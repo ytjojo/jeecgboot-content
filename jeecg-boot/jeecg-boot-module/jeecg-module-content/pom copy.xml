@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>jeecg-boot-module</artifactId>
+        <groupId>org.jeecgframework.boot</groupId>
+        <version>3.8.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jeecg-module-content</artifactId>
+    <groupId>org.jeecgframework.boot</groupId>
+    <version>3.8.2</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jeecgframework.boot</groupId>
+            <artifactId>jeecg-boot-base-core</artifactId>
+        </dependency>
+        
+        <!-- flexmark-java for Markdown parsing -->
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-all</artifactId>
+            <version>0.64.8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.java-diff-utils</groupId>
+            <artifactId>java-diff-utils</artifactId>
+            <version>4.15</version>
+        </dependency>
+        
+        <!-- JAudioTagger for audio metadata extraction -->
+        <dependency>
+            <groupId>org</groupId>
+            <artifactId>jaudiotagger</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+        
+        <!-- Metadata Extractor for image and video metadata -->
+        <dependency>
+            <groupId>com.drewnoakes</groupId>
+            <artifactId>metadata-extractor</artifactId>
+            <version>2.19.0</version>
+        </dependency>
+
+        <!-- Apache Tika for MIME type detection -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>3.2.1</version>
+        </dependency>
+
+        <!-- Jsoup for robust HTML parsing and traversal -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.16.1</version>
+        </dependency>
+        
+        <!-- Jackson for JSON processing (already included in spring-boot-starter-web) -->
+        <!-- Jakarta Validation (already included in spring-boot-starter-validation) -->
+        
+        <!-- JUnit 5 for testing (already included in spring-boot-starter-test) -->
+    </dependencies>
+</project>

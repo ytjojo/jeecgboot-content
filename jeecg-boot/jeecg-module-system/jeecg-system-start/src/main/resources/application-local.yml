@@ -1,0 +1,5 @@
+# application-local.yml (本地环境配置，优先级最高)
+jeecg:
+  path:
+    upload: /Users/yangtengjiao/Documents/j2ee/JeecgBoot/upload
+    webapp: /Users/yangtengjiao/Documents/j2ee/JeecgBoot/webapp

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.content.mapper.MediaFileMapper">
+
+    <!-- 通用查询媒体文件方法 - 支持多种查询条件的组合 -->
+    <select id="selectByConditions" resultType="org.jeecg.modules.content.entity.MediaFileEntity">
+        SELECT * FROM media_files 
+        WHERE del_flag = 0
+        <if test="fileType != null and fileType != ''">
+            AND file_type = #{fileType}
+        </if>
+        <if test="createBy != null and createBy != ''">
+            AND create_by = #{createBy}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="fileName != null and fileName != ''">
+            AND file_name LIKE CONCAT('%', #{fileName}, '%')
+        </if>
+        <if test="storageType != null and storageType != ''">
+            AND storage_type = #{storageType}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 分页查询媒体文件 -->
+    <select id="selectPageWithConditions" resultType="org.jeecg.modules.content.entity.MediaFileEntity">
+        SELECT * FROM media_files 
+        WHERE del_flag = 0
+        <if test="fileType != null and fileType != ''">
+            AND file_type = #{fileType}
+        </if>
+        <if test="uploaderId != null and uploaderId != ''">
+            AND uploader_id = #{uploaderId}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 统计媒体文件总数 -->
+    <select id="countByConditions" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM media_files 
+        WHERE del_flag = 0
+        <if test="fileType != null and fileType != ''">
+            AND file_type = #{fileType}
+        </if>
+        <if test="uploaderId != null and uploaderId != ''">
+            AND uploader_id = #{uploaderId}
+        </if>
+    </select>
+
+    <!-- 统计文件大小总和 -->
+    <select id="sumFileSizeByConditions" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(file_size), 0) FROM media_files 
+        WHERE del_flag = 0
+        <if test="fileType != null and fileType != ''">
+            AND file_type = #{fileType}
+        </if>
+        <if test="uploaderId != null and uploaderId != ''">
+            AND uploader_id = #{uploaderId}
+        </if>
+    </select>
+
+    <!-- 查询处理失败的文件 -->
+    <select id="selectFailedFiles" resultType="org.jeecg.modules.content.entity.MediaFileEntity">
+        SELECT * FROM media_files 
+        WHERE process_status = 'failed' 
+        AND del_flag = 0 
+        <if test="createBy != null and createBy != ''">
+            AND create_by = #{createBy}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 批量更新文件状态 -->
+    <update id="batchUpdateStatus">
+        UPDATE media_files 
+        SET status = #{status}, update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+    <!-- 根据MD5查询文件（用于去重） -->
+    <select id="selectByMd5" parameterType="java.lang.String" resultType="org.jeecg.modules.content.entity.MediaFileEntity">
+        SELECT * FROM media_files 
+        WHERE md5 = #{md5} 
+          <if test="createBy != null and createBy != ''">
+            AND create_by = #{createBy}
+        </if>
+        AND del_flag = 0 
+        LIMIT 1
+    </select>
+
+    <!-- 查询指定时间之前的临时文件 -->
+    <select id="selectTempFilesBefore" parameterType="java.util.Date" resultType="org.jeecg.modules.content.entity.MediaFileEntity">
+        <![CDATA[
+        SELECT * FROM media_files 
+        WHERE status = 'temp' 
+        AND create_time < #{beforeTime} 
+        AND del_flag = 0
+        ]]>
+    </select>
+
+</mapper>

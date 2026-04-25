@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.content.mapper.UserRelationOperationLogMapper">
+
+    <select id="selectLatestByRelationId" resultType="org.jeecg.modules.content.entity.UserRelationOperationLog">
+        SELECT *
+        FROM user_relation_operation_logs
+        WHERE relation_id = #{relationId}
+          AND del_flag = 0
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insertLog" useGeneratedKeys="false">
+        INSERT INTO user_relation_operation_logs (
+            id, relation_id, user_id, target_user_id, action_type,
+            before_state, after_state, reason, operator_id, channel,
+            request_id, ip, user_agent, device_info, success,
+            remark, del_flag, create_time, create_by, update_time, update_by
+        ) VALUES (
+            #{id}, #{relationId}, #{userId}, #{targetUserId}, #{actionType},
+            #{beforeState}, #{afterState}, #{reason}, #{operatorId}, #{channel},
+            #{requestId}, #{ip}, #{userAgent}, #{deviceInfo}, #{success},
+            #{remark}, #{delFlag}, NOW(), #{createBy}, NOW(), #{updateBy}
+        )
+    </insert>
+
+</mapper>

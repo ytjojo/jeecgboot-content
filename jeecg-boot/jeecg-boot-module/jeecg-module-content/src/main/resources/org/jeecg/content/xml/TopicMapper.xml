@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.content.mapper.TopicMapper">
+
+    <!-- 查询热门话题列表 -->
+    <!-- 根据参与人数和内容数量排序 -->
+    <select id="selectHotTopics" resultType="org.jeecg.modules.content.entity.TopicEntity">
+        SELECT * FROM content_topics 
+        WHERE status = 1 AND del_flag = 0 
+        ORDER BY (participant_count * 0.6 + content_count * 0.4) DESC, 
+                 create_time DESC 
+        LIMIT #{limit}
+    </select>
+
+    <!-- 查询话题统计信息 -->
+    <!-- 包括总数、启用数、热门数等 -->
+    <select id="selectTopicStats" resultType="java.util.Map">
+        SELECT 
+            COUNT(*) as totalCount, 
+            COUNT(CASE WHEN status = 1 THEN 1 END) as enabledCount, 
+            COUNT(CASE WHEN status = 0 THEN 1 END) as disabledCount, 
+            COUNT(CASE WHEN status = 2 THEN 1 END) as reviewingCount, 
+            COUNT(CASE WHEN status = 3 THEN 1 END) as rejectedCount, 
+            COUNT(CASE WHEN is_hot = 1 THEN 1 END) as hotCount, 
+            COALESCE(SUM(participant_count), 0) as totalParticipantCount, 
+            COALESCE(SUM(content_count), 0) as totalContentCount 
+        FROM content_topics 
+        WHERE del_flag = 0
+    </select>
+
+    <!-- 根据创建者查询话题 -->
+    <select id="selectTopicsByCreator" resultType="org.jeecg.modules.content.entity.TopicEntity">
+        SELECT * FROM content_topics 
+        WHERE creator_id = #{creatorId} AND del_flag = 0 
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 查询话题及统计信息 -->
+    <!-- 包含话题基本信息和相关统计数据 -->
+    <select id="selectTopicWithStats" resultType="org.jeecg.modules.content.entity.TopicEntity">
+        SELECT t.*, 
+               u.realname as creatorName, 
+               u.avatar as creatorAvatar 
+        FROM content_topics t 
+        LEFT JOIN sys_user u ON t.creator_id = u.id 
+        WHERE t.id = #{topicId} AND t.del_flag = 0
+    </select>
+
+    <!-- 获取话题的内容数量 -->
+    <select id="getTopicContentCount" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM content 
+        WHERE topic_id = #{topicId} 
+        AND status = 'published' 
+        AND del_flag = 0
+    </select>
+
+    <!-- 获取话题的参与人数 -->
+    <select id="getTopicParticipantCount" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT author_id) FROM content 
+        WHERE topic_id = #{topicId} 
+        AND status = 'published' 
+        AND del_flag = 0
+    </select>
+
+    <!-- 获取最近活跃的话题 -->
+    <select id="selectActiveTopics" resultType="org.jeecg.modules.content.entity.TopicEntity">
+        SELECT t.*, 
+               COUNT(c.id) as recentContentCount 
+        FROM content_topics t 
+        LEFT JOIN content c ON t.id = c.topic_id 
+        AND c.create_time &gt;= NOW() - INTERVAL #{days} DAY 
+        AND c.status = 'published' 
+        AND c.del_flag = 0 
+        WHERE t.status = 1 AND t.del_flag = 0 
+        GROUP BY t.id 
+        ORDER BY recentContentCount DESC, t.participant_count DESC 
+        LIMIT #{limit}
+    </select>
+
+    <!-- 搜索话题 -->
+    <!-- 根据话题名称和描述进行模糊搜索 -->
+    <select id="searchTopics" resultType="org.jeecg.modules.content.entity.TopicEntity">
+        SELECT * FROM content_topics 
+        WHERE (topic_name LIKE CONCAT('%', #{keyword}, '%') 
+        OR topic_desc LIKE CONCAT('%', #{keyword}, '%')) 
+        AND status = 1 AND del_flag = 0 
+        ORDER BY participant_count DESC, content_count DESC 
+        LIMIT #{limit}
+    </select>
+
+    <!-- 批量获取话题信息 -->
+    <select id="batchGetTopicInfo" resultType="org.jeecg.modules.content.entity.TopicEntity">
+        SELECT id, topic_name, topic_desc, cover_image, participant_count, 
+               content_count, is_hot, status, creator_id, create_time, update_time 
+        FROM content_topics 
+        WHERE del_flag = 0 
+        <if test="topicIds != null and topicIds.size()  &gt; 0">
+            AND id IN 
+            <foreach collection="topicIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 增加内容数量 -->
+    <update id="incrementContentCount">
+        UPDATE content_topics 
+        SET content_count = content_count + #{count} 
+        WHERE id = #{topicId} AND del_flag = 0
+    </update>
+
+    <!-- 增加参与人数 -->
+    <update id="incrementParticipantCount">
+        UPDATE content_topics 
+        SET participant_count = participant_count + #{count} 
+        WHERE id = #{topicId} AND del_flag = 0
+    </update>
+
+</mapper>

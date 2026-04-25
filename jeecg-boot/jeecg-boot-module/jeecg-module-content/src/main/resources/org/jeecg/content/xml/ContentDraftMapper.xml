@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.content.mapper.ContentDraftMapper">
+
+    <!-- 根据用户ID统计草稿数量（按状态分组） -->
+    <select id="countDraftsByUserAndStatus" resultType="java.util.Map">
+        SELECT status, COUNT(*) as count
+        FROM content_drafts
+        WHERE created_by = #{userId} AND del_flag = 0
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+        GROUP BY status
+    </select>
+
+    <!-- 统计系统草稿数量（按状态分组） -->
+    <select id="countDraftsByStatus" resultType="java.util.Map">
+        SELECT status, COUNT(*) as count
+        FROM content_drafts
+        WHERE del_flag = 0
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+        GROUP BY status
+    </select>
+
+    <!-- 根据用户ID统计草稿数量（按内容类型分组） -->
+    <select id="countDraftsByUserAndContentType" resultType="java.util.Map">
+        SELECT content_type, COUNT(*) as count
+        FROM content_drafts
+        WHERE created_by = #{userId} AND del_flag = 0
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+        GROUP BY content_type
+    </select>
+
+    <!-- 统计系统草稿数量（按内容类型分组） -->
+    <select id="countDraftsByContentType" resultType="java.util.Map">
+        SELECT content_type, COUNT(*) as count
+        FROM content_drafts
+        WHERE del_flag = 0
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+        GROUP BY content_type
+    </select>
+
+    <!-- 根据用户ID获取每日草稿创建统计 -->
+    <select id="getDailyCreatedCountsByUser" resultType="java.util.Map">
+        SELECT DATE(create_time) as date, COUNT(*) as count
+        FROM content_drafts
+        WHERE created_by = #{userId} AND del_flag = 0
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+        GROUP BY DATE(create_time)
+        ORDER BY DATE(create_time)
+    </select>
+
+    <!-- 获取系统每日草稿创建统计 -->
+    <select id="getDailyCreatedCounts" resultType="java.util.Map">
+        SELECT DATE(create_time) as date, COUNT(*) as count
+        FROM content_drafts
+        WHERE del_flag = 0
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+        GROUP BY DATE(create_time)
+        ORDER BY DATE(create_time)
+    </select>
+
+    <!-- 根据用户ID获取每日草稿发布统计 -->
+    <select id="getDailyPublishedCountsByUser" resultType="java.util.Map">
+        SELECT DATE(publish_time) as date, COUNT(*) as count
+        FROM content_drafts
+        WHERE created_by = #{userId} AND del_flag = 0 AND publish_time IS NOT NULL
+        <if test="startDate != null">
+            AND publish_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND publish_time &lt;= #{endDate}
+        </if>
+        GROUP BY DATE(publish_time)
+        ORDER BY DATE(publish_time)
+    </select>
+
+    <!-- 获取系统每日草稿发布统计 -->
+    <select id="getDailyPublishedCounts" resultType="java.util.Map">
+        SELECT DATE(publish_time) as date, COUNT(*) as count
+        FROM content_drafts
+        WHERE del_flag = 0 AND publish_time IS NOT NULL
+        <if test="startDate != null">
+            AND publish_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND publish_time &lt;= #{endDate}
+        </if>
+        GROUP BY DATE(publish_time)
+        ORDER BY DATE(publish_time)
+    </select>
+
+    <!-- 根据用户ID获取平均字数统计 -->
+    <select id="getAverageWordCountByUser" resultType="java.lang.Double">
+        SELECT AVG(word_count) as avg_word_count
+        FROM content_drafts
+        WHERE created_by = #{userId} AND del_flag = 0 AND word_count IS NOT NULL
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+    </select>
+
+    <!-- 获取系统平均字数统计 -->
+    <select id="getAverageWordCount" resultType="java.lang.Double">
+        SELECT AVG(word_count) as avg_word_count
+        FROM content_drafts
+        WHERE del_flag = 0 AND word_count IS NOT NULL
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+    </select>
+
+    <!-- 根据用户ID获取平均阅读时间统计 -->
+    <select id="getAverageReadingTimeByUser" resultType="java.lang.Double">
+        SELECT AVG(reading_time) as avg_reading_time
+        FROM content_drafts
+        WHERE created_by = #{userId} AND del_flag = 0 AND reading_time IS NOT NULL
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+    </select>
+
+    <!-- 获取系统平均阅读时间统计 -->
+    <select id="getAverageReadingTime" resultType="java.lang.Double">
+        SELECT AVG(reading_time) as avg_reading_time
+        FROM content_drafts
+        WHERE del_flag = 0 AND reading_time IS NOT NULL
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+    </select>
+
+    <!-- 获取最活跃用户列表 -->
+    <select id="getTopActiveUsers" resultType="java.util.Map">
+        SELECT created_by as user_id,
+               COUNT(*) as draft_count,
+               COUNT(CASE WHEN status = 'published' THEN 1 END) as publish_count,
+               MAX(update_time) as last_active_time
+        FROM content_drafts
+        WHERE del_flag = 0
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+        GROUP BY created_by
+        ORDER BY draft_count DESC, publish_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 获取最受欢迎的内容类型排行 -->
+    <select id="getTopContentTypes" resultType="java.util.Map">
+        SELECT content_type,
+               COUNT(*) as draft_count,
+               COUNT(CASE WHEN status = 'published' THEN 1 END) as publish_count
+        FROM content_drafts
+        WHERE del_flag = 0 AND content_type IS NOT NULL
+        <if test="startDate != null">
+            AND create_time  &gt;  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND create_time &lt;= #{endDate}
+        </if>
+        GROUP BY content_type
+        ORDER BY draft_count DESC, publish_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 获取需要定时发布的草稿列表 -->
+    <select id="getScheduledDraftsForPublish" resultType="org.jeecg.modules.content.entity.ContentDraftEntity">
+        SELECT * FROM content_drafts
+        WHERE status = 'scheduled'
+          AND scheduled_date &lt;= #{currentTime}
+          AND del_flag = 0
+        ORDER BY scheduled_date ASC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 获取过期的已删除草稿列表 -->
+    <select id="getExpiredDeletedDrafts" resultType="org.jeecg.modules.content.entity.ContentDraftEntity">
+        SELECT * FROM content_drafts
+        WHERE del_flag = 1
+          AND update_time &lt; #{expireDate}
+        ORDER BY update_time ASC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.content.mapper.UserRelationMapper">
+
+    <!--
+      用户关系并发安全更新SQL：
+      采用条件更新（CAS思想：只有旧值满足预期时才更新），避免并发下重复增加或状态错乱。
+    -->
+
+    <select id="selectByUserAndTarget" resultType="org.jeecg.modules.content.entity.UserRelation">
+        SELECT *
+        FROM user_relation
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND del_flag = 0
+        LIMIT 1
+    </select>
+
+    <!-- follow 开启：仅当 is_follow = 0 才置为 1 -->
+    <update id="setFollowOn">
+        UPDATE user_relation
+        SET is_follow = 1, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_follow = 0
+          AND del_flag = 0
+    </update>
+
+    <!-- follow 关闭：仅当 is_follow = 1 才置为 0 -->
+    <update id="setFollowOff">
+        UPDATE user_relation
+        SET is_follow = 0, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_follow = 1
+          AND del_flag = 0
+    </update>
+
+    <!-- subscribe 开启：仅当 is_subscribe = 0 才置为 1 -->
+    <update id="setSubscribeOn">
+        UPDATE user_relation
+        SET is_subscribe = 1, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_subscribe = 0
+          AND del_flag = 0
+    </update>
+
+    <!-- subscribe 关闭：仅当 is_subscribe = 1 才置为 0 -->
+    <update id="setSubscribeOff">
+        UPDATE user_relation
+        SET is_subscribe = 0, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_subscribe = 1
+          AND del_flag = 0
+    </update>
+
+    <!-- 不看TA 开启：仅当 is_block_view = 0 才置为 1 -->
+    <update id="setBlockViewOn">
+        UPDATE user_relation
+        SET is_block_view = 1, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_block_view = 0
+          AND del_flag = 0
+    </update>
+
+    <!-- 不看TA 关闭：仅当 is_block_view = 1 才置为 0 -->
+    <update id="setBlockViewOff">
+        UPDATE user_relation
+        SET is_block_view = 0, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_block_view = 1
+          AND del_flag = 0
+    </update>
+
+    <!-- 不让TA看 开启：仅当 is_block_viewed = 0 才置为 1 -->
+    <update id="setBlockViewedOn">
+        UPDATE user_relation
+        SET is_block_viewed = 1, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_block_viewed = 0
+          AND del_flag = 0
+    </update>
+
+    <!-- 不让TA看 关闭：仅当 is_block_viewed = 1 才置为 0 -->
+    <update id="setBlockViewedOff">
+        UPDATE user_relation
+        SET is_block_viewed = 0, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_block_viewed = 1
+          AND del_flag = 0
+    </update>
+
+    <!-- 屏蔽搜索 开启：仅当 is_block_search = 0 才置为 1 -->
+    <update id="setBlockSearchOn">
+        UPDATE user_relation
+        SET is_block_search = 1, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_block_search = 0
+          AND del_flag = 0
+    </update>
+
+    <!-- 屏蔽搜索 关闭：仅当 is_block_search = 1 才置为 0 -->
+    <update id="setBlockSearchOff">
+        UPDATE user_relation
+        SET is_block_search = 0, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_block_search = 1
+          AND del_flag = 0
+    </update>
+
+    <!-- 屏蔽私信 开启：仅当 is_block_message = 0 才置为 1 -->
+    <update id="setBlockMessageOn">
+        UPDATE user_relation
+        SET is_block_message = 1, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_block_message = 0
+          AND del_flag = 0
+    </update>
+
+    <!-- 屏蔽私信 关闭：仅当 is_block_message = 1 才置为 0 -->
+    <update id="setBlockMessageOff">
+        UPDATE user_relation
+        SET is_block_message = 0, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND target_user_id = #{targetUserId}
+          AND is_block_message = 1
+          AND del_flag = 0
+    </update>
+
+</mapper>

@@ -2,7 +2,8 @@
 **/.idea
 *.iml
 rebel.xml
-
+jeecguniapp/
+upload/
 ## backend
 **/target
 **/logs

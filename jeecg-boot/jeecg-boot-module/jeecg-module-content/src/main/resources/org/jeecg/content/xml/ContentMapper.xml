@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.content.mapper.ContentMapper">
+
+    <!-- ==================== SQL片段定义区域 ==================== -->
+    
+    <!-- 内容统计字段片段 -->
+    <sql id="contentStatisticsColumns">
+        COUNT(*) as totalCount,
+        COUNT(CASE WHEN status = 'published' THEN 1 END) as publishedCount,
+        COUNT(CASE WHEN status = 'draft' THEN 1 END) as draftCount,
+        COUNT(CASE WHEN status = 'reviewing' THEN 1 END) as reviewingCount,
+        COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejectedCount,
+        COUNT(CASE WHEN is_top = 1 THEN 1 END) as topCount,
+        COUNT(CASE WHEN is_essence = 1 THEN 1 END) as essenceCount,
+        COALESCE(SUM(view_count), 0) as totalViewCount,
+        COALESCE(SUM(like_count), 0) as totalLikeCount,
+        COALESCE(SUM(comment_count), 0) as totalCommentCount,
+        COALESCE(SUM(favorite_count), 0) as totalFavoriteCount,
+        COALESCE(SUM(share_count), 0) as totalShareCount
+    </sql>
+
+    <!-- 内容基础字段片段 -->
+    <sql id="contentBaseColumns">
+    c.id,
+    c.title,
+    c.content,
+    c.rendered_content,
+    c.content_type,
+    c.content_version,
+    c.status,
+    c.author_id,
+    c.channel_id,
+    c.community_id,
+    c.view_count,
+    c.like_count,
+    c.dislike_count,
+    c.comment_count,
+    c.share_count,
+    c.is_top,
+    c.is_recommend,
+    c.is_hot,
+    c.publish_at,
+    c.attachments,
+    c.tags,
+    c.topics,
+    c.summary,
+    c.cover_image,
+    c.create_by,
+    c.create_time,
+    c.update_by,
+    c.update_time
+    </sql>
+
+    <!-- 作者信息字段片段 - 使用前缀 -->
+    <sql id="authorInfoColumns">
+    up.id as up_id,
+    up.nickname as up_nickname,  -- 昵称
+    up.avatar as up_avatar,  -- 头像
+    up.bio as up_bio,  -- 个人简介
+    up.website as up_website,  -- 个人网站
+    up.location as up_location,  -- 所在地
+    up.occupation as up_occupation,  -- 职业
+    up.company as up_company,  -- 公司
+    up.school as up_school,  -- 学校
+    up.following_count as up_following_count,  -- 关注数
+    up.followers_count as up_followers_count,  -- 粉丝数
+    up.likes_count as up_likes_count,  -- 获赞数
+    up.content_count as up_content_count,  -- 发布内容数
+    up.points as up_points,  -- 积分
+    up.level as up_level,  -- 等级
+    up.verify_status as up_verify_status,  -- 认证状态：0-未认证 1-认证中 2-已认证 3-认证失败
+    up.verify_type as up_verify_type,  -- 认证类型：0-无 1-个人认证 2-大v牛人认证 3-系统官方认证 4-企业认证 5-机构认证
+    up.verify_info as up_verify_info,  -- 认证信息
+    up.is_vip as up_is_vip,  -- 是否VIP：0-否 1-是
+    up.vip_expire_time as up_vip_expire_time,  -- VIP到期时间
+    up.last_login_time as up_last_login_time,  -- 最后登录时间
+    up.last_active_time as up_last_active_time,  -- 最后活跃时间
+    up.tags as up_tags,  -- 个人标签（JSON数组格式）
+    up.interests as up_interests,  -- 兴趣爱好（JSON数组格式）
+    up.social_links as up_social_links,  -- 社交媒体链接（JSON格式）
+    up.privacy_settings as up_privacy_settings,  -- 隐私设置（JSON格式）
+    up.notification_settings as up_notification_settings,  -- 通知设置（JSON格式）
+    up.del_flag as up_del_flag,  -- 逻辑删除标识：0-正常 1-删除
+    up.ext_data as up_ext_data,  -- 扩展字段（JSON格式）
+    up.create_by as up_create_by,  -- 创建人
+    up.create_time as up_create_time,  -- 创建时间
+    up.update_by as up_update_by
+    </sql>
+
+<!-- 频道信息字段片段 - 使用前缀 -->
+<sql id="channelInfoColumns">
+   ch.id as ch_id,  -- 频道ID
+    ch.channel_name as ch_channel_name,  -- 频道名称
+    ch.description as ch_description,  -- 频道描述
+    ch.channel_avatar as ch_channel_avatar,  -- 频道头像
+    ch.channel_cover_image as ch_channel_cover_image,  -- 频道封面图
+    ch.category as ch_category,  -- 频道分类
+    ch.category_id as ch_category_id,  -- 频道分类ID，关联channel_categories表
+    ch.parent_channel_id as ch_parent_channel_id,  -- 父频道ID（支持子频道）
+    ch.owner_id as ch_owner_id,  -- 频道创建者ID
+    ch.is_public as ch_is_public,  -- 是否公开频道：0-私有 1-公开
+    ch.join_type as ch_join_type,  -- 加入方式：1-自由加入 2-申请加入 3-邀请加入
+    ch.post_permission as ch_post_permission,  -- 发帖权限：0-任何人 1-所有成员 2-版主以上 3-管理员 4-指定成员
+    ch.allowed_content_types as ch_allowed_content_types,  -- 允许的内容类型（JSON数组）
+    ch.view_permission as ch_view_permission,  -- 查看权限：0-任何人 1-所有成员 2-管理员 3-指定成员
+    ch.member_count as ch_member_count,  -- 成员数量
+    ch.content_count as ch_content_count,  -- 内容数量
+    ch.max_members as ch_max_members,  -- 最大成员数限制
+    ch.status as ch_status,
+    ch.sort_order as ch_sort_order,  -- 排序权重
+    ch.is_recommend as ch_is_recommend,  -- 是否推荐：0-否 1-是
+    ch.rules as ch_rules,  -- 频道规则
+    ch.announcement as ch_announcement,  -- 频道公告
+    ch.tags as ch_tags,  -- 频道标签（JSON数组）
+    ch.ext_data as ch_ext_data,  -- 扩展数据（JSON格式）
+    ch.del_flag as ch_del_flag,  -- 删除标识：0-正常 1-删除
+    ch.create_by as ch_create_by,  -- 创建人
+    ch.create_time as ch_create_time,  -- 创建时间
+    ch.update_by as ch_update_by,  -- 更新人
+    ch.update_time as ch_update_time
+</sql>
+
+<!-- 社区信息字段片段 - 使用前缀 -->
+<sql id="communityInfoColumns">
+    cm.id as cm_id,
+    cm.name as cm_name,  -- 社区名称
+    cm.description as cm_description,  -- 社区描述
+    cm.avatar as cm_avatar,  -- 社区头像
+    cm.cover_image as cm_cover_image,  -- 社区封面
+    cm.type as cm_type,  -- 社区类型：1-公开 2-私密 3-付费
+    cm.join_type as cm_join_type,  -- 加入方式：1-自由加入 2-申请加入 3-邀请加入
+    cm.post_permission as cm_post_permission,  -- 发帖权限：1-所有成员 2-管理员 3-指定成员
+    cm.member_count as cm_member_count,  -- 成员数量
+    cm.max_member_count as cm_max_member_count,  -- 最大成员数量
+    cm.content_count as cm_content_count,  -- 内容数量
+    cm.status as cm_status,
+    cm.rules as cm_rules,  -- 社区规则
+    cm.announcement as cm_announcement,  -- 社区公告
+    cm.invite_code as cm_invite_code,  -- 邀请码
+    cm.tags as cm_tags,  -- 社区标签
+    cm.ext_data as cm_ext_data,  -- 扩展数据
+    cm.del_flag as cm_del_flag,  -- 逻辑删除标识：0-正常 1-删除
+    cm.create_by as cm_create_by,  -- 创建人
+    cm.create_time as cm_create_time,  -- 创建时间
+    cm.update_by as cm_update_by,  -- 更新人
+    cm.update_time as cm_update_time
+
+</sql>
+
+<!-- 完整关联查询的JOIN片段 -->
+<sql id="contentWithAllRelationsJoins">
+    FROM contents c
+    LEFT JOIN user_profile_extension up ON c.author_id = up.id
+    LEFT JOIN channels ch ON c.channel_id = ch.id  
+    LEFT JOIN communities cm ON c.community_id = cm.id
+</sql>
+
+
+    <!-- 数字序列片段（用于标签分割） -->
+    <sql id="numberSequence">
+        SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 
+        UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+    </sql>
+
+    <!-- ID集合IN条件片段 -->
+    <sql id="idInCondition">
+        <if test="ids != null and ids.size() > 0">
+            AND c.id IN
+            <foreach collection="ids" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </sql>
+
+    <!-- ==================== ResultMap定义区域 ==================== -->
+    
+    <!-- 内容统计信息结果映射 -->
+    <resultMap id="ContentStatisticsMap" type="org.jeecg.modules.content.entity.ContentStatistics">
+        <result column="totalCount" property="totalCount"/>
+        <result column="publishedCount" property="publishedCount"/>
+        <result column="draftCount" property="draftCount"/>
+        <result column="reviewingCount" property="reviewingCount"/>
+        <result column="rejectedCount" property="rejectedCount"/>
+        <result column="topCount" property="topCount"/>
+        <result column="essenceCount" property="essenceCount"/>
+        <result column="totalViewCount" property="totalViewCount"/>
+        <result column="totalLikeCount" property="totalLikeCount"/>
+        <result column="totalCommentCount" property="totalCommentCount"/>
+        <result column="totalFavoriteCount" property="totalFavoriteCount"/>
+        <result column="totalShareCount" property="totalShareCount"/>
+    </resultMap>
+
+    <!-- 带有完整关联信息的内容结果映射 -->
+    <resultMap id="ContentWithAllRelationsMap" type="org.jeecg.modules.content.entity.ContentCompositeEntity">
+        <!-- 内容基础信息映射 -->
+        <association property="content" javaType="org.jeecg.modules.content.entity.ContentEntity" autoMapping="true">
+        </association>
+        
+        <!-- 关联对象映射 - 使用association标签实现自动映射 -->
+        <association property="author" javaType="org.jeecg.modules.content.entity.UserProfileExtension" 
+                     columnPrefix="up_" autoMapping="true">
+        </association>
+        
+        <association property="channel" javaType="org.jeecg.modules.channel.entity.ChannelEntity" 
+                     columnPrefix="ch_" autoMapping="true">
+        </association>
+        
+        <association property="community" javaType="org.jeecg.modules.community.entity.CommunityEntity" 
+                     columnPrefix="cm_" autoMapping="true">
+        </association>
+    </resultMap>
+
+    
+    <!-- ==================== 查询语句区域 ==================== -->
+
+    <!-- 获取用户的内容统计信息 -->
+    <select id="getUserContentStatistics" parameterType="string" resultMap="ContentStatisticsMap">
+        SELECT 
+            <include refid="contentStatisticsColumns"/>
+        FROM contents 
+        WHERE author_id = #{authorId} AND del_flag = 0 AND status = 1
+    </select>
+
+    <!-- 获取社区的内容统计信息 -->
+    <select id="getCommunityContentStatistics" parameterType="string" resultMap="ContentStatisticsMap">
+        SELECT 
+            <include refid="contentStatisticsColumns"/>
+        FROM contents 
+        WHERE community_id = #{communityId} AND del_flag = 0
+    </select>
+
+
+
+    <!-- 获取用户最近发布的内容数量（指定天数内） -->
+    <select id="getRecentContentCount" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM contents 
+        WHERE author_id = #{authorId} 
+        AND status = 1 
+        AND del_flag = 0
+        AND create_time &gt;= NOW() - INTERVAL #{days} DAY
+    </select>
+
+    <!-- 获取社区今日新增内容数量 -->
+    <select id="getTodayContentCount" parameterType="string" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM contents 
+        WHERE community_id = #{communityId} 
+         AND status = 1 
+        AND del_flag = 0
+        AND DATE(create_time) = CURDATE()
+    </select>
+
+ 
+
+    <!-- 获取带有完整关联信息的内容详情 -->
+    <select id="getContentWithAllRelations" parameterType="string" resultMap="ContentWithAllRelationsMap">
+        SELECT 
+            <include refid="contentBaseColumns"/>,
+            <include refid="authorInfoColumns"/>,
+            <include refid="channelInfoColumns"/>,
+            <include refid="communityInfoColumns"/>
+        <include refid="contentWithAllRelationsJoins"/>
+        WHERE c.id = #{id} AND c.del_flag = '0'
+    </select>
+
+    <!-- 批量获取带有完整关联信息的内容列表 -->
+    <select id="batchGetContentWithAllRelations" resultMap="ContentWithAllRelationsMap">
+        SELECT 
+            <include refid="contentBaseColumns"/>,
+            <include refid="authorInfoColumns"/>,
+            <include refid="channelInfoColumns"/>,
+            <include refid="communityInfoColumns"/>
+        <include refid="contentWithAllRelationsJoins"/>
+        WHERE c.del_flag = '0'
+        <if test="ids != null and ids.size() > 0">
+            AND c.id IN
+            <foreach collection="ids" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        ORDER BY c.create_time DESC
+    </select>
+
+    <!-- 分页查询带有完整关联信息的内容列表 -->
+    <select id="selectContentPageWithAllRelations" resultMap="ContentWithAllRelationsMap">
+        SELECT 
+            <include refid="contentBaseColumns"/>,
+            <include refid="authorInfoColumns"/>,
+            <include refid="channelInfoColumns"/>,
+            <include refid="communityInfoColumns"/>
+        <include refid="contentWithAllRelationsJoins"/>
+        ${ew.customSqlSegment}
+    </select>
+
+
+
+</mapper>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.content.mapper.ContentTopicRelationMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="org.jeecg.modules.content.entity.ContentTopicRelationEntity">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="content_id" property="contentId" jdbcType="VARCHAR"/>
+        <result column="topic_id" property="topicId" jdbcType="VARCHAR"/>
+        <result column="create_by" property="createBy" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_by" property="updateBy" jdbcType="VARCHAR"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="del_flag" property="delFlag" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- 基础字段列表 -->
+    <sql id="Base_Column_List">
+        id, content_id, topic_id, create_by, create_time, update_by, update_time, del_flag
+    </sql>
+
+    <!-- =============================================
+         内容话题关联查询相关方法
+         ============================================= -->
+
+    <!-- 根据内容ID查询关联的话题 -->
+    <select id="selectByContentId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM content_topic_relation
+        WHERE content_id = #{contentId}
+        AND del_flag = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据话题ID查询关联的内容 -->
+    <select id="selectByTopicId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM content_topic_relation
+        WHERE topic_id = #{topicId}
+        AND del_flag = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据内容ID和话题ID查询关联记录 -->
+    <select id="selectByContentIdAndTopicId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM content_topic_relation
+        WHERE content_id = #{contentId}
+        AND topic_id = #{topicId}
+        AND del_flag = 0
+        LIMIT 1
+    </select>
+
+    <!-- 根据内容ID列表查询所有话题关联 -->
+    <select id="selectByContentIds" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM content_topic_relation
+        WHERE content_id IN
+        <foreach collection="contentIds" item="contentId" open="(" separator="," close=")">
+            #{contentId}
+        </foreach>
+        AND del_flag = 0
+        ORDER BY content_id, create_time DESC
+    </select>
+
+    <!-- 根据话题ID列表查询所有内容关联 -->
+    <select id="selectByTopicIds" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM content_topic_relation
+        WHERE topic_id IN
+        <foreach collection="topicIds" item="topicId" open="(" separator="," close=")">
+            #{topicId}
+        </foreach>
+        AND del_flag = 0
+        ORDER BY topic_id, create_time DESC
+    </select>
+
+    <!-- =============================================
+         内容话题关联删除相关方法
+         ============================================= -->
+
+    <!-- 根据内容ID删除所有话题关联 -->
+    <delete id="deleteByContentId" parameterType="java.lang.String">
+        UPDATE content_topic_relation
+        SET del_flag = 1,
+            update_time = NOW()
+        WHERE content_id = #{contentId}
+        AND del_flag = 0
+    </delete>
+
+    <!-- 根据话题ID删除所有内容关联 -->
+    <delete id="deleteByTopicId" parameterType="java.lang.String">
+        UPDATE content_topic_relation
+        SET del_flag = 1,
+            update_time = NOW()
+        WHERE topic_id = #{topicId}
+        AND del_flag = 0
+    </delete>
+
+    <!-- =============================================
+         内容话题关联批量操作相关方法
+         ============================================= -->
+
+    <!-- 批量插入内容话题关联 -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO content_topic_relation
+        (id, content_id, topic_id, create_by, create_time, update_by, update_time, del_flag)
+        VALUES
+        <foreach collection="relations" item="item" separator=",">
+            (#{item.id}, #{item.contentId}, #{item.topicId}, #{item.createBy}, #{item.createTime}, 
+             #{item.updateBy}, #{item.updateTime}, #{item.delFlag})
+        </foreach>
+    </insert>
+
+    <!-- =============================================
+         内容话题关联统计相关方法
+         ============================================= -->
+
+    <!-- 统计话题的使用次数 -->
+    <select id="countByTopicId" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM content_topic_relation
+        WHERE topic_id = #{topicId}
+        AND del_flag = 0
+    </select>
+
+    <!-- 统计内容的话题数量 -->
+    <select id="countByContentId" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM content_topic_relation
+        WHERE content_id = #{contentId}
+        AND del_flag = 0
+    </select>
+
+    <!-- =============================================
+         内容话题关联ID查询相关方法
+         ============================================= -->
+
+    <!-- 查询内容的话题ID列表 -->
+    <select id="selectTopicIdsByContentId" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT topic_id
+        FROM content_topic_relation
+        WHERE content_id = #{contentId}
+        AND del_flag = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 查询话题的内容ID列表 -->
+    <select id="selectContentIdsByTopicId" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT content_id
+        FROM content_topic_relation
+        WHERE topic_id = #{topicId}
+        AND del_flag = 0
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

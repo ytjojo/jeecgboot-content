@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.content.mapper.ContentVersionMapper">
+
+    <!-- =============================================
+         版本查询相关方法
+         ============================================= -->
+
+    <!-- 根据内容ID查询版本列表（按版本号倒序） -->
+    <select id="selectVersionsByContentId" resultType="org.jeecg.modules.content.entity.ContentVersion">
+        SELECT * FROM content_versions 
+        WHERE content_id = #{contentId}
+        <if test="versionType != null and versionType != ''">
+            AND version_type = #{versionType}
+        </if>
+        ORDER BY version_number DESC
+    </select>
+
+    <!-- 分页查询指定内容的版本历史 -->
+    <select id="selectVersionPageByContentId" resultType="org.jeecg.modules.content.entity.ContentVersion">
+        SELECT * FROM content_versions 
+        WHERE content_id = #{contentId}
+        <if test="versionType != null and versionType != ''">
+            AND version_type = #{versionType}
+        </if>
+        ORDER BY version_number DESC
+    </select>
+
+    <!-- 根据内容ID和版本号查询特定版本 -->
+    <select id="selectVersionByContentIdAndNumber" resultType="org.jeecg.modules.content.entity.ContentVersion">
+        SELECT * FROM content_versions 
+        WHERE content_id = #{contentId} AND version_number = #{versionNumber}  AND version_type = #{versionType}
+    </select>
+
+    <!-- 根据内容ID获取最新版本 -->
+    <select id="selectLatestVersionByContentId" resultType="org.jeecg.modules.content.entity.ContentVersion">
+        SELECT * FROM content_versions 
+        WHERE content_id = #{contentId}
+        <if test="versionType != null and versionType != ''">
+            AND version_type = #{versionType}
+        </if>
+        ORDER BY version_number DESC 
+        LIMIT 1
+    </select>
+
+
+      <!-- 根据内容ID获取激活版本 -->
+    <select id="selectActiveVersionByContentId" resultType="org.jeecg.modules.content.entity.ContentVersion">
+        SELECT * FROM content_versions 
+        WHERE content_id = #{contentId}
+        AND is_active = 1
+        <if test="versionType != null and versionType != ''">
+            AND version_type = #{versionType}
+        </if>
+        ORDER BY version_number DESC 
+        LIMIT 1
+    </select>
+
+
+    <!-- 获取指定内容的最大版本号 -->
+    <select id="selectMaxVersionNumberByContentId" resultType="java.lang.Long">
+        SELECT COALESCE(MAX(version_number), 0) 
+        FROM content_versions 
+        WHERE content_id = #{contentId}
+        <if test="versionType != null and versionType != ''">
+            AND version_type = #{versionType}
+        </if>
+    </select>
+
+    <!-- =============================================
+         版本统计相关方法
+         ============================================= -->
+
+    <!-- 统计指定内容的版本数量 -->
+    <select id="countVersionsByContentId" resultType="java.lang.Integer">
+        SELECT COUNT(*) 
+        FROM content_versions 
+        WHERE content_id = #{contentId}
+        <if test="versionType != null and versionType != ''">
+            AND version_type = #{versionType}
+        </if>
+    </select>
+
+    <!-- =============================================
+         版本清理相关方法
+         ============================================= -->
+
+    <!-- 删除指定内容的版本 -->
+    <delete id="deleteVersionsByContentId">
+        DELETE FROM content_versions 
+        WHERE content_id = #{contentId}
+        <if test="versionType != null and versionType != ''">
+            AND version_type = #{versionType}
+        </if>
+    </delete>
+
+    <!-- 保留最新N个版本，删除其余版本 -->
+    <delete id="deleteOldVersions">
+        DELETE FROM content_versions 
+        WHERE content_id = #{contentId} 
+        AND version_number NOT IN (
+            SELECT version_number FROM (
+                SELECT version_number 
+                FROM content_versions 
+                WHERE content_id = #{contentId} 
+                <if test="versionType != null and versionType != ''">
+                    AND version_type = #{versionType}
+                </if>
+                ORDER BY version_number DESC 
+                LIMIT #{keepCount}
+            ) AS temp
+        )
+    </delete>
+
+    <!-- 删除指定用户的所有版本 -->
+    <delete id="deleteVersionsByUserId">
+        DELETE FROM content_versions 
+        WHERE created_by = #{userId}
+        <if test="versionType != null and versionType != ''">
+            AND version_type = #{versionType}
+        </if>
+    </delete>
+
+    <!-- =============================================
+         版本比较相关方法
+         ============================================= -->
+
+    <!-- 查询两个版本之间的所有版本（用于版本比较） -->
+    <select id="selectVersionsBetween" resultType="org.jeecg.modules.content.entity.ContentVersion">
+        SELECT * FROM content_versions 
+        WHERE content_id = #{contentId} 
+        AND version_number BETWEEN #{fromVersion} AND #{toVersion} 
+        <if test="versionType != null and versionType != ''">
+            AND version_type = #{versionType}
+        </if>
+        ORDER BY version_number ASC
+    </select>
+
+    <!-- 查询指定版本号范围内的版本列表 -->
+    <select id="selectVersionsByNumbers" resultType="org.jeecg.modules.content.entity.ContentVersion">
+        SELECT * FROM content_versions 
+        WHERE content_id = #{contentId} 
+        AND version_number IN 
+        <foreach collection="versionNumbers" item="versionNumber" open="(" separator="," close=")">
+            #{versionNumber}
+        </foreach>
+        ORDER BY version_number DESC
+    </select>
+
+  
+    <!-- =============================================
+         版本状态管理相关方法
+         ============================================= -->
+
+    <!-- 重置指定内容的所有版本为非活跃状态 -->
+    <update id="disableActiveVersions">
+        UPDATE content_versions 
+        SET is_active = 0, update_time = NOW() 
+        WHERE content_id = #{contentId} 
+        AND version_type = #{versionType} 
+        AND is_active = 1
+    </update>
+
+</mapper>
