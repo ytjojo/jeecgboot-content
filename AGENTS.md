@@ -135,10 +135,13 @@ docker-compose up -d
 ```
 
 ## Architecture Patterns
+内容社区系统是一个支持用户创建和分享多种类型内容的平台，包括文章、图文帖子、视频和笔记等。该系统将提供内容发布、浏览、互动和管理功能，为用户打造一个丰富的内容创作和分享社区。
+目录
+jeecg-boot/jeecg-boot-module/jeecg-module-content
 
 ### Backend Layer Architecture
 ```
-org.jeecg.modules.{module_name}/
+org.jeecg.modules.content.{module_name}/
 ├── controller/     # REST API endpoints
 ├── service/        # Business logic interfaces
 ├── service/impl/   # Business logic implementations
