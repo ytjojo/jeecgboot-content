@@ -43,45 +43,17 @@ POST   /api/v1/auth/logout            # 登出
 
 ## 统一响应格式
 
-所有接口必须返回统一的 `ApiResponse<T>` 结构，客户端只需要一套解析逻辑：
+JeecgBoot 项目统一返回 `org.jeecg.common.api.vo.Result<T>`，客户端只需要一套解析逻辑。
 
 ```java
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ApiResponse<T> {
-    private Integer code;       // 业务状态码
-    private String message;     // 提示信息
-    private T data;             // 业务数据
-    private Long timestamp;     // 响应时间戳
+// 成功
+Result<UserVO> ok1 = Result.OK(userVo);
+Result<UserVO> ok2 = Result.OK("操作成功", userVo);
 
-    public static <T> ApiResponse<T> success(T data) {
-        return ApiResponse.<T>builder()
-                .code(200)
-                .message("操作成功")
-                .data(data)
-                .timestamp(System.currentTimeMillis())
-                .build();
-    }
-
-    public static <T> ApiResponse<T> success(String message, T data) {
-        return ApiResponse.<T>builder()
-                .code(200)
-                .message(message)
-                .data(data)
-                .timestamp(System.currentTimeMillis())
-                .build();
-    }
-
-    public static <T> ApiResponse<T> error(Integer code, String message) {
-        return ApiResponse.<T>builder()
-                .code(code)
-                .message(message)
-                .timestamp(System.currentTimeMillis())
-                .build();
-    }
-}
+// 失败
+Result<?> err1 = Result.error("参数验证失败");
+Result<?> err2 = Result.error(400, "参数验证失败");
+Result<?> err3 = Result.noauth("没有权限");
 ```
 
 ### 响应示例
@@ -89,32 +61,35 @@ public class ApiResponse<T> {
 ```json
 // 成功
 {
-    "code": 200,
-    "message": "操作成功",
-    "data": { "id": 1, "username": "admin" },
-    "timestamp": 1711180800000
+  "success": true,
+  "message": "操作成功",
+  "code": 200,
+  "result": { "id": 1, "username": "admin" },
+  "timestamp": 1711180800000
 }
 
 // 失败
 {
-    "code": 400,
-    "message": "参数验证失败",
-    "data": null,
-    "timestamp": 1711180800000
+  "success": false,
+  "message": "参数验证失败",
+  "code": 400,
+  "result": null,
+  "timestamp": 1711180800000
 }
 
 // 分页
 {
-    "code": 200,
-    "message": "操作成功",
-    "data": {
-        "records": [...],
-        "total": 100,
-        "size": 10,
-        "current": 1,
-        "pages": 10
-    },
-    "timestamp": 1711180800000
+  "success": true,
+  "message": "操作成功",
+  "code": 200,
+  "result": {
+    "records": [...],
+    "total": 100,
+    "size": 10,
+    "current": 1,
+    "pages": 10
+  },
+  "timestamp": 1711180800000
 }
 ```
 
@@ -147,39 +122,39 @@ public class UserController {
 
     // GET /api/v1/users/list - 分页查询
     @GetMapping("/list")
-    public ApiResponse<Page<UserVO>> getUserList(
+    public Result<Page<UserVO>> getUserList(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size) {
         Page<UserVO> page = userService.getUsersByPage(new Page<>(current, size));
-        return ApiResponse.success(page);
+        return Result.OK(page);
     }
 
     // GET /api/v1/users/detail - 查询单个用户
     @GetMapping("/detail")
-    public ApiResponse<UserVO> getUserDetail(@RequestParam Long id) {
+    public Result<UserVO> getUserDetail(@RequestParam Long id) {
         UserVO user = userService.getUserById(id);
-        return ApiResponse.success(user);
+        return Result.OK(user);
     }
 
     // POST /api/v1/users/save - 创建用户
     @PostMapping("/save")
-    public ApiResponse<UserVO> saveUser(@Valid @RequestBody CreateUserDTO dto) {
+    public Result<UserVO> saveUser(@Valid @RequestBody CreateUserDTO dto) {
         UserVO user = userService.createUser(dto);
-        return ApiResponse.success(user);
+        return Result.OK(user);
     }
 
     // POST /api/v1/users/update - 更新用户
     @PostMapping("/update")
-    public ApiResponse<Void> updateUser(@Valid @RequestBody UpdateUserDTO dto) {
+    public Result<Void> updateUser(@Valid @RequestBody UpdateUserDTO dto) {
         userService.updateUser(dto);
-        return ApiResponse.success(null);
+        return Result.OK();
     }
 
     // DELETE /api/v1/users/{ids} - 删除用户（支持批量）
     @DeleteMapping("/{ids}")
-    public ApiResponse<Void> deleteUsers(@PathVariable List<Long> ids) {
+    public Result<Void> deleteUsers(@PathVariable List<Long> ids) {
         userService.deleteUsers(ids);
-        return ApiResponse.success(null);
+        return Result.OK();
     }
 }
 ```
@@ -262,7 +237,7 @@ GET /api/v1/users/page?current=1&size=10&keyword=admin&status=1
 
 ```java
 @GetMapping("/page")
-public ApiResponse<Page<UserVO>> getUsersByPage(
+public Result<Page<UserVO>> getUsersByPage(
         @RequestParam(defaultValue = "1") Integer current,
         @RequestParam(defaultValue = "10") Integer size,
         @RequestParam(required = false) String keyword,
@@ -273,7 +248,7 @@ public ApiResponse<Page<UserVO>> getUsersByPage(
 
     Page<UserVO> page = userService.getUsersByPage(
         new Page<>(current, size), keyword, status);
-    return ApiResponse.success(page);
+    return Result.OK(page);
 }
 ```
 
@@ -287,11 +262,11 @@ public ApiResponse<Page<UserVO>> getUsersByPage(
 
 // 正确做法：基于 ID 游标分页
 @GetMapping("/list")
-public ApiResponse<CursorPage<UserVO>> getUsersByCursor(
+public Result<CursorPage<UserVO>> getUsersByCursor(
         @RequestParam(required = false) Long lastId,
         @RequestParam(defaultValue = "10") Integer size) {
     // WHERE id > lastId ORDER BY id ASC LIMIT size
-    return ApiResponse.success(userService.getUsersByCursor(lastId, size));
+    return Result.OK(userService.getUsersByCursor(lastId, size));
 }
 ```
 
@@ -345,7 +320,7 @@ public interface UserConverter {
     @Parameter(name = "keyword", description = "搜索关键词（模糊匹配用户名）")
 })
 @GetMapping("/page")
-public ApiResponse<Page<UserVO>> getUsersByPage(...) { ... }
+public Result<Page<UserVO>> getUsersByPage(...) { ... }
 ```
 
 ### 如果不使用 Swagger
@@ -362,5 +337,5 @@ public ApiResponse<Page<UserVO>> getUsersByPage(...) { ... }
  * @return 分页用户列表
  */
 @GetMapping("/page")
-public ApiResponse<Page<UserVO>> getUsersByPage(...) { ... }
+public Result<Page<UserVO>> getUsersByPage(...) { ... }
 ```

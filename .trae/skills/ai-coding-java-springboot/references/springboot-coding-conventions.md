@@ -104,8 +104,8 @@ public class OrderController {
     private OrderBizManageService orderBizManageService;
 
     @PostMapping("/save")
-    public ApiResponse<OrderVO> createOrder(@Valid @RequestBody CreateOrderDTO dto) {
-        return ApiResponse.success(orderBizManageService.createOrder(dto));
+    public Result<OrderVO> createOrder(@Valid @RequestBody CreateOrderDTO dto) {
+        return Result.OK(orderBizManageService.createOrder(dto));
     }
 }
 ```

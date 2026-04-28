@@ -52,16 +52,18 @@ GET    /api/v1/users/detail?id=1   # 查询单个用户
 POST   /api/v1/users/save          # 创建用户
 POST   /api/v1/users/update        # 更新用户
 DELETE /api/v1/users/1,2,3         # 删除用户（支持批量）
+method /api/v1/{resources}/{list/detail/save/update/delete/..}
 ```
 
-**统一响应格式**：
+**统一响应格式**（JeecgBoot 项目使用 `org.jeecg.common.api.vo.Result<T>`）：
 
-```java
+```json
 {
-    "code": 200,
-    "message": "操作成功",
-    "data": { ... },
-    "timestamp": 1711180800000
+  "success": true,
+  "message": "操作成功",
+  "code": 200,
+  "result": { "...": "..." },
+  "timestamp": 1711180800000
 }
 ```
 
@@ -147,11 +149,10 @@ if (user == null) {
     throw new ResourceNotFoundException("用户", id);
 }
 
-// 全局异常处理器
+// 全局异常处理器（JeecgBoot 项目通常直接返回 Result）
 @ExceptionHandler(ResourceNotFoundException.class)
-public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex) {
-    return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body(ApiResponse.error(ex.getCode(), ex.getMessage()));
+public Result<?> handleResourceNotFound(ResourceNotFoundException ex) {
+    return Result.error(404, ex.getMessage());
 }
 ```
 
@@ -189,6 +190,20 @@ user.setPassword(rawPassword);
 user.setPassword(DigestUtils.md5Hex(rawPassword));
 ```
 
+### 11. 开发规范检查（必须）
+
+在代码生成/重构完成后、提交前或输出最终结果前，必须运行以下规范检查脚本：
+
+```bash
+python3 .trae/skills/ai-coding-java-springboot/scripts/standards-check.py --target <path>
+```
+
+脚本会对 Java/XML 做基础规范校验（分层、依赖注入、事务、SQL 注入与性能红线等）。如需仅提示不阻断，可使用：
+
+```bash
+python3 .trae/skills/ai-coding-java-springboot/scripts/standards-check.py --target <path> --warn-only
+```
+
 ---
 
 ## 代码检查清单
@@ -204,7 +219,7 @@ user.setPassword(DigestUtils.md5Hex(rawPassword));
 ### API 设计
 
 - [ ] URL 是否符合 RESTful 规范？（复数名词、动作路径统一）
-- [ ] 是否返回统一的 `ApiResponse<T>` 结构？
+- [ ] 是否返回统一的 `Result<T>` 结构？
 - [ ] 参数校验注解是否带 `message`？
 
 ### 数据库

@@ -48,7 +48,7 @@ Implement the user management module for this Spring Boot project.
 Strictly follow ai-coding-java-springboot-skills/skill.md:
 - Layering: Controller -> BizManageService -> Service -> Mapper
 - Use @Resource injection
-- Return unified ApiResponse
+- Return unified Result
 ```
 
 ### OpenCode

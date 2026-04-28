@@ -13,6 +13,13 @@ import org.jeecg.modules.common.enums.BaseEnum;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Mybatis 枚举类型转换器
+ * @param <T> 枚举类型
+ * @author scott
+ * @email jeecgos@163.com
+ * @date  2019年1月19日
+ */
 @Slf4j
 @NoArgsConstructor
 public class MybatisEnumTypeHandlar<T extends BaseEnum> extends BaseTypeHandler<T> {

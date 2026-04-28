@@ -113,20 +113,18 @@ public class GlobalExceptionHandler {
      * 业务异常 —— Service 层主动抛出的可预期错误
      */
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException ex) {
+    public Result<?> handleBusinessException(BusinessException ex) {
         log.warn("业务异常: code={}, message={}", ex.getCode(), ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(ex.getCode(), ex.getMessage()));
+        return Result.error(ex.getCode(), ex.getMessage());
     }
 
     /**
      * 资源不存在
      */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex) {
+    public Result<?> handleResourceNotFound(ResourceNotFoundException ex) {
         log.warn("资源不存在: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(ex.getCode(), ex.getMessage()));
+        return Result.error(ex.getCode(), ex.getMessage());
     }
 
     /**
@@ -135,25 +133,23 @@ public class GlobalExceptionHandler {
      * Spring MVC 环境下是 MethodArgumentNotValidException
      */
     @ExceptionHandler(WebExchangeBindException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(
+    public Result<Map<String, String>> handleValidation(
             WebExchangeBindException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
             errors.put(error.getField(), error.getDefaultMessage())
         );
         log.warn("参数校验失败: {}", errors);
-        return ResponseEntity.badRequest()
-                .body(ApiResponse.error(400, "参数验证失败"));
+        return Result.error("参数验证失败", errors);
     }
 
     /**
      * 认证异常
      */
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
+    public Result<?> handleBadCredentials(BadCredentialsException ex) {
         log.warn("认证失败: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.error(401, "用户名或密码错误"));
+        return Result.error(401, "用户名或密码错误");
     }
 
     /**
@@ -161,12 +157,11 @@ public class GlobalExceptionHandler {
      * 这一层是防线，确保客户端永远收到结构化的 JSON 响应
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleUnexpected(Exception ex) {
+    public Result<?> handleUnexpected(Exception ex) {
         // 系统异常要记录完整堆栈，方便排查
         log.error("系统异常: ", ex);
         // 不要把异常详情暴露给客户端（安全原因）
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(500, "服务器内部错误，请稍后重试"));
+        return Result.error(500, "服务器内部错误，请稍后重试");
     }
 }
 ```
