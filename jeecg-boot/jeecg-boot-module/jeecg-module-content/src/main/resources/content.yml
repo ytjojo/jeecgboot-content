@@ -1,8 +1,0 @@
-jeecg:
-  channel:
-    mute:
-      enabled: true                    # 启用禁言功能
-      default-mute-duration: 60       # 默认禁言时长(分钟)
-      max-mute-duration: 43200        # 最大禁言时长(分钟)
-      auto-clean-expired-mutes: true  # 自动清理过期记录
-      enable-mute-cache: true         # 启用缓存

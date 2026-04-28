@@ -1,6 +1,6 @@
 ---
 name: "wiki-requirements-writer"
-description: "Generates wiki-structured requirements documents with templates and acceptance criteria. Invoke when user asks to write, refine, or standardize product requirements."
+description: "Generates wiki-structured requirements documents with templates and acceptance criteria. Invoke ONLY when the user explicitly requests wiki-style structure/format (e.g., 'wiki-style', 'wiki结构', Confluence/Notion wiki, hierarchical headings, cross-links)."
 ---
 
 # Wiki Requirements Writer
@@ -9,14 +9,14 @@ Generate and refine requirement documents in wiki structure for product, platfor
 
 ## When to Invoke
 
-Invoke this skill when:
-- The user asks to write a requirement document (PRD/MRD/BRD).
-- The user wants wiki-style organization (hierarchical headings and cross-links).
-- The user needs an existing requirement draft to be normalized into a standard template.
-- The user asks for acceptance criteria, scope boundaries, or delivery milestones.
+Invoke this skill ONLY when the user explicitly requests wiki-style requirements output, for example:
+- The user explicitly asks to write a wiki-style requirement document (PRD/MRD/BRD) or a "wiki page" version.
+- The user explicitly asks for wiki-style organization (hierarchical headings/TOC and cross-links).
+- The user explicitly asks to convert/normalize an existing draft into a wiki-style standard template.
+- The user explicitly asks for acceptance criteria, scope boundaries, or delivery milestones in wiki-style format.
 
 ## Output Principles
-
+- Follow wiki-style organization (hierarchical headings and cross-links).
 - Use concise, implementation-ready language.
 - Keep one topic per section and avoid duplicate statements.
 - Mark uncertain items as `TBD` with owner and expected date.
