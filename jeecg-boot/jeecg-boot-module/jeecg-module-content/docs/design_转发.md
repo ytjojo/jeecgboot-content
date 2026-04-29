@@ -44,7 +44,7 @@
 INSERT INTO contents (
     user_id, channel_id, title, content, content_source, content_plain,
     content_type, editor_type, source_type, original_post_id,
-    status, visibility, created_at
+    status, visibility, created_time
 ) VALUES (
     ?, -- 转发用户ID
     ?, -- 频道ID
@@ -163,7 +163,7 @@ public Result<PageResult<ContentVO>> getReposts(
 SELECT * FROM contents 
 WHERE source_type = 'ORIGINAL' 
 AND status = 'PUBLISHED'
-ORDER BY created_at DESC;
+ORDER BY created_time DESC;
 ```
 
 #### 2. 获取转发内容及原内容信息
@@ -173,12 +173,12 @@ SELECT
     o.title as original_title,
     o.content as original_content,
     o.user_id as original_user_id,
-    o.created_at as original_created_at
+    o.created_time as original_created_time
 FROM contents r
 LEFT JOIN contents o ON r.original_post_id = o.id
 WHERE r.source_type = 'REPOST'
 AND r.status = 'PUBLISHED'
-ORDER BY r.created_at DESC;
+ORDER BY r.created_time DESC;
 ```
 
 #### 3. 获取热门转发内容
@@ -186,10 +186,10 @@ ORDER BY r.created_at DESC;
 SELECT 
     original_post_id,
     COUNT(*) as repost_count,
-    MAX(created_at) as latest_repost_time
+    MAX(created_time) as latest_repost_time
 FROM contents 
 WHERE source_type = 'REPOST'
-AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+AND created_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
 GROUP BY original_post_id
 ORDER BY repost_count DESC, latest_repost_time DESC
 LIMIT 10;

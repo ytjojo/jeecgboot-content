@@ -270,7 +270,7 @@ LambdaQueryWrapper<RequestLog> wrapper = new LambdaQueryWrapper<RequestLog>()
 
 ```java
 // ❌ 不好：在索引字段上使用函数，导致索引失效
-wrapper.apply("DATE(created_at) = '2024-01-01'");
+wrapper.apply("DATE(created_time) = '2024-01-01'");
 
 // ✅ 好：用范围查询，索引可以生效
 wrapper.ge(RequestLog::getCreatedAt, LocalDateTime.of(2024, 1, 1, 0, 0))

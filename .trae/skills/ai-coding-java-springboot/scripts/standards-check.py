@@ -27,6 +27,8 @@ RESOURCE = re.compile(r"@\s*Resource\b")
 TRANSACTIONAL = re.compile(r"@\s*Transactional\b")
 SERVICE_ANNOTATION = re.compile(r"@\s*Service\b")
 REST_CONTROLLER = re.compile(r"@\s*RestController\b")
+EXTENDS_SERVICE = re.compile(r"\bextends\s+\w*Service\b")
+EXTENDS_CONTROLLER = re.compile(r"\bextends\s+\w*Controller\b")
 
 MD5_USAGE = re.compile(r"\bmd5\b|DigestUtils\.md5Hex|MessageDigest\.getInstance\(\s*\"MD5\"\s*\)", re.IGNORECASE)
 
@@ -40,6 +42,10 @@ OFFSET_PAGINATION = re.compile(r"\bOFFSET\b", re.IGNORECASE)
 
 FOR_LOOP = re.compile(r"\bfor\s*\(")
 DB_CALL_IN_LOOP = re.compile(r"\b(selectById|selectOne|selectList|selectCount|selectPage)\s*\(", re.IGNORECASE)
+CLASS_DECL = re.compile(r"\b(class|interface|enum|record)\b")
+METHOD_DECL = re.compile(r"\b\w+\s*\([^;{}]*\)\s*(?:\{|throws\b)?")
+ANNOTATION_LINE = re.compile(r"^\s*@")
+ANNOTATION_CONTINUATION = re.compile(r"^\s*[\w.]+\s*=|^\s*[)\]}]\s*,?\s*$|^\s*[,({].*")
 
 
 @dataclass(frozen=True)
@@ -74,6 +80,18 @@ def is_controller(file_path: Path, content: str) -> bool:
     return "/controller/" in lower or file_path.name.endswith("Controller.java") or bool(REST_CONTROLLER.search(content))
 
 
+def is_service_or_controller_family(file_path: Path, content: str) -> bool:
+    lower = str(file_path).lower()
+    return (
+        "/service/" in lower
+        or is_controller(file_path, content)
+        or file_path.name.endswith("Service.java")
+        or bool(SERVICE_ANNOTATION.search(content))
+        or bool(EXTENDS_SERVICE.search(content))
+        or bool(EXTENDS_CONTROLLER.search(content))
+    )
+
+
 def is_mapper(file_path: Path) -> bool:
     lower = str(file_path).lower()
     return "/mapper/" in lower or file_path.name.endswith("Mapper.java")
@@ -98,7 +116,7 @@ def check_java(content: str, file_path: Path) -> List[Violation]:
 
     if AUTOWIRED.search(content):
         add(vs, file_path, None, "ERROR", "DI001", "禁止使用 @Autowired，统一使用 @Resource 注入")
-    if REQUIRED_ARGS.search(content):
+    if REQUIRED_ARGS.search(content) and is_service_or_controller_family(file_path, content):
         add(vs, file_path, None, "ERROR", "DI002", "禁止使用 @RequiredArgsConstructor（构造器注入），统一使用 @Resource 注入")
 
     if MD5_USAGE.search(content):
@@ -150,7 +168,56 @@ def check_java(content: str, file_path: Path) -> List[Violation]:
             if loop_depth == 0:
                 in_loop = False
 
+    javadoc_errors: List[str] = []
+    check_javadoc(content, file_path, javadoc_errors)
+    for error in javadoc_errors:
+        _, line_str, message = error.split(":", 2)
+        message = message.strip()
+        code = "DOC001" if "类声明前缺少 Javadoc" in message else "DOC002"
+        add(vs, file_path, int(line_str), "WARN", code, message)
+
     return vs
+
+# def check_select_star(content: str, file_path: Path, errors: List[str]) -> None:
+#     """Block SQL SELECT * usage in Java source literals/comments as a quick safety net."""
+#     if re.search(r"\bSELECT\s+\*\b", content, re.IGNORECASE):
+#         errors.append(f"{file_path}: 检测到 `SELECT *`，请改为明确字段列表")
+
+
+def check_javadoc(content: str, file_path: Path, errors: List[str]) -> None:
+    """Require class-level and public-method Javadoc comments with lightweight pattern matching."""
+    lines = content.splitlines()
+
+    def is_ignorable_javadoc_gap_line(line: str) -> bool:
+        stripped = line.strip()
+        if not stripped:
+            return True
+        return bool(ANNOTATION_LINE.search(line) or ANNOTATION_CONTINUATION.search(line))
+
+    def has_javadoc_before_declaration(idx: int) -> bool:
+        cursor = idx - 1
+        while cursor >= 0:
+            stripped = lines[cursor].strip()
+            if stripped == "*/":
+                return True
+            if is_ignorable_javadoc_gap_line(lines[cursor]):
+                cursor -= 1
+                continue
+            return False
+        return False
+
+    for idx, line in enumerate(lines):
+        if CLASS_DECL.search(line):
+            if not has_javadoc_before_declaration(idx):
+                errors.append(f"{file_path}:{idx + 1}: 类声明前缺少 Javadoc")
+            break
+
+    for idx, line in enumerate(lines):
+        if re.search(r"\bpublic\b", line) and METHOD_DECL.search(line):
+            if not has_javadoc_before_declaration(idx):
+                errors.append(f"{file_path}:{idx + 1}: public 方法前缺少 Javadoc")
+
+
 
 
 def check_xml(content: str, file_path: Path) -> List[Violation]:
@@ -217,4 +284,3 @@ def main(argv: Sequence[str]) -> int:
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
-

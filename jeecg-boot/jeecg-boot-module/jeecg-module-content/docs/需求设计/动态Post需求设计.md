@@ -92,20 +92,20 @@
   - `id`(String)、`content_type`(POST)、`title`(可空)、`source_type`(TIPTAP/TEXT)、`source_payload`(JSON/Text)、
     `html_cache`(Text, 可空)、`text_cache`(Text)、`cover_url`(可空)、`visibility`(PUBLIC/PRIVATE/FRIENDS_ONLY)、
     `status`(DRAFT/PUBLISHED/REVIEW_PENDING/BLOCKED/DELETED)、`author_id`、`channel_ids`(JSON)、
-    `location`(lng/lat/address JSON，可空)、`mention_user_ids`(JSON)、`created_at`、`updated_at`、`deleted_flag`。
+    `location`(lng/lat/address JSON，可空)、`mention_user_ids`(JSON)、`created_time`、`updated_time`、`deleted_flag`。
 
 - `content_media`
-  - `id`、`content_id`、`media_type`(IMAGE/VIDEO)、`url`、`meta`(JSON，如时长、分辨率)、`order_index`、`created_at`。
+  - `id`、`content_id`、`media_type`(IMAGE/VIDEO)、`url`、`meta`(JSON，如时长、分辨率)、`order_index`、`created_time`。
 
 - `content_tag_rel`
-  - `id`、`content_id`、`tag_id`、`created_at`。
+  - `id`、`content_id`、`tag_id`、`created_time`。
 
 - `interaction_like` / `favorite` / `comment`
   - 互动表按类型拆分；唯一约束（`user_id + content_id + type`）；评论支持层级与@提及。
 
 ### 5.2 索引与并发约束
 
-- 索引：`content.created_at`、`content.author_id`、`content.status`、`content_type`；`media.content_id`；`tag_rel.content_id`；互动表的 `user_id + content_id` 组合索引。
+- 索引：`content.created_time`、`content.author_id`、`content.status`、`content_type`；`media.content_id`；`tag_rel.content_id`；互动表的 `user_id + content_id` 组合索引。
 - 并发唯一：
   - 点赞/收藏：`UNIQUE (user_id, content_id, type)`；插入冲突即视为幂等成功。
   - 定时发布：基于内容 ID 唯一任务键，分布式锁保证唯一触发。

@@ -19,7 +19,7 @@
   - 基础字段：id、title、content、content_type、author_id、community_id 等
   - 统计字段：view_count、like_count、comment_count、share_count、repost_count 等
   - 状态字段：status、visibility、is_deleted、is_pinned、is_hot 等
-  - 系统字段：created_at、updated_at、create_by、update_by 等
+  - 系统字段：created_time、updated_time、create_by、update_by 等
   - 扩展字段：metadata（JSONB）、location_info（JSONB）等
 - **索引设计**：17个优化索引，包括复合索引和条件索引
 
@@ -187,7 +187,7 @@
 1. **统一主键类型**：所有表使用 BIGSERIAL 作为主键
 2. **完善的索引设计**：针对查询场景建立了复合索引和条件索引
 3. **软删除机制**：通过 is_deleted 字段实现软删除
-4. **审计字段**：包含 created_at、updated_at、create_by、update_by 等审计信息
+4. **审计字段**：包含 created_time、updated_time、create_by、update_by 等审计信息
 5. **JSONB 支持**：广泛使用 JSONB 字段存储复杂数据结构
 6. **多媒体支持**：统一的媒体文件管理系统
 7. **内容类型多样化**：支持文章、动态、问答、视频、笔记等多种内容类型

@@ -224,7 +224,7 @@ python3 .trae/skills/ai-coding-java-springboot/scripts/standards-check.py --targ
 
 ### 数据库
 
-- [ ] 表设计是否包含 `created_at` 和 `updated_at`？
+- [ ] 表设计是否包含 `created_time` 和 `updated_time`？
 - [ ] 是否每个字段都有 COMMENT？
 - [ ] 是否避免了 N+1 查询？
 - [ ] 分页是否避免了深分页（OFFSET）？
