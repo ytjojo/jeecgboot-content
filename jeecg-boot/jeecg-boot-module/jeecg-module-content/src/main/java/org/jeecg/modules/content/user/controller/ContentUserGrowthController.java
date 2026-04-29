@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * ReST endpoints for content user growth.
+ */
 @Tag(name = "内容社区用户成长")
 @RestController
 @RequestMapping("/content/user/growth")
@@ -22,6 +25,9 @@ public class ContentUserGrowthController {
     @Resource
     private IContentUserGrowthService growthService;
 
+    /**
+     * Records point and growth changes triggered by a user behavior.
+     */
     @Operation(summary = "记录积分与成长行为")
     @PostMapping("/record")
     public Result<String> record(@RequestBody ContentPointAdjustReq req) {
@@ -34,6 +40,9 @@ public class ContentUserGrowthController {
         return Result.OK("记录成功");
     }
 
+    /**
+     * Gets the point, growth, and level summary for the target user.
+     */
     @Operation(summary = "查询成长汇总")
     @GetMapping("/summary")
     public Result<ContentUserGrowthVO> summary(@RequestParam("userId") String userId) {

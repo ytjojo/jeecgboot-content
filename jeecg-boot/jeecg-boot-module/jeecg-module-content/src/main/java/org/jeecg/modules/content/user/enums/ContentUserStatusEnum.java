@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Enum for content user status.
+ */
 @Getter
 @RequiredArgsConstructor
 public enum ContentUserStatusEnum {
@@ -23,6 +26,9 @@ public enum ContentUserStatusEnum {
     private final String code;
     private final String description;
 
+    /**
+     * Returns all supported user status codes.
+     */
     public static List<String> codes() {
         return Arrays.stream(values()).map(ContentUserStatusEnum::getCode).collect(Collectors.toList());
     }

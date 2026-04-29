@@ -5,6 +5,9 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.jeecg.modules.content.user.entity.ContentUserPrivacySetting;
 
+/**
+ * Mapper for content user privacy setting.
+ */
 public interface ContentUserPrivacySettingMapper extends BaseMapper<ContentUserPrivacySetting> {
 
     @Select("select * from content_user_privacy_setting where user_id = #{userId} limit 1")

@@ -1,5 +1,8 @@
 package org.jeecg.modules.content.user.constant;
 
+/**
+ * Constants for content user error code.
+ */
 public interface ContentUserErrorCode {
 
     int USER_NOT_FOUND = 5404;

@@ -4,6 +4,9 @@ import org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq;
 import org.jeecg.modules.content.user.req.profile.ContentUserProfileUpdateReq;
 import org.jeecg.modules.content.user.vo.ContentUserProfileVO;
 
+/**
+ * Service contract for content user profile.
+ */
 public interface IContentUserProfileService {
 
     ContentUserProfileVO getProfile(String ownerUserId, String viewerUserId);

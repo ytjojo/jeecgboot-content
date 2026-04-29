@@ -15,6 +15,9 @@ import org.jeecg.modules.content.user.vo.ContentUserGrowthVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service implementation for content user growth.
+ */
 @Service
 public class ContentUserGrowthServiceImpl implements IContentUserGrowthService {
 
@@ -30,6 +33,9 @@ public class ContentUserGrowthServiceImpl implements IContentUserGrowthService {
     @Resource
     private ContentUserAuditLogMapper auditLogMapper;
 
+    /**
+     * Records point and growth ledger changes for a user behavior.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void recordBehavior(String userId, String sourceType, int pointDelta, int growthDelta) {
@@ -45,6 +51,9 @@ public class ContentUserGrowthServiceImpl implements IContentUserGrowthService {
         }
     }
 
+    /**
+     * Gets the point, growth, and level summary for the target user.
+     */
     @Override
     public ContentUserGrowthVO getGrowthSummary(String userId) {
         ContentUserProfile profile = profileMapper.selectOne(

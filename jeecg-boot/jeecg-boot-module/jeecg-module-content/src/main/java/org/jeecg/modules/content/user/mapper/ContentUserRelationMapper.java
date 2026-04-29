@@ -7,6 +7,9 @@ import org.jeecg.modules.content.user.entity.ContentUserRelation;
 
 import java.util.List;
 
+/**
+ * Mapper for content user relation.
+ */
 public interface ContentUserRelationMapper extends BaseMapper<ContentUserRelation> {
 
     @Select("select * from content_user_relation where owner_user_id = #{ownerUserId} and target_user_id = #{targetUserId} limit 1")

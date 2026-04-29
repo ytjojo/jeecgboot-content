@@ -1,5 +1,8 @@
 package org.jeecg.modules.common.enums;
 
+/**
+ * Base interface for enums.
+ */
 public interface BaseEnum<E extends Enum<?>, T> {
  
     /**

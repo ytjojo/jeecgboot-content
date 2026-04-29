@@ -19,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.Resource;
 import java.util.Date;
 
+/**
+ * Service implementation for content account.
+ */
 @Slf4j
 @Service
 public class ContentAccountServiceImpl implements IContentAccountService {
@@ -35,6 +38,9 @@ public class ContentAccountServiceImpl implements IContentAccountService {
     @Resource
     private ContentUserStatusRecordMapper statusRecordMapper;
 
+    /**
+     * Registers a community user by mobile and initializes the user profile.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String registerByMobile(ContentRegisterReq req) {
@@ -57,12 +63,18 @@ public class ContentAccountServiceImpl implements IContentAccountService {
         return userId;
     }
 
+    /**
+     * Resets the account password for the matched platform user.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void resetPassword(ContentPasswordResetReq req) {
         systemUserAccountGateway.resetPassword(req);
     }
 
+    /**
+     * Starts the account cancellation flow and records the pending status.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void initiateCancel(String userId, String operatorUserId, String reason) {

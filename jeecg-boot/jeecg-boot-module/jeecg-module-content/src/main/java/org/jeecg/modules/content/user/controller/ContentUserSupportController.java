@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * ReST endpoints for content user support.
+ */
 @Tag(name = "内容社区用户支持")
 @RestController
 @RequestMapping("/content/user/support")
@@ -19,6 +22,9 @@ public class ContentUserSupportController {
     @Resource
     private IContentUserSupportService supportService;
 
+    /**
+     * Creates a user appeal record and returns its identifier.
+     */
     @Operation(summary = "创建处罚申诉")
     @PostMapping("/appeal/create")
     public Result<String> createAppeal(@RequestBody ContentAppealCreateReq req) {

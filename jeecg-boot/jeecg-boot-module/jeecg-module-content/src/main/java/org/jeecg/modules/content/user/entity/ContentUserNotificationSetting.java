@@ -7,6 +7,9 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.jeecg.common.system.base.entity.JeecgEntity;
 
+/**
+ * Entity for content user notification setting.
+ */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
@@ -41,6 +44,9 @@ public class ContentUserNotificationSetting extends JeecgEntity {
     @Schema(description = "免打扰规则JSON")
     private String dndRuleJson;
 
+    /**
+     * Builds the default configuration for the target user.
+     */
     public static ContentUserNotificationSetting defaults(String userId) {
         return new ContentUserNotificationSetting()
             .setUserId(userId)

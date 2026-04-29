@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+/**
+ * Request model for content password reset.
+ */
 @Data
 @Accessors(chain = true)
 @Schema(description = "内容社区密码重置请求")

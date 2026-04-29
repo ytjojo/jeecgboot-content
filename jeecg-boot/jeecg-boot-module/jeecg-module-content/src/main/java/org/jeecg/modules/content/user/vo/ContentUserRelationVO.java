@@ -4,6 +4,9 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import org.jeecg.modules.content.user.entity.ContentUserRelation;
 
+/**
+ * View object for content user relation.
+ */
 @Data
 @Accessors(chain = true)
 public class ContentUserRelationVO {
@@ -17,6 +20,9 @@ public class ContentUserRelationVO {
     private Boolean blockedByOwner;
     private String relationGroupId;
 
+    /**
+     * Builds the current object from the given request or entity.
+     */
     public static ContentUserRelationVO from(ContentUserRelation relation) {
         return new ContentUserRelationVO()
             .setOwnerUserId(relation.getOwnerUserId())

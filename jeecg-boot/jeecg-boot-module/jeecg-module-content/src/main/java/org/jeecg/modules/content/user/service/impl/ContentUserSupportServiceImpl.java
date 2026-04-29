@@ -11,6 +11,9 @@ import org.jeecg.modules.content.user.service.IContentUserSupportService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service implementation for content user support.
+ */
 @Service
 public class ContentUserSupportServiceImpl implements IContentUserSupportService {
 
@@ -20,6 +23,9 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
     @Resource
     private ContentUserAuditLogMapper auditLogMapper;
 
+    /**
+     * Creates a user appeal record and returns its identifier.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String createAppeal(ContentAppealCreateReq req) {

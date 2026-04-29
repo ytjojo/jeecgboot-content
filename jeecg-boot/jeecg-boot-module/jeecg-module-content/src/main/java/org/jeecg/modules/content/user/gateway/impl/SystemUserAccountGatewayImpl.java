@@ -16,6 +16,9 @@ import org.springframework.stereotype.Component;
 import jakarta.annotation.Resource;
 import java.util.Date;
 
+/**
+ * Gateway for system user account.
+ */
 @Slf4j
 @Component
 public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
@@ -23,6 +26,9 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
     @Resource
     private SysUserMapper sysUserMapper;
 
+    /**
+     * Creates a platform user account and returns the account identifier.
+     */
     @Override
     public String createUser(ContentRegisterReq req) {
         if (req.getMobile() != null && sysUserMapper.getUserByPhone(req.getMobile()) != null) {
@@ -55,6 +61,9 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
         return user.getId();
     }
 
+    /**
+     * Resets the account password for the matched platform user.
+     */
     @Override
     public void resetPassword(ContentPasswordResetReq req) {
         SysUser user = resolveUser(req);
@@ -68,11 +77,17 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
         sysUserMapper.updateById(user);
     }
 
+    /**
+     * Gets the platform user by identifier.
+     */
     @Override
     public SysUser getById(String userId) {
         return sysUserMapper.selectById(userId);
     }
 
+    /**
+     * Marks the platform account as cancelled or disabled.
+     */
     @Override
     public void markCancelled(String userId) {
         SysUser user = sysUserMapper.selectById(userId);

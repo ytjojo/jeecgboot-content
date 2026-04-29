@@ -6,6 +6,9 @@ import org.jeecg.modules.content.user.vo.ContentUserStatusVO;
 
 import java.util.List;
 
+/**
+ * Service contract for content user governance.
+ */
 public interface IContentUserGovernanceService {
 
     void changeStatus(ContentUserStatusChangeReq req);

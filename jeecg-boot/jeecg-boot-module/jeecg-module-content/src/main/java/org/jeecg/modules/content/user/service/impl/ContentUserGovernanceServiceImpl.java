@@ -22,6 +22,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Service implementation for content user governance.
+ */
 @Service
 public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceService {
 
@@ -37,6 +40,9 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
     @Resource
     private ContentUserDeviceSessionMapper deviceSessionMapper;
 
+    /**
+     * Changes the lifecycle status of the target user and records governance logs.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void changeStatus(ContentUserStatusChangeReq req) {
@@ -47,6 +53,9 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
         updateProfileStatus(req.getUserId(), req.getTargetStatus());
     }
 
+    /**
+     * Checks whether the user can execute the requested action.
+     */
     @Override
     public boolean canExecuteAction(String userId, String actionType) {
         String currentStatus = resolveCurrentStatus(userId);
@@ -69,6 +78,9 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
         return true;
     }
 
+    /**
+     * Gets the current lifecycle status snapshot for the target user.
+     */
     @Override
     public ContentUserStatusVO getCurrentStatus(String userId) {
         ContentUserStatusRecord latestRecord = statusRecordMapper.selectLatestByUserId(userId);
@@ -88,6 +100,9 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
             .setTargetStatus(profile == null ? ContentUserStatusEnum.GUEST.getCode() : profile.getStatus());
     }
 
+    /**
+     * Lists recent device sessions for the target user.
+     */
     @Override
     public List<ContentUserDeviceSession> listDeviceSessions(String userId) {
         if (deviceSessionMapper == null) {
@@ -100,6 +115,9 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
         );
     }
 
+    /**
+     * Marks the specified device session as offline.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void offlineDeviceSession(String userId, String sessionId) {

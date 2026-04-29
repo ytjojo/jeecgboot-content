@@ -10,6 +10,9 @@ import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
 
 import java.util.Date;
 
+/**
+ * Entity for content user status transition history.
+ */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
@@ -47,6 +50,9 @@ public class ContentUserStatusRecord extends JeecgEntity {
     @Schema(description = "是否可恢复")
     private Boolean recoverable;
 
+    /**
+     * Builds the current object from the given request or entity.
+     */
     public static ContentUserStatusRecord from(ContentUserStatusChangeReq req) {
         return new ContentUserStatusRecord()
             .setUserId(req.getUserId())

@@ -12,6 +12,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
+/**
+ * Entity for content user profile.
+ */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)

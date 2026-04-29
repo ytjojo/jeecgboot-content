@@ -6,6 +6,9 @@ import lombok.experimental.Accessors;
 
 import java.util.Date;
 
+/**
+ * Request model for content user profile update.
+ */
 @Data
 @Accessors(chain = true)
 @Schema(description = "内容社区用户资料更新请求")

@@ -5,6 +5,9 @@ import lombok.experimental.Accessors;
 
 import java.util.List;
 
+/**
+ * Request model for content batch relation.
+ */
 @Data
 @Accessors(chain = true)
 public class ContentBatchRelationReq {

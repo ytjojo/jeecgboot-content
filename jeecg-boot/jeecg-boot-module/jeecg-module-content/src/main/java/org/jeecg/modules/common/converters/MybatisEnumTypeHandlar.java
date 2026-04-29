@@ -34,6 +34,10 @@ public class MybatisEnumTypeHandlar<T extends BaseEnum> extends BaseTypeHandler<
      */
     private T[] enums;
 
+    /**
+     * 构造函数
+     * @param enumType 枚举类型
+     */
     public MybatisEnumTypeHandlar(Class<T> enumType) {
         this.enumType = enumType;
         this.enums = enumType.getEnumConstants();

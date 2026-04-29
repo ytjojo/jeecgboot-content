@@ -5,6 +5,9 @@ import lombok.experimental.Accessors;
 
 import java.util.Date;
 
+/**
+ * View object for content user audit log.
+ */
 @Data
 @Accessors(chain = true)
 public class ContentUserAuditLogVO {

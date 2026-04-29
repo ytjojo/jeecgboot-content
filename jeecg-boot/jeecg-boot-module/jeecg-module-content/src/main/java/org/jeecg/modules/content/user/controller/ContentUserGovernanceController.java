@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * ReST endpoints for content user governance.
+ */
 @Tag(name = "内容社区用户治理")
 @RestController
 @RequestMapping("/content/user/governance")
@@ -26,6 +29,9 @@ public class ContentUserGovernanceController {
     @Resource
     private IContentUserGovernanceService governanceService;
 
+    /**
+     * Changes the lifecycle status of the target user and records governance logs.
+     */
     @Operation(summary = "变更用户状态")
     @PostMapping("/status/change")
     public Result<String> changeStatus(@RequestBody ContentUserStatusChangeReq req) {
@@ -33,6 +39,9 @@ public class ContentUserGovernanceController {
         return Result.OK("状态变更成功");
     }
 
+    /**
+     * Checks whether the user can execute the requested action.
+     */
     @Operation(summary = "检查当前用户行为权限")
     @GetMapping("/permission/check")
     public Result<Boolean> checkPermission(@RequestParam("actionType") String actionType,
@@ -40,18 +49,27 @@ public class ContentUserGovernanceController {
         return Result.OK(governanceService.canExecuteAction(resolveUserId(userId), actionType));
     }
 
+    /**
+     * Gets the current lifecycle status snapshot for the target user.
+     */
     @Operation(summary = "查询用户当前状态")
     @GetMapping("/status/current")
     public Result<ContentUserStatusVO> currentStatus(@RequestParam("userId") String userId) {
         return Result.OK(governanceService.getCurrentStatus(userId));
     }
 
+    /**
+     * Lists recent device sessions for the target user.
+     */
     @Operation(summary = "查询设备会话列表")
     @GetMapping("/device/sessions")
     public Result<List<ContentUserDeviceSession>> listDeviceSessions(@RequestParam("userId") String userId) {
         return Result.OK(governanceService.listDeviceSessions(userId));
     }
 
+    /**
+     * Marks the specified device session as offline.
+     */
     @Operation(summary = "下线指定设备会话")
     @PostMapping("/device/offline")
     public Result<String> offlineDeviceSession(@RequestParam("userId") String userId,

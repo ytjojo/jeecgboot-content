@@ -5,6 +5,9 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 
+/**
+ * Mapper for content user profile.
+ */
 public interface ContentUserProfileMapper extends BaseMapper<ContentUserProfile> {
 
     @Select("select * from content_user_profile where user_id = #{userId} limit 1")

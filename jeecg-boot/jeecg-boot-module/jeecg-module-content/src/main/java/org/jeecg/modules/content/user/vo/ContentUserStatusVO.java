@@ -5,6 +5,9 @@ import lombok.experimental.Accessors;
 
 import java.util.Date;
 
+/**
+ * View object for content user status.
+ */
 @Data
 @Accessors(chain = true)
 public class ContentUserStatusVO {

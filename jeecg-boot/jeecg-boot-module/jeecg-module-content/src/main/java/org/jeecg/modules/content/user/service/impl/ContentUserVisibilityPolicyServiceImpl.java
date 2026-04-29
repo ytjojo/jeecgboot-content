@@ -9,12 +9,18 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import java.util.Objects;
 
+/**
+ * Service implementation for content user visibility policy.
+ */
 @Service
 public class ContentUserVisibilityPolicyServiceImpl implements IContentUserVisibilityPolicyService {
 
     @Resource
     private ContentUserRelationMapper relationMapper;
 
+    /**
+     * Checks whether a profile field is visible to the current viewer.
+     */
     @Override
     public boolean canViewField(String ownerUserId, String viewerUserId, String visibility) {
         if (Objects.equals(ownerUserId, viewerUserId)) {
@@ -39,6 +45,9 @@ public class ContentUserVisibilityPolicyServiceImpl implements IContentUserVisib
         return false;
     }
 
+    /**
+     * Checks whether content is visible to the current viewer.
+     */
     @Override
     public boolean canViewContent(String ownerUserId, String viewerUserId) {
         if (Objects.equals(ownerUserId, viewerUserId)) {
@@ -52,17 +61,26 @@ public class ContentUserVisibilityPolicyServiceImpl implements IContentUserVisib
         return viewerToOwner == null || !Boolean.TRUE.equals(viewerToOwner.getMuted());
     }
 
+    /**
+     * Checks whether the target user can be found by the current viewer.
+     */
     @Override
     public boolean canSearchUser(String ownerUserId, String viewerUserId) {
         ContentUserRelation ownerToViewer = relationMapper.selectByPair(ownerUserId, viewerUserId);
         return ownerToViewer == null || !Boolean.TRUE.equals(ownerToViewer.getBlockedByOwner());
     }
 
+    /**
+     * Checks whether a private message can be sent to the target user.
+     */
     @Override
     public boolean canSendPrivateMessage(String ownerUserId, String viewerUserId) {
         return canViewContent(ownerUserId, viewerUserId);
     }
 
+    /**
+     * Checks whether the current viewer can mention the target user.
+     */
     @Override
     public boolean canMention(String ownerUserId, String viewerUserId) {
         return canViewContent(ownerUserId, viewerUserId);

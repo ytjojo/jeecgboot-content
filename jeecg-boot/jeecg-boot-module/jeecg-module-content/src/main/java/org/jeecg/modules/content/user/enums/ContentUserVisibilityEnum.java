@@ -3,6 +3,9 @@ package org.jeecg.modules.content.user.enums;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Enum for content user visibility.
+ */
 @Getter
 @RequiredArgsConstructor
 public enum ContentUserVisibilityEnum {

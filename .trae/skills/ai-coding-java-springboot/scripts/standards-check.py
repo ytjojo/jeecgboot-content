@@ -102,9 +102,13 @@ def is_biz_manage_service(file_path: Path) -> bool:
     return "/biz/" in lower or file_path.name.endswith("BizManageService.java")
 
 
-def is_service_impl(file_path: Path) -> bool:
+def is_service_impl(file_path: Path, content: str) -> bool:
     lower = str(file_path).lower()
-    return "/service/impl/" in lower or file_path.name.endswith("ServiceImpl.java")
+    return (
+        "/service/impl/" in lower
+        or file_path.name.endswith("ServiceImpl.java")
+        or "extends ServiceImpl" in content
+    )
 
 
 def add(vs: List[Violation], file: Path, line: int | None, level: str, code: str, message: str) -> None:
@@ -127,7 +131,7 @@ def check_java(content: str, file_path: Path) -> List[Violation]:
             add(vs, file_path, None, "ERROR", "TX001", "禁止在 Controller 上使用 @Transactional，事务应在 BizManageService（或业务编排层）")
         if is_mapper(file_path):
             add(vs, file_path, None, "ERROR", "TX002", "禁止在 Mapper 上使用 @Transactional")
-        if is_service_impl(file_path) and not is_biz_manage_service(file_path):
+        if is_service_impl(file_path, content) and not is_biz_manage_service(file_path):
             add(vs, file_path, None, "WARN", "TX003", "建议把跨表/编排事务放在 BizManageService；ServiceImpl 上的事务需确认是否单表写")
 
     if is_controller(file_path, content):
@@ -144,7 +148,7 @@ def check_java(content: str, file_path: Path) -> List[Violation]:
         if not SERVICE_ANNOTATION.search(content):
             add(vs, file_path, None, "WARN", "LAY010", "BizManageService 建议标注 @Service")
 
-    if is_service_impl(file_path):
+    if is_service_impl(file_path, content):
         if "extends ServiceImpl" not in content:
             add(vs, file_path, None, "WARN", "MP001", "Service 实现建议继承 MyBatis Plus ServiceImpl")
 

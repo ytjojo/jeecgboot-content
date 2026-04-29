@@ -6,6 +6,9 @@ import org.jeecg.modules.content.user.entity.ContentUserProfile;
 
 import java.util.Date;
 
+/**
+ * View object for content user profile.
+ */
 @Data
 @Accessors(chain = true)
 public class ContentUserProfileVO {
@@ -27,6 +30,9 @@ public class ContentUserProfileVO {
     private String status;
     private Integer level;
 
+    /**
+     * Builds the current object from the given request or entity.
+     */
     public static ContentUserProfileVO from(ContentUserProfile profile, boolean birthdayVisible) {
         return new ContentUserProfileVO()
             .setUserId(profile.getUserId())

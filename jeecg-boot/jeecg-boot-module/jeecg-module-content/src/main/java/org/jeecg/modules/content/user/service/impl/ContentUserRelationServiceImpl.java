@@ -11,12 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.Resource;
 import java.util.Date;
 
+/**
+ * Service implementation for content user relation.
+ */
 @Service
 public class ContentUserRelationServiceImpl implements IContentUserRelationService {
 
     @Resource
     private ContentUserRelationMapper relationMapper;
 
+    /**
+     * Creates or refreshes a follow relationship to the target user.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void follow(String operatorUserId, String targetUserId, String relationGroupId) {
@@ -28,6 +34,9 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         relationMapper.updateById(relation);
     }
 
+    /**
+     * Cancels the follow relationship to the target user.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void unfollow(String operatorUserId, String targetUserId) {
@@ -37,6 +46,9 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         relationMapper.updateById(relation);
     }
 
+    /**
+     * Blacklists the target user and cuts off related interactions.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void blacklist(String operatorUserId, String targetUserId) {
@@ -50,6 +62,9 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         relationMapper.updateById(relation);
     }
 
+    /**
+     * Mutes the target user for one-way noise reduction.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void mute(String operatorUserId, String targetUserId) {
@@ -59,6 +74,9 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         relationMapper.updateById(relation);
     }
 
+    /**
+     * Gets the relation details between the current user and the target user.
+     */
     @Override
     public ContentUserRelationVO getRelation(String operatorUserId, String targetUserId) {
         return ContentUserRelationVO.from(getOrCreate(operatorUserId, targetUserId));

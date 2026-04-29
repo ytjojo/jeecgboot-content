@@ -7,6 +7,9 @@ import org.jeecg.modules.content.user.entity.ContentUserSubscription;
 
 import java.util.List;
 
+/**
+ * Mapper for content user subscription.
+ */
 public interface ContentUserSubscriptionMapper extends BaseMapper<ContentUserSubscription> {
 
     @Select("select * from content_user_subscription where user_id = #{userId}")

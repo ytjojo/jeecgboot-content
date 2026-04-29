@@ -9,6 +9,9 @@ import org.jeecg.common.system.base.entity.JeecgEntity;
 
 import java.util.Date;
 
+/**
+ * Entity for content user relation.
+ */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)

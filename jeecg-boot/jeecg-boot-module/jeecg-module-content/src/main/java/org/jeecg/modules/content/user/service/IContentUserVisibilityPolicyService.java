@@ -1,5 +1,8 @@
 package org.jeecg.modules.content.user.service;
 
+/**
+ * Service contract for content user visibility policy.
+ */
 public interface IContentUserVisibilityPolicyService {
 
     boolean canViewField(String ownerUserId, String viewerUserId, String visibility);

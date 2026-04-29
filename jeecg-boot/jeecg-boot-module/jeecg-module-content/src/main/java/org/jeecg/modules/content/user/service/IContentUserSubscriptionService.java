@@ -5,6 +5,9 @@ import org.jeecg.modules.content.user.req.subscription.ContentSubscriptionReq;
 
 import java.util.List;
 
+/**
+ * Service contract for content user subscription.
+ */
 public interface IContentUserSubscriptionService {
 
     String subscribe(String userId, ContentSubscriptionReq req);

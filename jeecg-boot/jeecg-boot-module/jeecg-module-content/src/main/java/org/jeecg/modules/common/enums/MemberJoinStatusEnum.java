@@ -128,12 +128,21 @@ public enum MemberJoinStatusEnum implements BaseEnum< MemberJoinStatusEnum,Integ
     }
 
    
-
+    /**
+     * 获取枚举值描述
+     * @return 枚举值的描述
+     */
     @Override
     public String getDescription() {
         return description;
     }
 
+
+
+    /**
+     * 获取枚举值名称
+     * @return 枚举值的名称
+     */
     @Override
     public String getName() {
         return name;

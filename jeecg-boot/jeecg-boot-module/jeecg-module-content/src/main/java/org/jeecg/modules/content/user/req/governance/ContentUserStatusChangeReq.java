@@ -5,6 +5,9 @@ import lombok.experimental.Accessors;
 
 import java.util.Date;
 
+/**
+ * Request model for content user status change.
+ */
 @Data
 @Accessors(chain = true)
 public class ContentUserStatusChangeReq {

@@ -3,6 +3,9 @@ package org.jeecg.modules.content.user.req.support;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+/**
+ * Request model for content appeal create.
+ */
 @Data
 @Accessors(chain = true)
 public class ContentAppealCreateReq {

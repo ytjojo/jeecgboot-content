@@ -9,6 +9,9 @@ import org.jeecg.modules.content.user.service.IContentUserProfileService;
 import org.jeecg.modules.content.user.service.IContentUserVisibilityPolicyService;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * ReST endpoints for content user settings.
+ */
 @Tag(name = "内容社区用户设置")
 @RestController
 @RequestMapping("/content/user/settings")
@@ -20,6 +23,9 @@ public class ContentUserSettingsController {
     @Resource
     private IContentUserVisibilityPolicyService visibilityPolicyService;
 
+    /**
+     * Updates privacy, visibility, and discovery settings for the user.
+     */
     @Operation(summary = "更新隐私设置")
     @PostMapping("/privacy/update")
     public Result<String> updatePrivacy(@RequestParam("userId") String userId,
@@ -28,6 +34,9 @@ public class ContentUserSettingsController {
         return Result.OK("更新成功");
     }
 
+    /**
+     * Checks whether content is visible to the current viewer.
+     */
     @Operation(summary = "检查是否允许查看内容")
     @GetMapping("/visibility/content")
     public Result<Boolean> canViewContent(@RequestParam("ownerUserId") String ownerUserId,

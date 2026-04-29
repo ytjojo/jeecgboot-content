@@ -2,6 +2,9 @@ package org.jeecg.modules.content.user.service;
 
 import org.jeecg.modules.content.user.vo.ContentUserRelationVO;
 
+/**
+ * Service contract for content user relation.
+ */
 public interface IContentUserRelationService {
 
     void follow(String operatorUserId, String targetUserId, String relationGroupId);

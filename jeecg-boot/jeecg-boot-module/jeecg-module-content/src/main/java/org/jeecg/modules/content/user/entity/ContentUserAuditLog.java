@@ -10,6 +10,9 @@ import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
 
 import java.util.Date;
 
+/**
+ * Entity for content user audit log.
+ */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
@@ -44,6 +47,9 @@ public class ContentUserAuditLog extends JeecgEntity {
     @Schema(description = "设备信息")
     private String deviceInfo;
 
+    /**
+     * Executes the statusChange operation.
+     */
     public static ContentUserAuditLog statusChange(ContentUserStatusChangeReq req) {
         return new ContentUserAuditLog()
             .setUserId(req.getUserId())
@@ -54,6 +60,9 @@ public class ContentUserAuditLog extends JeecgEntity {
             .setEventTime(new Date());
     }
 
+    /**
+     * Executes the behaviorAwarded operation.
+     */
     public static ContentUserAuditLog behaviorAwarded(String userId, String sourceType, int pointDelta, int growthDelta) {
         return new ContentUserAuditLog()
             .setUserId(userId)
@@ -63,6 +72,9 @@ public class ContentUserAuditLog extends JeecgEntity {
             .setEventTime(new Date());
     }
 
+    /**
+     * Executes the appealCreated operation.
+     */
     public static ContentUserAuditLog appealCreated(ContentUserAppeal appeal) {
         return new ContentUserAuditLog()
             .setUserId(appeal.getUserId())

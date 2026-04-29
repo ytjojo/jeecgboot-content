@@ -3,6 +3,9 @@ package org.jeecg.modules.content.user.service;
 import org.jeecg.modules.content.user.req.account.ContentPasswordResetReq;
 import org.jeecg.modules.content.user.req.account.ContentRegisterReq;
 
+/**
+ * Service contract for content account.
+ */
 public interface IContentAccountService {
 
     String registerByMobile(ContentRegisterReq req);

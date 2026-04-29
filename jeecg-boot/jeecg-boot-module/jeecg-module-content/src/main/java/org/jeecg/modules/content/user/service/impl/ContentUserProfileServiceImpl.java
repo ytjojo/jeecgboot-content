@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service implementation for content user profile.
+ */
 @Service
 public class ContentUserProfileServiceImpl implements IContentUserProfileService {
 
@@ -29,6 +32,9 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
     @Resource
     private IContentUserVisibilityPolicyService visibilityPolicyService;
 
+    /**
+     * Returns the user profile as seen by the current viewer.
+     */
     @Override
     public ContentUserProfileVO getProfile(String ownerUserId, String viewerUserId) {
         ContentUserProfile profile = requireProfile(ownerUserId);
@@ -37,6 +43,9 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
         return ContentUserProfileVO.from(profile, birthdayVisible);
     }
 
+    /**
+     * Updates user profile fields and homepage personalization settings.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateProfile(String userId, ContentUserProfileUpdateReq req) {
@@ -57,6 +66,9 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
         profileMapper.updateById(profile);
     }
 
+    /**
+     * Updates privacy, visibility, and discovery settings for the user.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updatePrivacy(String userId, ContentUserPrivacyUpdateReq req) {

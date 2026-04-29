@@ -11,12 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.Resource;
 import java.util.List;
 
+/**
+ * Service implementation for content user subscription.
+ */
 @Service
 public class ContentUserSubscriptionServiceImpl implements IContentUserSubscriptionService {
 
     @Resource
     private ContentUserSubscriptionMapper subscriptionMapper;
 
+    /**
+     * Creates a subscription for the requested content source.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String subscribe(String userId, ContentSubscriptionReq req) {
@@ -33,12 +39,18 @@ public class ContentUserSubscriptionServiceImpl implements IContentUserSubscript
         return subscription.getId();
     }
 
+    /**
+     * Cancels the specified subscription record.
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void cancelSubscription(String userId, String subscriptionId) {
         subscriptionMapper.deleteById(subscriptionId);
     }
 
+    /**
+     * Lists all subscriptions owned by the target user.
+     */
     @Override
     public List<ContentUserSubscription> listSubscriptions(String userId) {
         return subscriptionMapper.selectByUserId(userId);

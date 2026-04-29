@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+/**
+ * Request model for content user privacy update.
+ */
 @Data
 @Accessors(chain = true)
 @Schema(description = "内容社区用户隐私更新请求")
