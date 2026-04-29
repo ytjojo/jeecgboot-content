@@ -143,7 +143,8 @@ jeecg-boot/jeecg-boot-module/jeecg-module-content
 ```
 org.jeecg.modules.content.{module_name}/
 ├── controller/     # REST API endpoints
-├── service/        # Business logic interfaces
+├── biz/            # 业务合并层（BizManageService）(仅多表/跨聚合编排)
+├── service/        # Business logic interfaces (仅仅单表逻辑在 Service)
 ├── service/impl/   # Business logic implementations
 ├── mapper/         # MyBatis mappers
 ├── entity/         # Database entities
