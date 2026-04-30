@@ -12,7 +12,7 @@ A comprehensive, production-ready development standards library for Spring Boot 
 
 ## Why Use This?
 
-AI coding assistants generate better code when given clear, structured standards. This project provides **7 battle-tested skill modules** that enforce consistent, maintainable, and secure Spring Boot code — whether you're building microservices, RESTful APIs, or monolithic backends.
+AI coding assistants generate better code when given clear, structured standards. This project provides **8 battle-tested skill modules** that enforce consistent, maintainable, and secure Spring Boot code — whether you're building microservices, RESTful APIs, or monolithic backends.
 
 **These are not suggestions — they are baseline requirements.** Violations lead to serious maintainability and performance issues in production.
 
@@ -36,6 +36,7 @@ AI coding assistants generate better code when given clear, structured standards
 | **[Logging & Monitoring](references/springboot-logging-monitoring.md)** | Log output, tracing, metrics | Log levels, structured logging, sensitive data masking |
 | **[Performance](references/springboot-performance.md)** | Query optimization, caching, high concurrency | N+1 prevention, cursor pagination, cache protection |
 | **[Security](references/springboot-security-standards.md)** | Auth, user input, sensitive data | SQL injection prevention, XSS, BCrypt passwords, JWT security |
+| **[Testing Standards](references/springboot-testing-standards.md)** | Unit tests, integration tests, test layering | JUnit 5, Mockito, AssertJ, slice tests |
 
 ## How to Use with AI Coding Tools
 
@@ -82,6 +83,7 @@ Load only what you need for the current task:
 | Optimizing performance | `performance` |
 | Security controls | `security-standards` |
 | Logging & monitoring | `logging-monitoring` |
+| Writing or fixing tests | `testing-standards` |
 
 ## Project Structure
 
@@ -100,7 +102,8 @@ ai-coding-java-springboot-skills/
     ├── springboot-exception-handling.md  # Exception handling & error codes
     ├── springboot-logging-monitoring.md  # Logging & monitoring standards
     ├── springboot-performance.md         # Performance optimization
-    └── springboot-security-standards.md  # Security best practices
+    ├── springboot-security-standards.md  # Security best practices
+    └── springboot-testing-standards.md   # Testing conventions & test layering
 ```
 
 ## Applicable Scenarios

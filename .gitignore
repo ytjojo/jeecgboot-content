@@ -18,3 +18,5 @@ derby.log
 .cursor
 .history
 .claude
+.omc
+.worktrees/

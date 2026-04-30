@@ -23,7 +23,7 @@ comments, exceptions, logging, MySQL schema/index/SQL/ORM, project structure, an
 Apply these guidelines **automatically** whenever you:
 - Write new Java classes, methods, or SQL
 - Review or refactor existing Java code
-- RESTful API design,
+- Design RESTful APIs or Controllers
 - Design MySQL table schemas or indexes
 - Define POJOs (DO/DTO/VO/BO)
 - Configure thread pools, locks, or concurrent data structures
@@ -31,7 +31,7 @@ Apply these guidelines **automatically** whenever you:
 
 # Spring Boot 项目开发规范合集
 
-本合集包含 Spring Boot 项目的全套开发规范，共 7 个核心技能模块。**这些规范是底线，不是建议**——违反规则会导致严重的可维护性问题和性能隐患。
+本合集包含 Spring Boot 项目的全套开发规范，共 8 个核心技能模块。**这些规范是底线，不是建议**——违反规则会导致严重的可维护性问题和性能隐患。
 
 ## 技能模块总览
 
@@ -44,6 +44,7 @@ Apply these guidelines **automatically** whenever you:
 | [springboot-logging-monitoring](#springboot-logging-monitoring) | 日志输出、日志级别配置、链路追踪、Metrics 埋点、异步日志        | 日志级别规范、结构化日志、日志脱敏、日志文件配置、链路追踪、监控指标             |
 | [springboot-performance](#springboot-performance)               | 数据库查询、列表接口、批量数据、缓存策略、高并发场景            | 禁止 N+1 查询、禁止 OFFSET 深分页、缓存防护、查询优化、连接池配置、异步处理      |
 | [springboot-security-standards](#springboot-security-standards) | 认证鉴权、用户输入处理、SQL 查询、敏感数据、文件上传、CORS 配置 | SQL 注入防护、XSS 防护、密码安全、JWT/API Key 安全、敏感数据脱敏、输入校验       |
+| [springboot-testing-standards](#springboot-testing-standards)   | 单元测试、接口测试、集成测试、Mock、测试分层                   | JUnit 5、Mockito、AssertJ、测试切片、命名规范、回归用例                         |
 
 ---
 
@@ -230,6 +231,19 @@ python3 .trae/skills/ai-coding-java-springboot/scripts/standards-check.py --targ
 python3 .trae/skills/ai-coding-java-springboot/scripts/standards-check.py --target <path> --warn-only
 ```
 
+### 12. 高频补充规则
+
+- 日志统一使用 SLF4J 占位符 `{}`，禁止字符串拼接
+- 核心业务日志推荐 `key=value` 风格，并带 `requestId` / `traceId`
+- 禁止吞异常；底层异常要按层翻译并保留原始 `cause`
+- 集合返回空集合，不返回 `null`；Optional 只用于返回值
+- Stream 只用于短链路无副作用转换，禁止在 Stream 中查库/调 Redis
+- 禁止 `Executors.newXxx()`；ThreadLocal 用后必须 `remove()`
+- 禁止共享 `SimpleDateFormat`，统一使用 `DateTimeFormatter`
+- SQL / ORM 禁止 `SELECT *`，复杂映射用 `resultMap`，统计统一 `count(*)`
+- 分页必须使用物理分页，禁止查全量后内存截取
+- 优先使用测试切片，避免默认全量 `@SpringBootTest`
+
 ---
 
 ## 代码检查清单
@@ -289,6 +303,7 @@ python3 .trae/skills/ai-coding-java-springboot/scripts/standards-check.py --targ
 | **logging-monitoring** | 日志输出、链路追踪、Metrics 埋点、异步日志         | 日志级别、结构化日志、日志脱敏、链路追踪、监控指标      |
 | **performance**        | 数据库查询、列表接口、批量数据、缓存策略、高并发   | 禁止 N+1 查询、禁止深分页、缓存防护、查询优化、异步处理 |
 | **security-standards** | 认证鉴权、用户输入、敏感数据、文件上传、CORS 配置  | SQL 注入防护、XSS 防护、密码安全、数据脱敏、输入校验    |
+| **testing-standards**  | 单元测试、接口测试、集成测试、测试分层             | JUnit 5、Mockito、AssertJ、MockMvc、测试切片            |
 
 ---
 
@@ -305,6 +320,7 @@ python3 .trae/skills/ai-coding-java-springboot/scripts/standards-check.py --targ
 | 添加日志输出                | 日志规范                       |
 | 编写查询或列表接口          | 性能规范（检查 N+1、深分页等） |
 | 处理用户输入或敏感数据      | 安全规范                       |
+| 编写或补充测试              | 测试规范                       |
 
 ---
 
@@ -322,7 +338,8 @@ ai-coding-java-springboot-skills/
    ├─ springboot-exception-handling.md
    ├─ springboot-logging-monitoring.md
    ├─ springboot-performance.md
-   └─ springboot-security-standards.md
+   ├─ springboot-security-standards.md
+   └─ springboot-testing-standards.md
 ```
 
 ---

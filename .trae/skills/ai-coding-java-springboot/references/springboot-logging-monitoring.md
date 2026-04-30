@@ -83,6 +83,56 @@ log.info("订单创建成功: orderId={}, userId={}, amount={}", orderId, userId
 log.error("订单创建失败: orderId={}, userId={}, 原因: {}", orderId, userId, e.getMessage(), e);
 ```
 
+### 占位符规则
+
+```java
+// ✅ 推荐：统一使用占位符
+log.info("创建订单成功, orderId={}, userId={}", orderId, userId);
+log.warn("用户不存在, userId={}", userId);
+log.error("创建订单失败, orderId={}", orderId, e);
+
+// ❌ 不推荐：字符串拼接，性能差且格式不统一
+log.info("创建订单成功, orderId=" + orderId + ", userId=" + userId);
+```
+
+规则：
+- **统一使用 SLF4J 占位符 `{}`**
+- **禁止字符串拼接日志**
+- **ERROR 日志必须带异常对象**，不能只打印 `e.getMessage()`
+
+### key=value 风格
+
+推荐核心业务日志使用 `key=value` 风格，方便检索、聚合和告警：
+
+```java
+log.info("order_created orderId={} userId={} amount={}", orderId, userId, amount);
+log.warn("user_not_found userId={}", userId);
+log.error("order_create_failed orderId={} userId={}", orderId, userId, e);
+```
+
+建议最少包含：
+- 资源主键或业务 ID
+- 操作人或请求来源
+- 结果状态
+- 失败原因或异常堆栈
+
+### MDC 链路上下文
+
+```java
+String requestId = UUID.randomUUID().toString().replace("-", "");
+MDC.put("requestId", requestId);
+try {
+    log.info("request_start method={} path={}", request.getMethod(), request.getRequestURI());
+} finally {
+    MDC.clear();
+}
+```
+
+规则：
+- **请求入口统一放入 `requestId` / `traceId`**
+- **使用完成后及时清理 MDC**，避免线程复用导致串数据
+- **不要在每一层重复生成 requestId**，同一次请求只保留一个链路标识
+
 ### 日志格式
 
 ```yaml
@@ -193,37 +243,31 @@ logging:
 ```java
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class LogWriter {
 
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private final RequestLogService requestLogService;
+    @Resource
+    private ThreadPoolTaskExecutor logTaskExecutor;
+
+    @Resource
+    private RequestLogService requestLogService;
 
     public void submit(RequestLogContext ctx) {
-        executor.submit(() -> {
+        logTaskExecutor.execute(() -> {
             try {
                 requestLogService.save(convert(ctx));
             } catch (Exception e) {
-                log.error("日志写入失败: ", e);
+                log.error("日志写入失败, requestId={}", ctx.getRequestId(), e);
                 // 日志写入失败不能影响业务流程
             }
         });
     }
-
-    @PreDestroy
-    public void shutdown() {
-        executor.shutdown();
-        try {
-            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
-                executor.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            executor.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
-    }
 }
 ```
+
+规则：
+- **不要使用 `Executors.newSingleThreadExecutor()` 等工厂方法**
+- **异步日志必须使用自定义线程池**
+- **同一个异常避免在业务层和全局异常处理器重复打 `error`**
 
 ---
 

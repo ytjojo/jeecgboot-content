@@ -162,6 +162,39 @@ com.example.project
 | Util | `{功能}Util` | `JwtUtil`, `DateUtil` |
 | 常量 | `{模块}Constants` | `RedisConstants`, `ApiConstants` |
 
+### 布尔字段命名
+
+```java
+// ✅ 推荐：布尔字段直接用形容词/状态词
+private Boolean enabled;
+private Boolean deleted;
+private Boolean success;
+
+// ❌ 不推荐：Java 字段使用 isXxx，容易和序列化、Lombok、ORM 映射冲突
+private Boolean isEnabled;
+private Boolean isDeleted;
+```
+
+规则：
+- **Java 字段**不用 `isXxx` 作为属性名，统一使用 `enabled`、`deleted`、`success` 这类命名
+- **数据库字段**如果历史表结构已使用 `is_enabled`，在 Java 侧保持驼峰映射一致，不要再额外造一个 `isEnabled`
+- **getter** 由 Lombok 或 IDE 按 JavaBean 规范生成，不手写奇怪的 `getIsXxx()`
+
+### DO / DTO / VO / BO 边界
+
+| 类型 | 职责 | 禁止事项 |
+|------|------|----------|
+| **DO / Entity** | 映射数据库表结构，用于持久化 | 不直接返回给前端 |
+| **DTO** | 接收入参，承载校验注解 | 不直接作为数据库实体使用 |
+| **VO** | 返回前端，只保留展示需要的字段 | 不回写数据库 |
+| **BO** | 业务过程中的组合对象或中间对象 | 不直接暴露到接口层 |
+
+规则：
+- **不要混用对象职责**，DTO/VO/DO 不能因为字段“差不多”就互相替代
+- **Entity 不直接出现在 Controller 返回值中**，避免暴露内部字段和敏感数据
+- **BO 只在业务层内部流转**，不参与接口协议定义
+- **不要使用 `POJO` 作为业务对象命名**，语义太弱
+
 ### 方法命名
 
 ```java
@@ -191,6 +224,71 @@ if (user.getStatus() == 1) { ... }
 // ✅
 if (user.getStatus().equals(UserStatus.ACTIVE)) { ... }
 ```
+
+---
+
+## 集合、空值与 Stream 使用边界
+
+### 集合与空值
+
+```java
+// ✅ 推荐：返回空集合，不返回 null
+public List<UserVO> listUsers() {
+    List<UserVO> users = userMapper.selectUserList();
+    return users == null ? Collections.emptyList() : users;
+}
+
+// ❌ 不推荐：返回 null，调用方到处判空
+public List<UserVO> listUsers() {
+    return userMapper.selectUserList();
+}
+```
+
+规则：
+- **集合返回空集合，不返回 `null`**
+- **数组返回空数组，不返回 `null`**
+- **字符串比较**使用 `"const".equals(value)` 或 `Objects.equals(a, b)`
+- **重写 `equals()` 时必须同步重写 `hashCode()`**
+
+### Optional 使用规范
+
+```java
+// ✅ 推荐：查询类方法返回 Optional
+public Optional<User> findByUsername(String username) {
+    return Optional.ofNullable(userMapper.selectByUsername(username));
+}
+
+// ❌ 不推荐：Optional 作为字段或入参
+private Optional<String> nickname;
+public void updateNickname(Optional<String> nickname) { ... }
+```
+
+规则：
+- **Optional 只用于返回值**，表达“可能不存在”
+- **不要把 Optional 用作字段、DTO 字段或方法参数**
+- **不要直接 `optional.get()`**，优先使用 `orElse`、`orElseThrow`、`map`
+
+### Stream 使用边界
+
+```java
+// ✅ 推荐：短链路转换
+List<String> usernames = users.stream()
+    .filter(User::getEnabled)
+    .map(User::getUsername)
+    .filter(Objects::nonNull)
+    .toList();
+
+// ❌ 不推荐：长链路 + 嵌套 + 副作用
+users.stream().forEach(user -> {
+    user.setDeptName(deptService.getById(user.getDeptId()).getName());
+});
+```
+
+规则：
+- **Stream 适合无副作用的筛选、映射、分组**
+- **链路超过 3 到 4 步、出现嵌套 Stream、出现外部调用或副作用时改用 for 循环**
+- **不要在 Stream 中调用 Mapper/Service/Redis**，否则通常就是可读性和性能双重问题
+- **遍历删除元素时使用 `Iterator`**，不要在 foreach 中直接 `remove`
 
 ---
 
@@ -517,6 +615,69 @@ public void createOrder(CreateOrderDTO dto) {
     }
 }
 ```
+
+---
+
+## 并发与异步规范
+
+### 线程池
+
+```java
+// ✅ 推荐：显式配置线程池参数
+@Bean("bizTaskExecutor")
+public ThreadPoolTaskExecutor bizTaskExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(4);
+    executor.setMaxPoolSize(16);
+    executor.setQueueCapacity(200);
+    executor.setThreadNamePrefix("biz-task-");
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+    executor.initialize();
+    return executor;
+}
+
+// ❌ 不推荐：直接使用 Executors 工厂方法
+ExecutorService executor = Executors.newFixedThreadPool(10);
+```
+
+规则：
+- **禁止 `Executors.newXxx()`**，统一显式配置线程池参数
+- **线程名必须可读**，方便排查日志和线程堆栈
+- **线程池参数要和业务量匹配**，不要默认照抄
+
+### ThreadLocal 与日期格式化
+
+```java
+try {
+    USER_CONTEXT.set(userId);
+    // 业务逻辑
+} finally {
+    USER_CONTEXT.remove();
+}
+
+private static final DateTimeFormatter DATE_TIME_FORMATTER =
+    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+```
+
+规则：
+- **ThreadLocal 使用后必须在 `finally` 中 `remove()`**
+- **禁止共享 `SimpleDateFormat` 实例**，统一使用 `DateTimeFormatter`
+- **锁、线程池、异步执行这类并发工具必须有明确的释放和清理逻辑**
+
+### @Async 使用规范
+
+```java
+@Async("bizTaskExecutor")
+public CompletableFuture<Void> sendNoticeAsync(Long userId) {
+    // 异步逻辑
+    return CompletableFuture.completedFuture(null);
+}
+```
+
+规则：
+- **`@Async` 必须指定自定义线程池**，不要依赖默认执行器
+- **`@Async` 方法必须是 `public`，且从其他 Bean 调用**
+- **异步方法内部要记录异常日志**，不能静默失败
 
 ---
 

@@ -64,6 +64,28 @@ public class DuplicateResourceException extends BusinessException {
 
 为什么用 RuntimeException 而不是 checked Exception：Spring 的 `@Transactional` 默认只回滚 RuntimeException，而且 checked Exception 会污染方法签名，让调用链上的每个方法都要声明 throws。
 
+### 异常分层翻译
+
+```java
+public class RepositoryException extends RuntimeException {
+    public RepositoryException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
+public class ServiceException extends BusinessException {
+    public ServiceException(String message, Throwable cause) {
+        super(500, message);
+        initCause(cause);
+    }
+}
+```
+
+规则：
+- **DAO / Mapper 层异常不要直接抛到 Controller**
+- **Service 层对底层异常做语义化翻译**，让异常名和当前层职责一致
+- **包装异常时必须保留原始 `cause`**，不要丢失排查线索
+
 ### 错误码设计
 
 ```java
@@ -184,10 +206,10 @@ Service 层的职责是检查业务规则，不满足就抛异常。不要返回
 
 ```java
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserMapper userMapper;
+    @Resource
+    private UserMapper userMapper;
 
     @Override
     public UserVO getUserById(Long id) {
@@ -222,6 +244,7 @@ public class UserServiceImpl implements UserService {
 - **不要在 Service 层 catch BusinessException**——让它一路抛到全局处理器
 - **只 catch 你确实能处理的异常**，比如外部 API 调用失败需要降级
 - **catch 后必须做有意义的事**（日志 + 降级 / 日志 + 转换为业务异常），不要空 catch
+- **禁止吞异常**：空 catch、只打印日志不处理、丢失原始 cause 都属于违规
 
 ```java
 // ❌ 错误：空 catch，异常被吃掉了
@@ -238,11 +261,18 @@ try {
     throw e;
 }
 
+// ❌ 错误：只打日志不继续处理，事务不会回滚
+try {
+    orderMapper.insert(order);
+} catch (Exception e) {
+    log.error("保存订单失败, orderNo={}", order.getOrderNo(), e);
+}
+
 // ✅ 正确：catch 外部异常，转为业务异常 + 记录日志
 try {
     externalApiClient.sendNotification(userId);
 } catch (Exception e) {
-    log.error("发送通知失败, userId={}: {}", userId, e);
+    log.error("发送通知失败, userId={}", userId, e);
     // 通知失败不影响主流程，降级处理
 }
 
@@ -250,8 +280,27 @@ try {
 try {
     smsService.sendCode(phone);
 } catch (SmsException e) {
-    log.error("短信发送失败: {}", e);
+    log.error("短信发送失败, phone={}", phone, e);
     throw new BusinessException(ErrorCode.SMS_SEND_FAILED);
+}
+```
+
+### 底层异常翻译示例
+
+```java
+public User getUserOrThrow(Long userId) {
+    try {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new ResourceNotFoundException("用户", userId);
+        }
+        return user;
+    } catch (BusinessException ex) {
+        throw ex;
+    } catch (Exception ex) {
+        log.error("查询用户失败, userId={}", userId, ex);
+        throw new ServiceException("查询用户失败", ex);
+    }
 }
 ```
 
@@ -274,3 +323,5 @@ public void transferMoney(Long fromId, Long toId, BigDecimal amount) {
 - `@Transactional` 必须加 `rollbackFor = Exception.class`
 - 不要在事务方法内部 catch 异常又不重新抛出（会导致事务不回滚）
 - 事务方法必须是 public 的（Spring AOP 限制）
+- 禁止在 `finally` 中 `return`
+- 关闭型资源优先使用 `try-with-resources`
