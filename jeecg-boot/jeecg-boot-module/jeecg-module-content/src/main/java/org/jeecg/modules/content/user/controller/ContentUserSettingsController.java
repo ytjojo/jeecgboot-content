@@ -3,6 +3,7 @@ package org.jeecg.modules.content.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq;
 import org.jeecg.modules.content.user.service.IContentUserProfileService;
@@ -29,7 +30,7 @@ public class ContentUserSettingsController {
     @Operation(summary = "更新隐私设置")
     @PostMapping("/privacy/update")
     public Result<String> updatePrivacy(@RequestParam("userId") String userId,
-                                        @RequestBody ContentUserPrivacyUpdateReq req) {
+                                        @Valid @RequestBody ContentUserPrivacyUpdateReq req) {
         profileService.updatePrivacy(userId, req);
         return Result.OK("更新成功");
     }

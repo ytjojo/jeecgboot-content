@@ -18,20 +18,22 @@ import org.jeecg.common.util.oConvertUtils;
 @Schema(description = "内容社区密码重置请求")
 public class ContentPasswordResetReq {
 
-    @Schema(description = "用户ID")
+    @Size(max = 64, message = "用户ID长度不能超过64位")
+    @Schema(description = "用户ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String userId;
 
     @Pattern(regexp = "^1\\d{10}$", message = "手机号格式不正确")
-    @Schema(description = "手机号")
+    @Schema(description = "手机号", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String mobile;
 
     @Email(message = "邮箱格式不正确")
-    @Schema(description = "邮箱")
+    @Size(max = 100, message = "邮箱长度不能超过100位")
+    @Schema(description = "邮箱", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String email;
 
     @NotBlank(message = "新密码不能为空")
     @Size(min = 6, max = 32, message = "新密码长度需在6到32位之间")
-    @Schema(description = "新密码")
+    @Schema(description = "新密码", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private String newPassword;
 
     /**

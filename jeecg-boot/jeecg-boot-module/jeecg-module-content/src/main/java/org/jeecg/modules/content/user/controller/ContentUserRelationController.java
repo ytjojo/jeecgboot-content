@@ -3,6 +3,7 @@ package org.jeecg.modules.content.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.req.relation.ContentFollowReq;
 import org.jeecg.modules.content.user.service.IContentUserRelationService;
@@ -25,7 +26,7 @@ public class ContentUserRelationController {
      */
     @Operation(summary = "关注用户")
     @PostMapping("/follow")
-    public Result<String> follow(@RequestParam("userId") String userId, @RequestBody ContentFollowReq req) {
+    public Result<String> follow(@RequestParam("userId") String userId, @Valid @RequestBody ContentFollowReq req) {
         relationService.follow(userId, req.getTargetUserId(), req.getRelationGroupId());
         return Result.OK("关注成功");
     }

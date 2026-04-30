@@ -3,6 +3,7 @@ package org.jeecg.modules.content.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.req.support.ContentAppealCreateReq;
 import org.jeecg.modules.content.user.service.IContentUserSupportService;
@@ -27,7 +28,7 @@ public class ContentUserSupportController {
      */
     @Operation(summary = "创建处罚申诉")
     @PostMapping("/appeal/create")
-    public Result<String> createAppeal(@RequestBody ContentAppealCreateReq req) {
+    public Result<String> createAppeal(@Valid @RequestBody ContentAppealCreateReq req) {
         return Result.OK(supportService.createAppeal(req));
     }
 }

@@ -1,7 +1,33 @@
 ---
 name: springboot-skills
-description: Spring Boot 项目全套开发规范合集，涵盖 RESTful API 设计、编码规范、数据库设计、异常处理、日志监控、性能优化和安全开发。确保代码质量、一致性和可维护性。
+description: >
+  Alibaba Java Coding Guidelines (P3C / Alibaba Coding Guidelines / Huangshan Edition).
+  Covers RESTful API design, coding conventions, database design, exception handling,
+  logging and monitoring, performance optimization, and secure development.
+  Apply when writing, reviewing, or refactoring Java code, Spring Boot services, controllers,
+  MyBatis mappers, MySQL schema, or when the user mentions "P3C", "Alibaba Coding Guidelines", or "coding guidelines".
 ---
+
+
+
+# Alibaba Java Coding Guidelines Skill
+
+## Purpose
+
+Enforce Alibaba Java Coding Guidelines (P3C, 黄山版) when writing or reviewing Java code.
+These guidelines cover: naming, formatting, OOP, collections, concurrency, flow control,
+comments, exceptions, logging, MySQL schema/index/SQL/ORM, project structure, and security.
+
+## When to Apply
+
+Apply these guidelines **automatically** whenever you:
+- Write new Java classes, methods, or SQL
+- Review or refactor existing Java code
+- RESTful API design,
+- Design MySQL table schemas or indexes
+- Define POJOs (DO/DTO/VO/BO)
+- Configure thread pools, locks, or concurrent data structures
+- Write MyBatis XML mappings or ORM code
 
 # Spring Boot 项目开发规范合集
 

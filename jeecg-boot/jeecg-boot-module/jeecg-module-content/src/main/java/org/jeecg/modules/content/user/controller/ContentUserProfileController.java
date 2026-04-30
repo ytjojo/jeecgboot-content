@@ -3,6 +3,7 @@ package org.jeecg.modules.content.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.req.profile.ContentUserProfileUpdateReq;
 import org.jeecg.modules.content.user.service.IContentUserProfileService;
@@ -36,7 +37,7 @@ public class ContentUserProfileController {
     @Operation(summary = "更新用户资料")
     @PostMapping("/update")
     public Result<String> updateProfile(@RequestParam("userId") String userId,
-                                        @RequestBody ContentUserProfileUpdateReq req) {
+                                        @Valid @RequestBody ContentUserProfileUpdateReq req) {
         profileService.updateProfile(userId, req);
         return Result.OK("更新成功");
     }

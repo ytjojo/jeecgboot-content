@@ -3,6 +3,7 @@ package org.jeecg.modules.content.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.user.entity.ContentUserDeviceSession;
@@ -34,7 +35,7 @@ public class ContentUserGovernanceController {
      */
     @Operation(summary = "变更用户状态")
     @PostMapping("/status/change")
-    public Result<String> changeStatus(@RequestBody ContentUserStatusChangeReq req) {
+    public Result<String> changeStatus(@Valid @RequestBody ContentUserStatusChangeReq req) {
         governanceService.changeStatus(req);
         return Result.OK("状态变更成功");
     }

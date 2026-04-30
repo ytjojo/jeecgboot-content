@@ -1,5 +1,6 @@
 package org.jeecg.modules.content.user.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.jeecg.modules.content.user.entity.ContentUserRelation;
@@ -9,15 +10,31 @@ import org.jeecg.modules.content.user.entity.ContentUserRelation;
  */
 @Data
 @Accessors(chain = true)
+@Schema(description = "内容社区用户关系视图")
 public class ContentUserRelationVO {
 
+    @Schema(description = "关系拥有者用户ID", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private String ownerUserId;
+
+    @Schema(description = "目标用户ID", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private String targetUserId;
+
+    @Schema(description = "是否已关注", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private Boolean followed;
+
+    @Schema(description = "是否特别关注", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private Boolean specialFollow;
+
+    @Schema(description = "是否屏蔽", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private Boolean muted;
+
+    @Schema(description = "是否拉黑", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private Boolean blacklisted;
+
+    @Schema(description = "是否由拥有者阻断", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private Boolean blockedByOwner;
+
+    @Schema(description = "关系分组ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String relationGroupId;
 
     /**
