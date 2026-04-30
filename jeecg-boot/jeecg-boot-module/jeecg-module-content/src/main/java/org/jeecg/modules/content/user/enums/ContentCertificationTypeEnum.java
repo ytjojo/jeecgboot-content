@@ -15,6 +15,12 @@ public enum ContentCertificationTypeEnum {
     ENTERPRISE("ENTERPRISE", "企业认证"),
     ORGANIZATION("ORGANIZATION", "机构认证");
 
+    /**
+     * 枚举值的代码
+     */
     private final String code;
+    /**
+     * 枚举值的描述
+     */
     private final String description;
 }
