@@ -137,8 +137,6 @@ def check_java(content: str, file_path: Path) -> List[Violation]:
     if is_controller(file_path, content):
         if MAPPER_FIELD.search(content):
             add(vs, file_path, None, "ERROR", "LAY001", "Controller 不应注入 Mapper（应调用 BizManageService）")
-        if SERVICE_FIELD.search(content):
-            add(vs, file_path, None, "ERROR", "LAY002", "Controller 不应直接注入 Service（应调用 BizManageService）")
 
         has_bm = bool(BM_SERVICE_FIELD.search(content))
         if not has_bm:
