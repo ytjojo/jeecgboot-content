@@ -143,6 +143,44 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
         if (req.getCurrentStatus().equals(req.getTargetStatus())) {
             throw new JeecgBootException("状态未发生变化");
         }
+        if (!isAllowedTransition(req.getCurrentStatus(), req.getTargetStatus())) {
+            throw new JeecgBootException("状态流转不合法");
+        }
+    }
+
+    private boolean isAllowedTransition(String currentStatus, String targetStatus) {
+        if (ContentUserStatusEnum.CANCELLED.getCode().equals(currentStatus)) {
+            return false;
+        }
+        if (ContentUserStatusEnum.CANCEL_PENDING.getCode().equals(currentStatus)) {
+            return ContentUserStatusEnum.CANCELLED.getCode().equals(targetStatus)
+                || ContentUserStatusEnum.NORMAL.getCode().equals(targetStatus);
+        }
+        if (ContentUserStatusEnum.GUEST.getCode().equals(currentStatus)) {
+            return ContentUserStatusEnum.REGISTERED_INCOMPLETE.getCode().equals(targetStatus);
+        }
+        if (ContentUserStatusEnum.REGISTERED_INCOMPLETE.getCode().equals(currentStatus)) {
+            return ContentUserStatusEnum.NORMAL.getCode().equals(targetStatus)
+                || ContentUserStatusEnum.FROZEN.getCode().equals(targetStatus)
+                || ContentUserStatusEnum.BANNED.getCode().equals(targetStatus);
+        }
+        if (ContentUserStatusEnum.NORMAL.getCode().equals(currentStatus)) {
+            return ContentUserStatusEnum.MUTED.getCode().equals(targetStatus)
+                || ContentUserStatusEnum.RECOMMENDATION_LIMITED.getCode().equals(targetStatus)
+                || ContentUserStatusEnum.FROZEN.getCode().equals(targetStatus)
+                || ContentUserStatusEnum.BANNED.getCode().equals(targetStatus)
+                || ContentUserStatusEnum.CANCEL_PENDING.getCode().equals(targetStatus);
+        }
+        if (ContentUserStatusEnum.MUTED.getCode().equals(currentStatus)
+            || ContentUserStatusEnum.RECOMMENDATION_LIMITED.getCode().equals(currentStatus)
+            || ContentUserStatusEnum.FROZEN.getCode().equals(currentStatus)
+            || ContentUserStatusEnum.BANNED.getCode().equals(currentStatus)) {
+            return ContentUserStatusEnum.NORMAL.getCode().equals(targetStatus)
+                || ContentUserStatusEnum.BANNED.getCode().equals(targetStatus)
+                || ContentUserStatusEnum.FROZEN.getCode().equals(targetStatus)
+                || ContentUserStatusEnum.CANCEL_PENDING.getCode().equals(targetStatus);
+        }
+        return false;
     }
 
     private void updateProfileStatus(String userId, String targetStatus) {

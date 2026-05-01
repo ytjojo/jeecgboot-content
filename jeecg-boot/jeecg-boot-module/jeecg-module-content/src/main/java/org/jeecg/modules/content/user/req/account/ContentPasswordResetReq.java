@@ -36,6 +36,9 @@ public class ContentPasswordResetReq {
     @Schema(description = "新密码", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private String newPassword;
 
+    @Schema(description = "是否已完成二次校验", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private Boolean secondaryVerified;
+
     /**
      * 校验用户ID、手机号、邮箱至少提供一项用于定位账号。
      */

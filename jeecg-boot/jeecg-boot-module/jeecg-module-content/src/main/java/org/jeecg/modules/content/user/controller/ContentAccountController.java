@@ -2,8 +2,8 @@ package org.jeecg.modules.content.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.annotation.Resource;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.req.account.ContentPasswordResetReq;
 import org.jeecg.modules.content.user.req.account.ContentRegisterReq;
@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.*;
 public class ContentAccountController {
 
     @Resource
-    private IContentAccountService contentAccountService;
+    private  IContentAccountService contentAccountService;
+
+ 
 
     /**
      * Registers a community user by mobile and initializes the user profile.
@@ -52,5 +54,28 @@ public class ContentAccountController {
                                       @RequestParam(value = "reason", required = false) String reason) {
         contentAccountService.initiateCancel(userId, operatorUserId, reason);
         return Result.OK("注销流程已发起");
+    }
+
+    /**
+     * Completes the irreversible cancellation after the cooling period ends.
+     */
+    @Operation(summary = "完成账号注销")
+    @PostMapping("/cancel/complete")
+    public Result<String> completeCancel(@RequestParam("userId") String userId,
+                                         @RequestParam(value = "operatorUserId", required = false) String operatorUserId) {
+        contentAccountService.completeCancel(userId, operatorUserId);
+        return Result.OK("账号已完成注销");
+    }
+
+    /**
+     * Revokes the pending cancellation request during the cooling period.
+     */
+    @Operation(summary = "撤销账号注销")
+    @PostMapping("/cancel/revoke")
+    public Result<String> revokeCancel(@RequestParam("userId") String userId,
+                                       @RequestParam(value = "operatorUserId", required = false) String operatorUserId,
+                                       @RequestParam(value = "reason", required = false) String reason) {
+        contentAccountService.revokeCancel(userId, operatorUserId, reason);
+        return Result.OK("注销申请已撤销");
     }
 }

@@ -20,6 +20,10 @@
             <groupId>org.jeecgframework.boot3</groupId>
             <artifactId>jeecg-system-biz</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
         
         <!-- flexmark-java for Markdown parsing -->
         <dependency>
@@ -67,4 +71,31 @@
         
         <!-- JUnit 5 for testing (already included in spring-boot-starter-test) -->
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 显式声明 Lombok 注解处理，避免模块独立编译时方法未生成 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <!-- 内容模块需要执行聚焦测试，覆盖父级跳过测试配置 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>false</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

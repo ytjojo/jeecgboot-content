@@ -1,5 +1,6 @@
 package org.jeecg.modules.content.user.service.impl;
 
+import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.common.util.UUIDGenerator;
 import org.jeecg.modules.content.user.entity.ContentUserSubscription;
 import org.jeecg.modules.content.user.mapper.ContentUserSubscriptionMapper;
@@ -26,6 +27,16 @@ public class ContentUserSubscriptionServiceImpl implements IContentUserSubscript
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String subscribe(String userId, ContentSubscriptionReq req) {
+        ContentUserSubscription existingSubscription =
+            subscriptionMapper.selectByUniqueKey(userId, req.getSourceType(), req.getSourceId());
+        if (existingSubscription != null) {
+            existingSubscription.setSourceName(req.getSourceName());
+            existingSubscription.setNotificationChannels(req.getNotificationChannels());
+            existingSubscription.setNotificationFrequency(req.getNotificationFrequency());
+            existingSubscription.setPaused(Boolean.FALSE);
+            subscriptionMapper.updateById(existingSubscription);
+            return existingSubscription.getId();
+        }
         ContentUserSubscription subscription = new ContentUserSubscription();
         subscription.setId(UUIDGenerator.generate());
         subscription.setUserId(userId);
@@ -40,11 +51,34 @@ public class ContentUserSubscriptionServiceImpl implements IContentUserSubscript
     }
 
     /**
+     * Pauses the specified subscription record.
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void pauseSubscription(String userId, String subscriptionId) {
+        ContentUserSubscription subscription = getOwnedSubscription(userId, subscriptionId);
+        subscription.setPaused(Boolean.TRUE);
+        subscriptionMapper.updateById(subscription);
+    }
+
+    /**
+     * Resumes the specified subscription record.
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void resumeSubscription(String userId, String subscriptionId) {
+        ContentUserSubscription subscription = getOwnedSubscription(userId, subscriptionId);
+        subscription.setPaused(Boolean.FALSE);
+        subscriptionMapper.updateById(subscription);
+    }
+
+    /**
      * Cancels the specified subscription record.
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void cancelSubscription(String userId, String subscriptionId) {
+        ContentUserSubscription subscription = getOwnedSubscription(userId, subscriptionId);
         subscriptionMapper.deleteById(subscriptionId);
     }
 
@@ -54,5 +88,13 @@ public class ContentUserSubscriptionServiceImpl implements IContentUserSubscript
     @Override
     public List<ContentUserSubscription> listSubscriptions(String userId) {
         return subscriptionMapper.selectByUserId(userId);
+    }
+
+    private ContentUserSubscription getOwnedSubscription(String userId, String subscriptionId) {
+        ContentUserSubscription subscription = subscriptionMapper.selectById(subscriptionId);
+        if (subscription == null || !userId.equals(subscription.getUserId())) {
+            throw new JeecgBootException("订阅不存在或无权取消");
+        }
+        return subscription;
     }
 }
