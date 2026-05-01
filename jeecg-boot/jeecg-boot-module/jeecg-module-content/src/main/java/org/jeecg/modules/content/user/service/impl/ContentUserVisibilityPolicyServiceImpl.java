@@ -2,6 +2,7 @@ package org.jeecg.modules.content.user.service.impl;
 
 import org.jeecg.modules.content.user.entity.ContentUserRelation;
 import org.jeecg.modules.content.user.enums.ContentUserVisibilityEnum;
+import org.jeecg.modules.content.user.mapper.ContentUserPrivacySettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationMapper;
 import org.jeecg.modules.content.user.service.IContentUserVisibilityPolicyService;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,9 @@ public class ContentUserVisibilityPolicyServiceImpl implements IContentUserVisib
 
     @Resource
     private ContentUserRelationMapper relationMapper;
+
+    @Resource
+    private ContentUserPrivacySettingMapper privacySettingMapper;
 
     /**
      * Checks whether a profile field is visible to the current viewer.
@@ -58,7 +62,11 @@ public class ContentUserVisibilityPolicyServiceImpl implements IContentUserVisib
             return false;
         }
         ContentUserRelation viewerToOwner = relationMapper.selectByPair(viewerUserId, ownerUserId);
-        return viewerToOwner == null || !Boolean.TRUE.equals(viewerToOwner.getMuted());
+        if (viewerToOwner != null
+            && (Boolean.TRUE.equals(viewerToOwner.getBlockedByOwner()) || Boolean.TRUE.equals(viewerToOwner.getBlacklisted()))) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -66,6 +74,15 @@ public class ContentUserVisibilityPolicyServiceImpl implements IContentUserVisib
      */
     @Override
     public boolean canSearchUser(String ownerUserId, String viewerUserId) {
+        if (Objects.equals(ownerUserId, viewerUserId)) {
+            return true;
+        }
+        if (privacySettingMapper != null) {
+            var privacySetting = privacySettingMapper.selectByUserId(ownerUserId);
+            if (privacySetting != null && Boolean.FALSE.equals(privacySetting.getAllowUserSearch())) {
+                return false;
+            }
+        }
         ContentUserRelation ownerToViewer = relationMapper.selectByPair(ownerUserId, viewerUserId);
         return ownerToViewer == null || !Boolean.TRUE.equals(ownerToViewer.getBlockedByOwner());
     }

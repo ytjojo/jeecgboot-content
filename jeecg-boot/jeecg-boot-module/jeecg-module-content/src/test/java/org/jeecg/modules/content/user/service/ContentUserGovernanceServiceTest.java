@@ -13,9 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class ContentUserGovernanceServiceTest {
@@ -35,6 +37,21 @@ class ContentUserGovernanceServiceTest {
 
         verify(statusRecordMapper).insert(any(ContentUserStatusRecord.class));
         verify(auditLogMapper).insert(argThat((ContentUserAuditLog it) -> "USER_STATUS_CHANGE".equals(it.getEventType())));
+    }
+
+    @Test
+    void shouldRejectIllegalStatusTransitionFromCancelledToNormal() {
+        ContentUserStatusChangeReq req = new ContentUserStatusChangeReq()
+            .setUserId("u1")
+            .setCurrentStatus(ContentUserStatusEnum.CANCELLED.getCode())
+            .setTargetStatus(ContentUserStatusEnum.NORMAL.getCode())
+            .setOperatorUserId("admin")
+            .setReason("非法恢复");
+
+        assertThatThrownBy(() -> governanceService.changeStatus(req))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("状态流转");
+        verifyNoInteractions(statusRecordMapper, auditLogMapper);
     }
 
     private ContentUserStatusChangeReq changeReq(String userId, String targetStatus) {

@@ -3,15 +3,16 @@ package org.jeecg.modules.content.user.controller;
 import org.jeecg.modules.content.user.service.IContentUserGovernanceService;
 import org.jeecg.modules.content.user.service.IContentUserProfileService;
 import org.jeecg.modules.content.user.service.IContentUserRelationService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,31 +20,37 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(
-    controllers = {
-        ContentUserGovernanceController.class,
-        ContentUserProfileController.class,
-        ContentUserRelationController.class
-    },
-    excludeAutoConfiguration = {
-        SecurityAutoConfiguration.class,
-        SecurityFilterAutoConfiguration.class
-    }
-)
+@ExtendWith(MockitoExtension.class)
 class ContentUserControllerWebMvcTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @Mock
     private IContentUserGovernanceService governanceService;
 
-    @MockitoBean
+    @Mock
     private IContentUserProfileService profileService;
 
-    @MockitoBean
+    @Mock
     private IContentUserRelationService relationService;
+
+    @InjectMocks
+    private ContentUserGovernanceController governanceController;
+
+    @InjectMocks
+    private ContentUserProfileController profileController;
+
+    @InjectMocks
+    private ContentUserRelationController relationController;
+
+    @BeforeEach
+    void setUp() {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.afterPropertiesSet();
+        mockMvc = MockMvcBuilders.standaloneSetup(governanceController, profileController, relationController)
+            .setValidator(validator)
+            .build();
+    }
 
     @Test
     void shouldRejectMutedUserCommentPermission() throws Exception {
@@ -64,5 +71,26 @@ class ContentUserControllerWebMvcTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"targetUserId\":\"\"}"))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldCancelBlacklistSuccessfully() throws Exception {
+        mockMvc.perform(post("/content/user/relation/blacklist/cancel")
+                .param("userId", "u1")
+                .param("targetUserId", "u2"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("解除拉黑成功"));
+    }
+
+    @Test
+    void shouldEnableSpecialFollowSuccessfully() throws Exception {
+        mockMvc.perform(post("/content/user/relation/special-follow")
+                .param("userId", "u1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"targetUserId\":\"u2\",\"relationGroupId\":\"g1\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("特别关注成功"));
     }
 }

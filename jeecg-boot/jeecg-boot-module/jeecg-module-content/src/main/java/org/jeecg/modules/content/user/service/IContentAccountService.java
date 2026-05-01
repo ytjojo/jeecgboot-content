@@ -13,4 +13,8 @@ public interface IContentAccountService {
     void resetPassword(ContentPasswordResetReq req);
 
     void initiateCancel(String userId, String operatorUserId, String reason);
+
+    void completeCancel(String userId, String operatorUserId);
+
+    void revokeCancel(String userId, String operatorUserId, String reason);
 }

@@ -51,7 +51,7 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
             .setEmail(req.getEmail())
             .setSalt(salt)
             .setPassword(PasswordUtil.encrypt(username, req.getPassword(), salt))
-            .setAvatar(req.getMobile())
+            .setAvatar(null)
             .setStatus(1)
             .setDelFlag(CommonConstant.DEL_FLAG_0)
             .setCreateTime(now)

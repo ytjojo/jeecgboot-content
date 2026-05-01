@@ -6,48 +6,48 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.jeecg.common.system.base.entity.JeecgEntity;
-import org.jeecg.modules.content.user.req.support.ContentAppealCreateReq;
+import org.jeecg.modules.content.user.req.support.ContentReportCreateReq;
 
 import java.util.Date;
 
 /**
- * Entity for content user appeal.
+ * Entity for content user report.
  */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
-@TableName("content_user_appeal")
-public class ContentUserAppeal extends JeecgEntity {
+@TableName("content_user_report")
+public class ContentUserReport extends JeecgEntity {
 
-    @Schema(description = "申诉用户ID")
+    @Schema(description = "举报用户ID")
     private String userId;
 
-    @Schema(description = "申诉类型")
-    private String appealType;
-
-    @Schema(description = "申诉目标ID")
-    private String targetId;
-
-    @Schema(description = "申诉目标类型")
+    @Schema(description = "举报目标类型")
     private String targetType;
 
-    @Schema(description = "申诉状态")
-    private String status;
+    @Schema(description = "举报目标ID")
+    private String targetId;
 
-    @Schema(description = "申诉原因")
+    @Schema(description = "举报类型")
+    private String reportType;
+
+    @Schema(description = "举报原因")
     private String reason;
 
-    @Schema(description = "申诉证据JSON")
+    @Schema(description = "举报证据JSON")
     private String evidenceJson;
 
-    @Schema(description = "处理进度说明")
-    private String progressNote;
+    @Schema(description = "举报状态")
+    private String status;
 
     @Schema(description = "处理结果状态")
     private String resultStatus;
 
     @Schema(description = "处理结果说明")
     private String resultNote;
+
+    @Schema(description = "处理进度说明")
+    private String progressNote;
 
     @Schema(description = "处理人")
     private String resolvedBy;
@@ -56,14 +56,14 @@ public class ContentUserAppeal extends JeecgEntity {
     private Date resolvedAt;
 
     /**
-     * Builds the current object from the given request or entity.
+     * Builds the current object from report create request.
      */
-    public static ContentUserAppeal from(ContentAppealCreateReq req) {
-        return new ContentUserAppeal()
+    public static ContentUserReport from(ContentReportCreateReq req) {
+        return new ContentUserReport()
             .setUserId(req.getUserId())
-            .setAppealType(req.getAppealType())
-            .setTargetId(req.getTargetId())
             .setTargetType(req.getTargetType())
+            .setTargetId(req.getTargetId())
+            .setReportType(req.getReportType())
             .setReason(req.getReason())
             .setEvidenceJson(req.getEvidenceJson())
             .setStatus("PENDING");

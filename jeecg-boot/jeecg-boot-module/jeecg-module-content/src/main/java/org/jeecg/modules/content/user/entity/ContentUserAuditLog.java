@@ -7,6 +7,9 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.jeecg.common.system.base.entity.JeecgEntity;
 import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
+import org.jeecg.modules.content.user.req.support.ContentAppealHandleReq;
+import org.jeecg.modules.content.user.req.support.ContentReportCreateReq;
+import org.jeecg.modules.content.user.req.support.ContentReportHandleReq;
 
 import java.util.Date;
 
@@ -81,6 +84,47 @@ public class ContentUserAuditLog extends JeecgEntity {
             .setEventType("USER_APPEAL_CREATED")
             .setEventContent(appeal.getAppealType() + ":" + appeal.getTargetType())
             .setExtraDataJson(appeal.getTargetId())
+            .setEventTime(new Date());
+    }
+
+    /**
+     * Executes the reportCreated operation.
+     */
+    public static ContentUserAuditLog reportCreated(String reportId, ContentReportCreateReq req) {
+        return new ContentUserAuditLog()
+            .setUserId(req.getUserId())
+            .setEventType("USER_REPORT_CREATED")
+            .setEventContent(req.getReportType() + ":" + req.getTargetType())
+            .setExtraDataJson("{\"reportId\":\"" + reportId + "\",\"targetId\":\"" + req.getTargetId()
+                + "\",\"reason\":\"" + req.getReason() + "\"}")
+            .setEventTime(new Date());
+    }
+
+    /**
+     * Executes the appealHandled operation.
+     */
+    public static ContentUserAuditLog appealHandled(ContentUserAppeal appeal, ContentAppealHandleReq req) {
+        return new ContentUserAuditLog()
+            .setUserId(appeal.getUserId())
+            .setOperatorUserId(req.getOperatorUserId())
+            .setEventType("USER_APPEAL_HANDLED")
+            .setEventContent(appeal.getAppealType() + ":" + req.getResultStatus())
+            .setExtraDataJson("{\"appealId\":\"" + appeal.getId() + "\",\"resultStatus\":\""
+                + req.getResultStatus() + "\",\"resultNote\":\"" + req.getResultNote() + "\"}")
+            .setEventTime(new Date());
+    }
+
+    /**
+     * Executes the reportHandled operation.
+     */
+    public static ContentUserAuditLog reportHandled(ContentUserReport report, ContentReportHandleReq req) {
+        return new ContentUserAuditLog()
+            .setUserId(report.getUserId())
+            .setOperatorUserId(req.getOperatorUserId())
+            .setEventType("USER_REPORT_HANDLED")
+            .setEventContent(report.getReportType() + ":" + req.getResultStatus())
+            .setExtraDataJson("{\"reportId\":\"" + report.getId() + "\",\"resultStatus\":\""
+                + req.getResultStatus() + "\",\"resultNote\":\"" + req.getResultNote() + "\"}")
             .setEventTime(new Date());
     }
 }

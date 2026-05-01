@@ -222,6 +222,9 @@ CREATE TABLE IF NOT EXISTS `content_user_appeal` (
   `reason` varchar(500) DEFAULT NULL COMMENT '申诉原因',
   `evidence_json` text COMMENT '证据JSON',
   `progress_note` varchar(500) DEFAULT NULL COMMENT '处理进度说明',
+  `result_status` varchar(32) DEFAULT NULL COMMENT '处理结果状态',
+  `result_note` varchar(500) DEFAULT NULL COMMENT '处理结果说明',
+  `resolved_by` varchar(32) DEFAULT NULL COMMENT '处理人',
   `resolved_at` datetime DEFAULT NULL COMMENT '处理完成时间',
   `create_by` varchar(32) DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -230,6 +233,28 @@ CREATE TABLE IF NOT EXISTS `content_user_appeal` (
   PRIMARY KEY (`id`),
   KEY `idx_content_user_appeal_user` (`user_id`,`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='内容社区用户申诉';
+
+CREATE TABLE IF NOT EXISTS `content_user_report` (
+  `id` varchar(32) NOT NULL COMMENT '主键ID',
+  `user_id` varchar(32) NOT NULL COMMENT '举报用户ID',
+  `target_type` varchar(32) NOT NULL COMMENT '举报目标类型',
+  `target_id` varchar(64) NOT NULL COMMENT '举报目标ID',
+  `report_type` varchar(32) NOT NULL COMMENT '举报类型',
+  `reason` varchar(500) DEFAULT NULL COMMENT '举报原因',
+  `evidence_json` text COMMENT '举报证据JSON',
+  `status` varchar(32) NOT NULL DEFAULT 'PENDING' COMMENT '举报状态',
+  `result_status` varchar(32) DEFAULT NULL COMMENT '处理结果状态',
+  `result_note` varchar(500) DEFAULT NULL COMMENT '处理结果说明',
+  `progress_note` varchar(500) DEFAULT NULL COMMENT '处理进度说明',
+  `resolved_by` varchar(32) DEFAULT NULL COMMENT '处理人',
+  `resolved_at` datetime DEFAULT NULL COMMENT '处理完成时间',
+  `create_by` varchar(32) DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(32) DEFAULT NULL COMMENT '更新人',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_content_user_report_user` (`user_id`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='内容社区用户举报';
 
 CREATE TABLE IF NOT EXISTS `content_user_audit_log` (
   `id` varchar(32) NOT NULL COMMENT '主键ID',
