@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 import java.util.List;
 
 /**
- * View object for help center metadata.
+ * 内容社区帮助中心视图。
  */
 @Data
 @Accessors(chain = true)
@@ -15,11 +15,11 @@ import java.util.List;
 public class ContentHelpCenterVO {
 
     @Schema(description = "常见问题分类", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
-    private List<String> faqCategories;
+    private List<ContentHelpCenterEntryVO> faqCategories;
 
     @Schema(description = "使用指南入口", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
-    private List<String> guideEntries;
+    private List<ContentHelpCenterEntryVO> guideEntries;
 
     @Schema(description = "功能更新日志入口", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
-    private List<String> releaseNotes;
+    private List<ContentHelpCenterEntryVO> releaseNotes;
 }

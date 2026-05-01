@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.user.entity.ContentUserAppeal;
 import org.jeecg.modules.content.user.entity.ContentUserAuditLog;
+import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserReport;
 import org.jeecg.modules.content.user.mapper.ContentUserAppealMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserAuditLogMapper;
+import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserReportMapper;
 import org.jeecg.modules.content.user.req.support.ContentAppealCreateReq;
 import org.jeecg.modules.content.user.req.support.ContentAppealHandleReq;
@@ -16,10 +18,10 @@ import org.jeecg.modules.content.user.req.support.ContentUserReportAdminQueryReq
 import org.jeecg.modules.content.user.service.impl.ContentUserSupportServiceImpl;
 import org.jeecg.modules.content.user.vo.ContentCustomerServiceVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterVO;
+import org.jeecg.modules.content.user.vo.ContentHelpCenterEntryVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealProgressVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminDetailVO;
-import org.jeecg.modules.content.user.vo.ContentUserReportAdminListItemVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportProgressVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +50,9 @@ class ContentUserSupportServiceTest {
 
     @Mock
     private ContentUserReportMapper reportMapper;
+
+    @Mock
+    private ContentUserProfileMapper profileMapper;
 
     @InjectMocks
     private ContentUserSupportServiceImpl supportService;
@@ -446,19 +451,114 @@ class ContentUserSupportServiceTest {
     }
 
     @Test
-    void shouldReturnHelpCenterMetadata() {
-        ContentHelpCenterVO result = supportService.getHelpCenter();
+    void shouldReturnSmartFirstHelpCenterForDefaultUser() {
+        when(profileMapper.selectByUserId("u1")).thenReturn(null);
 
-        assertThat(result.getFaqCategories()).contains("账号安全", "举报申诉", "隐私设置");
-        assertThat(result.getGuideEntries()).contains("新手指南", "社区规范", "功能使用说明");
-        assertThat(result.getReleaseNotes()).contains("产品更新", "功能上新", "规则公告");
+        ContentHelpCenterVO result = supportService.getHelpCenter("u1");
+
+        assertThat(findEntry(result.getFaqCategories(), "ACCOUNT_SECURITY").getRecommendedRouteType())
+            .isEqualTo("SMART_FIRST");
+        assertThat(findEntry(result.getFaqCategories(), "REPORT_APPEAL").getRecommendedRouteType())
+            .isEqualTo("SMART_FIRST");
+        assertThat(findEntry(result.getGuideEntries(), "BEGINNER_GUIDE").getRecommendedRouteType())
+            .isEqualTo("SMART_FIRST");
+        assertThat(findEntry(result.getGuideEntries(), "COMMUNITY_RULES").getRecommendedRouteType())
+            .isEqualTo("SMART_FIRST");
+    }
+
+    @Test
+    void shouldReturnManualPriorityHelpCenterForHighLevelUser() {
+        when(profileMapper.selectByUserId("u100"))
+            .thenReturn(new ContentUserProfile()
+                .setUserId("u100")
+                .setLevel(5)
+                .setGrowthValue(420)
+                .setStatus("NORMAL"));
+
+        ContentHelpCenterVO result = supportService.getHelpCenter("u100");
+
+        assertThat(findEntry(result.getFaqCategories(), "ACCOUNT_SECURITY").getRecommendedRouteType())
+            .isEqualTo("MANUAL_PRIORITY");
+        assertThat(findEntry(result.getFaqCategories(), "REPORT_APPEAL").getRecommendedRouteType())
+            .isEqualTo("MANUAL_PRIORITY");
+        assertThat(findEntry(result.getFaqCategories(), "PRIVACY_SETTINGS").getRecommendedRouteType())
+            .isEqualTo("SMART_FIRST");
+    }
+
+    @Test
+    void shouldReturnAppealPriorityHelpCenterForGovernanceUser() {
+        when(profileMapper.selectByUserId("u200"))
+            .thenReturn(new ContentUserProfile()
+                .setUserId("u200")
+                .setLevel(6)
+                .setGrowthValue(600)
+                .setStatus("FROZEN"));
+
+        ContentHelpCenterVO result = supportService.getHelpCenter("u200");
+
+        assertThat(findEntry(result.getFaqCategories(), "ACCOUNT_SECURITY").getRecommendedRouteType())
+            .isEqualTo("APPEAL_PRIORITY");
+        assertThat(findEntry(result.getFaqCategories(), "REPORT_APPEAL").getRecommendedRouteType())
+            .isEqualTo("APPEAL_PRIORITY");
+        assertThat(findEntry(result.getGuideEntries(), "COMMUNITY_RULES").getRecommendedRouteType())
+            .isEqualTo("APPEAL_PRIORITY");
+        assertThat(findEntry(result.getGuideEntries(), "FEATURE_GUIDE").getRecommendedRouteType())
+            .isEqualTo("SMART_FIRST");
+    }
+
+    @Test
+    void shouldKeepReleaseNotesWithoutRecommendedRouteFields() {
+        when(profileMapper.selectByUserId("u1")).thenReturn(null);
+
+        ContentHelpCenterVO result = supportService.getHelpCenter("u1");
+
+        ContentHelpCenterEntryVO releaseNote = findEntry(result.getReleaseNotes(), "PRODUCT_UPDATE");
+        assertThat(releaseNote.getRecommendedRouteType()).isNull();
+        assertThat(releaseNote.getRecommendedRouteTitle()).isNull();
+        assertThat(releaseNote.getManualSupported()).isNull();
     }
 
     @Test
     void shouldReturnDefaultCustomerServiceEntry() {
+        when(profileMapper.selectByUserId("u1")).thenReturn(null);
+
         ContentCustomerServiceVO result = supportService.getCustomerServiceEntry("u1");
 
         assertThat(result.getRouteType()).isEqualTo("SMART_FIRST");
+        assertThat(result.getManualSupported()).isTrue();
+    }
+
+    @Test
+    void shouldReturnManualPriorityCustomerServiceEntryWhenUserIsHighLevel() {
+        when(profileMapper.selectByUserId("u100"))
+            .thenReturn(new ContentUserProfile()
+                .setUserId("u100")
+                .setLevel(5)
+                .setGrowthValue(420)
+                .setStatus("NORMAL"));
+
+        ContentCustomerServiceVO result = supportService.getCustomerServiceEntry("u100");
+
+        assertThat(result.getRouteType()).isEqualTo("MANUAL_PRIORITY");
+        assertThat(result.getTitle()).isEqualTo("专属客服");
+        assertThat(result.getDescription()).isEqualTo("高等级用户优先进入人工客服通道");
+        assertThat(result.getManualSupported()).isTrue();
+    }
+
+    @Test
+    void shouldReturnGovernancePriorityCustomerServiceEntryWhenUserStatusIsRestricted() {
+        when(profileMapper.selectByUserId("u200"))
+            .thenReturn(new ContentUserProfile()
+                .setUserId("u200")
+                .setLevel(6)
+                .setGrowthValue(600)
+                .setStatus("FROZEN"));
+
+        ContentCustomerServiceVO result = supportService.getCustomerServiceEntry("u200");
+
+        assertThat(result.getRouteType()).isEqualTo("APPEAL_PRIORITY");
+        assertThat(result.getTitle()).isEqualTo("治理申诉专线");
+        assertThat(result.getDescription()).isEqualTo("当前账号状态异常，优先进入申诉与人工复核通道");
         assertThat(result.getManualSupported()).isTrue();
     }
 
@@ -500,5 +600,12 @@ class ContentUserSupportServiceTest {
             .setResultStatus("CONFIRMED")
             .setResultNote("违规成立")
             .setProgressNote("已处理完成");
+    }
+
+    private ContentHelpCenterEntryVO findEntry(List<ContentHelpCenterEntryVO> entries, String code) {
+        return entries.stream()
+            .filter(entry -> code.equals(entry.getCode()))
+            .findFirst()
+            .orElseThrow();
     }
 }

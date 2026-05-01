@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * ReST endpoints for content user support.
+ * 内容社区用户支持接口。
  */
 @Tag(name = "内容社区用户支持")
 @RestController
@@ -33,7 +33,7 @@ public class ContentUserSupportController {
     private IContentUserSupportService supportService;
 
     /**
-     * Creates a user appeal record and returns its identifier.
+     * 创建用户申诉并返回申诉 ID。
      */
     @Operation(summary = "创建处罚申诉")
     @PostMapping("/appeal/create")
@@ -42,7 +42,7 @@ public class ContentUserSupportController {
     }
 
     /**
-     * Creates a report submission and returns its identifier.
+     * 创建用户举报并返回举报 ID。
      */
     @Operation(summary = "创建举报")
     @PostMapping("/report/create")
@@ -51,7 +51,7 @@ public class ContentUserSupportController {
     }
 
     /**
-     * Queries the current progress of the specified appeal.
+     * 查询指定申诉的处理进度。
      */
     @Operation(summary = "查询申诉进度")
     @GetMapping("/appeal/progress")
@@ -61,7 +61,7 @@ public class ContentUserSupportController {
     }
 
     /**
-     * Lists all appeals of the specified user.
+     * 查询指定用户的申诉列表。
      */
     @Operation(summary = "查询申诉列表")
     @GetMapping("/appeal/list")
@@ -70,7 +70,7 @@ public class ContentUserSupportController {
     }
 
     /**
-     * Queries the current progress of the specified report.
+     * 查询指定举报的处理进度。
      */
     @Operation(summary = "查询举报进度")
     @GetMapping("/report/progress")
@@ -80,16 +80,16 @@ public class ContentUserSupportController {
     }
 
     /**
-     * Returns help-center metadata for self-service support.
+     * 按用户上下文返回帮助中心分类与客服推荐信息。
      */
     @Operation(summary = "查询帮助中心")
     @GetMapping("/help-center")
-    public Result<ContentHelpCenterVO> getHelpCenter() {
-        return Result.OK(supportService.getHelpCenter());
+    public Result<ContentHelpCenterVO> getHelpCenter(@RequestParam("userId") String userId) {
+        return Result.OK(supportService.getHelpCenter(userId));
     }
 
     /**
-     * Returns the customer-service entry for the specified user.
+     * 查询指定用户的客服入口。
      */
     @Operation(summary = "查询客服入口")
     @GetMapping("/customer-service")

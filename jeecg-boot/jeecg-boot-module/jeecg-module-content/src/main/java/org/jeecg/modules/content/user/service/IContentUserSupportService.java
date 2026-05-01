@@ -28,7 +28,7 @@ public interface IContentUserSupportService {
 
     String createReport(ContentReportCreateReq req);
 
-    ContentHelpCenterVO getHelpCenter();
+    ContentHelpCenterVO getHelpCenter(String userId);
 
     ContentCustomerServiceVO getCustomerServiceEntry(String userId);
 
