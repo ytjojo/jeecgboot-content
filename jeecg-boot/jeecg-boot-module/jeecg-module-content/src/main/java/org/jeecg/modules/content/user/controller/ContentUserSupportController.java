@@ -10,6 +10,7 @@ import org.jeecg.modules.content.user.req.support.ContentReportCreateReq;
 import org.jeecg.modules.content.user.service.IContentUserSupportService;
 import org.jeecg.modules.content.user.vo.ContentCustomerServiceVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterVO;
+import org.jeecg.modules.content.user.vo.ContentUserAppealPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealProgressVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportProgressVO;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * 内容社区用户支持接口。
@@ -65,8 +64,10 @@ public class ContentUserSupportController {
      */
     @Operation(summary = "查询申诉列表")
     @GetMapping("/appeal/list")
-    public Result<List<ContentUserAppealProgressVO>> listAppeals(@RequestParam("userId") String userId) {
-        return Result.OK(supportService.listAppeals(userId));
+    public Result<ContentUserAppealPageVO> listAppeals(@RequestParam("userId") String userId,
+                                                       @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
+                                                       @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
+        return Result.OK(supportService.listAppeals(userId, pageNo, pageSize));
     }
 
     /**
@@ -84,7 +85,8 @@ public class ContentUserSupportController {
      */
     @Operation(summary = "查询帮助中心")
     @GetMapping("/help-center")
-    public Result<ContentHelpCenterVO> getHelpCenter(@RequestParam("userId") String userId) {
+    public Result<ContentHelpCenterVO> getHelpCenter(
+            @RequestParam(value = "userId", required = false) String userId) {
         return Result.OK(supportService.getHelpCenter(userId));
     }
 

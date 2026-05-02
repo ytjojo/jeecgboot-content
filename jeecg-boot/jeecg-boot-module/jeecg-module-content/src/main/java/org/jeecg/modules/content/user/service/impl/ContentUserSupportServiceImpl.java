@@ -10,20 +10,27 @@ import org.jeecg.modules.content.user.entity.ContentUserAppeal;
 import org.jeecg.modules.content.user.entity.ContentUserAuditLog;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserReport;
+import org.jeecg.modules.content.user.entity.ContentUserStatusRecord;
 import org.jeecg.modules.content.user.enums.ContentUserStatusEnum;
 import org.jeecg.modules.content.user.mapper.ContentUserAppealMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserAuditLogMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserReportMapper;
+import org.jeecg.modules.content.user.mapper.ContentUserStatusRecordMapper;
 import org.jeecg.modules.content.user.req.support.ContentAppealCreateReq;
 import org.jeecg.modules.content.user.req.support.ContentAppealHandleReq;
 import org.jeecg.modules.content.user.req.support.ContentReportCreateReq;
 import org.jeecg.modules.content.user.req.support.ContentReportHandleReq;
 import org.jeecg.modules.content.user.req.support.ContentUserReportAdminQueryReq;
+import org.jeecg.modules.content.user.service.IContentUserGrowthPenaltyRecordService;
+import org.jeecg.modules.content.user.service.IContentUserGrowthPenaltyRecoveryService;
+import org.jeecg.modules.content.user.service.IContentUserLevelBenefitService;
+import org.jeecg.modules.content.user.service.IContentUserLevelBenefitRecoveryService;
 import org.jeecg.modules.content.user.service.IContentUserSupportService;
 import org.jeecg.modules.content.user.vo.ContentCustomerServiceVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterEntryVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterVO;
+import org.jeecg.modules.content.user.vo.ContentUserAppealPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealProgressVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminDetailVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminListItemVO;
@@ -42,9 +49,12 @@ import java.util.List;
 @Service
 public class ContentUserSupportServiceImpl implements IContentUserSupportService {
 
+    private static final List<String> PUNISHING_REPORT_RESULTS = List.of("CONFIRMED");
+    private static final String APPEAL_TARGET_TYPE_GOVERNANCE_STATUS = "GOVERNANCE_STATUS";
     private static final String ROUTE_SMART_FIRST = "SMART_FIRST";
     private static final String ROUTE_MANUAL_PRIORITY = "MANUAL_PRIORITY";
     private static final String ROUTE_APPEAL_PRIORITY = "APPEAL_PRIORITY";
+    private static final String BENEFIT_PRIORITY_CUSTOMER_SERVICE = "PRIORITY_CUSTOMER_SERVICE";
 
     private static final String ROUTE_TITLE_SMART_FIRST = "在线客服";
     private static final String ROUTE_TITLE_MANUAL_PRIORITY = "专属客服";
@@ -72,6 +82,20 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
     @Resource
     private ContentUserProfileMapper profileMapper;
 
+    @Resource
+    private ContentUserStatusRecordMapper statusRecordMapper;
+
+    @Resource
+    private IContentUserGrowthPenaltyRecoveryService growthPenaltyRecoveryService;
+
+    @Resource
+    private IContentUserLevelBenefitRecoveryService levelBenefitRecoveryService;
+
+    @Resource
+    private IContentUserLevelBenefitService levelBenefitService;
+
+    @Resource
+    private IContentUserGrowthPenaltyRecordService growthPenaltyRecordService;
     /**
      * Creates a user appeal record and returns its identifier.
      */
@@ -102,10 +126,18 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
      * Lists all appeals for the specified user.
      */
     @Override
-    public List<ContentUserAppealProgressVO> listAppeals(String userId) {
-        return appealMapper.selectByUserId(userId).stream()
-            .map(this::toAppealProgress)
-            .toList();
+    public ContentUserAppealPageVO listAppeals(String userId, Long pageNo, Long pageSize) {
+        long currentPage = pageNo == null || pageNo < 1L ? 1L : pageNo;
+        long currentSize = pageSize == null || pageSize < 1L ? 10L : pageSize;
+        LambdaQueryWrapper<ContentUserAppeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ContentUserAppeal::getUserId, userId)
+            .orderByDesc(ContentUserAppeal::getCreateTime);
+        IPage<ContentUserAppeal> page = appealMapper.selectPage(new Page<>(currentPage, currentSize), queryWrapper);
+        return new ContentUserAppealPageVO()
+            .setRecords(page.getRecords().stream().map(this::toAppealProgress).toList())
+            .setTotal(page.getTotal())
+            .setPageNo(page.getCurrent())
+            .setPageSize(page.getSize());
     }
 
     /**
@@ -237,13 +269,16 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
             throw new JeecgBootException("申诉不存在");
         }
         validateAppealHandle(req, appeal);
+        Date resolvedAt = new Date();
         appeal.setStatus(req.getStatus());
         appeal.setResultStatus(req.getResultStatus());
         appeal.setResultNote(req.getResultNote());
         appeal.setProgressNote(req.getProgressNote());
         appeal.setResolvedBy(req.getOperatorUserId());
-        appeal.setResolvedAt(new Date());
+        appeal.setResolvedAt(resolvedAt);
         appealMapper.updateById(appeal);
+        restoreGovernanceStatusIfNecessary(appeal, req);
+        growthPenaltyRecoveryService.recoverByAppeal(appeal, req.getOperatorUserId(), resolvedAt, req.getResultNote());
         auditLogMapper.insert(ContentUserAuditLog.appealHandled(appeal, req));
         return appeal.getId();
     }
@@ -259,13 +294,17 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
             throw new JeecgBootException("举报不存在");
         }
         validateReportHandle(req, report);
+        Date resolvedAt = new Date();
         report.setStatus(req.getStatus());
         report.setResultStatus(req.getResultStatus());
         report.setResultNote(req.getResultNote());
         report.setProgressNote(req.getProgressNote());
         report.setResolvedBy(req.getOperatorUserId());
-        report.setResolvedAt(new Date());
+        report.setResolvedAt(resolvedAt);
         reportMapper.updateById(report);
+        if (growthPenaltyRecordService != null && PUNISHING_REPORT_RESULTS.contains(req.getResultStatus())) {
+            growthPenaltyRecordService.createFromReportHandle(report, req, null, resolvedAt);
+        }
         auditLogMapper.insert(ContentUserAuditLog.reportHandled(report, req));
         return report.getId();
     }
@@ -356,6 +395,47 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
         }
     }
 
+    private void restoreGovernanceStatusIfNecessary(ContentUserAppeal appeal, ContentAppealHandleReq req) {
+        if (!"APPROVED".equalsIgnoreCase(req.getResultStatus())
+            || appeal == null
+            || !APPEAL_TARGET_TYPE_GOVERNANCE_STATUS.equals(appeal.getTargetType())
+            || !StringUtils.hasText(appeal.getTargetId())
+            || profileMapper == null
+            || statusRecordMapper == null) {
+            return;
+        }
+        ContentUserStatusRecord targetRecord = statusRecordMapper.selectById(appeal.getTargetId());
+        if (targetRecord == null
+            || !appeal.getUserId().equals(targetRecord.getUserId())
+            || !Boolean.TRUE.equals(targetRecord.getRecoverable())) {
+            return;
+        }
+        ContentUserProfile profile = profileMapper.selectByUserId(appeal.getUserId());
+        if (!shouldRestoreGovernanceStatus(profile)) {
+            return;
+        }
+        String restoredStatus = StringUtils.hasText(targetRecord.getCurrentStatus())
+            ? targetRecord.getCurrentStatus()
+            : ContentUserStatusEnum.NORMAL.getCode();
+        if (restoredStatus.equals(profile.getStatus())) {
+            return;
+        }
+        String currentStatus = profile.getStatus();
+        profile.setStatus(restoredStatus);
+        profileMapper.updateById(profile);
+
+        ContentUserStatusRecord restoreRecord = new ContentUserStatusRecord();
+        restoreRecord.setId(UUIDGenerator.generate());
+        restoreRecord.setUserId(appeal.getUserId());
+        restoreRecord.setCurrentStatus(currentStatus);
+        restoreRecord.setTargetStatus(restoredStatus);
+        restoreRecord.setTriggerSource("APPEAL_APPROVED");
+        restoreRecord.setOperatorUserId(req.getOperatorUserId());
+        restoreRecord.setReason(req.getResultNote());
+        restoreRecord.setRecoverable(Boolean.FALSE);
+        restoreRecord.setEffectiveStartTime(new Date());
+        statusRecordMapper.insert(restoreRecord);
+    }
     private ContentUserProfile selectUserProfile(String userId) {
         if (profileMapper == null || !StringUtils.hasText(userId)) {
             return null;
@@ -426,6 +506,14 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
         if (profile == null) {
             return false;
         }
+        if (levelBenefitService != null && StringUtils.hasText(profile.getUserId())) {
+            if (levelBenefitService.hasEnabledBenefit(profile.getUserId(), BENEFIT_PRIORITY_CUSTOMER_SERVICE)) {
+                return true;
+            }
+            if (levelBenefitService.isBenefitExplicitlyDisabled(profile.getUserId(), BENEFIT_PRIORITY_CUSTOMER_SERVICE)) {
+                return false;
+            }
+        }
         int level = profile.getLevel() == null ? 1 : profile.getLevel();
         int growthValue = profile.getGrowthValue() == null ? 0 : profile.getGrowthValue();
         return level >= 5 || growthValue >= 400;
@@ -438,5 +526,15 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
         return ContentUserStatusEnum.FROZEN.getCode().equals(profile.getStatus())
             || ContentUserStatusEnum.BANNED.getCode().equals(profile.getStatus())
             || ContentUserStatusEnum.CANCEL_PENDING.getCode().equals(profile.getStatus());
+    }
+
+    private boolean shouldRestoreGovernanceStatus(ContentUserProfile profile) {
+        if (profile == null || !StringUtils.hasText(profile.getStatus())) {
+            return false;
+        }
+        return !ContentUserStatusEnum.NORMAL.getCode().equals(profile.getStatus())
+            && !ContentUserStatusEnum.GUEST.getCode().equals(profile.getStatus())
+            && !ContentUserStatusEnum.REGISTERED_INCOMPLETE.getCode().equals(profile.getStatus())
+            && !ContentUserStatusEnum.CANCELLED.getCode().equals(profile.getStatus());
     }
 }

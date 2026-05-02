@@ -1,5 +1,7 @@
 package org.jeecg.modules.content.user.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import jakarta.annotation.Resource;
 import org.jeecg.common.exception.JeecgBootException;
@@ -13,20 +15,43 @@ import org.jeecg.modules.content.user.mapper.ContentUserDeviceSessionMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserStatusRecordMapper;
 import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
+import org.jeecg.modules.content.user.service.IContentUserGrowthPenaltyRecordService;
+import org.jeecg.modules.content.user.service.IContentUserGrowthPenaltyRecoveryService;
 import org.jeecg.modules.content.user.service.IContentUserGovernanceService;
+import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryItemVO;
+import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Service implementation for content user governance.
  */
 @Service
 public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceService {
+
+    private static final String AUTO_RECOVER_OPERATOR = "system";
+    private static final String AUTO_RECOVER_TRIGGER = "AUTO_EXPIRE_RECOVER";
+    private static final List<String> PENALTY_STATUSES = List.of(
+        ContentUserStatusEnum.MUTED.getCode(),
+        ContentUserStatusEnum.RECOMMENDATION_LIMITED.getCode(),
+        ContentUserStatusEnum.FROZEN.getCode(),
+        ContentUserStatusEnum.BANNED.getCode()
+    );
+    private static final List<String> AUTO_RECOVERABLE_STATUSES = List.of(
+        ContentUserStatusEnum.MUTED.getCode(),
+        ContentUserStatusEnum.RECOMMENDATION_LIMITED.getCode(),
+        ContentUserStatusEnum.FROZEN.getCode(),
+        ContentUserStatusEnum.BANNED.getCode()
+    );
 
     @Resource
     private ContentUserStatusRecordMapper statusRecordMapper;
@@ -40,6 +65,12 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
     @Resource
     private ContentUserDeviceSessionMapper deviceSessionMapper;
 
+    @Resource
+    private IContentUserGrowthPenaltyRecoveryService growthPenaltyRecoveryService;
+
+    @Resource
+    private IContentUserGrowthPenaltyRecordService growthPenaltyRecordService;
+
     /**
      * Changes the lifecycle status of the target user and records governance logs.
      */
@@ -49,8 +80,11 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
         validateTransition(req);
         ContentUserStatusRecord record = ContentUserStatusRecord.from(req);
         statusRecordMapper.insert(record);
-        auditLogMapper.insert(ContentUserAuditLog.statusChange(req));
         updateProfileStatus(req.getUserId(), req.getTargetStatus());
+        if (growthPenaltyRecordService != null && PENALTY_STATUSES.contains(req.getTargetStatus())) {
+            growthPenaltyRecordService.createFromGovernanceRecord(record, req, new Date());
+        }
+        auditLogMapper.insert(ContentUserAuditLog.statusChange(req));
     }
 
     /**
@@ -98,6 +132,70 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
             .setUserId(userId)
             .setCurrentStatus(profile == null ? ContentUserStatusEnum.GUEST.getCode() : profile.getStatus())
             .setTargetStatus(profile == null ? ContentUserStatusEnum.GUEST.getCode() : profile.getStatus());
+    }
+
+    /**
+     * Queries paged status history for the target user.
+     */
+    @Override
+    public ContentUserStatusHistoryPageVO listStatusHistory(String userId, Long pageNo, Long pageSize) {
+        long currentPage = pageNo == null || pageNo < 1L ? 1L : pageNo;
+        long currentSize = pageSize == null || pageSize < 1L ? 10L : pageSize;
+        IPage<ContentUserStatusRecord> page = statusRecordMapper.selectPage(
+            new Page<>(currentPage, currentSize),
+            Wrappers.<ContentUserStatusRecord>lambdaQuery()
+                .eq(ContentUserStatusRecord::getUserId, userId)
+                .orderByDesc(ContentUserStatusRecord::getCreateTime)
+        );
+        return new ContentUserStatusHistoryPageVO()
+            .setRecords(page.getRecords().stream().map(this::toStatusHistoryItem).toList())
+            .setTotal(page.getTotal())
+            .setPageNo(page.getCurrent())
+            .setPageSize(page.getSize());
+    }
+
+    /**
+     * Automatically restores expired governance statuses in small batches.
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int autoRecoverExpiredStatuses(Date currentTime, Long batchSize) {
+        long currentBatchSize = batchSize == null || batchSize < 1L ? 100L : batchSize;
+        Date executionTime = currentTime == null ? new Date() : currentTime;
+        IPage<ContentUserStatusRecord> page = statusRecordMapper.selectPage(
+            new Page<>(1L, currentBatchSize),
+            Wrappers.<ContentUserStatusRecord>lambdaQuery()
+                .eq(ContentUserStatusRecord::getRecoverable, Boolean.TRUE)
+                .isNotNull(ContentUserStatusRecord::getEffectiveEndTime)
+                .le(ContentUserStatusRecord::getEffectiveEndTime, executionTime)
+                .in(ContentUserStatusRecord::getTargetStatus, AUTO_RECOVERABLE_STATUSES)
+                .orderByAsc(ContentUserStatusRecord::getEffectiveEndTime)
+        );
+        List<ContentUserStatusRecord> expiredRecords = page.getRecords();
+        if (expiredRecords == null || expiredRecords.isEmpty() || profileMapper == null) {
+            return 0;
+        }
+        Map<String, ContentUserProfile> profileMap = selectProfilesByUserIds(expiredRecords);
+        int recoveredCount = 0;
+        for (ContentUserStatusRecord expiredRecord : expiredRecords) {
+            ContentUserProfile profile = profileMap.get(expiredRecord.getUserId());
+            if (profile == null || !expiredRecord.getTargetStatus().equals(profile.getStatus())) {
+                continue;
+            }
+            String restoredStatus = restoreProfileStatus(profile, expiredRecord, executionTime);
+            if (restoredStatus == null) {
+                continue;
+            }
+            auditLogMapper.insert(buildAutoRecoverAuditLog(expiredRecord, restoredStatus));
+            growthPenaltyRecoveryService.recoverByGovernanceRecord(
+                expiredRecord,
+                AUTO_RECOVER_OPERATOR,
+                executionTime,
+                "处罚到期自动恢复"
+            );
+            recoveredCount++;
+        }
+        return recoveredCount;
     }
 
     /**
@@ -205,5 +303,67 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
             return latestRecord.getTargetStatus();
         }
         return ContentUserStatusEnum.GUEST.getCode();
+    }
+
+    private ContentUserStatusHistoryItemVO toStatusHistoryItem(ContentUserStatusRecord record) {
+        return new ContentUserStatusHistoryItemVO()
+            .setRecordId(record.getId())
+            .setUserId(record.getUserId())
+            .setCurrentStatus(record.getCurrentStatus())
+            .setTargetStatus(record.getTargetStatus())
+            .setTriggerSource(record.getTriggerSource())
+            .setOperatorUserId(record.getOperatorUserId())
+            .setReason(record.getReason())
+            .setRuleCode(record.getRuleCode())
+            .setEffectiveStartTime(record.getEffectiveStartTime())
+            .setEffectiveEndTime(record.getEffectiveEndTime())
+            .setRecoverable(record.getRecoverable())
+            .setCreateTime(record.getCreateTime());
+    }
+
+    private Map<String, ContentUserProfile> selectProfilesByUserIds(List<ContentUserStatusRecord> expiredRecords) {
+        Set<String> userIds = expiredRecords.stream()
+            .map(ContentUserStatusRecord::getUserId)
+            .filter(userId -> userId != null && !userId.isBlank())
+            .collect(Collectors.toSet());
+        if (userIds.isEmpty()) {
+            return new HashMap<>();
+        }
+        return profileMapper.selectList(
+            Wrappers.<ContentUserProfile>lambdaQuery().in(ContentUserProfile::getUserId, userIds)
+        ).stream().collect(Collectors.toMap(ContentUserProfile::getUserId, profile -> profile, (left, right) -> left));
+    }
+
+    private String restoreProfileStatus(ContentUserProfile profile, ContentUserStatusRecord expiredRecord, Date executionTime) {
+        String restoredStatus = expiredRecord.getCurrentStatus() == null || expiredRecord.getCurrentStatus().isBlank()
+            ? ContentUserStatusEnum.NORMAL.getCode()
+            : expiredRecord.getCurrentStatus();
+        if (restoredStatus.equals(profile.getStatus())) {
+            return null;
+        }
+        String currentStatus = profile.getStatus();
+        profile.setStatus(restoredStatus);
+        profileMapper.updateById(profile);
+        ContentUserStatusRecord restoreRecord = new ContentUserStatusRecord();
+        restoreRecord.setUserId(expiredRecord.getUserId());
+        restoreRecord.setCurrentStatus(currentStatus);
+        restoreRecord.setTargetStatus(restoredStatus);
+        restoreRecord.setTriggerSource(AUTO_RECOVER_TRIGGER);
+        restoreRecord.setOperatorUserId(AUTO_RECOVER_OPERATOR);
+        restoreRecord.setReason("处罚到期自动恢复");
+        restoreRecord.setEffectiveStartTime(executionTime);
+        restoreRecord.setRecoverable(Boolean.FALSE);
+        statusRecordMapper.insert(restoreRecord);
+        return restoredStatus;
+    }
+
+    private ContentUserAuditLog buildAutoRecoverAuditLog(ContentUserStatusRecord expiredRecord, String restoredStatus) {
+        ContentUserStatusChangeReq req = new ContentUserStatusChangeReq()
+            .setUserId(expiredRecord.getUserId())
+            .setCurrentStatus(expiredRecord.getTargetStatus())
+            .setTargetStatus(restoredStatus)
+            .setOperatorUserId(AUTO_RECOVER_OPERATOR)
+            .setReason("处罚到期自动恢复");
+        return ContentUserAuditLog.statusChange(req);
     }
 }

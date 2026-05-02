@@ -23,4 +23,7 @@ public class ContentUserGrowthVO {
 
     @Schema(description = "等级", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private Integer level;
+
+    @Schema(description = "等级权益摘要", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private ContentUserLevelBenefitSummaryVO levelBenefitSummary;
 }

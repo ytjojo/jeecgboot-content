@@ -9,6 +9,7 @@ import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.user.entity.ContentUserDeviceSession;
 import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
 import org.jeecg.modules.content.user.service.IContentUserGovernanceService;
+import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,6 +58,17 @@ public class ContentUserGovernanceController {
     @GetMapping("/status/current")
     public Result<ContentUserStatusVO> currentStatus(@RequestParam("userId") String userId) {
         return Result.OK(governanceService.getCurrentStatus(userId));
+    }
+
+    /**
+     * Queries paged status history for the target user.
+     */
+    @Operation(summary = "分页查询用户状态历史")
+    @GetMapping("/status/history")
+    public Result<ContentUserStatusHistoryPageVO> listStatusHistory(@RequestParam("userId") String userId,
+                                                                    @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
+                                                                    @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
+        return Result.OK(governanceService.listStatusHistory(userId, pageNo, pageSize));
     }
 
     /**

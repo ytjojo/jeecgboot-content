@@ -19,4 +19,7 @@ public interface ContentUserSubscriptionMapper extends BaseMapper<ContentUserSub
 
     @Select("select * from content_user_subscription where user_id = #{userId}")
     List<ContentUserSubscription> selectByUserId(@Param("userId") String userId);
+
+    @Select("select count(1) from content_user_subscription where user_id = #{userId} and source_type = #{sourceType}")
+    Long countByUserIdAndSourceType(@Param("userId") String userId, @Param("sourceType") String sourceType);
 }

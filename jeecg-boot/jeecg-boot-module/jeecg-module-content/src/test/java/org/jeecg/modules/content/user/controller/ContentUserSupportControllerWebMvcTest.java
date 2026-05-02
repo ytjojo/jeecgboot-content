@@ -4,6 +4,7 @@ import org.jeecg.modules.content.user.service.IContentUserSupportService;
 import org.jeecg.modules.content.user.vo.ContentCustomerServiceVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterEntryVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterVO;
+import org.jeecg.modules.content.user.vo.ContentUserAppealPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealProgressVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportProgressVO;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,12 +22,16 @@ import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Web MVC tests for content user support controller.
+ */
 @ExtendWith(MockitoExtension.class)
 class ContentUserSupportControllerWebMvcTest {
 
@@ -81,21 +86,30 @@ class ContentUserSupportControllerWebMvcTest {
     }
 
     @Test
-    void shouldReturnAppealList() throws Exception {
+    void shouldReturnAppealListByPage() throws Exception {
         Date resolvedAt = new Date(1735689600000L);
-        when(supportService.listAppeals("u1"))
-            .thenReturn(List.of(new ContentUserAppealProgressVO()
-                .setAppealId("appeal-1")
-                .setStatus("PENDING")
-                .setProgressNote("等待处理")
-                .setResolvedAt(resolvedAt)));
+        when(supportService.listAppeals(eq("u1"), eq(2L), eq(1L)))
+            .thenReturn(new ContentUserAppealPageVO()
+                .setRecords(List.of(new ContentUserAppealProgressVO()
+                    .setAppealId("appeal-1")
+                    .setStatus("PENDING")
+                    .setProgressNote("等待处理")
+                    .setResolvedAt(resolvedAt)))
+                .setTotal(3L)
+                .setPageNo(2L)
+                .setPageSize(1L));
 
         mockMvc.perform(get("/content/user/support/appeal/list")
-                .param("userId", "u1"))
+                .param("userId", "u1")
+                .param("pageNo", "2")
+                .param("pageSize", "1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.result[0].appealId").value("appeal-1"))
-            .andExpect(jsonPath("$.result[0].resolvedAt").exists());
+            .andExpect(jsonPath("$.result.records[0].appealId").value("appeal-1"))
+            .andExpect(jsonPath("$.result.records[0].resolvedAt").exists())
+            .andExpect(jsonPath("$.result.total").value(3))
+            .andExpect(jsonPath("$.result.pageNo").value(2))
+            .andExpect(jsonPath("$.result.pageSize").value(1));
     }
 
     @Test
@@ -123,9 +137,18 @@ class ContentUserSupportControllerWebMvcTest {
     }
 
     @Test
-    void shouldRejectHelpCenterRequestWithoutUserId() throws Exception {
+    void shouldReturnHelpCenterWithoutUserIdForBackwardCompatibility() throws Exception {
+        when(supportService.getHelpCenter(null))
+            .thenReturn(new ContentHelpCenterVO()
+                .setFaqCategories(List.of())
+                .setGuideEntries(List.of())
+                .setReleaseNotes(List.of()));
         mockMvc.perform(get("/content/user/support/help-center"))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.faqCategories").isArray())
+            .andExpect(jsonPath("$.result.guideEntries").isArray())
+            .andExpect(jsonPath("$.result.releaseNotes").isArray());
     }
 
     @Test
@@ -158,6 +181,9 @@ class ContentUserSupportControllerWebMvcTest {
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.faqCategories").isArray())
+            .andExpect(jsonPath("$.result.guideEntries").isArray())
+            .andExpect(jsonPath("$.result.releaseNotes").isArray())
             .andExpect(jsonPath("$.result.faqCategories[0].code").value("ACCOUNT_SECURITY"))
             .andExpect(jsonPath("$.result.faqCategories[0].recommendedRouteType").value("SMART_FIRST"))
             .andExpect(jsonPath("$.result.faqCategories[0].recommendedRouteTitle").value("在线客服"))

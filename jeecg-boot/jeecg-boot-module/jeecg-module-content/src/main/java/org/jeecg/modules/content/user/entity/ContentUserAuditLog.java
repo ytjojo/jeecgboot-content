@@ -127,4 +127,52 @@ public class ContentUserAuditLog extends JeecgEntity {
                 + req.getResultStatus() + "\",\"resultNote\":\"" + req.getResultNote() + "\"}")
             .setEventTime(new Date());
     }
+
+    /**
+     * Executes the growthPenaltyRecovered operation.
+     */
+    public static ContentUserAuditLog growthPenaltyRecovered(String userId,
+                                                             String operatorUserId,
+                                                             String trigger,
+                                                             String penaltyRecordId,
+                                                             int pointDelta,
+                                                             int growthDelta,
+                                                             int badgeCount,
+                                                             int recoveredBenefitCount) {
+        return new ContentUserAuditLog()
+            .setUserId(userId)
+            .setOperatorUserId(operatorUserId)
+            .setEventType("USER_GROWTH_PENALTY_RECOVERED")
+            .setEventContent(trigger)
+            .setExtraDataJson("{\"penaltyRecordId\":\"" + penaltyRecordId
+                + "\",\"pointDelta\":" + pointDelta
+                + ",\"growthDelta\":" + growthDelta
+                + ",\"badgeCount\":" + badgeCount
+                + ",\"recoveredBenefitCount\":" + recoveredBenefitCount + "}")
+            .setEventTime(new Date());
+    }
+
+    /**
+     * Executes the growthPenaltyExecuted operation.
+     */
+    public static ContentUserAuditLog growthPenaltyExecuted(String userId,
+                                                            String operatorUserId,
+                                                            String sourceType,
+                                                            String penaltyRecordId,
+                                                            int pointDelta,
+                                                            int growthDelta,
+                                                            int badgeCount,
+                                                            int benefitCount) {
+        return new ContentUserAuditLog()
+            .setUserId(userId)
+            .setOperatorUserId(operatorUserId)
+            .setEventType("USER_GROWTH_PENALTY_EXECUTED")
+            .setEventContent(sourceType)
+            .setExtraDataJson("{\"penaltyRecordId\":\"" + penaltyRecordId
+                + "\",\"pointDelta\":" + pointDelta
+                + ",\"growthDelta\":" + growthDelta
+                + ",\"badgeCount\":" + badgeCount
+                + ",\"benefitCount\":" + benefitCount + "}")
+            .setEventTime(new Date());
+    }
 }
