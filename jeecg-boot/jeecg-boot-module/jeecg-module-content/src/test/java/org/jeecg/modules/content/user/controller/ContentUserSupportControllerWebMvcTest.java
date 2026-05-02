@@ -2,7 +2,9 @@ package org.jeecg.modules.content.user.controller;
 
 import org.jeecg.modules.content.user.service.IContentUserSupportService;
 import org.jeecg.modules.content.user.vo.ContentCustomerServiceVO;
+import org.jeecg.modules.content.user.vo.ContentHelpCenterEntryVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterVO;
+import org.jeecg.modules.content.user.vo.ContentUserAppealPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealProgressVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportProgressVO;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,12 +21,17 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.util.Date;
 import java.util.List;
 
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Web MVC tests for content user support controller.
+ */
 @ExtendWith(MockitoExtension.class)
 class ContentUserSupportControllerWebMvcTest {
 
@@ -79,21 +86,30 @@ class ContentUserSupportControllerWebMvcTest {
     }
 
     @Test
-    void shouldReturnAppealList() throws Exception {
+    void shouldReturnAppealListByPage() throws Exception {
         Date resolvedAt = new Date(1735689600000L);
-        when(supportService.listAppeals("u1"))
-            .thenReturn(List.of(new ContentUserAppealProgressVO()
-                .setAppealId("appeal-1")
-                .setStatus("PENDING")
-                .setProgressNote("等待处理")
-                .setResolvedAt(resolvedAt)));
+        when(supportService.listAppeals(eq("u1"), eq(2L), eq(1L)))
+            .thenReturn(new ContentUserAppealPageVO()
+                .setRecords(List.of(new ContentUserAppealProgressVO()
+                    .setAppealId("appeal-1")
+                    .setStatus("PENDING")
+                    .setProgressNote("等待处理")
+                    .setResolvedAt(resolvedAt)))
+                .setTotal(3L)
+                .setPageNo(2L)
+                .setPageSize(1L));
 
         mockMvc.perform(get("/content/user/support/appeal/list")
-                .param("userId", "u1"))
+                .param("userId", "u1")
+                .param("pageNo", "2")
+                .param("pageSize", "1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.result[0].appealId").value("appeal-1"))
-            .andExpect(jsonPath("$.result[0].resolvedAt").exists());
+            .andExpect(jsonPath("$.result.records[0].appealId").value("appeal-1"))
+            .andExpect(jsonPath("$.result.records[0].resolvedAt").exists())
+            .andExpect(jsonPath("$.result.total").value(3))
+            .andExpect(jsonPath("$.result.pageNo").value(2))
+            .andExpect(jsonPath("$.result.pageSize").value(1));
     }
 
     @Test
@@ -121,17 +137,58 @@ class ContentUserSupportControllerWebMvcTest {
     }
 
     @Test
-    void shouldReturnHelpCenterMetadata() throws Exception {
-        when(supportService.getHelpCenter())
+    void shouldReturnHelpCenterWithoutUserIdForBackwardCompatibility() throws Exception {
+        when(supportService.getHelpCenter(null))
             .thenReturn(new ContentHelpCenterVO()
-                .setFaqCategories(List.of("账号安全"))
-                .setGuideEntries(List.of("新手指南"))
-                .setReleaseNotes(List.of("产品更新")));
+                .setFaqCategories(List.of())
+                .setGuideEntries(List.of())
+                .setReleaseNotes(List.of()));
 
         mockMvc.perform(get("/content/user/support/help-center"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.result.faqCategories[0]").value("账号安全"));
+            .andExpect(jsonPath("$.result.faqCategories").isArray())
+            .andExpect(jsonPath("$.result.guideEntries").isArray())
+            .andExpect(jsonPath("$.result.releaseNotes").isArray());
+    }
+
+    @Test
+    void shouldReturnStructuredHelpCenterMetadata() throws Exception {
+        when(supportService.getHelpCenter("u1"))
+            .thenReturn(new ContentHelpCenterVO()
+                .setFaqCategories(List.of(new ContentHelpCenterEntryVO()
+                    .setCode("ACCOUNT_SECURITY")
+                    .setTitle("账号安全")
+                    .setDescription("账号登录、密码与设备安全相关问题")
+                    .setRecommendedRouteType("SMART_FIRST")
+                    .setRecommendedRouteTitle("在线客服")
+                    .setManualSupported(Boolean.TRUE)))
+                .setGuideEntries(List.of(new ContentHelpCenterEntryVO()
+                    .setCode("BEGINNER_GUIDE")
+                    .setTitle("新手指南")
+                    .setDescription("帮助新用户快速了解社区基础功能")
+                    .setRecommendedRouteType("SMART_FIRST")
+                    .setRecommendedRouteTitle("在线客服")
+                    .setManualSupported(Boolean.TRUE)))
+                .setReleaseNotes(List.of(new ContentHelpCenterEntryVO()
+                    .setCode("PRODUCT_UPDATE")
+                    .setTitle("产品更新")
+                    .setDescription("版本更新与功能发布日志")
+                    .setRecommendedRouteType(null)
+                    .setRecommendedRouteTitle(null)
+                    .setManualSupported(null))));
+
+        mockMvc.perform(get("/content/user/support/help-center")
+                .param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.faqCategories[0].code").value("ACCOUNT_SECURITY"))
+            .andExpect(jsonPath("$.result.faqCategories[0].recommendedRouteType").value("SMART_FIRST"))
+            .andExpect(jsonPath("$.result.faqCategories[0].recommendedRouteTitle").value("在线客服"))
+            .andExpect(jsonPath("$.result.faqCategories[0].manualSupported").value(true))
+            .andExpect(jsonPath("$.result.releaseNotes[0].recommendedRouteType").value(nullValue()))
+            .andExpect(jsonPath("$.result.releaseNotes[0].recommendedRouteTitle").value(nullValue()))
+            .andExpect(jsonPath("$.result.releaseNotes[0].manualSupported").value(nullValue()));
     }
 
     @Test
@@ -148,5 +205,23 @@ class ContentUserSupportControllerWebMvcTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.routeType").value("SMART_FIRST"));
+    }
+
+    @Test
+    void shouldReturnManualPriorityCustomerServiceEntry() throws Exception {
+        when(supportService.getCustomerServiceEntry("u100"))
+            .thenReturn(new ContentCustomerServiceVO()
+                .setRouteType("MANUAL_PRIORITY")
+                .setTitle("专属客服")
+                .setDescription("高等级用户优先进入人工客服通道")
+                .setManualSupported(true));
+
+        mockMvc.perform(get("/content/user/support/customer-service")
+                .param("userId", "u100"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.routeType").value("MANUAL_PRIORITY"))
+            .andExpect(jsonPath("$.result.title").value("专属客服"))
+            .andExpect(jsonPath("$.result.manualSupported").value(true));
     }
 }

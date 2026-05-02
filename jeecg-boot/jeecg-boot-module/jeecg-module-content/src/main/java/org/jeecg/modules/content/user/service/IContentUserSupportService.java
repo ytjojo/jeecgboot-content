@@ -7,13 +7,12 @@ import org.jeecg.modules.content.user.req.support.ContentReportHandleReq;
 import org.jeecg.modules.content.user.req.support.ContentUserReportAdminQueryReq;
 import org.jeecg.modules.content.user.vo.ContentCustomerServiceVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterVO;
+import org.jeecg.modules.content.user.vo.ContentUserAppealPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealProgressVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminDetailVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminListItemVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportProgressVO;
-
-import java.util.List;
 
 /**
  * Service contract for content user support.
@@ -24,11 +23,11 @@ public interface IContentUserSupportService {
 
     ContentUserAppealProgressVO getAppealProgress(String userId, String appealId);
 
-    List<ContentUserAppealProgressVO> listAppeals(String userId);
+    ContentUserAppealPageVO listAppeals(String userId, Long pageNo, Long pageSize);
 
     String createReport(ContentReportCreateReq req);
 
-    ContentHelpCenterVO getHelpCenter();
+    ContentHelpCenterVO getHelpCenter(String userId);
 
     ContentCustomerServiceVO getCustomerServiceEntry(String userId);
 

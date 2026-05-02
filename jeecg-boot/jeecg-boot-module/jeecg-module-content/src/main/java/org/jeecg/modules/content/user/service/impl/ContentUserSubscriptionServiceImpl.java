@@ -5,7 +5,9 @@ import org.jeecg.common.util.UUIDGenerator;
 import org.jeecg.modules.content.user.entity.ContentUserSubscription;
 import org.jeecg.modules.content.user.mapper.ContentUserSubscriptionMapper;
 import org.jeecg.modules.content.user.req.subscription.ContentSubscriptionReq;
+import org.jeecg.modules.content.user.service.IContentUserLevelBenefitService;
 import org.jeecg.modules.content.user.service.IContentUserSubscriptionService;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,8 +20,13 @@ import java.util.List;
 @Service
 public class ContentUserSubscriptionServiceImpl implements IContentUserSubscriptionService {
 
+    private static final String SOURCE_TYPE_TOPIC = "TOPIC";
+
     @Resource
     private ContentUserSubscriptionMapper subscriptionMapper;
+
+    @Resource
+    private IContentUserLevelBenefitService levelBenefitService;
 
     /**
      * Creates a subscription for the requested content source.
@@ -37,6 +44,7 @@ public class ContentUserSubscriptionServiceImpl implements IContentUserSubscript
             subscriptionMapper.updateById(existingSubscription);
             return existingSubscription.getId();
         }
+        validateTopicQuotaIfNecessary(userId, req);
         ContentUserSubscription subscription = new ContentUserSubscription();
         subscription.setId(UUIDGenerator.generate());
         subscription.setUserId(userId);
@@ -46,7 +54,11 @@ public class ContentUserSubscriptionServiceImpl implements IContentUserSubscript
         subscription.setNotificationChannels(req.getNotificationChannels());
         subscription.setNotificationFrequency(req.getNotificationFrequency());
         subscription.setPaused(Boolean.FALSE);
-        subscriptionMapper.insert(subscription);
+        try {
+            subscriptionMapper.insert(subscription);
+        } catch (DuplicateKeyException ex) {
+            throw new JeecgBootException("请勿重复订阅同一话题");
+        }
         return subscription.getId();
     }
 
@@ -88,6 +100,17 @@ public class ContentUserSubscriptionServiceImpl implements IContentUserSubscript
     @Override
     public List<ContentUserSubscription> listSubscriptions(String userId) {
         return subscriptionMapper.selectByUserId(userId);
+    }
+
+    private void validateTopicQuotaIfNecessary(String userId, ContentSubscriptionReq req) {
+        if (req == null || !SOURCE_TYPE_TOPIC.equals(req.getSourceType()) || levelBenefitService == null) {
+            return;
+        }
+        int topicQuota = levelBenefitService.resolveTopicQuota(userId);
+        Long currentCount = subscriptionMapper.countByUserIdAndSourceType(userId, SOURCE_TYPE_TOPIC);
+        if (currentCount != null && currentCount >= topicQuota) {
+            throw new JeecgBootException("当前等级可订阅话题数已达上限");
+        }
     }
 
     private ContentUserSubscription getOwnedSubscription(String userId, String subscriptionId) {

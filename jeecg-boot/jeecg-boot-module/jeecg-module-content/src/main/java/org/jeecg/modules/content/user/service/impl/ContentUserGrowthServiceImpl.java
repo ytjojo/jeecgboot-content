@@ -11,6 +11,7 @@ import org.jeecg.modules.content.user.mapper.ContentUserGrowthLedgerMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserPointLedgerMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.service.IContentUserGrowthService;
+import org.jeecg.modules.content.user.service.IContentUserLevelBenefitService;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,9 @@ public class ContentUserGrowthServiceImpl implements IContentUserGrowthService {
 
     @Resource
     private ContentUserAuditLogMapper auditLogMapper;
+
+    @Resource
+    private IContentUserLevelBenefitService levelBenefitService;
 
     /**
      * Records point and growth ledger changes for a user behavior.
@@ -64,13 +68,15 @@ public class ContentUserGrowthServiceImpl implements IContentUserGrowthService {
                 .setUserId(userId)
                 .setPointBalance(0)
                 .setGrowthValue(0)
-                .setLevel(1);
+                .setLevel(1)
+                .setLevelBenefitSummary(levelBenefitService == null ? null : levelBenefitService.getBenefitSummary(userId));
         }
         return new ContentUserGrowthVO()
             .setUserId(userId)
             .setPointBalance(defaultZero(profile.getPointBalance()))
             .setGrowthValue(defaultZero(profile.getGrowthValue()))
-            .setLevel(defaultLevel(profile.getLevel(), profile.getGrowthValue()));
+            .setLevel(defaultLevel(profile.getLevel(), profile.getGrowthValue()))
+            .setLevelBenefitSummary(levelBenefitService == null ? null : levelBenefitService.getBenefitSummary(userId));
     }
 
     private void updateProfileSummary(String userId, int pointDelta, int growthDelta) {
