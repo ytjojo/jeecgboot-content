@@ -14,6 +14,6 @@
 
 ## 路由
 - 内容社区模块：查看 `jeecg-boot-module/jeecg-module-content/AGENTS.md`
-- 其他后端背景资料：查看 `../doc/agent-context/api-guidelines.md` 和 `../doc/agent-context/architecture.md`
-- 后端编码规范：`../doc/agent-context/springboot-coding-conventions.md`
-- 后端数据库设计：`../doc/agent-context/springboot-db-design.md`
+- 其他后端背景资料：查看 `../docs/agent-context/api-guidelines.md` 和 `../docs/agent-context/architecture.md`
+- 后端编码规范：`../docs/agent-context/springboot-coding-conventions.md`
+- 后端数据库设计：`../docs/agent-context/springboot-db-design.md`

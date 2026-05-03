@@ -12,7 +12,7 @@
 
 ## File Structure
 
-- Modify: `doc/prd/内容社区-用户域-PRD.md` (reference only, no changes)
+- Modify: `docs/requirements/prd/内容社区-用户域-PRD.md` (reference only, no changes)
 - Modify: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/controller/ContentUserSupportController.java`
 - Modify: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/IContentUserSupportService.java`
 - Modify: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/impl/ContentUserSupportServiceImpl.java`

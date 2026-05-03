@@ -7,7 +7,7 @@ JeecgBoot 是企业级 AI 低代码平台，采用前后端分离架构，支持
 ## 主要目录
 - `jeecg-boot/`：Java 后端主工程
 - `jeecgboot-vue3/`：Vue3 + TypeScript 前端工程
-- `doc/`：需求、方案和补充说明文档
+- `docs/requirements/`：需求、方案和补充说明文档
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/`：内容社区业务模块
 
 ## 架构模式

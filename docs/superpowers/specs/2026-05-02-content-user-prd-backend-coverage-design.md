@@ -4,7 +4,7 @@
 
 当前你要求对以下范围执行一体化工作：
 
-- 审查 `doc/prd/内容社区-用户域-PRD.md` 中的需求
+- 审查 `docs/requirements/prd/内容社区-用户域-PRD.md` 中的需求
 - 核查 `jeecg-module-content/src/main/java/org/jeecg/modules/content/user` Java 后端代码是否已实现
 - 使用并行子代理思路做需求覆盖检查
 - 产出汇总文档
@@ -28,7 +28,7 @@
 
 ### 3.1 包含
 
-- `doc/prd/内容社区-用户域-PRD.md`
+- `docs/requirements/prd/内容社区-用户域-PRD.md`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user`
 - 需求与代码、测试之间的映射与结论文档

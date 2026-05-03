@@ -14,4 +14,4 @@
 
 ## 参考
 - 本地补充说明：`CLAUDE.md`
-- 仓库级背景资料：`../doc/agent-context/project-overview.md`、`../doc/agent-context/commands.md`
+- 仓库级背景资料：`../docs/agent-context/project-overview.md`、`../docs/agent-context/commands.md`

@@ -1,6 +1,6 @@
 # 内容社区用户域 PRD 后端覆盖审计报告
 
-- 审计范围：`doc/prd/内容社区-用户域-PRD.md`
+- 审计范围：`docs/requirements/prd/内容社区-用户域-PRD.md`
 - 代码范围：`jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user`
 - 测试范围：`jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user`
 - 审计依据：`docs/superpowers/specs/2026-05-02-content-user-prd-backend-coverage-design.md`

@@ -2,7 +2,7 @@
 
 - 文档版本：V1
 - 更新日期：2026-04-28
-- 需求来源：[内容社区系统需求文档.md:L2-L173](file:///Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/doc/内容社区系统需求文档.md#L2-L173)
+- 需求来源：[内容社区系统需求文档.md:L2-L173](file:///Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/docs/requirements/内容社区系统需求文档.md#L2-L173)
 
 ## Problem Statement
 

@@ -7,7 +7,7 @@
 ## 规则优先级
 1. 当前目录及更深层目录中的 `AGENTS.md`
 2. 仓库根目录 `AGENTS.md`
-3. `doc/agent-context/` 下的文档仅作参考，不是硬约束
+3. `docs/agent-context/` 下的文档仅作参考，不是硬约束
 
 ## 路由
 - 修改后端代码前，先阅读 `jeecg-boot/AGENTS.md`
@@ -20,13 +20,13 @@
 - 只修改与当前任务直接相关的文件，不顺手重构无关模块
 - 不覆盖、不回退、不清理用户已有改动，除非用户明确要求
 - 新增目录级规则时，保持文件短小，优先写“必须遵守的约束”，不要复制整份项目手册
-- 易变信息，例如版本号、启动命令、环境变量、部署步骤，放到 `doc/agent-context/`，不要堆在根规则文件
+- 易变信息，例如版本号、启动命令、环境变量、部署步骤，放到 `docs/agent-context/`，不要堆在根规则文件
 
 ## 参考文档
-- 项目概览：`doc/agent-context/project-overview.md`
-- 常用命令：`doc/agent-context/commands.md`
-- 架构与目录：`doc/agent-context/architecture.md`
-- API 与后端约定：`doc/agent-context/api-guidelines.md`
-- 后端编码规范：`doc/agent-context/springboot-coding-conventions.md`
-- 后端数据库设计：`doc/agent-context/springboot-db-design.md`
-- 部署与排障：`doc/agent-context/deployment.md`
+- 项目概览：`docs/agent-context/project-overview.md`
+- 常用命令：`docs/agent-context/commands.md`
+- 架构与目录：`docs/agent-context/architecture.md`
+- API 与后端约定：`docs/agent-context/api-guidelines.md`
+- 后端编码规范：`docs/agent-context/springboot-coding-conventions.md`
+- 后端数据库设计：`docs/agent-context/springboot-db-design.md`
+- 部署与排障：`docs/agent-context/deployment.md`
