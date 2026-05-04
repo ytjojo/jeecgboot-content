@@ -13,6 +13,8 @@ Core principle:
 
 `A good PRD lets development avoid guessing, lets QA verify objectively, and lets the business measure outcomes.`
 
+This skill owns linear requirement completeness, not wiki page architecture.
+
 ## When to Use
 
 Use this skill when:
@@ -22,15 +24,39 @@ Use this skill when:
 - The user wants to audit an existing PRD for completeness, ambiguity, missing edge cases, missing NFRs, or weak acceptance criteria.
 - The user explicitly asks what a high-quality requirement document should contain.
 - The user wants requirements that are implementation-ready and testable, not just a conceptual summary.
+- The expected output is primarily a single document or a linear sectioned spec, even if it is long.
 
 Do NOT use this skill when:
 
 - The user explicitly requires wiki-style output with hierarchical wiki conventions and cross-links. In that case, prefer `wiki-requirements-writer`.
 - The user only wants a pure technical design, schema design, or implementation plan without a product requirement layer.
 
+## Boundary With `wiki-requirements-writer`
+
+Use this skill when the main problem is requirement quality inside a normal PRD:
+
+- Missing scope boundaries
+- Weak or missing acceptance criteria
+- Missing edge cases and exception paths
+- Missing NFRs
+- Ambiguous business rules
+- Weak implementation readiness in a linear document
+
+Prefer `wiki-requirements-writer` when the main problem is document topology:
+
+- Hierarchical wiki pages
+- Parent-child requirement pages
+- Cross-links and reverse links
+- Knowledge-base organization
+- BR/UR/SR/DR decomposition
+- Confluence/Notion/飞书/语雀 style page structure
+
+If the user wants both, start here only when wiki structure is not explicitly required.
+
 ## Output Principles
 
 - Prefer clear, concrete, implementation-ready language.
+- Prefer a single coherent document over a page tree.
 - Separate `In Scope` and `Out of Scope`.
 - Cover normal flow, failure flow, and interruption flow.
 - Make edge cases explicit: empty state, extreme input, timeout, retry, concurrency, permission, compatibility.
@@ -375,7 +401,8 @@ Suggested usage:
 1. Start from `templates/prd-template.md`
 2. Fill known information first
 3. Use `examples/simple-prd-demo.md` to understand the target level of detail
-4. Expand edge cases, NFRs, and acceptance criteria before finalizing
+4. Keep the result as a linear PRD unless the user explicitly asks for wiki hierarchy
+5. Expand edge cases, NFRs, and acceptance criteria before finalizing
 
 ## Final Reminder
 
@@ -387,3 +414,5 @@ It is high quality when it is:
 - precise enough for implementation,
 - testable enough for QA,
 - and measurable enough for business review.
+
+If the user later asks for wiki hierarchy, cross-links, or BR/UR/SR/DR page decomposition, switch to `wiki-requirements-writer`.

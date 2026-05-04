@@ -7,11 +7,11 @@ description: "Use when the user explicitly asks for wiki风格需求文档, Conf
 
 ## Overview
 
-Write and normalize requirement documents in wiki style so they are easy to navigate, easy to trace, and precise enough for product, engineering, QA, and AI coding agents.
+Write and normalize requirement documents in wiki style so they become a navigable, cross-linked, layered knowledge base.
 
 Core principle:
 
-`A wiki requirement is not just a document. It is a linked knowledge structure with explicit hierarchy, traceability, constraints, and testable acceptance criteria.`
+`This skill owns wiki packaging, hierarchy, page boundaries, cross-links, and traceability. It does not own generic PRD completeness by default.`
 
 ## When to Use
 
@@ -25,9 +25,30 @@ Use this skill when:
 
 Do NOT use this skill when:
 
-- The user only wants a normal linear PRD without wiki hierarchy.
+- The user only wants a normal linear PRD, sectioned requirement doc, or single-document spec without wiki hierarchy.
 - The user only wants a technical design or implementation plan.
 - The user only wants a short feature summary with no traceability requirement.
+
+## Boundary With `prd-requirements-writer`
+
+Use `wiki-requirements-writer` when the primary problem is document shape:
+
+- Multi-page hierarchy
+- Parent-child requirement decomposition
+- Cross-links and reverse links
+- Knowledge-base navigation
+- BR/UR/SR/DR traceability
+- Confluence/Notion/飞书/语雀 style page organization
+
+Prefer `prd-requirements-writer` when the primary problem is content quality inside a mostly linear document:
+
+- Scope clarity
+- Edge cases
+- NFR completeness
+- Acceptance criteria quality
+- Ambiguity reduction in a normal PRD
+
+If the user wants both, use this skill only when wiki structure is explicitly required; otherwise prefer `prd-requirements-writer`.
 
 ## Common Chinese Triggers
 
@@ -104,73 +125,44 @@ Minimum traceability expectations:
 - Requirement to test/acceptance
 - Requirement to bug/change request when relevant
 
-## Required Sections
+## Wiki-Specific Required Elements
 
-For each major requirement page, include these blocks unless the user explicitly wants a lean version:
+For each wiki requirement set, make these wiki-specific elements explicit:
 
-### 1. Metadata
+### 1. Index And Navigation
 
-Include:
+- Entry page or index page
+- Page list or domain map
+- Stable naming convention
+- Shared links to glossary, NFR page, or error matrix when relevant
 
-- Requirement ID
-- Title
-- Requirement type
-- Priority
-- Status
-- Owner / proposer
-- Stakeholders
-- Version
-- Create / update date
+### 2. Page Boundaries
 
-### 2. Requirement Description
+- One topic per page
+- Clear page purpose
+- No mixed layers on the same page unless the user explicitly wants a compact output
 
-Include:
+### 3. Parent-Child Traceability
 
-- Background and pain point
-- Quantified goal or value
-- User role or affected actor
-- User story: `As a <role>, I want <capability>, so that <value>.`
-- Preconditions
-- Main flow
-- Alternate / exception flow
-- Business rules
+- Parent page lists `下级实现`
+- Child page declares `上级来源`
+- Cross-links use stable IDs
+- Global traceability matrix exists when the set spans multiple pages or levels
 
-### 3. Acceptance
+### 4. Shared Canonical Pages
 
-Prefer `Given / When / Then`.
+- Glossary page for terms
+- Global NFR page for shared constraints
+- Error matrix page for reusable error handling
+- Index page for navigation and reverse links
 
-Each major function should have:
+### 5. Layering Strategy
 
-- Observable result
-- Clear pass/fail judgment
-- Measurable threshold when applicable
+- Lightweight wiki hierarchy for smaller scopes
+- Full `BR/UR/SR/DR` hierarchy for large, cross-team, or traceable initiatives
+- No fake decomposition just to satisfy the four-level pattern
 
-### 4. Relationships
-
-Include:
-
-- Dependencies
-- Conflicts
-- Impacted modules / tables / APIs / pages
-- Related documents
-
-### 5. Management
-
-Include:
-
-- Change history
-- Review record
-- Risk assessment
-- Open questions
-
-### 6. Appendix
-
-Include as needed:
-
-- Glossary
-- Assumptions
-- Constraints
-- Reference links
+For section-level completeness inside each page, reuse the quality bar from `prd-requirements-writer`. This skill focuses on how pages are split, linked, and navigated.
 
 ## Agent-Ready Additions
 
@@ -182,7 +174,7 @@ When the requirement is meant to guide coding agents, explicitly add:
 - Business assertions that must never be violated
 - Existing code or module references to follow
 
-This reduces ambiguity and helps the agent generate code that matches the current system instead of guessing.
+These additions are optional in normal wiki pages, but become important when the wiki will be used directly by coding agents.
 
 ## Prompt Inputs To Ask For
 
@@ -198,6 +190,7 @@ If critical context is missing, ask only for information that materially affects
 ## Writing Rules
 
 - Use IDs consistently; never reuse retired IDs.
+- Keep wiki-specific value high; do not duplicate long linear PRD prose across every page.
 - Avoid vague words like `optimize`, `fast`, `friendly`, `support multiple scenarios`, `properly handle exceptions`.
 - Quantify NFRs such as latency, availability, audit retention, concurrency, and security constraints.
 - Keep terminology consistent across all pages.
@@ -270,7 +263,8 @@ Suggested usage:
 2. Use `templates/wiki-requirements-template.md` to draft the structure
 3. Determine whether the material needs lightweight hierarchy or full `BR/UR/SR/DR`
 4. Use `examples/simple-wiki-demo.md` to match the expected page shape and traceability style
-5. Run `checklists/wiki-quality-checklist.md` before finalizing
+5. Borrow the content-quality bar from `prd-requirements-writer` only where needed
+6. Run `checklists/wiki-quality-checklist.md` before finalizing
 
 ## Output Modes
 
@@ -288,9 +282,10 @@ When using this skill:
 1. Confirm whether the user wants generation, rewrite, or audit of wiki requirements.
 2. Determine the required hierarchy depth from the source material.
 3. Normalize naming, IDs, headings, and traceability links.
-4. Fill missing essentials: scope, actors, rules, exceptions, NFRs, acceptance.
+4. Fill only the minimum content required to make each page navigable and traceable.
 5. Add agent-ready sections when the document will be used for coding or code generation.
-6. Run the quality checklist before finalizing.
+6. If the user also needs stronger linear requirement completeness, prefer `prd-requirements-writer`.
+7. Run the quality checklist before finalizing.
 
 ## Quality Checklist
 
@@ -298,9 +293,8 @@ Before finishing, verify:
 
 - The hierarchy is explicit and not contradictory.
 - Parent-child references are bidirectional where needed.
-- Every major function has acceptance criteria.
-- NFRs are measurable, not vague.
-- Rules, exceptions, and edge cases are visible.
+- Every major page has a clear role in the hierarchy.
+- Shared information is centralized instead of duplicated everywhere.
 - Scope boundaries are explicit.
 - IDs are unique and stable.
 - Open questions have owner or next step.
@@ -312,13 +306,14 @@ Watch for these problems:
 
 - A long wiki page with headings but no real hierarchy
 - Child requirements listed without parent references
-- Only happy path is described
-- No exception handling or no lifecycle/state rules
+- Long linear PRD prose copied into every child page
+- No clear separation between index pages, parent pages, and atomic requirement pages
 - No links to design, API, or tests
 - Agent-facing docs that omit schema, assertions, or error handling
 
 ## Final Reminder
 
-Good wiki requirements are discoverable, traceable, and executable.
+Good wiki requirements are discoverable, traceable, and navigable.
 
-They let humans navigate quickly and let AI agents implement with fewer guesses.
+Let `prd-requirements-writer` own generic requirement completeness.
+Let this skill own wiki structure and traceability.
