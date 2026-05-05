@@ -1,18 +1,19 @@
 package org.jeecg.modules.content.user.controller;
 
+import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.exception.JeecgBootException;
-import org.jeecg.common.exception.JeecgBootExceptionHandler;
-import org.jeecg.modules.base.service.BaseCommonService;
 import org.jeecg.modules.content.user.service.IContentAccountService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -20,25 +21,35 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc(addFilters = false)
-@Import(JeecgBootExceptionHandler.class)
-@WebMvcTest(
-    controllers = ContentAccountController.class,
-    excludeAutoConfiguration = {
-        SecurityAutoConfiguration.class,
-        SecurityFilterAutoConfiguration.class
-    }
-)
+@ExtendWith(MockitoExtension.class)
 class ContentAccountControllerWebMvcTest {
 
-    @Autowired
+    @RestControllerAdvice
+    static class TestJeecgBootExceptionHandler {
+
+        @ExceptionHandler(JeecgBootException.class)
+        Result<?> handleJeecgBootException(JeecgBootException e) {
+            return Result.error(e.getErrCode(), e.getMessage());
+        }
+    }
+
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @Mock
     private IContentAccountService contentAccountService;
 
-    @MockitoBean
-    private BaseCommonService baseCommonService;
+    @InjectMocks
+    private ContentAccountController contentAccountController;
+
+    @BeforeEach
+    void setUp() {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.afterPropertiesSet();
+        mockMvc = MockMvcBuilders.standaloneSetup(contentAccountController)
+            .setValidator(validator)
+            .setControllerAdvice(new TestJeecgBootExceptionHandler())
+            .build();
+    }
 
     @Test
     void applyCancel_validRequest_returnsSuccess() throws Exception {
