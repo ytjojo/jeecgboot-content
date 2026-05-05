@@ -5,6 +5,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.annotation.Resource;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.modules.content.user.req.account.ContentAccountBindEmailReq;
+import org.jeecg.modules.content.user.req.account.ContentAccountBindMobileReq;
+import org.jeecg.modules.content.user.req.account.ContentAccountUnbindEmailReq;
+import org.jeecg.modules.content.user.req.account.ContentAccountUnbindMobileReq;
+import org.jeecg.modules.content.user.req.account.ContentEmailRegisterReq;
 import org.jeecg.modules.content.user.req.account.ContentPasswordResetReq;
 import org.jeecg.modules.content.user.req.account.ContentRegisterReq;
 import org.jeecg.modules.content.user.service.IContentAccountService;
@@ -32,6 +37,55 @@ public class ContentAccountController {
     @PostMapping("/register/mobile")
     public Result<String> registerByMobile(@Valid @RequestBody ContentRegisterReq req) {
         return Result.OK(contentAccountService.registerByMobile(req));
+    }
+
+    /**
+     * Registers a community user by email and initializes the user profile.
+     */
+    @Operation(summary = "邮箱注册并初始化社区资料")
+    @PostMapping("/register/email")
+    public Result<String> registerByEmail(@Valid @RequestBody ContentEmailRegisterReq req) {
+        return Result.OK(contentAccountService.registerByEmail(req));
+    }
+
+    /**
+     * Binds a mobile number to the target account.
+     */
+    @Operation(summary = "绑定手机号")
+    @PostMapping("/bind/mobile")
+    public Result<String> bindMobile(@Valid @RequestBody ContentAccountBindMobileReq req) {
+        contentAccountService.bindMobile(req);
+        return Result.OK("手机号绑定成功");
+    }
+
+    /**
+     * Binds an email to the target account.
+     */
+    @Operation(summary = "绑定邮箱")
+    @PostMapping("/bind/email")
+    public Result<String> bindEmail(@Valid @RequestBody ContentAccountBindEmailReq req) {
+        contentAccountService.bindEmail(req);
+        return Result.OK("邮箱绑定成功");
+    }
+
+    /**
+     * Unbinds the current mobile number from the target account.
+     */
+    @Operation(summary = "解绑手机号")
+    @PostMapping("/unbind/mobile")
+    public Result<String> unbindMobile(@Valid @RequestBody ContentAccountUnbindMobileReq req) {
+        contentAccountService.unbindMobile(req);
+        return Result.OK("手机号解绑成功");
+    }
+
+    /**
+     * Unbinds the current email from the target account.
+     */
+    @Operation(summary = "解绑邮箱")
+    @PostMapping("/unbind/email")
+    public Result<String> unbindEmail(@Valid @RequestBody ContentAccountUnbindEmailReq req) {
+        contentAccountService.unbindEmail(req);
+        return Result.OK("邮箱解绑成功");
     }
 
     /**

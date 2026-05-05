@@ -9,14 +9,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -101,5 +104,98 @@ class ContentAccountControllerWebMvcTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(false))
             .andExpect(jsonPath("$.message").value("注销冷静期未结束"));
+    }
+
+    @Test
+    void registerByEmail_validRequest_returnsSuccess() throws Exception {
+        when(contentAccountService.registerByEmail(any())).thenReturn("u_mail_1001");
+
+        mockMvc.perform(post("/content/user/account/register/email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "email":"user@example.com",
+                      "password":"Pass@123",
+                      "nickname":"邮箱用户"
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("u_mail_1001"));
+    }
+
+    @Test
+    void bindMobile_secondaryVerifyFailed_returnsBusinessError() throws Exception {
+        doThrow(new JeecgBootException("绑定手机号需先完成二次校验"))
+            .when(contentAccountService)
+            .bindMobile(any());
+
+        mockMvc.perform(post("/content/user/account/bind/mobile")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "userId":"u1",
+                      "mobile":"13800000002",
+                      "secondaryVerified":false
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(false))
+            .andExpect(jsonPath("$.message").value("绑定手机号需先完成二次校验"));
+    }
+
+    @Test
+    void bindEmail_validRequest_returnsSuccess() throws Exception {
+        mockMvc.perform(post("/content/user/account/bind/email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "userId":"u1",
+                      "email":"bind@example.com",
+                      "operatorUserId":"u1",
+                      "secondaryVerified":true
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("邮箱绑定成功"));
+
+        verify(contentAccountService).bindEmail(any());
+    }
+
+    @Test
+    void unbindMobile_validRequest_returnsSuccess() throws Exception {
+        mockMvc.perform(post("/content/user/account/unbind/mobile")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "userId":"u1",
+                      "operatorUserId":"u1",
+                      "secondaryVerified":true
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("手机号解绑成功"));
+
+        verify(contentAccountService).unbindMobile(any());
+    }
+
+    @Test
+    void unbindEmail_validRequest_returnsSuccess() throws Exception {
+        mockMvc.perform(post("/content/user/account/unbind/email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "userId":"u1",
+                      "operatorUserId":"u1",
+                      "secondaryVerified":true
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("邮箱解绑成功"));
+
+        verify(contentAccountService).unbindEmail(any());
     }
 }
