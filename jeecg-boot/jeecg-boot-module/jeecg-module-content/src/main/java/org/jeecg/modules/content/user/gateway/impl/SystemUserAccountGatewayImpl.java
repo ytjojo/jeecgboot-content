@@ -18,7 +18,7 @@ import jakarta.annotation.Resource;
 import java.util.Date;
 
 /**
- * Gateway for system user account.
+ * 平台用户账号网关实现。
  */
 @Slf4j
 @Component
@@ -28,7 +28,7 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
     private SysUserMapper sysUserMapper;
 
     /**
-     * Creates a platform user account and returns the account identifier.
+     * 创建平台账号并返回账号标识。
      */
     @Override
     public String createUser(ContentRegisterReq req) {
@@ -63,7 +63,7 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
     }
 
     /**
-     * Creates a platform user account by email and returns the account identifier.
+     * 通过邮箱创建平台账号并返回账号标识。
      */
     @Override
     public String createUserByEmail(ContentEmailRegisterReq req) {
@@ -77,7 +77,7 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
     }
 
     /**
-     * Resets the account password for the matched platform user.
+     * 为匹配到的平台账号重置密码。
      */
     @Override
     public void resetPassword(ContentPasswordResetReq req) {
@@ -93,7 +93,7 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
     }
 
     /**
-     * Gets the platform user by identifier.
+     * 按账号标识查询平台用户。
      */
     @Override
     public SysUser getById(String userId) {
@@ -101,7 +101,7 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
     }
 
     /**
-     * Binds the mobile number for the target account.
+     * 为指定账号绑定手机号。
      */
     @Override
     public SysUser bindMobile(String userId, String mobile) {
@@ -117,7 +117,7 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
     }
 
     /**
-     * Binds the email for the target account.
+     * 为指定账号绑定邮箱。
      */
     @Override
     public SysUser bindEmail(String userId, String email) {
@@ -133,7 +133,7 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
     }
 
     /**
-     * Clears the bound mobile number for the target account.
+     * 清空指定账号已绑定的手机号。
      */
     @Override
     public SysUser unbindMobile(String userId) {
@@ -145,7 +145,7 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
     }
 
     /**
-     * Clears the bound email for the target account.
+     * 清空指定账号已绑定的邮箱。
      */
     @Override
     public SysUser unbindEmail(String userId) {
@@ -157,7 +157,7 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
     }
 
     /**
-     * Marks the platform account as cancelled or disabled.
+     * 将平台账号标记为已注销或已停用。
      */
     @Override
     public void markCancelled(String userId) {

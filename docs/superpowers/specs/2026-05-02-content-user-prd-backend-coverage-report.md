@@ -7,6 +7,7 @@
 
 ## 0. 增量实现记录
 
+- `2026-05-05` 已新增账号安全域闭环：`register/email` 独立邮箱注册、手机号/邮箱绑定解绑、敏感操作二次校验与账号审计留痕。
 - `2026-05-02` 已完成支持治理域第一阶段：`help-center` 结构化分类推荐、`customer-service` 按用户画像分层、`appeal/list` 分页返回。
 - `2026-05-02` 已完成支持治理域第二阶段的首批闭环：`support/admin/appeal/handle` 在申诉通过时联动恢复可恢复的治理状态，并新增 `GET /content/user/governance/status/history` 分页查询状态历史。
 - `2026-05-02` 已新增自动解禁能力：到期的 `MUTED / RECOMMENDATION_LIMITED / FROZEN / BANNED` 状态会通过定时任务自动恢复并补审计记录。
@@ -17,8 +18,8 @@
 
 ## 1. 总结论
 
-- 当前 `content/user` 目录已经形成了用户域后端的基础骨架，覆盖了 `手机号注册`、`密码找回`、`注销冷静期`、`资料更新`、`隐私可见性`、`积分/成长记账`、`关注/拉黑/屏蔽`、`订阅管理`、`举报/申诉`、`状态治理`、`设备会话管理` 等最小能力。
-- 现状以“基础聚合 + 静态规则 + 单表 service”为主，和 PRD 相比仍存在大量能力缺口，尤其集中在 `登录方式多样化`、`绑定解绑`、`异常登录与风控`、`通知偏好细化`、`勋章体系行为闭环`、`关注流/推荐/粉丝/邀请`、`更细粒度等级权益规则`。
+- 当前 `content/user` 目录已经形成了用户域后端的基础骨架，覆盖了 `手机号注册`、`邮箱注册`、`手机号/邮箱绑定解绑`、`密码找回`、`注销冷静期`、`资料更新`、`隐私可见性`、`积分/成长记账`、`关注/拉黑/屏蔽`、`订阅管理`、`举报/申诉`、`状态治理`、`设备会话管理` 等最小能力。
+- 现状以“基础聚合 + 静态规则 + 单表 service”为主，和 PRD 相比仍存在大量能力缺口，尤其集中在 `登录方式多样化`、`一步式换绑与第三方绑定`、`异常登录与风控`、`通知偏好细化`、`勋章体系行为闭环`、`关注流/推荐/粉丝/邀请`、`更细粒度等级权益规则`。
 - `支持治理域` 已补齐 `help-center` 分类级客服联动、`customer-service` 分层路由、`appeal/list` 分页返回、`status/history` 分页查询，以及申诉通过/自动到期恢复后的成长处罚联动恢复。
 - `成长激励域` 和 `关系订阅域` 的实体模型比服务闭环更完整，存在“有表/有字段，但无对外行为或无业务规则”的情况，需要谨慎判为“部分实现”或“未实现”。
 - 测试层以 service 单测和少量 WebMvc 测试为主，已覆盖部分关键正向路径，但对于复杂 PRD 能力仍存在明显缺测。
@@ -27,7 +28,7 @@
 
 | 子域 | 已实现 | 部分实现 | 未实现 | 待确认 | 测试缺口 |
 | --- | --- | --- | --- | --- | --- |
-| 账号安全域 | 4 | 4 | 10 | 1 | 4 |
+| 账号安全域 | 6 | 3 | 10 | 1 | 4 |
 | 资料与隐私域 | 4 | 3 | 6 | 2 | 4 |
 | 成长激励域 | 2 | 2 | 8 | 1 | 4 |
 | 关系订阅域 | 6 | 3 | 8 | 2 | 4 |
@@ -39,7 +40,9 @@
 
 | PRD 编号 | 需求摘要 | 实现状态 | 代码证据 | 测试证据 | 缺口说明 | 实现建议 | 优先级 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 6、14、15 | 手机号注册并支持邮箱字段落库 | 已实现 | `controller/ContentAccountController.java`、`service/impl/ContentAccountServiceImpl.java`、`gateway/impl/SystemUserAccountGatewayImpl.java`、`req/account/ContentRegisterReq.java` | `service/ContentAccountServiceTest.java` | 当前只暴露手机号注册入口，邮箱仅作为可选字段 | 保持现状，后续扩展邮箱独立注册入口 | P0 |
+| 6 | 手机号注册 | 已实现 | `controller/ContentAccountController.java`、`service/impl/ContentAccountServiceImpl.java`、`gateway/impl/SystemUserAccountGatewayImpl.java`、`req/account/ContentRegisterReq.java` | `service/ContentAccountServiceTest.java` | 当前仍未接入邀请码或验证码链路 | 后续补邀请码与登录编排 | P0 |
+| 7 | 邮箱注册 | 已实现 | `controller/ContentAccountController.java`、`service/impl/ContentAccountServiceImpl.java`、`gateway/impl/SystemUserAccountGatewayImpl.java`、`req/account/ContentEmailRegisterReq.java` | `service/ContentAccountServiceTest.java`、`controller/ContentAccountControllerWebMvcTest.java` | 已有独立邮箱注册入口，但仍未接入邀请码校验 | 后续补邀请码与登录编排 | P0 |
+| 14、15 | 绑定手机号、绑定邮箱 | 已实现 | `controller/ContentAccountController.java`、`service/impl/ContentAccountServiceImpl.java`、`gateway/impl/SystemUserAccountGatewayImpl.java`、`entity/ContentUserAuditLog.java` | `service/ContentAccountServiceTest.java`、`controller/ContentAccountControllerWebMvcTest.java` | 当前只覆盖手机号/邮箱，未覆盖第三方账号绑定 | 后续补第三方绑定模型 | P0 |
 | 23、24 | 通过用户ID/手机号/邮箱定位账号重置密码，并要求二次校验 | 已实现 | `controller/ContentAccountController.java`、`service/impl/ContentAccountServiceImpl.java`、`gateway/impl/SystemUserAccountGatewayImpl.java`、`req/account/ContentPasswordResetReq.java` | `service/ContentAccountServiceTest.java` | 只实现重置，不含找回流程中的验证码/身份核验编排 | 后续补独立找回流程状态机 | P0 |
 | 25、26 | 注销申请、冷静期完成注销、冷静期撤销注销 | 已实现 | `controller/ContentAccountController.java`、`service/impl/ContentAccountServiceImpl.java`、`enums/ContentUserStatusEnum.java`、`entity/ContentUserStatusRecord.java` | `service/ContentAccountServiceTest.java`、`controller/ContentAccountControllerWebMvcTest.java` | 注销前置校验只覆盖待处理申诉 | 后续补未完成事项清单校验 | P0 |
 | 13、21、22 | 设备会话列表与指定设备下线 | 已实现 | `controller/ContentUserGovernanceController.java`、`service/impl/ContentUserGovernanceServiceImpl.java`、`entity/ContentUserDeviceSession.java` | 无专门 WebMvc 测试；`service/ContentUserGovernanceServiceTest.java` 仅覆盖状态变更 | 会话查询/下线已存在，但缺异常登录识别与提醒 | 后续补设备会话测试与安全事件联动 | P1 |
@@ -48,8 +51,7 @@
 
 | PRD 编号 | 需求摘要 | 实现状态 | 代码证据 | 测试证据 | 缺口说明 | 实现建议 | 优先级 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 7 | 邮箱注册 | 部分实现 | `req/account/ContentRegisterReq.java`、`gateway/impl/SystemUserAccountGatewayImpl.java` | 无 | 支持保存邮箱并校验重复，但没有 `邮箱注册` 独立入口，仍要求手机号必填 | 新增邮箱注册请求模型与入口 | P0 |
-| 17 | 换绑/解绑手机号或邮箱，敏感操作二次校验 | 部分实现 | `req/account/ContentPasswordResetReq.java` | 无 | 仅密码重置要求二次校验，没有绑定/解绑能力 | 新增绑定解绑接口与审计日志 | P0 |
+| 17 | 换绑/解绑手机号或邮箱，敏感操作二次校验 | 部分实现 | `controller/ContentAccountController.java`、`service/impl/ContentAccountServiceImpl.java`、`gateway/impl/SystemUserAccountGatewayImpl.java`、`entity/ContentUserAuditLog.java` | `service/ContentAccountServiceTest.java`、`controller/ContentAccountControllerWebMvcTest.java` | 已支持绑定、解绑和二次校验，但未提供一步式换绑编排 | 后续补换绑流程与更细粒度校验凭证 | P0 |
 | 20 | 异常批量注册识别与拦截 | 部分实现 | `gateway/impl/SystemUserAccountGatewayImpl.java` | 无 | 只有手机号/邮箱/用户名去重校验，没有风控规则 | 在 service 或 biz 中补频率/来源风控 | P1 |
 | 25 | 注销前校验未完成事项 | 部分实现 | `service/impl/ContentAccountServiceImpl.java` | `service/ContentAccountServiceTest.java` | 仅校验待处理申诉，未覆盖违规处理中、订单未结清等 | 扩展前置校验策略 | P0 |
 
@@ -72,9 +74,9 @@
 
 ### 测试缺口
 
-- `ContentAccountControllerWebMvcTest` 只覆盖注销链路，没有覆盖注册和重置密码接口。
+- `ContentAccountControllerWebMvcTest` 已补邮箱注册与绑定解绑，但仍未覆盖手机号注册和重置密码接口。
 - `ContentUserGovernanceServiceTest` 没有覆盖设备会话列表、设备下线、权限检查。
-- 没有针对邮箱注册、邀请码校验、绑定解绑等需求缺口的红灯测试。
+- 邀请码校验、第三方绑定和异常登录风控仍缺少红灯测试。
 - 没有针对异常登录/风控场景的测试基线。
 
 ## 4. 资料与隐私域

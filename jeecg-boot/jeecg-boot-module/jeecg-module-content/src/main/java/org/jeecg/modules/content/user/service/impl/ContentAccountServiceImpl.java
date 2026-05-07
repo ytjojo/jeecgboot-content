@@ -34,7 +34,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Service implementation for content account.
+ * 内容社区账号编排服务实现。
  */
 @Slf4j
 @Service
@@ -61,7 +61,7 @@ public class ContentAccountServiceImpl implements IContentAccountService {
     private ContentUserAuditLogMapper auditLogMapper;
 
     /**
-     * Registers a community user by mobile and initializes the user profile.
+     * 通过手机号注册社区用户并初始化资料。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -72,7 +72,7 @@ public class ContentAccountServiceImpl implements IContentAccountService {
     }
 
     /**
-     * Registers a community user by email and initializes the user profile.
+     * 通过邮箱注册社区用户并初始化资料。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -83,7 +83,7 @@ public class ContentAccountServiceImpl implements IContentAccountService {
     }
 
     /**
-     * Binds a new mobile number for the target account.
+     * 为指定账号绑定新的手机号。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -104,7 +104,7 @@ public class ContentAccountServiceImpl implements IContentAccountService {
     }
 
     /**
-     * Binds a new email for the target account.
+     * 为指定账号绑定新的邮箱。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -125,7 +125,7 @@ public class ContentAccountServiceImpl implements IContentAccountService {
     }
 
     /**
-     * Unbinds the current mobile number while keeping another recovery method.
+     * 解绑当前手机号，并确保仍保留其他找回方式。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -143,7 +143,7 @@ public class ContentAccountServiceImpl implements IContentAccountService {
     }
 
     /**
-     * Unbinds the current email while keeping another recovery method.
+     * 解绑当前邮箱，并确保仍保留其他找回方式。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -161,7 +161,7 @@ public class ContentAccountServiceImpl implements IContentAccountService {
     }
 
     /**
-     * Resets the account password for the matched platform user.
+     * 为匹配到的平台账号重置密码。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -174,7 +174,7 @@ public class ContentAccountServiceImpl implements IContentAccountService {
     }
 
     /**
-     * Starts the account cancellation flow and records the pending status.
+     * 发起账号注销流程并记录待注销状态。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
