@@ -3,6 +3,11 @@ package org.jeecg.modules.content.user.req;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import org.jeecg.modules.content.user.req.account.ContentAccountBindEmailReq;
+import org.jeecg.modules.content.user.req.account.ContentAccountBindMobileReq;
+import org.jeecg.modules.content.user.req.account.ContentAccountUnbindEmailReq;
+import org.jeecg.modules.content.user.req.account.ContentAccountUnbindMobileReq;
+import org.jeecg.modules.content.user.req.account.ContentEmailRegisterReq;
 import org.jeecg.modules.content.user.req.account.ContentRegisterReq;
 import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
 import org.jeecg.modules.content.user.req.growth.ContentPointAdjustReq;
@@ -36,6 +41,59 @@ class ContentUserReqValidationTest {
         assertTrue(fields.contains("mobile"));
         assertTrue(fields.contains("password"));
         assertTrue(fields.contains("nickname"));
+    }
+
+    @Test
+    void shouldRejectInvalidEmailRegisterRequest() {
+        ContentEmailRegisterReq req = new ContentEmailRegisterReq()
+            .setEmail("bad")
+            .setPassword("123")
+            .setNickname("");
+
+        Set<String> fields = validate(req);
+
+        assertTrue(fields.contains("email"));
+        assertTrue(fields.contains("password"));
+        assertTrue(fields.contains("nickname"));
+    }
+
+    @Test
+    void shouldRejectInvalidBindMobileRequest() {
+        ContentAccountBindMobileReq req = new ContentAccountBindMobileReq()
+            .setUserId("")
+            .setMobile("123")
+            .setSecondaryVerified(null);
+
+        Set<String> fields = validate(req);
+
+        assertTrue(fields.contains("userId"));
+        assertTrue(fields.contains("mobile"));
+    }
+
+    @Test
+    void shouldRejectInvalidBindEmailRequest() {
+        ContentAccountBindEmailReq req = new ContentAccountBindEmailReq()
+            .setUserId("")
+            .setEmail("bad");
+
+        Set<String> fields = validate(req);
+
+        assertTrue(fields.contains("userId"));
+        assertTrue(fields.contains("email"));
+    }
+
+    @Test
+    void shouldRejectInvalidUnbindRequests() {
+        ContentAccountUnbindMobileReq unbindMobileReq = new ContentAccountUnbindMobileReq()
+            .setUserId("");
+        ContentAccountUnbindEmailReq unbindEmailReq = new ContentAccountUnbindEmailReq()
+            .setUserId("");
+
+        Set<String> unbindMobileFields = validate(unbindMobileReq);
+        Set<String> unbindEmailFields = validate(unbindEmailReq);
+
+        assertTrue(unbindMobileFields.contains("userId"));
+        assertTrue(unbindEmailFields.contains("userId"));
     }
 
     @Test

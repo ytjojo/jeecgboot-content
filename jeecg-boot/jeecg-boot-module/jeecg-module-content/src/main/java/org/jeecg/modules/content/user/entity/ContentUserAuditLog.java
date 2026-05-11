@@ -175,4 +175,54 @@ public class ContentUserAuditLog extends JeecgEntity {
                 + ",\"benefitCount\":" + benefitCount + "}")
             .setEventTime(new Date());
     }
+
+    /**
+     * 记录手机号绑定审计事件。
+     */
+    public static ContentUserAuditLog accountMobileBound(String userId, String operatorUserId, String maskedMobile) {
+        return new ContentUserAuditLog()
+            .setUserId(userId)
+            .setOperatorUserId(operatorUserId)
+            .setEventType("USER_ACCOUNT_MOBILE_BOUND")
+            .setEventContent("bind_mobile")
+            .setExtraDataJson("{\"mobile\":\"" + maskedMobile + "\"}")
+            .setEventTime(new Date());
+    }
+
+    /**
+     * 记录邮箱绑定审计事件。
+     */
+    public static ContentUserAuditLog accountEmailBound(String userId, String operatorUserId, String maskedEmail) {
+        return new ContentUserAuditLog()
+            .setUserId(userId)
+            .setOperatorUserId(operatorUserId)
+            .setEventType("USER_ACCOUNT_EMAIL_BOUND")
+            .setEventContent("bind_email")
+            .setExtraDataJson("{\"email\":\"" + maskedEmail + "\"}")
+            .setEventTime(new Date());
+    }
+
+    /**
+     * 记录手机号解绑审计事件。
+     */
+    public static ContentUserAuditLog accountMobileUnbound(String userId, String operatorUserId) {
+        return new ContentUserAuditLog()
+            .setUserId(userId)
+            .setOperatorUserId(operatorUserId)
+            .setEventType("USER_ACCOUNT_MOBILE_UNBOUND")
+            .setEventContent("unbind_mobile")
+            .setEventTime(new Date());
+    }
+
+    /**
+     * 记录邮箱解绑审计事件。
+     */
+    public static ContentUserAuditLog accountEmailUnbound(String userId, String operatorUserId) {
+        return new ContentUserAuditLog()
+            .setUserId(userId)
+            .setOperatorUserId(operatorUserId)
+            .setEventType("USER_ACCOUNT_EMAIL_UNBOUND")
+            .setEventContent("unbind_email")
+            .setEventTime(new Date());
+    }
 }
