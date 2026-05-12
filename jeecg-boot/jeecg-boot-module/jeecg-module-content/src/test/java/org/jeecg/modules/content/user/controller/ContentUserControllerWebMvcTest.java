@@ -1,8 +1,12 @@
 package org.jeecg.modules.content.user.controller;
 
 import org.jeecg.modules.content.user.service.IContentUserGovernanceService;
+import org.jeecg.modules.content.user.service.IContentUserNotificationSettingService;
 import org.jeecg.modules.content.user.service.IContentUserProfileService;
 import org.jeecg.modules.content.user.service.IContentUserRelationService;
+import org.jeecg.modules.content.user.vo.ContentNotificationChannelConfigVO;
+import org.jeecg.modules.content.user.vo.ContentNotificationDndRuleVO;
+import org.jeecg.modules.content.user.vo.ContentUserNotificationSettingVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryItemVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryPageVO;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +43,9 @@ class ContentUserControllerWebMvcTest {
     @Mock
     private IContentUserRelationService relationService;
 
+    @Mock
+    private IContentUserNotificationSettingService notificationSettingService;
+
     @InjectMocks
     private ContentUserGovernanceController governanceController;
 
@@ -48,11 +55,14 @@ class ContentUserControllerWebMvcTest {
     @InjectMocks
     private ContentUserRelationController relationController;
 
+    @InjectMocks
+    private ContentUserSettingsController settingsController;
+
     @BeforeEach
     void setUp() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();
-        mockMvc = MockMvcBuilders.standaloneSetup(governanceController, profileController, relationController)
+        mockMvc = MockMvcBuilders.standaloneSetup(governanceController, profileController, relationController, settingsController)
             .setValidator(validator)
             .build();
     }
@@ -127,5 +137,38 @@ class ContentUserControllerWebMvcTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result").value("特别关注成功"));
+    }
+
+    @Test
+    void shouldReturnNotificationSetting() throws Exception {
+        when(notificationSettingService.getSetting("u1"))
+            .thenReturn(new ContentUserNotificationSettingVO()
+                .setUserId("u1")
+                .setLikeNoticeEnabled(Boolean.TRUE)
+                .setCommentNoticeEnabled(Boolean.FALSE)
+                .setChannelConfig(new ContentNotificationChannelConfigVO()
+                    .setLikeChannels(List.of("IN_APP", "EMAIL")))
+                .setDndRule(new ContentNotificationDndRuleVO()
+                    .setEnabled(Boolean.TRUE)
+                    .setStartTime("22:00")
+                    .setEndTime("08:00")));
+
+        mockMvc.perform(get("/content/user/settings/notification")
+                .param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.userId").value("u1"))
+            .andExpect(jsonPath("$.result.commentNoticeEnabled").value(false))
+            .andExpect(jsonPath("$.result.channelConfig.likeChannels[1]").value("EMAIL"))
+            .andExpect(jsonPath("$.result.dndRule.startTime").value("22:00"));
+    }
+
+    @Test
+    void shouldRejectInvalidNotificationChannel() throws Exception {
+        mockMvc.perform(post("/content/user/settings/notification/update")
+                .param("userId", "u1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"channelConfig\":{\"likeChannels\":[\"BAD\"]}}"))
+            .andExpect(status().isBadRequest());
     }
 }

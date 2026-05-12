@@ -15,10 +15,11 @@
 - `2026-05-02` 已新增成长处罚来源建模扩展：`governance/status/change` 与 `support/admin/report/handle` 可统一写入成长处罚主记录，并补齐 `sourceType/sourceId/sourceStatus` 来源字段与幂等建档规则。
 - `2026-05-02` 已新增成长处罚真实执行引擎：治理处罚入口与举报处理入口可真实执行积分、成长值、等级、勋章和首批等级权益处罚，并生成可恢复回放的执行快照与执行审计。
 - `2026-05-02` 已新增更多等级权益消费方：统一等级权益判定服务接管运行时权益判断，成长汇总返回上传大小、高清视频与话题额度能力摘要，`TOPIC` 订阅入口可真实感知额度变化。
+- `2026-05-11` 已新增资料与隐私域通知设置闭环：`settings/notification` 查询与更新通知开关、渠道配置、免打扰规则，并提供发送前通知策略判定，安全类通知按白名单豁免。
 
 ## 1. 总结论
 
-- 当前 `content/user` 目录已经形成了用户域后端的基础骨架，覆盖了 `手机号注册`、`邮箱注册`、`手机号/邮箱绑定解绑`、`密码找回`、`注销冷静期`、`资料更新`、`隐私可见性`、`积分/成长记账`、`关注/拉黑/屏蔽`、`订阅管理`、`举报/申诉`、`状态治理`、`设备会话管理` 等最小能力。
+- 当前 `content/user` 目录已经形成了用户域后端的基础骨架，覆盖了 `手机号注册`、`邮箱注册`、`手机号/邮箱绑定解绑`、`密码找回`、`注销冷静期`、`资料更新`、`隐私可见性`、`通知设置`、`积分/成长记账`、`关注/拉黑/屏蔽`、`订阅管理`、`举报/申诉`、`状态治理`、`设备会话管理` 等最小能力。
 - 现状以“基础聚合 + 静态规则 + 单表 service”为主，和 PRD 相比仍存在大量能力缺口，尤其集中在 `登录方式多样化`、`一步式换绑与第三方绑定`、`异常登录与风控`、`通知偏好细化`、`勋章体系行为闭环`、`关注流/推荐/粉丝/邀请`、`更细粒度等级权益规则`。
 - `支持治理域` 已补齐 `help-center` 分类级客服联动、`customer-service` 分层路由、`appeal/list` 分页返回、`status/history` 分页查询，以及申诉通过/自动到期恢复后的成长处罚联动恢复。
 - `成长激励域` 和 `关系订阅域` 的实体模型比服务闭环更完整，存在“有表/有字段，但无对外行为或无业务规则”的情况，需要谨慎判为“部分实现”或“未实现”。
@@ -29,7 +30,7 @@
 | 子域 | 已实现 | 部分实现 | 未实现 | 待确认 | 测试缺口 |
 | --- | --- | --- | --- | --- | --- |
 | 账号安全域 | 6 | 3 | 10 | 1 | 4 |
-| 资料与隐私域 | 4 | 3 | 6 | 2 | 4 |
+| 资料与隐私域 | 5 | 3 | 4 | 2 | 3 |
 | 成长激励域 | 2 | 2 | 8 | 1 | 4 |
 | 关系订阅域 | 6 | 3 | 8 | 2 | 4 |
 | 支持治理域 | 7 | 2 | 6 | 1 | 4 |
@@ -89,14 +90,15 @@
 | 32 | 字段可见性控制 | 已实现 | `service/impl/ContentUserProfileServiceImpl.java`、`service/impl/ContentUserVisibilityPolicyServiceImpl.java`、`entity/ContentUserPrivacySetting.java` | `service/ContentUserProfileServiceTest.java`、`service/ContentUserVisibilityPolicyServiceTest.java` | 当前只在生日字段上通过 `VO.from` 显式体现 | 后续扩展到更多字段显隐 | P1 |
 | 77、78 | 在线状态可见性、搜索引擎索引开关 | 已实现 | `req/profile/ContentUserPrivacyUpdateReq.java`、`service/impl/ContentUserProfileServiceImpl.java`、`entity/ContentUserPrivacySetting.java` | 无专门测试 | 已支持设置保存，但未提供专门查询与外部行为断言 | 后续增加设置读取与生效测试 | P1 |
 | 80 | 账户安全设置入口中的可见性/设置能力基础 | 已实现 | `controller/ContentUserSettingsController.java` | 无 | 只覆盖隐私设置，不含设备管理/密码修改统一门户 | 后续整合设置聚合接口 | P2 |
+| 74、75 | 通知开关、渠道配置与免打扰规则 | 已实现 | `controller/ContentUserSettingsController.java`、`service/impl/ContentUserNotificationSettingServiceImpl.java`、`req/settings/ContentUserNotificationUpdateReq.java`、`vo/ContentUserNotificationSettingVO.java`、`entity/ContentUserNotificationSetting.java` | `service/ContentUserNotificationSettingServiceTest.java`、`controller/ContentUserControllerWebMvcTest.java`、`req/ContentUserReqValidationTest.java` | 已支持查询/更新通知开关、渠道配置、免打扰规则，并提供发送前策略判定；尚未接入真实消息发送模块 | 后续在消息发送链路调用 `canSendNotice` | P1 |
 
 ### 部分实现
 
 | PRD 编号 | 需求摘要 | 实现状态 | 代码证据 | 测试证据 | 缺口说明 | 实现建议 | 优先级 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 33 | 昵称/头像历史记录与回溯展示 | 部分实现 | `entity/ContentUserProfile.java` 存在 `nicknameHistoryJson`、`avatarHistoryJson` 字段 | 无 | 更新资料时未维护历史，也未在 VO 中返回 | 在更新 service 中补历史写入与展示规则 | P1 |
-| 74、75 | 通知开关、渠道与免打扰 | 部分实现 | `entity/ContentUserNotificationSetting.java`、`mapper/ContentUserNotificationSettingMapper.java`、`ContentAccountServiceImpl.java` 初始化默认设置 | 无 | 只有默认数据初始化，没有 controller/service 更新接口 | 新增设置接口与渠道校验 | P1 |
 | 76 | 动态/收藏等可见性 | 部分实现 | `entity/ContentUserPrivacySetting.java` 中有 `dynamicVisibility` | 无 | 仅存储字段，没有明确查询策略落地到内容查询 | 补 visibility service 与对外接口 | P1 |
+| 112 | 通知关闭后不再发送 | 部分实现 | `service/impl/ContentUserNotificationSettingServiceImpl.java` | `service/ContentUserNotificationSettingServiceTest.java` | 已提供按通知类型、渠道、免打扰和安全类豁免的发送前判定，但真实消息发送模块尚未接入 | 在站内信、推送、邮件等发送入口统一调用通知策略服务 | P0 |
 
 ### 未实现
 
@@ -104,10 +106,8 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 30 | 手机号/邮箱绑定状态展示 | 未实现 | `vo/ContentUserProfileVO.java` 未见绑定状态字段 | 无 | 资料 VO 未输出绑定状态 | 补充绑定状态 VO 字段 | P1 |
 | 79 | 第三方授权列表与撤销授权 | 未实现 | 未发现第三方授权实体、接口或 service | 无 | 完全缺失 | 新增授权记录聚合与撤销接口 | P1 |
-| 74 | 渠道级通知开关的对外更新能力 | 未实现 | 只有 entity/mapper，无 controller/service | 无 | 需求未形成闭环 | 新增 `settings/notification` 子接口 | P1 |
-| 75 | 免打扰时段策略生效 | 未实现 | `ContentUserNotificationSetting` 只有 `doNotDisturbRuleJson` 字段 | 无 | 无策略解析和发送前判定逻辑 | 在通知发送链路接入豁免判定 | P1 |
 | 76 | 浏览记录、点赞动态、收藏夹显隐 | 未实现 | 未发现对应字段或策略接口 | 无 | 当前隐私模型未覆盖这些对象级显隐 | 扩展隐私模型 | P2 |
-| 111、112 | 隐私即时生效、通知关闭后不再发送 | 未实现 | 未发现缓存失效或通知发送策略实现 | 无 | 只有配置存储，没有消费侧执行 | 需要跨模块联动实现 | P0 |
+| 111 | 隐私即时生效与缓存失效 | 未实现 | 未发现缓存失效或跨模块消费侧策略实现 | 无 | 当前只有配置存储和可见性服务，缓存页面失效链路未体现 | 需要跨模块联动实现 | P0 |
 
 ### 待确认
 
@@ -120,7 +120,7 @@
 
 - `ContentUserProfileServiceTest` 仅覆盖“生日不可见”一条路径，没有覆盖资料更新、主页背景图、主题色、认证字段。
 - 没有 `ContentUserProfileController` 与 `ContentUserSettingsController` 的 WebMvc 测试。
-- 没有 `ContentUserNotificationSetting` 的 service/controller 测试。
+- `ContentUserNotificationSetting` 已补 service/controller/请求校验测试，但真实通知发送模块接入仍缺集成测试。
 - 昵称/头像历史、在线状态、搜索索引设置都缺行为测试。
 
 ## 5. 成长激励域
@@ -259,14 +259,14 @@
 - `PRD-18、19`：异常登录识别、风险拦截、限流或冻结。
 - `PRD-97、98`：帮助中心分类级客服联动、高等级/治理异常用户优先客服。
 - `PRD-96、106`：申诉结果驱动处罚恢复、自动/人工恢复闭环。
-- `PRD-111、112`：隐私即时生效、关闭通知后不再发送。
+- `PRD-111`：隐私即时生效与缓存失效。
 
 ### P1
 
 - `PRD-33`：昵称/头像历史维护与展示。
 - `PRD-34-46、83-87`：勋章服务、积分明细查询、等级权益、升级提示、经验衰减。
 - `PRD-49、50、52、53、59、68-71、90-94`：分组管理、关注流、推荐、订阅广场、内容降噪、粉丝与邀请。
-- `PRD-74、75、79`：通知设置更新、免打扰生效、第三方授权管理。
+- `PRD-79`：第三方授权管理。
 - `PRD-105`：状态历史查询。
 
 ### P2
@@ -281,5 +281,5 @@
 1. 第一阶段：先补 `支持治理域` 中 `help-center 分类级客服联动 + customer-service 分层`，并同步完成列表接口分页评估：`help-center` 属于静态小集合，不分页；`appeal/list` 属于用户历史列表，应升级为分页；`admin report list` 保持现有分页模型不变。
 2. 第二阶段：补 `账号安全域` 的 `邮箱注册、绑定解绑、登录方式、风险拦截`，形成真正的账号安全链路。
 3. 第三阶段：补 `关系订阅域` 的 `分组管理、批量操作、关注流、推荐、内容降噪`，把现有关系表从“数据维护”升级为“用户体验”能力。
-4. 第四阶段：补 `资料与隐私域` 的 `通知设置、免打扰、历史记录、第三方授权`，让设置类需求形成完整闭环。
+4. 第四阶段：继续补 `资料与隐私域` 的 `历史记录、第三方授权、隐私缓存失效与真实通知发送链路接入`，让设置类需求形成完整闭环。
 5. 第五阶段：补 `成长激励域` 的 `勋章服务、积分消耗、等级权益、升级提示与衰减规则`，在现有账本模型上做增量扩展。

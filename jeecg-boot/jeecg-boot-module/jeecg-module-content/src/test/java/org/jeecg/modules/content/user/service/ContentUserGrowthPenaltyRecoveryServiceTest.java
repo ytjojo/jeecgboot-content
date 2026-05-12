@@ -64,6 +64,8 @@ class ContentUserGrowthPenaltyRecoveryServiceTest {
     void shouldRecoverPenaltyEffectsByAppealApproval() {
         ContentUserAppeal appeal = new ContentUserAppeal()
             .setUserId("u1")
+            .setTargetType("GROWTH_PENALTY")
+            .setTargetId("penalty-1")
             .setResultStatus("APPROVED");
         appeal.setId("appeal-1");
         when(growthPenaltyRecordMapper.selectList(any())).thenReturn(List.of(buildPenaltyRecord()));
@@ -109,7 +111,11 @@ class ContentUserGrowthPenaltyRecoveryServiceTest {
         when(growthPenaltyRecordMapper.selectList(any())).thenReturn(List.of(buildRecoveredPenaltyRecord()));
 
         int recoveredCount = recoveryService.recoverByAppeal(
-            new ContentUserAppeal().setUserId("u1").setResultStatus("APPROVED"),
+            new ContentUserAppeal()
+                .setUserId("u1")
+                .setTargetType("GROWTH_PENALTY")
+                .setTargetId("penalty-2")
+                .setResultStatus("APPROVED"),
             "admin-1",
             new Date(),
             "重复触发"
@@ -123,6 +129,8 @@ class ContentUserGrowthPenaltyRecoveryServiceTest {
     void shouldContinueWhenBadgeGrantIsMissing() {
         ContentUserAppeal appeal = new ContentUserAppeal()
             .setUserId("u1")
+            .setTargetType("GROWTH_PENALTY")
+            .setTargetId("penalty-1")
             .setResultStatus("APPROVED");
         appeal.setId("appeal-1");
         when(growthPenaltyRecordMapper.selectList(any())).thenReturn(List.of(buildPenaltyRecord()));
@@ -144,6 +152,8 @@ class ContentUserGrowthPenaltyRecoveryServiceTest {
     void shouldRecoverLevelBenefitWhenAppealApproved() {
         ContentUserAppeal appeal = new ContentUserAppeal()
             .setUserId("u1")
+            .setTargetType("GROWTH_PENALTY")
+            .setTargetId("penalty-1")
             .setResultStatus("APPROVED");
         appeal.setId("appeal-1");
         when(growthPenaltyRecordMapper.selectList(any())).thenReturn(List.of(buildPenaltyRecord()));
@@ -172,6 +182,8 @@ class ContentUserGrowthPenaltyRecoveryServiceTest {
     void shouldRecoverPenaltyEffectsFromExecutionSnapshot() {
         ContentUserAppeal appeal = new ContentUserAppeal()
             .setUserId("u1")
+            .setTargetType("GROWTH_PENALTY")
+            .setTargetId("penalty-3")
             .setResultStatus("APPROVED");
         appeal.setId("appeal-1");
         when(growthPenaltyRecordMapper.selectList(any())).thenReturn(List.of(buildExecutionSnapshotPenaltyRecord()));

@@ -15,6 +15,9 @@ import org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq;
 import org.jeecg.modules.content.user.req.profile.ContentUserProfileUpdateReq;
 import org.jeecg.modules.content.user.req.relation.ContentBatchRelationReq;
 import org.jeecg.modules.content.user.req.relation.ContentFollowReq;
+import org.jeecg.modules.content.user.req.settings.ContentNotificationChannelConfigReq;
+import org.jeecg.modules.content.user.req.settings.ContentNotificationDndRuleReq;
+import org.jeecg.modules.content.user.req.settings.ContentUserNotificationUpdateReq;
 import org.jeecg.modules.content.user.req.subscription.ContentSubscriptionReq;
 import org.jeecg.modules.content.user.req.support.ContentAppealCreateReq;
 import org.junit.jupiter.api.Test;
@@ -143,6 +146,21 @@ class ContentUserReqValidationTest {
 
         assertTrue(fields.contains("nickname"));
         assertTrue(fields.contains("bio"));
+    }
+
+    @Test
+    void shouldRejectInvalidNotificationUpdateRequest() {
+        ContentUserNotificationUpdateReq req = new ContentUserNotificationUpdateReq()
+            .setChannelConfig(new ContentNotificationChannelConfigReq()
+                .setLikeChannels(List.of("BAD")))
+            .setDndRule(new ContentNotificationDndRuleReq()
+                .setEnabled(Boolean.TRUE)
+                .setStartTime("25:00"));
+
+        Set<String> fields = validate(req);
+
+        assertTrue(fields.contains("channelConfig.likeChannels[0].<list element>"));
+        assertTrue(fields.contains("dndRule.startTime"));
     }
 
     @Test
