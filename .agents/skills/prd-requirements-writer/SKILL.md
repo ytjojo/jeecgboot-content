@@ -20,6 +20,7 @@ This skill owns linear requirement completeness, not wiki page architecture.
 Use this skill when:
 
 - The user wants to write a PRD, MRD, BRD, requirement document, feature spec, or structured需求文档.
+- The user says common trigger phrases such as `写 PRD`, `写需求文档`, `按模板写产品需求`, `生成 PRD`, `审一下这份 PRD`, or `评审这份需求文档`.
 - The user has scattered notes, chat context, prototype notes, or rough ideas and wants them normalized into a usable requirement document.
 - The user wants to audit an existing PRD for completeness, ambiguity, missing edge cases, missing NFRs, or weak acceptance criteria.
 - The user explicitly asks what a high-quality requirement document should contain.
@@ -57,12 +58,31 @@ If the user wants both, start here only when wiki structure is not explicitly re
 
 - Prefer clear, concrete, implementation-ready language.
 - Prefer a single coherent document over a page tree.
+- Output directly usable Markdown by default, suitable for Confluence, Notion, wiki, or repository docs.
+- If a required detail is unknown, use a visible placeholder such as `[请补充：xxx]`, `[待确认]`, or `TBD` instead of silently omitting the section.
 - Separate `In Scope` and `Out of Scope`.
+- Include `Non-Goals` when it helps prevent scope creep.
 - Cover normal flow, failure flow, and interruption flow.
 - Make edge cases explicit: empty state, extreme input, timeout, retry, concurrency, permission, compatibility.
 - Use measurable statements instead of vague wording.
 - Ensure every major function has acceptance criteria.
 - Mark unknown items as `TBD` with owner or clarification question.
+
+## Minimum Input Rule
+
+Before generating a full PRD, confirm there is at least:
+
+- Product / feature name or topic
+- Business goal, product goal, or problem statement
+
+If the user only says `写一份 PRD` or `写需求文档` with no usable context, ask only for the essentials:
+
+- Product / feature name
+- Problem to solve
+- Target users
+- Core goal or success metric
+
+If the user has provided a partial draft, do not block on missing details. Generate or rewrite the PRD with explicit placeholders for missing items.
 
 ## Recommended Structure
 
@@ -288,6 +308,33 @@ Rules:
 - Should cover normal flow and exception flow
 - Should map back to major functional requirements
 
+## Gap Audit and Review Mode
+
+When the user provides an existing PRD and asks to review, audit, normalize, or check whether it follows the template, output a structured gap report instead of rewriting immediately unless requested.
+
+Include:
+
+- Conforming sections
+- Missing required sections
+- Requirements that are not testable
+- Missing or unmeasurable success metrics
+- Missing scope boundaries or non-goals
+- Missing dependencies, constraints, risks, or acceptance criteria
+
+Group findings by:
+
+- `必改`: blocks implementation, review, QA, or scope agreement
+- `建议`: improves clarity, delivery quality, or traceability
+- `可选`: useful polish or team-specific enhancement
+
+For every finding, include:
+
+- Location or section
+- Problem
+- Suggested fix
+
+If the user provides a local Markdown file path and asks to review PRD structure, run `scripts/check-prd-sections.sh <path>` when available, then merge the missing-section output into `必改`.
+
 ## Risks, Dependencies, and Assumptions
 
 Always check:
@@ -379,6 +426,7 @@ When using this skill:
 4. Expand each major function with rules, exceptions, and edge cases.
 5. Add NFRs, acceptance criteria, risks, and open questions.
 6. Run the quality checklist before finalizing.
+7. For review mode, classify findings as `必改 / 建议 / 可选`, and give concrete rewrite suggestions.
 
 ## Output Modes
 
@@ -395,6 +443,7 @@ Use these files for fast reuse:
 
 - `templates/prd-template.md`: standard PRD scaffold for direct copy-and-fill
 - `examples/simple-prd-demo.md`: minimal worked example showing the expected output shape
+- `scripts/check-prd-sections.sh`: optional structure checker for existing Markdown PRDs
 
 Suggested usage:
 
@@ -403,6 +452,16 @@ Suggested usage:
 3. Use `examples/simple-prd-demo.md` to understand the target level of detail
 4. Keep the result as a linear PRD unless the user explicitly asks for wiki hierarchy
 5. Expand edge cases, NFRs, and acceptance criteria before finalizing
+6. When reviewing a local `.md` PRD file, optionally run the checker script first and include its missing sections in the review
+
+## Skill Maintenance and Team Collaboration
+
+When maintaining this skill for a team:
+
+- Keep `description` aligned with real user trigger phrases, including PRD, 需求文档, 产品需求, 评审 PRD, and 按模板写需求.
+- Keep the main `SKILL.md` short enough to express hard rules and workflow; put reusable long templates and examples into supporting files.
+- Review skill changes like product-process changes: check whether the structure matches team consensus, whether writing rules are clear, and whether the skill can be triggered successfully in a realistic conversation.
+- Prefer adding small scripts for mechanical checks, such as required section validation, while leaving judgment-heavy issues to the skill review logic.
 
 ## Final Reminder
 
