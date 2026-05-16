@@ -19,12 +19,12 @@ schema: spec-driven
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
 
-  rules:
-    specs:
-      - 每个数据字段的变更，必须覆盖null、空值、越界三种异常场景
-      - Scenario必须使用#### 四级标题，否则会被静默忽略
-    design:
-      - 涉及数据库migration的设计，必须包含回滚方案
-    tasks:
-      - 所有实现任务必须配对对应的测试任务，测试任务写在实现任务正下方
-      - 单个task不超过30分钟工作量
+rules:
+  specs:
+    - 每个数据字段的变更，必须覆盖null、空值、越界三种异常场景
+    - Scenario必须使用#### 四级标题，否则会被静默忽略
+  design:
+    - 涉及数据库migration的设计，必须包含回滚方案
+  tasks:
+    - 所有实现任务必须配对对应的测试任务，测试任务写在实现任务正下方
+    - 单个task不超过30分钟工作量
