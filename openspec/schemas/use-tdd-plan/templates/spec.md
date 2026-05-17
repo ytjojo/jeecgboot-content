@@ -2,7 +2,9 @@
 
 ### Requirement: <!-- requirement name -->
 <!-- requirement text -->
+### Scenarios
 
 #### Scenario: <!-- scenario name -->
-- **WHEN** <!-- condition -->
-- **THEN** <!-- expected outcome -->
+- GIVEN: [前置条件]
+- WHEN: [操作]
+- THEN: [期望结果]

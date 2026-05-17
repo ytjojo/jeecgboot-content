@@ -1,6 +1,6 @@
-name: with-review
+name: use-tdd-plan
 version: 1
-description: Default OpenSpec workflow - proposal → specs → design → review → tasks
+description: Default OpenSpec workflow - proposal → specs → design → tasks → plans
 artifacts:
   - id: proposal
     generates: proposal.md
@@ -184,20 +184,6 @@ artifacts:
       Good design docs explain the "why" behind technical decisions.
     requires:
       - proposal
-      
-  #⬇️ 新增的 review 工件
-  - id:review
-    generates:review.md
-    template:review.md   # ← 需要在 templates/ 目录下创建此文件
-    description:五维审查-检查设计方案和Spec的完整性
-    instruction: >
-      从五个维度审查所有工件的完整性：
-      1. 边界条件：Spec 是否覆盖 null、空值、越界、并发等异常场景
-      2. 回滚方案：数据库变更是否包含回滚策略
-      3. 测试覆盖：Design 是否明确了需要测试的场景和用例
-      4. 向后兼容：是否分析了现有接口和数据的兼容性
-      5. 任务粒度：初步判断 tasks 应该怎么拆分才合理
-    requires:[proposal,specs,design]
 
   - id: tasks
     generates: tasks.md
@@ -251,11 +237,53 @@ artifacts:
     requires:
       - specs
       - design
-      - review
+
+  - id: plans
+    generates: plan.md
+    description: 执行计划——每步对应一个任务，附验证命令
+    template: plan.md
+    instruction: |
+      创建详细的执行计划。
+      每个计划步骤必须精确对应 tasks.md 中的一个任务。
+
+      RED 任务需包含：测试文件路径、断言内容、预期失败原因、验证命令。
+      GREEN 任务需包含：要通过的测试、最小实现描述、验证命令。
+
+      计划末尾必须追加：
+      ---
+      ## Execution Mode Selection
+      REQUIRED: Use superpowers:subagent-driven-development skill.
+      DO NOT use executing-plans or inline execution.
+    requires:
+      - tasks    
 apply:
   requires:
-    - tasks
+    - plans
   tracks: tasks.md
   instruction: |
     Read context files, work through pending tasks, mark complete as you go.
     Pause if you hit blockers or need clarification.
+    必须使用 superpowers:subagent-driven-development skill 执行。
+    禁止使用 executing-plans 或 inline 执行。
+
+    执行规则：
+    1. 每个任务是一个原子 TDD 阶段——每个任务派遣一个子代理
+    2. 禁止并行派遣多个实现子代理
+    3. 任务必须按顺序执行
+
+    每个子代理的证据要求：
+    - RED 任务：必须包含测试失败输出
+      如果 RED 阶段报告"所有测试通过"→ 异常 → 重新派遣
+    - GREEN 任务：必须包含测试通过输出
+      如果 GREEN 阶段报告"测试仍失败"→ 不要标记完成 → 重新派遣
+
+    每个任务完成后（必须逐个执行，不可跳过）：
+    1. Spec 审查：子代理是否精确实现了任务要求？
+    2. 代码质量审查：代码是否干净、有测试、可维护？
+    3. 两项审查都通过后 → 标记完成（- [ ] → - [x]）
+    4. 继续下一个任务
+
+    全部任务完成后：
+    1. 运行完整测试套件
+    2. 验证所有 spec 已满足
+    3. 检查测试覆盖率

@@ -1,10 +1,15 @@
 ## Why
 
-<!-- Explain the motivation for this change. What problem does this solve? Why now? -->
 
-## What Changes
+## Problem
+<!-- 描述要解决的问题 -->
 
-<!-- Describe what will change. Be specific about new capabilities, modifications, or removals. -->
+## Testable Behaviors
+<!-- WHEN/THEN 格式列出每一个可测试行为 -->
+
+## Acceptance Criteria
+<!-- 验收标准 -->
+
 
 ## Capabilities
 
