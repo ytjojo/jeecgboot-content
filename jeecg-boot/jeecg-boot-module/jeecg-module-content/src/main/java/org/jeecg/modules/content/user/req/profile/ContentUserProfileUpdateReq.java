@@ -1,6 +1,8 @@
 package org.jeecg.modules.content.user.req.profile;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -15,12 +17,14 @@ import java.util.Date;
 @Schema(description = "内容社区用户资料更新请求")
 public class ContentUserProfileUpdateReq {
 
+    @NotBlank(message = "昵称不能为空")
     @Size(max = 20, message = "昵称长度不能超过20位")
-    @Schema(description = "昵称", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    @Schema(description = "昵称", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private String nickname;
 
-    @Size(max = 255, message = "头像长度不能超过255位")
-    @Schema(description = "头像", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    @NotBlank(message = "头像不能为空")
+    @Size(max = 500, message = "头像长度不能超过500位")
+    @Schema(description = "头像", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private String avatar;
 
     @Size(max = 500, message = "个人简介长度不能超过500位")
@@ -42,10 +46,11 @@ public class ContentUserProfileUpdateReq {
     private String profession;
 
     @Size(max = 255, message = "个人链接长度不能超过255位")
+    @Pattern(regexp = "^(https?://|/).*$", message = "个人链接格式不合法")
     @Schema(description = "个人链接", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String personalLink;
 
-    @Size(max = 255, message = "主页背景图长度不能超过255位")
+    @Size(max = 500, message = "主页背景图长度不能超过500位")
     @Schema(description = "主页背景图", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String homepageBackground;
 

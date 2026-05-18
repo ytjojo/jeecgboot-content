@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.jeecg.common.system.base.entity.JeecgEntity;
 
+import java.util.Date;
+
 /**
  * Entity for content user subscription.
  */
@@ -37,6 +39,15 @@ public class ContentUserSubscription extends JeecgEntity {
     @Schema(description = "是否暂停订阅")
     private Boolean paused;
 
+    @Schema(description = "订阅状态")
+    private String subscriptionStatus;
+
     @Schema(description = "推荐理由")
     private String recommendationReason;
+
+    @Schema(description = "订阅时间")
+    private Date subscribedAt;
+
+    @Schema(description = "订阅源最近更新时间")
+    private Date lastUpdateTime;
 }

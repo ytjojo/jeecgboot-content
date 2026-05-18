@@ -76,6 +76,19 @@ public class ContentUserAuditLog extends JeecgEntity {
     }
 
     /**
+     * 记录勋章违规回收审计事件，并作为用户通知流水来源。
+     */
+    public static ContentUserAuditLog badgeRecycled(String userId, String operatorUserId, String badgeCode, String reason) {
+        return new ContentUserAuditLog()
+            .setUserId(userId)
+            .setOperatorUserId(operatorUserId)
+            .setEventType("USER_BADGE_RECYCLED")
+            .setEventContent(badgeCode)
+            .setExtraDataJson("{\"reason\":\"" + reason + "\",\"notification\":true}")
+            .setEventTime(new Date());
+    }
+
+    /**
      * Executes the appealCreated operation.
      */
     public static ContentUserAuditLog appealCreated(ContentUserAppeal appeal) {

@@ -27,4 +27,7 @@ public class ContentUserRelationGroup extends JeecgEntity {
 
     @Schema(description = "是否默认分组")
     private Boolean isDefault;
+
+    @Schema(description = "分组状态")
+    private String groupStatus;
 }

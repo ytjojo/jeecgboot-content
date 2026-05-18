@@ -43,6 +43,9 @@ public class ContentUserRelation extends JeecgEntity {
     @Schema(description = "是否由拥有者阻断")
     private Boolean blockedByOwner;
 
+    @Schema(description = "关系记录状态")
+    private String relationStatus;
+
     @Schema(description = "推荐理由")
     private String recommendationReason;
 
@@ -57,4 +60,7 @@ public class ContentUserRelation extends JeecgEntity {
 
     @Schema(description = "拉黑时间")
     private Date blacklistedAt;
+
+    @Schema(description = "最近互动时间")
+    private Date lastInteractionTime;
 }

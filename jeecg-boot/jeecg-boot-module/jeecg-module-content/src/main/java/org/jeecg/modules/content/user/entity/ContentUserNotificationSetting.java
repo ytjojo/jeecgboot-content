@@ -38,6 +38,15 @@ public class ContentUserNotificationSetting extends JeecgEntity {
     @Schema(description = "私信通知开关")
     private Boolean privateMessageNoticeEnabled;
 
+    @Schema(description = "订阅更新通知开关")
+    private Boolean subscriptionNoticeEnabled;
+
+    @Schema(description = "订阅默认通知渠道")
+    private String subscriptionDefaultChannels;
+
+    @Schema(description = "订阅默认通知频率")
+    private String subscriptionDefaultFrequency;
+
     @Schema(description = "通知渠道JSON")
     private String channelConfigJson;
 
@@ -56,6 +65,9 @@ public class ContentUserNotificationSetting extends JeecgEntity {
             .setFavoriteNoticeEnabled(Boolean.TRUE)
             .setMentionNoticeEnabled(Boolean.TRUE)
             .setPrivateMessageNoticeEnabled(Boolean.TRUE)
+            .setSubscriptionNoticeEnabled(Boolean.TRUE)
+            .setSubscriptionDefaultChannels("IN_APP,PUSH")
+            .setSubscriptionDefaultFrequency("REALTIME")
             .setChannelConfigJson("{}")
             .setDndRuleJson("{}");
     }

@@ -32,6 +32,15 @@ public class ContentUserPrivacySetting extends JeecgEntity {
     @Schema(description = "职业可见范围")
     private String professionVisibility;
 
+    @Schema(description = "个人链接可见范围")
+    private String personalLinkVisibility;
+
+    @Schema(description = "认证标识可见范围")
+    private String verificationBadgeVisibility;
+
+    @Schema(description = "绑定标识可见范围")
+    private String contactBadgeVisibility;
+
     @Schema(description = "主页可见范围")
     private String homepageVisibility;
 

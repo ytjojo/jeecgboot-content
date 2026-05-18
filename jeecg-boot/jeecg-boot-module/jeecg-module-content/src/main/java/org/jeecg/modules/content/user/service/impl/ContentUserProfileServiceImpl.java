@@ -1,27 +1,56 @@
 package org.jeecg.modules.content.user.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.common.util.UUIDGenerator;
+import org.jeecg.modules.content.user.constant.ContentUserCacheConstant;
+import org.jeecg.modules.content.user.entity.ContentUserHomepageModule;
 import org.jeecg.modules.content.user.entity.ContentUserPrivacySetting;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
+import org.jeecg.modules.content.user.entity.ContentUserProfileReview;
+import org.jeecg.modules.content.user.enums.ContentProfileHistoryTypeEnum;
+import org.jeecg.modules.content.user.enums.ContentProfileReviewStatusEnum;
 import org.jeecg.modules.content.user.enums.ContentUserVisibilityEnum;
+import org.jeecg.modules.content.user.mapper.ContentUserHomepageModuleMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserPrivacySettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
+import org.jeecg.modules.content.user.mapper.ContentUserProfileReviewMapper;
 import org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq;
 import org.jeecg.modules.content.user.req.profile.ContentUserProfileUpdateReq;
+import org.jeecg.modules.content.user.req.profile.ContentUserReviewHandleReq;
+import org.jeecg.modules.content.user.service.IContentUserMediaAdapter;
+import org.jeecg.modules.content.user.service.IContentUserProfileAuditAdapter;
+import org.jeecg.modules.content.user.service.IContentUserProfileHistoryService;
 import org.jeecg.modules.content.user.service.IContentUserProfileService;
+import org.jeecg.modules.content.user.service.IContentUserVerificationBadgeService;
 import org.jeecg.modules.content.user.service.IContentUserVisibilityPolicyService;
+import org.jeecg.modules.content.user.vo.ContentUserHomepageModuleVO;
 import org.jeecg.modules.content.user.vo.ContentUserProfileVO;
+import org.jeecg.modules.content.user.vo.ContentUserVerificationBadgeVO;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Service implementation for content user profile.
+ * 内容社区用户资料服务实现。
  */
 @Service
 public class ContentUserProfileServiceImpl implements IContentUserProfileService {
+
+    private static final int PROFILE_DAILY_LIMIT = 5;
+    private static final int PRIVACY_HOURLY_LIMIT = 10;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Resource
     private ContentUserProfileMapper profileMapper;
@@ -30,26 +59,227 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
     private ContentUserPrivacySettingMapper privacyMapper;
 
     @Resource
+    private ContentUserProfileReviewMapper profileReviewMapper;
+
+    @Resource
+    private ContentUserHomepageModuleMapper homepageModuleMapper;
+
+    @Resource
     private IContentUserVisibilityPolicyService visibilityPolicyService;
 
+    @Resource
+    private IContentUserProfileAuditAdapter profileAuditAdapter;
+
+    @Resource
+    private IContentUserMediaAdapter mediaAdapter;
+
+    @Resource
+    private IContentUserProfileHistoryService historyService;
+
+    @Resource
+    private IContentUserVerificationBadgeService verificationBadgeService;
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
     /**
-     * Returns the user profile as seen by the current viewer.
+     * 按查看者身份返回经过隐私裁剪的用户资料。
      */
     @Override
     public ContentUserProfileVO getProfile(String ownerUserId, String viewerUserId) {
         ContentUserProfile profile = requireProfile(ownerUserId);
         ContentUserPrivacySetting privacy = defaultPrivacy(privacyMapper.selectByUserId(ownerUserId), ownerUserId);
         boolean birthdayVisible = visibilityPolicyService.canViewField(ownerUserId, viewerUserId, privacy.getBirthdayVisibility());
-        return ContentUserProfileVO.from(profile, birthdayVisible);
+        boolean genderVisible = visibilityPolicyService.canViewField(ownerUserId, viewerUserId, privacy.getGenderVisibility());
+        boolean regionVisible = visibilityPolicyService.canViewField(ownerUserId, viewerUserId, privacy.getRegionVisibility());
+        boolean professionVisible = visibilityPolicyService.canViewField(ownerUserId, viewerUserId, privacy.getProfessionVisibility());
+        boolean personalLinkVisible = visibilityPolicyService.canViewField(ownerUserId, viewerUserId, privacy.getPersonalLinkVisibility());
+        boolean verificationVisible = visibilityPolicyService.canViewField(ownerUserId, viewerUserId, privacy.getVerificationBadgeVisibility());
+        ContentUserProfileVO vo = ContentUserProfileVO.from(
+            profile,
+            birthdayVisible,
+            genderVisible,
+            regionVisible,
+            professionVisible,
+            personalLinkVisible,
+            verificationVisible
+        );
+        if (verificationVisible) {
+            List<ContentUserVerificationBadgeVO> badges = verificationBadgeService.listVisibleBadges(ownerUserId);
+            vo.setVerificationBadges(badges);
+        }
+        if (visibilityPolicyService.canViewField(ownerUserId, viewerUserId, privacy.getHomepageVisibility())) {
+            List<ContentUserHomepageModuleVO> modules = homepageModuleMapper.selectByUserId(ownerUserId).stream()
+                .map(ContentUserHomepageModuleVO::from)
+                .toList();
+            vo.setHomepageModules(modules);
+        } else {
+            vo.setHomepageBackground(null);
+            vo.setThemeColor(null);
+            vo.setModuleOrderJson(null);
+        }
+        return vo;
     }
 
     /**
-     * Updates user profile fields and homepage personalization settings.
+     * 更新用户资料；疑似风险内容进入待审核，低风险内容直接生效。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateProfile(String userId, ContentUserProfileUpdateReq req) {
         ContentUserProfile profile = requireProfile(userId);
+        ContentUserProfileUpdateReq normalizedReq = mergeAndNormalize(profile, req);
+        validateProfileReq(normalizedReq);
+        if (profileReviewMapper.selectPendingByUserId(userId) != null) {
+            throw new JeecgBootException("资料正在审核中，请稍后再修改");
+        }
+        assertProfileUpdateQuota(userId);
+        mediaAdapter.validateAvatar(normalizedReq.getAvatar());
+        mediaAdapter.validateHomepageBackground(normalizedReq.getHomepageBackground());
+        IContentUserProfileAuditAdapter.AuditResult auditResult = profileAuditAdapter.review(normalizedReq);
+        if (auditResult.suspicious()) {
+            createPendingReview(userId, profile, normalizedReq, auditResult.reason());
+            return;
+        }
+        applyProfileUpdate(profile, normalizedReq, null);
+        evictProfileCache(userId);
+    }
+
+    /**
+     * 更新隐私设置，并删除公共资料缓存。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updatePrivacy(String userId, ContentUserPrivacyUpdateReq req) {
+        assertPrivacyUpdateQuota(userId);
+        ContentUserPrivacySetting privacy = privacyMapper.selectByUserId(userId);
+        if (privacy == null) {
+            privacy = defaultPrivacy(new ContentUserPrivacySetting(), userId);
+            applyPrivacyUpdate(privacy, req);
+            privacy.setId(UUIDGenerator.generate());
+            privacyMapper.insert(privacy);
+            evictProfileCache(userId);
+            return;
+        }
+        applyPrivacyUpdate(privacy, req);
+        privacyMapper.updateById(privacy);
+        evictProfileCache(userId);
+    }
+
+    /**
+     * 处理资料审核结果，审核通过才发布新资料。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void handleProfileReview(ContentUserReviewHandleReq req) {
+        ContentUserProfileReview review = profileReviewMapper.selectById(req.getReviewId());
+        if (review == null || !ContentProfileReviewStatusEnum.PENDING.getCode().equals(review.getReviewStatus())) {
+            throw new JeecgBootException("待审核资料不存在");
+        }
+        ContentUserProfile profile = requireProfile(review.getUserId());
+        if (ContentProfileReviewStatusEnum.APPROVED.getCode().equals(req.getReviewStatus())) {
+            ContentUserProfileUpdateReq targetReq = readReviewTarget(review);
+            applyProfileUpdate(profile, targetReq, review.getId());
+            review.setReviewStatus(ContentProfileReviewStatusEnum.APPROVED.getCode());
+        } else if (ContentProfileReviewStatusEnum.REJECTED.getCode().equals(req.getReviewStatus())) {
+            profile.setProfileReviewStatus(ContentProfileReviewStatusEnum.REJECTED.getCode());
+            profileMapper.updateById(profile);
+            review.setReviewStatus(ContentProfileReviewStatusEnum.REJECTED.getCode());
+            review.setRejectReason(req.getRejectReason());
+        } else {
+            throw new JeecgBootException("审核结果不合法");
+        }
+        review.setReviewedBy(req.getOperatorUserId());
+        review.setReviewedAt(new Date());
+        profileReviewMapper.updateById(review);
+        evictProfileCache(review.getUserId());
+    }
+
+    private ContentUserProfileUpdateReq mergeAndNormalize(ContentUserProfile profile, ContentUserProfileUpdateReq req) {
+        ContentUserProfileUpdateReq normalizedReq = new ContentUserProfileUpdateReq();
+        normalizedReq.setNickname(trimToNull(firstNonNull(req.getNickname(), profile.getNickname())));
+        normalizedReq.setAvatar(trimToNull(firstNonNull(req.getAvatar(), profile.getAvatar())));
+        normalizedReq.setBio(trimToNull(firstNonNull(req.getBio(), profile.getBio())));
+        normalizedReq.setGender(firstNonNull(req.getGender(), profile.getGender()));
+        normalizedReq.setBirthday(firstNonNull(req.getBirthday(), profile.getBirthday()));
+        normalizedReq.setRegion(trimToNull(firstNonNull(req.getRegion(), profile.getRegion())));
+        normalizedReq.setProfession(trimToNull(firstNonNull(req.getProfession(), profile.getProfession())));
+        normalizedReq.setPersonalLink(trimToNull(firstNonNull(req.getPersonalLink(), profile.getPersonalLink())));
+        normalizedReq.setHomepageBackground(trimToNull(firstNonNull(req.getHomepageBackground(), profile.getHomepageBackground())));
+        normalizedReq.setThemeColor(trimToNull(firstNonNull(req.getThemeColor(), profile.getThemeColor())));
+        normalizedReq.setModuleOrderJson(trimToNull(firstNonNull(req.getModuleOrderJson(), profile.getModuleOrderJson())));
+        normalizedReq.setCertificationType(trimToNull(firstNonNull(req.getCertificationType(), profile.getCertificationType())));
+        normalizedReq.setCertificationLabel(trimToNull(firstNonNull(req.getCertificationLabel(), profile.getCertificationLabel())));
+        return normalizedReq;
+    }
+
+    private void validateProfileReq(ContentUserProfileUpdateReq req) {
+        if (isBlank(req.getNickname())) {
+            throw new JeecgBootException("昵称不能为空");
+        }
+        if (req.getNickname().length() > 20) {
+            throw new JeecgBootException("昵称长度不能超过20位");
+        }
+        if (isBlank(req.getAvatar())) {
+            throw new JeecgBootException("头像不能为空");
+        }
+        if (req.getBio() != null && req.getBio().length() > 500) {
+            throw new JeecgBootException("个人简介长度不能超过500位");
+        }
+        if (req.getGender() != null && req.getGender() != 0 && req.getGender() != 1 && req.getGender() != 2) {
+            throw new JeecgBootException("性别取值不合法");
+        }
+        if (req.getBirthday() != null && req.getBirthday().after(new Date())) {
+            throw new JeecgBootException("生日不能晚于当前日期");
+        }
+        if (req.getRegion() != null && req.getRegion().length() > 64) {
+            throw new JeecgBootException("地区长度不能超过64位");
+        }
+        if (req.getProfession() != null && req.getProfession().length() > 64) {
+            throw new JeecgBootException("职业长度不能超过64位");
+        }
+        if (req.getPersonalLink() != null) {
+            validatePersonalLink(req.getPersonalLink());
+        }
+    }
+
+    private void validatePersonalLink(String personalLink) {
+        try {
+            URI uri = new URI(personalLink);
+            if (uri.getScheme() == null || !List.of("http", "https").contains(uri.getScheme())) {
+                throw new JeecgBootException("个人链接格式不合法");
+            }
+        } catch (URISyntaxException ex) {
+            throw new JeecgBootException("个人链接格式不合法");
+        }
+    }
+
+    private void createPendingReview(String userId,
+                                     ContentUserProfile profile,
+                                     ContentUserProfileUpdateReq req,
+                                     String riskReason) {
+        ContentUserProfileReview review = new ContentUserProfileReview()
+            .setUserId(userId)
+            .setReviewStatus(ContentProfileReviewStatusEnum.PENDING.getCode())
+            .setReviewType("PROFILE")
+            .setRiskReason(riskReason)
+            .setOriginalSnapshotJson(writeProfileSnapshot(profile))
+            .setTargetSnapshotJson(writeReqSnapshot(req));
+        review.setId(UUIDGenerator.generate());
+        profileReviewMapper.insert(review);
+        profile.setProfileReviewStatus(ContentProfileReviewStatusEnum.PENDING.getCode());
+        profileMapper.updateById(profile);
+    }
+
+    private void applyProfileUpdate(ContentUserProfile profile, ContentUserProfileUpdateReq req, String sourceUpdateId) {
+        if (!Objects.equals(profile.getNickname(), req.getNickname())) {
+            historyService.recordEffectiveChange(profile.getUserId(), ContentProfileHistoryTypeEnum.NICKNAME.getCode(),
+                profile.getNickname(), sourceUpdateId);
+        }
+        if (!Objects.equals(profile.getAvatar(), req.getAvatar())) {
+            historyService.recordEffectiveChange(profile.getUserId(), ContentProfileHistoryTypeEnum.AVATAR.getCode(),
+                profile.getAvatar(), sourceUpdateId);
+        }
         profile.setNickname(req.getNickname());
         profile.setAvatar(req.getAvatar());
         profile.setBio(req.getBio());
@@ -63,37 +293,57 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
         profile.setModuleOrderJson(req.getModuleOrderJson());
         profile.setCertificationType(req.getCertificationType());
         profile.setCertificationLabel(req.getCertificationLabel());
+        profile.setProfileCompletionState("COMPLETE");
+        profile.setProfileReviewStatus(ContentProfileReviewStatusEnum.NONE.getCode());
+        profile.setProfileVersion(profile.getProfileVersion() == null ? 1 : profile.getProfileVersion() + 1);
         profileMapper.updateById(profile);
     }
 
-    /**
-     * Updates privacy, visibility, and discovery settings for the user.
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updatePrivacy(String userId, ContentUserPrivacyUpdateReq req) {
-        ContentUserPrivacySetting privacy = privacyMapper.selectByUserId(userId);
-        if (privacy == null) {
-            privacy = defaultPrivacy(new ContentUserPrivacySetting(), userId);
-            privacy.setId(UUIDGenerator.generate());
-            applyPrivacyUpdate(privacy, req);
-            privacyMapper.insert(privacy);
-            return;
-        }
-        applyPrivacyUpdate(privacy, req);
-        privacyMapper.updateById(privacy);
+    private void applyPrivacyUpdate(ContentUserPrivacySetting privacy, ContentUserPrivacyUpdateReq req) {
+        setIfPresent(req.getBirthdayVisibility(), privacy::setBirthdayVisibility);
+        setIfPresent(req.getGenderVisibility(), privacy::setGenderVisibility);
+        setIfPresent(req.getRegionVisibility(), privacy::setRegionVisibility);
+        setIfPresent(req.getProfessionVisibility(), privacy::setProfessionVisibility);
+        setIfPresent(req.getPersonalLinkVisibility(), privacy::setPersonalLinkVisibility);
+        setIfPresent(req.getVerificationBadgeVisibility(), privacy::setVerificationBadgeVisibility);
+        setIfPresent(req.getContactBadgeVisibility(), privacy::setContactBadgeVisibility);
+        setIfPresent(req.getHomepageVisibility(), privacy::setHomepageVisibility);
+        setIfPresent(req.getDynamicVisibility(), privacy::setDynamicVisibility);
+        privacy.setOnlineStatusVisible(firstNonNull(req.getOnlineStatusVisible(), privacy.getOnlineStatusVisible()));
+        privacy.setAllowSearchEngineIndex(firstNonNull(req.getAllowSearchEngineIndex(), privacy.getAllowSearchEngineIndex()));
+        privacy.setAllowUserSearch(firstNonNull(req.getAllowUserSearch(), privacy.getAllowUserSearch()));
     }
 
-    private void applyPrivacyUpdate(ContentUserPrivacySetting privacy, ContentUserPrivacyUpdateReq req) {
-        privacy.setBirthdayVisibility(req.getBirthdayVisibility());
-        privacy.setGenderVisibility(req.getGenderVisibility());
-        privacy.setRegionVisibility(req.getRegionVisibility());
-        privacy.setProfessionVisibility(req.getProfessionVisibility());
-        privacy.setHomepageVisibility(req.getHomepageVisibility());
-        privacy.setDynamicVisibility(req.getDynamicVisibility());
-        privacy.setOnlineStatusVisible(req.getOnlineStatusVisible());
-        privacy.setAllowSearchEngineIndex(req.getAllowSearchEngineIndex());
-        privacy.setAllowUserSearch(req.getAllowUserSearch());
+    private void assertProfileUpdateQuota(String userId) {
+        String key = ContentUserCacheConstant.PROFILE_UPDATE_COUNT_PREFIX + userId + ":" + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+        incrementOrReject(key, PROFILE_DAILY_LIMIT, 1, TimeUnit.DAYS, "今日资料修改次数已达上限");
+    }
+
+    private void assertPrivacyUpdateQuota(String userId) {
+        String key = ContentUserCacheConstant.PRIVACY_UPDATE_COUNT_PREFIX + userId + ":" + System.currentTimeMillis() / 3_600_000;
+        incrementOrReject(key, PRIVACY_HOURLY_LIMIT, 1, TimeUnit.HOURS, "隐私设置修改过于频繁");
+    }
+
+    private void incrementOrReject(String key, int limit, long timeout, TimeUnit unit, String message) {
+        if (redisTemplate == null) {
+            return;
+        }
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count != null && count == 1L) {
+            redisTemplate.expire(key, timeout, unit);
+        }
+        if (count != null && count > limit) {
+            throw new JeecgBootException(message);
+        }
+    }
+
+    private void evictProfileCache(String userId) {
+        if (redisTemplate == null || isBlank(userId)) {
+            return;
+        }
+        redisTemplate.delete(ContentUserCacheConstant.PROFILE_CACHE_PREFIX + userId);
+        redisTemplate.delete(ContentUserCacheConstant.PRIVACY_CACHE_PREFIX + userId);
+        redisTemplate.delete(ContentUserCacheConstant.PROFILE_PUBLIC_CACHE_PREFIX + userId);
     }
 
     private ContentUserProfile requireProfile(String userId) {
@@ -121,6 +371,15 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
         if (privacy.getProfessionVisibility() == null) {
             privacy.setProfessionVisibility(ContentUserVisibilityEnum.PUBLIC.getCode());
         }
+        if (privacy.getPersonalLinkVisibility() == null) {
+            privacy.setPersonalLinkVisibility(ContentUserVisibilityEnum.PUBLIC.getCode());
+        }
+        if (privacy.getVerificationBadgeVisibility() == null) {
+            privacy.setVerificationBadgeVisibility(ContentUserVisibilityEnum.PUBLIC.getCode());
+        }
+        if (privacy.getContactBadgeVisibility() == null) {
+            privacy.setContactBadgeVisibility(ContentUserVisibilityEnum.PRIVATE.getCode());
+        }
         if (privacy.getHomepageVisibility() == null) {
             privacy.setHomepageVisibility(ContentUserVisibilityEnum.PUBLIC.getCode());
         }
@@ -137,5 +396,64 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
             privacy.setAllowUserSearch(Boolean.TRUE);
         }
         return privacy;
+    }
+
+    private String writeProfileSnapshot(ContentUserProfile profile) {
+        ContentUserProfileUpdateReq req = new ContentUserProfileUpdateReq()
+            .setNickname(profile.getNickname())
+            .setAvatar(profile.getAvatar())
+            .setBio(profile.getBio())
+            .setGender(profile.getGender())
+            .setBirthday(profile.getBirthday())
+            .setRegion(profile.getRegion())
+            .setProfession(profile.getProfession())
+            .setPersonalLink(profile.getPersonalLink())
+            .setHomepageBackground(profile.getHomepageBackground())
+            .setThemeColor(profile.getThemeColor())
+            .setModuleOrderJson(profile.getModuleOrderJson())
+            .setCertificationType(profile.getCertificationType())
+            .setCertificationLabel(profile.getCertificationLabel());
+        return writeReqSnapshot(req);
+    }
+
+    private String writeReqSnapshot(ContentUserProfileUpdateReq req) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(req);
+        } catch (JsonProcessingException ex) {
+            throw new JeecgBootException("资料快照序列化失败");
+        }
+    }
+
+    private ContentUserProfileUpdateReq readReviewTarget(ContentUserProfileReview review) {
+        try {
+            return OBJECT_MAPPER.readValue(review.getTargetSnapshotJson(), ContentUserProfileUpdateReq.class);
+        } catch (JsonProcessingException ex) {
+            throw new JeecgBootException("资料审核快照解析失败");
+        }
+    }
+
+    private void setIfPresent(String value, java.util.function.Consumer<String> consumer) {
+        if (value != null) {
+            if (value.trim().isEmpty()) {
+                throw new JeecgBootException("可见范围不能为空");
+            }
+            consumer.accept(value);
+        }
+    }
+
+    private <T> T firstNonNull(T first, T second) {
+        return first != null ? first : second;
+    }
+
+    private String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

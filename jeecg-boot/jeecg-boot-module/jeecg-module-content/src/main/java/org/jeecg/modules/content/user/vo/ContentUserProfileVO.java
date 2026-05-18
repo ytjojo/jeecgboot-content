@@ -6,6 +6,7 @@ import lombok.experimental.Accessors;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * View object for content user profile.
@@ -57,6 +58,18 @@ public class ContentUserProfileVO {
     @Schema(description = "认证展示文案", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String certificationLabel;
 
+    @Schema(description = "认证标识列表", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private List<ContentUserVerificationBadgeVO> verificationBadges;
+
+    @Schema(description = "主页模块列表", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private List<ContentUserHomepageModuleVO> homepageModules;
+
+    @Schema(description = "资料完善状态", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private String profileCompletionState;
+
+    @Schema(description = "资料审核状态", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private String profileReviewStatus;
+
     @Schema(description = "当前状态", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private String status;
 
@@ -66,23 +79,35 @@ public class ContentUserProfileVO {
     /**
      * Builds the current object from the given request or entity.
      */
-    public static ContentUserProfileVO from(ContentUserProfile profile, boolean birthdayVisible) {
+    public static ContentUserProfileVO from(ContentUserProfile profile,
+                                            boolean birthdayVisible,
+                                            boolean genderVisible,
+                                            boolean regionVisible,
+                                            boolean professionVisible,
+                                            boolean personalLinkVisible,
+                                            boolean verificationVisible) {
         return new ContentUserProfileVO()
             .setUserId(profile.getUserId())
             .setNickname(profile.getNickname())
             .setAvatar(profile.getAvatar())
             .setBio(profile.getBio())
-            .setGender(profile.getGender())
+            .setGender(genderVisible ? profile.getGender() : null)
             .setBirthday(birthdayVisible ? profile.getBirthday() : null)
-            .setRegion(profile.getRegion())
-            .setProfession(profile.getProfession())
-            .setPersonalLink(profile.getPersonalLink())
+            .setRegion(regionVisible ? profile.getRegion() : null)
+            .setProfession(professionVisible ? profile.getProfession() : null)
+            .setPersonalLink(personalLinkVisible ? profile.getPersonalLink() : null)
             .setHomepageBackground(profile.getHomepageBackground())
             .setThemeColor(profile.getThemeColor())
             .setModuleOrderJson(profile.getModuleOrderJson())
-            .setCertificationType(profile.getCertificationType())
-            .setCertificationLabel(profile.getCertificationLabel())
+            .setCertificationType(null)
+            .setCertificationLabel(null)
+            .setProfileCompletionState(profile.getProfileCompletionState())
+            .setProfileReviewStatus(profile.getProfileReviewStatus())
             .setStatus(profile.getStatus())
             .setLevel(profile.getLevel());
+    }
+
+    public static ContentUserProfileVO from(ContentUserProfile profile, boolean birthdayVisible) {
+        return from(profile, birthdayVisible, true, true, true, true, true);
     }
 }

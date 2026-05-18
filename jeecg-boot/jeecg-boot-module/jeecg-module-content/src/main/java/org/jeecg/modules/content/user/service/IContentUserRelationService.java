@@ -1,6 +1,12 @@
 package org.jeecg.modules.content.user.service;
 
+import org.jeecg.modules.content.user.req.relation.ContentRelationGroupReq;
+import org.jeecg.modules.content.user.vo.ContentRelationBatchResultVO;
+import org.jeecg.modules.content.user.vo.ContentRelationGroupVO;
+import org.jeecg.modules.content.user.vo.ContentRelationUserPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserRelationVO;
+
+import java.util.List;
 
 /**
  * Service contract for content user relation.
@@ -24,4 +30,24 @@ public interface IContentUserRelationService {
     void unmute(String operatorUserId, String targetUserId);
 
     ContentUserRelationVO getRelation(String operatorUserId, String targetUserId);
+
+    List<ContentRelationGroupVO> listGroups(String operatorUserId);
+
+    ContentRelationGroupVO createGroup(String operatorUserId, ContentRelationGroupReq req);
+
+    ContentRelationGroupVO renameGroup(String operatorUserId, String groupId, ContentRelationGroupReq req);
+
+    void deleteGroup(String operatorUserId, String groupId);
+
+    ContentRelationBatchResultVO moveTargetsToGroup(String operatorUserId, List<String> targetUserIds, String groupId);
+
+    ContentRelationBatchResultVO removeTargetsFromGroup(String operatorUserId, List<String> targetUserIds);
+
+    ContentRelationBatchResultVO batchUnfollow(String operatorUserId, List<String> targetUserIds);
+
+    ContentRelationBatchResultVO batchCancelSpecialFollow(String operatorUserId, List<String> targetUserIds);
+
+    ContentRelationUserPageVO listFollowedUsers(String operatorUserId, String relationGroupId, String keyword, Long pageNo, Long pageSize);
+
+    ContentRelationUserPageVO listSpecialFollowedUsers(String operatorUserId, Long pageNo, Long pageSize);
 }

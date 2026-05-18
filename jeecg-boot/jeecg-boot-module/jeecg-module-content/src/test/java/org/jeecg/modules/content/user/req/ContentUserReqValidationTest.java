@@ -20,6 +20,7 @@ import org.jeecg.modules.content.user.req.settings.ContentNotificationDndRuleReq
 import org.jeecg.modules.content.user.req.settings.ContentUserNotificationUpdateReq;
 import org.jeecg.modules.content.user.req.subscription.ContentSubscriptionReq;
 import org.jeecg.modules.content.user.req.support.ContentAppealCreateReq;
+import org.jeecg.modules.content.user.dto.ContentUserRewardEventDTO;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -124,6 +125,24 @@ class ContentUserReqValidationTest {
 
         assertTrue(fields.contains("userId"));
         assertTrue(fields.contains("sourceType"));
+    }
+
+    @Test
+    void shouldRejectInvalidRewardEventRequest() {
+        ContentUserRewardEventDTO req = new ContentUserRewardEventDTO()
+            .setUserId("")
+            .setSourceType("")
+            .setEventId("")
+            .setBizId("x".repeat(65))
+            .setDailyBucket("2026-01-01");
+
+        Set<String> fields = validate(req);
+
+        assertTrue(fields.contains("userId"));
+        assertTrue(fields.contains("sourceType"));
+        assertTrue(fields.contains("eventId"));
+        assertTrue(fields.contains("bizId"));
+        assertTrue(fields.contains("dailyBucket"));
     }
 
     @Test

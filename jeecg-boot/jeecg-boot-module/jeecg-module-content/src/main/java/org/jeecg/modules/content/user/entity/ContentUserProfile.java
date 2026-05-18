@@ -72,6 +72,15 @@ public class ContentUserProfile extends JeecgEntity {
     @Schema(description = "头像历史JSON")
     private String avatarHistoryJson;
 
+    @Schema(description = "资料完善状态")
+    private String profileCompletionState;
+
+    @Schema(description = "资料审核状态")
+    private String profileReviewStatus;
+
+    @Schema(description = "资料版本号")
+    private Integer profileVersion;
+
     @Schema(description = "当前用户状态")
     private String status;
 

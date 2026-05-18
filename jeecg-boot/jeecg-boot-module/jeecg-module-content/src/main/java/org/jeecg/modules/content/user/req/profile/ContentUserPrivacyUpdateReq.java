@@ -2,6 +2,7 @@ package org.jeecg.modules.content.user.req.profile;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -40,6 +41,30 @@ public class ContentUserPrivacyUpdateReq {
     )
     @Schema(description = "职业可见范围", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String professionVisibility;
+
+    @Pattern(
+        regexp = "^(PUBLIC|FOLLOWERS_ONLY|MUTUAL_ONLY|PRIVATE)$",
+        message = "个人链接可见范围取值不合法"
+    )
+    @Size(max = 32, message = "个人链接可见范围长度不能超过32位")
+    @Schema(description = "个人链接可见范围", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private String personalLinkVisibility;
+
+    @Pattern(
+        regexp = "^(PUBLIC|FOLLOWERS_ONLY|MUTUAL_ONLY|PRIVATE)$",
+        message = "认证标识可见范围取值不合法"
+    )
+    @Size(max = 32, message = "认证标识可见范围长度不能超过32位")
+    @Schema(description = "认证标识可见范围", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private String verificationBadgeVisibility;
+
+    @Pattern(
+        regexp = "^(PUBLIC|FOLLOWERS_ONLY|MUTUAL_ONLY|PRIVATE)$",
+        message = "绑定标识可见范围取值不合法"
+    )
+    @Size(max = 32, message = "绑定标识可见范围长度不能超过32位")
+    @Schema(description = "绑定标识可见范围", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private String contactBadgeVisibility;
 
     @Pattern(
         regexp = "^(PUBLIC|FOLLOWERS_ONLY|MUTUAL_ONLY|PRIVATE)$",

@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import org.jeecg.modules.content.user.entity.ContentUserRelation;
 
+import java.util.Date;
+
 /**
  * View object for content user relation.
  */
@@ -37,6 +39,12 @@ public class ContentUserRelationVO {
     @Schema(description = "关系分组ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String relationGroupId;
 
+    @Schema(description = "关注时间", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private Date followedAt;
+
+    @Schema(description = "特别关注时间", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private Date specialFollowAt;
+
     /**
      * Builds the current object from the given request or entity.
      */
@@ -49,6 +57,8 @@ public class ContentUserRelationVO {
             .setMuted(relation.getMuted())
             .setBlacklisted(relation.getBlacklisted())
             .setBlockedByOwner(relation.getBlockedByOwner())
-            .setRelationGroupId(relation.getRelationGroupId());
+            .setRelationGroupId(relation.getRelationGroupId())
+            .setFollowedAt(relation.getFollowedAt())
+            .setSpecialFollowAt(relation.getSpecialFollowAt());
     }
 }

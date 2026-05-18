@@ -8,12 +8,13 @@ import lombok.experimental.Accessors;
 import org.jeecg.common.system.base.entity.JeecgEntity;
 
 /**
- * Entity for content user point ledger.
+ * 内容社区用户积分台账实体。
  */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @TableName("content_user_point_ledger")
+@Schema(description = "内容社区用户积分台账")
 public class ContentUserPointLedger extends JeecgEntity {
 
     @Schema(description = "用户ID")
@@ -22,8 +23,17 @@ public class ContentUserPointLedger extends JeecgEntity {
     @Schema(description = "来源类型")
     private String sourceType;
 
+    @Schema(description = "来源说明")
+    private String sourceDescription;
+
     @Schema(description = "业务ID")
     private String bizId;
+
+    @Schema(description = "奖励事件ID")
+    private String eventId;
+
+    @Schema(description = "规则快照JSON")
+    private String ruleSnapshotJson;
 
     @Schema(description = "积分变动量")
     private Integer pointDelta;
@@ -38,7 +48,7 @@ public class ContentUserPointLedger extends JeecgEntity {
     private String remark;
 
     /**
-     * Builds the current object from the given input values.
+     * 根据基础积分变动参数创建台账对象。
      */
     public static ContentUserPointLedger of(String userId, String sourceType, int pointDelta) {
         return new ContentUserPointLedger()
@@ -48,7 +58,7 @@ public class ContentUserPointLedger extends JeecgEntity {
     }
 
     /**
-     * Builds the current object from the given input values.
+     * 根据业务来源和备注创建台账对象。
      */
     public static ContentUserPointLedger of(String userId, String sourceType, String bizId, int pointDelta, String remark) {
         return of(userId, sourceType, pointDelta)
