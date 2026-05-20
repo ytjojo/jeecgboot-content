@@ -1,7 +1,7 @@
 package org.jeecg.modules.content.user.constant;
 
 /**
- * Constants for content user error code.
+ * 内容社区用户域错误码常量。
  */
 public interface ContentUserErrorCode {
 
@@ -16,4 +16,67 @@ public interface ContentUserErrorCode {
 
     /** 可见性校验不通过。 */
     int VISIBILITY_DENIED = 5411;
+
+    /** 奖励事件参数不合法。 */
+    int REWARD_EVENT_INVALID = 5420;
+
+    /** 奖励来源类型不支持。 */
+    int REWARD_SOURCE_UNSUPPORTED = 5421;
+
+    /** 奖励金额或成长值不合法。 */
+    int REWARD_AMOUNT_INVALID = 5422;
+
+    /** 勋章不存在或不可用。 */
+    int BADGE_NOT_FOUND = 5430;
+
+    /** 勋章佩戴请求不合法。 */
+    int BADGE_WEAR_INVALID = 5431;
+
+    /** 勋章佩戴数量超过限制。 */
+    int BADGE_WEAR_LIMIT_EXCEEDED = 5432;
+
+    /** 勋章回收请求不合法。 */
+    int BADGE_RECYCLE_INVALID = 5433;
+
+    /** 积分余额不足。 */
+    int POINT_BALANCE_INSUFFICIENT = 5440;
+
+    /** 积分明细查询条件不合法。 */
+    int POINT_LEDGER_QUERY_INVALID = 5441;
+
+    /** 兑换商品不存在或不可用。 */
+    int EXCHANGE_GOODS_NOT_FOUND = 5450;
+
+    /** 兑换商品已禁用。 */
+    int EXCHANGE_GOODS_DISABLED = 5451;
+
+    /** 兑换商品库存不足。 */
+    int EXCHANGE_STOCK_INSUFFICIENT = 5452;
+
+    /** 兑换数量不合法。 */
+    int EXCHANGE_QUANTITY_INVALID = 5453;
+
+    /** 功能解锁请求不合法。 */
+    int FEATURE_UNLOCK_INVALID = 5460;
+
+    /** 礼物接收人不合法。 */
+    int GIFT_RECEIVER_INVALID = 5461;
+
+    /** 不允许给自己赠送礼物。 */
+    int GIFT_SELF_NOT_ALLOWED = 5462;
+
+    /** 等级配置不合法。 */
+    int LEVEL_CONFIG_INVALID = 5470;
+
+    /** 等级权益不支持。 */
+    int LEVEL_BENEFIT_UNSUPPORTED = 5471;
+
+    /** 推荐分发权重缺少内容质量分。 */
+    int DISTRIBUTION_QUALITY_SCORE_REQUIRED = 5472;
+
+    /** 成长值衰减规则不合法。 */
+    int GROWTH_DECAY_RULE_INVALID = 5480;
+
+    /** 成长值降级保护状态不合法。 */
+    int GROWTH_DECAY_PROTECTION_INVALID = 5481;
 }

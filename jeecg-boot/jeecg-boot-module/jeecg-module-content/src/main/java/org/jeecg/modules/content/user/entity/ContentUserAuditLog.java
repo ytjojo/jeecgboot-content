@@ -89,6 +89,47 @@ public class ContentUserAuditLog extends JeecgEntity {
     }
 
     /**
+     * 记录虚拟礼物通知事件。
+     */
+    public static ContentUserAuditLog virtualGiftSent(String receiverUserId, String senderUserId, String giftCode,
+                                                      int quantity, String recordId) {
+        return new ContentUserAuditLog()
+            .setUserId(receiverUserId)
+            .setOperatorUserId(senderUserId)
+            .setEventType("USER_VIRTUAL_GIFT_RECEIVED")
+            .setEventContent(giftCode)
+            .setExtraDataJson("{\"giftRecordId\":\"" + recordId + "\",\"quantity\":" + quantity
+                + ",\"notification\":true}")
+            .setEventTime(new Date());
+    }
+
+    /**
+     * 记录等级提升通知事件。
+     */
+    public static ContentUserAuditLog levelUp(String userId, int beforeLevel, int afterLevel, int growthValue) {
+        return new ContentUserAuditLog()
+            .setUserId(userId)
+            .setEventType("USER_LEVEL_UP")
+            .setEventContent(beforeLevel + " -> " + afterLevel)
+            .setExtraDataJson("{\"beforeLevel\":" + beforeLevel + ",\"afterLevel\":" + afterLevel
+                + ",\"growthValue\":" + growthValue + ",\"notification\":true}")
+            .setEventTime(new Date());
+    }
+
+    /**
+     * 记录等级降低通知事件。
+     */
+    public static ContentUserAuditLog levelDown(String userId, int beforeLevel, int afterLevel, int growthValue) {
+        return new ContentUserAuditLog()
+            .setUserId(userId)
+            .setEventType("USER_LEVEL_DOWN")
+            .setEventContent(beforeLevel + " -> " + afterLevel)
+            .setExtraDataJson("{\"beforeLevel\":" + beforeLevel + ",\"afterLevel\":" + afterLevel
+                + ",\"growthValue\":" + growthValue + ",\"notification\":true}")
+            .setEventTime(new Date());
+    }
+
+    /**
      * Executes the appealCreated operation.
      */
     public static ContentUserAuditLog appealCreated(ContentUserAppeal appeal) {

@@ -18,8 +18,10 @@ import org.jeecg.modules.content.user.mapper.ContentUserGrowthLedgerMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserPointLedgerMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRewardEventMapper;
+import org.jeecg.modules.content.user.service.IContentUserGrowthDecayStateService;
 import org.jeecg.modules.content.user.service.IContentUserGrowthService;
 import org.jeecg.modules.content.user.service.IContentUserLevelBenefitService;
+import org.jeecg.modules.content.user.service.IContentUserLevelConfigService;
 import org.jeecg.modules.content.user.service.IContentUserRewardRuleService;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthVO;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -65,6 +67,12 @@ public class ContentUserGrowthServiceImpl implements IContentUserGrowthService {
     private IContentUserLevelBenefitService levelBenefitService;
 
     @Resource
+    private IContentUserLevelConfigService levelConfigService;
+
+    @Resource
+    private IContentUserGrowthDecayStateService growthDecayStateService;
+
+    @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
     /**
@@ -107,6 +115,7 @@ public class ContentUserGrowthServiceImpl implements IContentUserGrowthService {
         if (decision.shouldAward()) {
             SummaryAfter summaryAfter = updateProfileSummary(event.getUserId(), decision.pointDelta(), decision.growthDelta());
             insertLedgers(event, decision, summaryAfter);
+            markUserActiveForDecay(event.getUserId(), summaryAfter.growthValue());
             if (auditLogMapper != null) {
                 auditLogMapper.insert(ContentUserAuditLog.behaviorAwarded(event.getUserId(), event.getSourceType(),
                     decision.pointDelta(), decision.growthDelta()));
@@ -152,11 +161,28 @@ public class ContentUserGrowthServiceImpl implements IContentUserGrowthService {
         }
         int nextPointBalance = defaultZero(profile.getPointBalance()) + pointDelta;
         int nextGrowthValue = defaultZero(profile.getGrowthValue()) + growthDelta;
+        int beforeLevel = defaultLevel(profile.getLevel(), profile.getGrowthValue());
         profile.setPointBalance(Math.max(nextPointBalance, 0));
         profile.setGrowthValue(Math.max(nextGrowthValue, 0));
         profile.setLevel(calculateLevel(profile.getGrowthValue()));
         profileMapper.updateById(profile);
+        notifyLevelUp(userId, growthDelta, beforeLevel, profile.getLevel(), profile.getGrowthValue());
         return new SummaryAfter(profile.getPointBalance(), profile.getGrowthValue());
+    }
+
+    private void markUserActiveForDecay(String userId, int currentGrowthValue) {
+        if (growthDecayStateService == null) {
+            return;
+        }
+        // 奖励事件代表用户重新活跃，衰减状态由专门服务判断是否清除保护。
+        growthDecayStateService.markUserActive(userId, new java.util.Date(), currentGrowthValue);
+    }
+
+    private void notifyLevelUp(String userId, int growthDelta, int beforeLevel, int afterLevel, int growthValue) {
+        if (growthDelta <= 0 || afterLevel <= beforeLevel || auditLogMapper == null) {
+            return;
+        }
+        auditLogMapper.insert(ContentUserAuditLog.levelUp(userId, beforeLevel, afterLevel, growthValue));
     }
 
     private void validateEvent(ContentUserRewardEventDTO event) {
@@ -289,6 +315,9 @@ public class ContentUserGrowthServiceImpl implements IContentUserGrowthService {
     }
 
     private int calculateLevel(Integer growthValue) {
+        if (levelConfigService != null) {
+            return levelConfigService.calculateLevel(growthValue);
+        }
         int safeGrowth = Math.max(defaultZero(growthValue), 0);
         return Math.max(1, safeGrowth / 100 + 1);
     }

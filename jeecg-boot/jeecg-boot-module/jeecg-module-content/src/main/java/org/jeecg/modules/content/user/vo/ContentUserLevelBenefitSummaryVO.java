@@ -23,6 +23,15 @@ public class ContentUserLevelBenefitSummaryVO {
     @Schema(description = "可订阅话题上限")
     private Integer topicQuota;
 
+    @Schema(description = "客服优先级")
+    private Integer supportPriority;
+
+    @Schema(description = "等级徽章样式KEY")
+    private String levelBadgeStyleKey;
+
+    @Schema(description = "评论视觉特效KEY")
+    private String commentEffectKey;
+
     @Schema(description = "当前显式启用的权益编码")
     private List<String> enabledBenefitCodes;
 }

@@ -1,7 +1,23 @@
 package org.jeecg.modules.content.user.controller;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.jeecg.modules.content.user.constant.ContentUserErrorCode;
+import org.jeecg.modules.content.user.dto.ContentUserBadgeProgressDTO;
+import org.jeecg.modules.content.user.dto.ContentUserPointLedgerQueryDTO;
+import org.jeecg.modules.content.user.entity.ContentUserLevelConfig;
+import org.jeecg.modules.content.user.req.growth.ContentUserBadgeRecycleReq;
+import org.jeecg.modules.content.user.req.growth.ContentUserBadgeWearReq;
+import org.jeecg.modules.content.user.req.growth.ContentUserExchangeReq;
+import org.jeecg.modules.content.user.req.growth.ContentUserFeatureUnlockReq;
+import org.jeecg.modules.content.user.req.growth.ContentUserVirtualGiftReq;
+import org.jeecg.modules.content.user.service.IContentUserBadgeService;
 import org.jeecg.modules.content.user.service.IContentUserGovernanceService;
+import org.jeecg.modules.content.user.service.IContentUserGrowthDecayStateService;
+import org.jeecg.modules.content.user.service.IContentUserGrowthService;
+import org.jeecg.modules.content.user.service.IContentUserLevelBenefitService;
+import org.jeecg.modules.content.user.service.IContentUserLevelConfigService;
 import org.jeecg.modules.content.user.service.IContentUserNotificationSettingService;
+import org.jeecg.modules.content.user.service.IContentUserPointSpendService;
 import org.jeecg.modules.content.user.service.IContentUserProfileService;
 import org.jeecg.modules.content.user.service.IContentUserRelationService;
 import org.jeecg.modules.content.user.vo.ContentRelationBatchResultVO;
@@ -10,6 +26,15 @@ import org.jeecg.modules.content.user.vo.ContentRelationUserPageVO;
 import org.jeecg.modules.content.user.vo.ContentNotificationChannelConfigVO;
 import org.jeecg.modules.content.user.vo.ContentNotificationDndRuleVO;
 import org.jeecg.modules.content.user.vo.ContentUserNotificationSettingVO;
+import org.jeecg.modules.content.user.vo.ContentUserBadgeVO;
+import org.jeecg.modules.content.user.vo.ContentUserDistributionWeightVO;
+import org.jeecg.modules.content.user.vo.ContentUserExchangeGoodsVO;
+import org.jeecg.modules.content.user.vo.ContentUserFeatureUnlockVO;
+import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayRuleVO;
+import org.jeecg.modules.content.user.vo.ContentUserLevelBenefitSummaryVO;
+import org.jeecg.modules.content.user.vo.ContentUserPointLedgerPageVO;
+import org.jeecg.modules.content.user.vo.ContentUserPointLedgerVO;
+import org.jeecg.modules.content.user.vo.ContentUserPointSpendResultVO;
 import org.jeecg.modules.content.user.vo.ContentUserRelationVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryItemVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryPageVO;
@@ -26,7 +51,12 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.math.BigDecimal;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,6 +80,24 @@ class ContentUserControllerWebMvcTest {
     @Mock
     private IContentUserNotificationSettingService notificationSettingService;
 
+    @Mock
+    private IContentUserGrowthService growthService;
+
+    @Mock
+    private IContentUserGrowthDecayStateService growthDecayStateService;
+
+    @Mock
+    private IContentUserBadgeService badgeService;
+
+    @Mock
+    private IContentUserPointSpendService pointSpendService;
+
+    @Mock
+    private IContentUserLevelBenefitService levelBenefitService;
+
+    @Mock
+    private IContentUserLevelConfigService levelConfigService;
+
     @InjectMocks
     private ContentUserGovernanceController governanceController;
 
@@ -62,11 +110,15 @@ class ContentUserControllerWebMvcTest {
     @InjectMocks
     private ContentUserSettingsController settingsController;
 
+    @InjectMocks
+    private ContentUserGrowthController growthController;
+
     @BeforeEach
     void setUp() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();
-        mockMvc = MockMvcBuilders.standaloneSetup(governanceController, profileController, relationController, settingsController)
+        mockMvc = MockMvcBuilders.standaloneSetup(governanceController, profileController, relationController,
+                settingsController, growthController)
             .setValidator(validator)
             .build();
     }
@@ -120,6 +172,237 @@ class ContentUserControllerWebMvcTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"targetUserId\":\"\"}"))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnGrowthDecayRule() throws Exception {
+        when(growthDecayStateService.getDecayRule()).thenReturn(new ContentUserGrowthDecayRuleVO()
+            .setEnabled(Boolean.TRUE)
+            .setInactiveDays(30)
+            .setDecayRate(new BigDecimal("0.05"))
+            .setProtectionDays(7)
+            .setRuleDescription("连续 30 天未登录后衰减，7 天保护"));
+
+        mockMvc.perform(get("/content/user/growth/decay/rule"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.enabled").value(true))
+            .andExpect(jsonPath("$.result.inactiveDays").value(30))
+            .andExpect(jsonPath("$.result.decayRate").value(0.05))
+            .andExpect(jsonPath("$.result.protectionDays").value(7))
+            .andExpect(jsonPath("$.result.ruleDescription").value("连续 30 天未登录后衰减，7 天保护"));
+    }
+
+    @Test
+    void shouldReturnBadgeCatalogAndDetailThroughGrowthController() throws Exception {
+        ContentUserBadgeVO badge = new ContentUserBadgeVO()
+            .setBadgeCode("PUBLISHER")
+            .setBadgeName("创作者")
+            .setCategory("ACHIEVEMENT")
+            .setGranted(Boolean.FALSE)
+            .setProgress(new ContentUserBadgeProgressDTO()
+                .setBadgeCode("PUBLISHER")
+                .setCurrentProgress(3)
+                .setTargetProgress(10)
+                .setRemainingRequirement(7));
+        when(badgeService.listBadgeCatalog("u1")).thenReturn(Map.of("ACHIEVEMENT", List.of(badge)));
+        when(badgeService.getBadgeDetail("u1", "PUBLISHER")).thenReturn(badge);
+
+        mockMvc.perform(get("/content/user/growth/badge/catalog").param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.ACHIEVEMENT[0].badgeCode").value("PUBLISHER"))
+            .andExpect(jsonPath("$.result.ACHIEVEMENT[0].progress.remainingRequirement").value(7));
+
+        mockMvc.perform(get("/content/user/growth/badge/detail")
+                .param("userId", "u1")
+                .param("badgeCode", "PUBLISHER"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.badgeName").value("创作者"));
+    }
+
+    @Test
+    void shouldSaveWornBadgesAndRecycleBadgeThroughGrowthController() throws Exception {
+        ContentUserBadgeVO worn = new ContentUserBadgeVO()
+            .setBadgeGrantId("grant-1")
+            .setBadgeCode("PUBLISHER")
+            .setDisplaying(Boolean.TRUE);
+        when(badgeService.saveWornBadges("u1", List.of("grant-1"))).thenReturn(List.of(worn));
+
+        mockMvc.perform(post("/content/user/growth/badge/wear")
+                .param("userId", "u1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"grantIds\":[\"grant-1\"]}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result[0].badgeGrantId").value("grant-1"))
+            .andExpect(jsonPath("$.result[0].displaying").value(true));
+
+        mockMvc.perform(post("/content/user/growth/badge/recycle")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"grantId\":\"grant-1\",\"operatorUserId\":\"admin-1\",\"reason\":\"违规获取\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("回收成功"));
+    }
+
+    @Test
+    void shouldRejectTooManyWornBadgesAtControllerBoundary() throws Exception {
+        mockMvc.perform(post("/content/user/growth/badge/wear")
+                .param("userId", "u1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"grantIds\":[\"g1\",\"g2\",\"g3\",\"g4\",\"g5\",\"g6\"]}"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnPointGoodsExchangeGiftAndLedgerThroughGrowthController() throws Exception {
+        when(pointSpendService.listExchangeGoods("BENEFIT"))
+            .thenReturn(List.of(new ContentUserExchangeGoodsVO()
+                .setGoodsId("goods-1")
+                .setGoodsCode("VIP_BADGE")
+                .setGoodsName("会员标识")
+                .setGoodsType("BENEFIT")
+                .setPointPrice(100)));
+        when(pointSpendService.exchangeGoods("u1", "goods-1", 2))
+            .thenReturn(new ContentUserPointSpendResultVO()
+                .setOrderId("order-1")
+                .setGoodsId("goods-1")
+                .setQuantity(2)
+                .setPointCost(200)
+                .setBalanceAfter(800));
+        when(pointSpendService.sendVirtualGift("u1", "u2", "gift-1", 1, "加油"))
+            .thenReturn(new ContentUserPointSpendResultVO()
+                .setOrderId("gift-order-1")
+                .setGoodsId("gift-1")
+                .setQuantity(1)
+                .setPointCost(10)
+                .setBenefitStatus("GRANTED"));
+        when(pointSpendService.queryPointLedger(any(ContentUserPointLedgerQueryDTO.class)))
+            .thenReturn(new ContentUserPointLedgerPageVO()
+                .setCurrent(1L)
+                .setSize(10L)
+                .setTotal(1L)
+                .setRecords(List.of(new ContentUserPointLedgerVO()
+                    .setId("ledger-1")
+                    .setPointDelta(-200)
+                    .setSourceType("POINT_EXCHANGE")
+                    .setSourceDescription("会员标识"))));
+
+        mockMvc.perform(get("/content/user/growth/point/exchange/goods").param("goodsType", "BENEFIT"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result[0].goodsCode").value("VIP_BADGE"));
+
+        mockMvc.perform(post("/content/user/growth/point/exchange")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"userId\":\"u1\",\"goodsId\":\"goods-1\",\"quantity\":2}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result.orderId").value("order-1"))
+            .andExpect(jsonPath("$.result.balanceAfter").value(800));
+
+        mockMvc.perform(post("/content/user/growth/point/gift/send")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"senderUserId\":\"u1\",\"receiverUserId\":\"u2\",\"giftGoodsId\":\"gift-1\",\"quantity\":1,\"message\":\"加油\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result.orderId").value("gift-order-1"))
+            .andExpect(jsonPath("$.result.benefitStatus").value("GRANTED"));
+
+        mockMvc.perform(get("/content/user/growth/point/ledger")
+                .param("userId", "u1")
+                .param("type", "SPEND")
+                .param("current", "1")
+                .param("size", "10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result.records[0].sourceType").value("POINT_EXCHANGE"))
+            .andExpect(jsonPath("$.result.records[0].sourceDescription").value("会员标识"));
+    }
+
+    @Test
+    void shouldRejectInvalidPointExchangeAtControllerBoundary() throws Exception {
+        mockMvc.perform(post("/content/user/growth/point/exchange")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"userId\":\"u1\",\"goodsId\":\"goods-1\",\"quantity\":0}"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnFeatureUnlockLevelBenefitConfigAndDistributionWeight() throws Exception {
+        when(pointSpendService.unlockFeature("u1", "feature-goods-1"))
+            .thenReturn(new ContentUserPointSpendResultVO()
+                .setGoodsId("feature-goods-1")
+                .setPointCost(50)
+                .setReusedUnlock(Boolean.FALSE));
+        when(pointSpendService.getFeatureUnlock("u1", "PIN_TOP"))
+            .thenReturn(new ContentUserFeatureUnlockVO()
+                .setFeatureCode("PIN_TOP")
+                .setEnabled(Boolean.TRUE));
+        when(levelBenefitService.getBenefitSummary("u1"))
+            .thenReturn(new ContentUserLevelBenefitSummaryVO()
+                .setUploadSizeLimitMb(500)
+                .setHdVideoEnabled(Boolean.TRUE)
+                .setTopicQuota(30)
+                .setSupportPriority(1)
+                .setEnabledBenefitCodes(List.of("HD_VIDEO")));
+        when(levelConfigService.listValidEnabledLevels())
+            .thenReturn(List.of(new ContentUserLevelConfig()
+                .setLevel(2)
+                .setLevelName("进阶创作者")
+                .setGrowthThreshold(100)
+                .setBadgeStyleKey("level-2")));
+        when(levelBenefitService.resolveDistributionWeight("u1", new BigDecimal("0.80")))
+            .thenReturn(new ContentUserDistributionWeightVO()
+                .setUserId("u1")
+                .setLevel(2)
+                .setQualityScore(new BigDecimal("0.80"))
+                .setDistributionWeight(new BigDecimal("1.10"))
+                .setQualityScoreRequired(Boolean.TRUE)
+                .setWeighted(Boolean.TRUE));
+
+        mockMvc.perform(post("/content/user/growth/point/feature/unlock")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"userId\":\"u1\",\"goodsId\":\"feature-goods-1\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result.goodsId").value("feature-goods-1"))
+            .andExpect(jsonPath("$.result.reusedUnlock").value(false));
+
+        mockMvc.perform(get("/content/user/growth/point/feature/unlock")
+                .param("userId", "u1")
+                .param("featureCode", "PIN_TOP"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result.featureCode").value("PIN_TOP"))
+            .andExpect(jsonPath("$.result.enabled").value(true));
+
+        mockMvc.perform(get("/content/user/growth/level/benefit").param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result.uploadSizeLimitMb").value(500))
+            .andExpect(jsonPath("$.result.enabledBenefitCodes[0]").value("HD_VIDEO"));
+
+        mockMvc.perform(get("/content/user/growth/level/config"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result[0].level").value(2))
+            .andExpect(jsonPath("$.result[0].growthThreshold").value(100));
+
+        mockMvc.perform(get("/content/user/growth/level/distribution-weight")
+                .param("userId", "u1")
+                .param("qualityScore", "0.80"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result.distributionWeight").value(1.10))
+            .andExpect(jsonPath("$.result.qualityScoreRequired").value(true));
+    }
+
+    @Test
+    void shouldKeepGrowthApiDocsAndErrorCodeConstantsCovered() throws Exception {
+        assertTrue(ContentUserErrorCode.BADGE_WEAR_LIMIT_EXCEEDED > 0);
+        assertTrue(ContentUserErrorCode.POINT_LEDGER_QUERY_INVALID > 0);
+        assertTrue(ContentUserErrorCode.DISTRIBUTION_QUALITY_SCORE_REQUIRED > 0);
+        assertTrue(ContentUserErrorCode.GROWTH_DECAY_RULE_INVALID > 0);
+        assertRequiredSchema(ContentUserExchangeReq.class, "userId");
+        assertRequiredSchema(ContentUserExchangeReq.class, "goodsId");
+        assertRequiredSchema(ContentUserBadgeWearReq.class, "grantIds");
+        assertRequiredSchema(ContentUserBadgeRecycleReq.class, "reason");
+        assertRequiredSchema(ContentUserFeatureUnlockReq.class, "goodsId");
+        assertRequiredSchema(ContentUserVirtualGiftReq.class, "receiverUserId");
     }
 
     @Test
@@ -335,5 +618,12 @@ class ContentUserControllerWebMvcTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"channelConfig\":{\"likeChannels\":[\"BAD\"]}}"))
             .andExpect(status().isBadRequest());
+    }
+
+    private void assertRequiredSchema(Class<?> targetType, String fieldName) throws NoSuchFieldException {
+        Schema schema = targetType.getDeclaredField(fieldName).getAnnotation(Schema.class);
+        assertNotNull(schema);
+        assertTrue(schema.description() != null && !schema.description().isBlank());
+        assertTrue(schema.requiredMode() == Schema.RequiredMode.REQUIRED);
     }
 }

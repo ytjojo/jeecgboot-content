@@ -4,11 +4,13 @@ import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.user.constant.ContentUserRewardSourceTypeConstant;
 import org.jeecg.modules.content.user.dto.ContentUserRewardEventDTO;
 import org.jeecg.modules.content.user.dto.ContentUserRewardResultDTO;
+import org.jeecg.modules.content.user.entity.ContentUserAuditLog;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserGrowthLedger;
 import org.jeecg.modules.content.user.entity.ContentUserPointLedger;
 import org.jeecg.modules.content.user.entity.ContentUserRewardEvent;
 import org.jeecg.modules.content.user.entity.ContentUserRewardRule;
+import org.jeecg.modules.content.user.mapper.ContentUserAuditLogMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserGrowthLedgerMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserPointLedgerMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
@@ -24,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import org.junit.jupiter.api.BeforeEach;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,10 +57,16 @@ class ContentUserGrowthServiceTest {
     private ContentUserRewardEventMapper rewardEventMapper;
 
     @Mock
+    private ContentUserAuditLogMapper auditLogMapper;
+
+    @Mock
     private IContentUserRewardRuleService rewardRuleService;
 
     @Mock
     private IContentUserLevelBenefitService levelBenefitService;
+
+    @Mock
+    private IContentUserLevelConfigService levelConfigService;
 
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
@@ -66,6 +76,16 @@ class ContentUserGrowthServiceTest {
 
     @InjectMocks
     private ContentUserGrowthServiceImpl growthService;
+
+    @BeforeEach
+    void setUp() {
+        // 默认按配置化等级算法回退，单个用例可覆盖成特定阈值。
+        lenient().when(levelConfigService.calculateLevel(any())).thenAnswer(invocation -> {
+            Integer growthValue = invocation.getArgument(0, Integer.class);
+            int safeGrowth = Math.max(growthValue == null ? 0 : growthValue, 0);
+            return Math.max(1, safeGrowth / 100 + 1);
+        });
+    }
 
     @Test
     void shouldKeepPointsAndGrowthInSeparateLedgers() {
@@ -211,6 +231,57 @@ class ContentUserGrowthServiceTest {
         assertThat(result.getLevelBenefitSummary()).isNotNull();
         assertThat(result.getLevelBenefitSummary().getUploadSizeLimitMb()).isEqualTo(500);
         assertThat(result.getLevelBenefitSummary().getHdVideoEnabled()).isTrue();
+    }
+
+    @Test
+    void shouldUpdateLevelAndCreateLevelUpNotificationWhenGrowthCrossesThreshold() {
+        when(rewardEventMapper.selectOne(any())).thenReturn(null);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.setIfAbsent(any(), eq("1"), eq(10L), eq(TimeUnit.MINUTES))).thenReturn(Boolean.TRUE);
+        when(rewardRuleService.getEnabledRule(ContentUserRewardSourceTypeConstant.CONTENT_PUBLISH))
+            .thenReturn(Optional.of(rule("R_GROWTH", 0, 160, null, null)));
+        when(levelConfigService.calculateLevel(250)).thenReturn(3);
+        when(profileMapper.selectByUserId("u1")).thenReturn(new ContentUserProfile()
+            .setUserId("u1")
+            .setPointBalance(0)
+            .setGrowthValue(90)
+            .setLevel(1));
+
+        growthService.reward(new ContentUserRewardEventDTO()
+            .setUserId("u1")
+            .setSourceType(ContentUserRewardSourceTypeConstant.CONTENT_PUBLISH)
+            .setEventId("evt-level-up"));
+
+        verify(profileMapper).updateById(argThat((ContentUserProfile it) ->
+            it.getGrowthValue() == 250 && it.getLevel() == 3));
+        verify(auditLogMapper).insert(argThat((ContentUserAuditLog it) ->
+            "USER_LEVEL_UP".equals(it.getEventType())
+                && it.getExtraDataJson().contains("\"beforeLevel\":1")
+                && it.getExtraDataJson().contains("\"afterLevel\":3")
+                && it.getExtraDataJson().contains("\"notification\":true")));
+    }
+
+    @Test
+    void shouldNotCreateLevelNotificationWhenGrowthDoesNotUpgradeOrOnlyPointsChange() {
+        when(rewardEventMapper.selectOne(any())).thenReturn(null);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.setIfAbsent(any(), eq("1"), eq(10L), eq(TimeUnit.MINUTES))).thenReturn(Boolean.TRUE);
+        when(rewardRuleService.getEnabledRule(ContentUserRewardSourceTypeConstant.COMMENT))
+            .thenReturn(Optional.of(rule("R_NO_UP", 0, 5, null, null)));
+        when(levelConfigService.calculateLevel(95)).thenReturn(1);
+        when(profileMapper.selectByUserId("u1")).thenReturn(new ContentUserProfile()
+            .setUserId("u1")
+            .setPointBalance(0)
+            .setGrowthValue(90)
+            .setLevel(1));
+
+        growthService.reward(new ContentUserRewardEventDTO()
+            .setUserId("u1")
+            .setSourceType(ContentUserRewardSourceTypeConstant.COMMENT)
+            .setEventId("evt-no-up"));
+
+        verify(auditLogMapper, never()).insert(argThat((ContentUserAuditLog it) ->
+            "USER_LEVEL_UP".equals(it.getEventType())));
     }
 
     private ContentUserRewardRule rule(String ruleCode, int pointAmount, int growthAmount, Integer pointCap, Integer growthCap) {
