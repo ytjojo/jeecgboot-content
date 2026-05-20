@@ -79,4 +79,25 @@ public interface ContentUserErrorCode {
 
     /** 成长值降级保护状态不合法。 */
     int GROWTH_DECAY_PROTECTION_INVALID = 5481;
+
+    /** 关注流配置不合法。 */
+    int SOCIAL_FEED_SETTING_INVALID = 5490;
+
+    /** 关注推荐查询不合法。 */
+    int SOCIAL_RECOMMENDATION_QUERY_INVALID = 5491;
+
+    /** 订阅请求不合法。 */
+    int SOCIAL_SUBSCRIPTION_INVALID = 5492;
+
+    /** 订阅关系不存在或无权操作。 */
+    int SOCIAL_SUBSCRIPTION_FORBIDDEN = 5493;
+
+    /** 订阅源目录参数不合法。 */
+    int SOCIAL_SUBSCRIPTION_SOURCE_INVALID = 5494;
+
+    /** 订阅源不存在或未启用。 */
+    int SOCIAL_SUBSCRIPTION_SOURCE_NOT_FOUND = 5495;
+
+    /** 订阅通知配置不合法。 */
+    int SOCIAL_SUBSCRIPTION_NOTIFICATION_INVALID = 5496;
 }

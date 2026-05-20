@@ -6,14 +6,19 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.common.util.UUIDGenerator;
 import org.jeecg.modules.content.user.entity.ContentUserActivitySnapshot;
+import org.jeecg.modules.content.user.entity.ContentUserFeedSetting;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserRelation;
 import org.jeecg.modules.content.user.entity.ContentUserRelationGroup;
 import org.jeecg.modules.content.user.mapper.ContentUserActivitySnapshotMapper;
+import org.jeecg.modules.content.user.mapper.ContentUserFeedSettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationGroupMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.req.relation.ContentRelationGroupReq;
+import org.jeecg.modules.content.user.service.IContentUserVisibilityPolicyService;
+import org.jeecg.modules.content.user.vo.ContentFollowFeedItemVO;
+import org.jeecg.modules.content.user.vo.ContentFollowFeedPageVO;
 import org.jeecg.modules.content.user.service.IContentUserRelationService;
 import org.jeecg.modules.content.user.vo.ContentRelationBatchResultVO;
 import org.jeecg.modules.content.user.vo.ContentRelationGroupVO;
@@ -25,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +61,13 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
     private ContentUserActivitySnapshotMapper activitySnapshotMapper;
 
     @Resource
+    private ContentUserFeedSettingMapper feedSettingMapper;
+
+    @Resource
     private ContentUserProfileMapper profileMapper;
+
+    @Resource
+    private IContentUserVisibilityPolicyService visibilityPolicyService;
 
     /**
      * Creates or refreshes a follow relationship to the target user.
@@ -67,11 +79,13 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         validateTargetExists(targetUserId);
         ContentUserRelation relation = getOrCreate(operatorUserId, targetUserId);
         validateFollowAllowed(operatorUserId, targetUserId, relation);
+        boolean wasFollowed = Boolean.TRUE.equals(relation.getFollowed());
         relation.setRelationGroupId(resolveRelationGroupId(operatorUserId, relationGroupId));
         relation.setFollowed(Boolean.TRUE);
         relation.setRelationStatus(ACTIVE_STATUS);
         relation.setFollowedAt(new Date());
         relationMapper.updateById(relation);
+        syncFollowCount(operatorUserId, targetUserId, wasFollowed, true);
     }
 
     /**
@@ -84,6 +98,8 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         validateTargetExists(targetUserId);
         ContentUserRelation relation = getOrCreate(operatorUserId, targetUserId);
         validateFollowAllowed(operatorUserId, targetUserId, relation);
+        boolean wasFollowed = Boolean.TRUE.equals(relation.getFollowed());
+        boolean wasSpecialFollow = Boolean.TRUE.equals(relation.getSpecialFollow());
         relation.setRelationGroupId(resolveRelationGroupId(operatorUserId, relationGroupId));
         relation.setFollowed(Boolean.TRUE);
         relation.setSpecialFollow(Boolean.TRUE);
@@ -93,6 +109,8 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         }
         relation.setSpecialFollowAt(new Date());
         relationMapper.updateById(relation);
+        syncFollowCount(operatorUserId, targetUserId, wasFollowed, true);
+        syncSpecialFollowCount(operatorUserId, wasSpecialFollow, true);
     }
 
     /**
@@ -106,9 +124,11 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         if (relation == null) {
             return;
         }
+        boolean wasSpecialFollow = Boolean.TRUE.equals(relation.getSpecialFollow());
         relation.setSpecialFollow(Boolean.FALSE);
         relation.setSpecialFollowAt(null);
         relationMapper.updateById(relation);
+        syncSpecialFollowCount(operatorUserId, wasSpecialFollow, false);
     }
 
     /**
@@ -122,10 +142,14 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         if (relation == null) {
             return;
         }
+        boolean wasFollowed = Boolean.TRUE.equals(relation.getFollowed());
+        boolean wasSpecialFollow = Boolean.TRUE.equals(relation.getSpecialFollow());
         relation.setFollowed(Boolean.FALSE);
         relation.setSpecialFollow(Boolean.FALSE);
         relation.setSpecialFollowAt(null);
         relationMapper.updateById(relation);
+        syncFollowCount(operatorUserId, targetUserId, wasFollowed, false);
+        syncSpecialFollowCount(operatorUserId, wasSpecialFollow, false);
     }
 
     /**
@@ -137,6 +161,10 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         validateRelationIdentity(operatorUserId, targetUserId);
         ContentUserRelation relation = getOrCreate(operatorUserId, targetUserId);
         ContentUserRelation reverseRelation = getOrCreate(targetUserId, operatorUserId);
+        boolean wasFollowed = Boolean.TRUE.equals(relation.getFollowed());
+        boolean wasSpecialFollow = Boolean.TRUE.equals(relation.getSpecialFollow());
+        boolean reverseWasFollowed = Boolean.TRUE.equals(reverseRelation.getFollowed());
+        boolean reverseWasSpecialFollow = Boolean.TRUE.equals(reverseRelation.getSpecialFollow());
         relation.setBlacklisted(Boolean.TRUE);
         relation.setMuted(Boolean.TRUE);
         relation.setBlockedByOwner(Boolean.TRUE);
@@ -147,6 +175,10 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         reverseRelation.setFollowed(Boolean.FALSE);
         reverseRelation.setSpecialFollow(Boolean.FALSE);
         relationMapper.updateById(reverseRelation);
+        syncFollowCount(operatorUserId, targetUserId, wasFollowed, false);
+        syncSpecialFollowCount(operatorUserId, wasSpecialFollow, false);
+        syncFollowCount(targetUserId, operatorUserId, reverseWasFollowed, false);
+        syncSpecialFollowCount(targetUserId, reverseWasSpecialFollow, false);
     }
 
     /**
@@ -332,10 +364,13 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
                 result.addFailure(targetUserId, "关注关系不存在");
                 continue;
             }
+            boolean wasSpecialFollow = Boolean.TRUE.equals(relation.getSpecialFollow());
             relation.setFollowed(Boolean.FALSE);
             relation.setSpecialFollow(Boolean.FALSE);
             relation.setSpecialFollowAt(null);
             relationMapper.updateById(relation);
+            syncFollowCount(operatorUserId, targetUserId, true, false);
+            syncSpecialFollowCount(operatorUserId, wasSpecialFollow, false);
             result.addSuccess();
         }
         return result;
@@ -359,6 +394,7 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
             relation.setSpecialFollow(Boolean.FALSE);
             relation.setSpecialFollowAt(null);
             relationMapper.updateById(relation);
+            syncSpecialFollowCount(operatorUserId, true, false);
             result.addSuccess();
         }
         return result;
@@ -389,6 +425,52 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
     public ContentRelationUserPageVO listSpecialFollowedUsers(String operatorUserId, Long pageNo, Long pageSize) {
         requireValidUserId(operatorUserId, "当前用户ID不能为空", "当前用户ID长度不能超过64位");
         return queryRelationUsers(operatorUserId, null, Collections.emptyList(), true, pageNo, pageSize, "NO_SPECIAL_FOLLOW");
+    }
+
+    /**
+     * 查询关注流，按特别关注优先和动态时间倒序返回可见动态。
+     */
+    @Override
+    public ContentFollowFeedPageVO listFollowFeed(String operatorUserId, Long pageNo, Long pageSize) {
+        requireValidUserId(operatorUserId, "当前用户ID不能为空", "当前用户ID长度不能超过64位");
+        long currentPage = normalizePageNo(pageNo);
+        long currentSize = normalizePageSize(pageSize);
+        List<ContentUserRelation> followedRelations = relationMapper.selectList(Wrappers.<ContentUserRelation>lambdaQuery()
+            .eq(ContentUserRelation::getOwnerUserId, operatorUserId)
+            .eq(ContentUserRelation::getFollowed, Boolean.TRUE)
+            .eq(ContentUserRelation::getRelationStatus, ACTIVE_STATUS));
+        List<ContentUserRelation> visibleRelations = followedRelations.stream()
+            .filter(this::isFeedRelationVisible)
+            .toList();
+        if (visibleRelations.isEmpty()) {
+            return emptyFeedPage(currentPage, currentSize);
+        }
+        Map<String, ContentUserRelation> relationMap = visibleRelations.stream()
+            .collect(Collectors.toMap(ContentUserRelation::getTargetUserId, Function.identity(), (left, right) -> left));
+        List<String> actorUserIds = visibleRelations.stream()
+            .map(ContentUserRelation::getTargetUserId)
+            .toList();
+        Set<String> enabledTypes = enabledFeedTypes(operatorUserId);
+        List<ContentUserActivitySnapshot> snapshots = activitySnapshotMapper.selectList(Wrappers.<ContentUserActivitySnapshot>lambdaQuery()
+            .in(ContentUserActivitySnapshot::getActorUserId, actorUserIds)
+            .in(ContentUserActivitySnapshot::getActivityType, enabledTypes)
+            .eq(ContentUserActivitySnapshot::getSnapshotStatus, ACTIVE_STATUS));
+        List<ContentFollowFeedItemVO> allItems = snapshots.stream()
+            .filter(snapshot -> relationMap.containsKey(snapshot.getActorUserId()))
+            .filter(snapshot -> isSnapshotVisible(operatorUserId, snapshot))
+            .map(snapshot -> ContentFollowFeedItemVO.from(snapshot, relationMap.get(snapshot.getActorUserId())))
+            .sorted(Comparator.comparing(ContentFollowFeedItemVO::getSpecialFollow, Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(ContentFollowFeedItemVO::getActivityTime, Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(ContentFollowFeedItemVO::getSnapshotId, Comparator.nullsLast(String::compareTo)))
+            .toList();
+        int fromIndex = (int) Math.min((currentPage - 1L) * currentSize, allItems.size());
+        int toIndex = (int) Math.min(fromIndex + currentSize, allItems.size());
+        return new ContentFollowFeedPageVO()
+            .setRecords(allItems.subList(fromIndex, toIndex))
+            .setTotal((long) allItems.size())
+            .setPageNo(currentPage)
+            .setPageSize(currentSize)
+            .setHasMore(toIndex < allItems.size());
     }
 
     private void validateRelationIdentity(String operatorUserId, String targetUserId) {
@@ -492,6 +574,39 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
             .setPageNo(normalizePageNo(pageNo))
             .setPageSize(normalizePageSize(pageSize))
             .setEmptyStateCode(emptyStateCode);
+    }
+
+    private ContentFollowFeedPageVO emptyFeedPage(long pageNo, long pageSize) {
+        return new ContentFollowFeedPageVO()
+            .setRecords(Collections.emptyList())
+            .setTotal(0L)
+            .setPageNo(pageNo)
+            .setPageSize(pageSize)
+            .setHasMore(Boolean.FALSE);
+    }
+
+    private boolean isFeedRelationVisible(ContentUserRelation relation) {
+        return !Boolean.TRUE.equals(relation.getMuted())
+            && !Boolean.TRUE.equals(relation.getBlacklisted())
+            && !Boolean.TRUE.equals(relation.getBlockedByOwner());
+    }
+
+    private boolean isSnapshotVisible(String operatorUserId, ContentUserActivitySnapshot snapshot) {
+        if (snapshot == null || "PRIVATE".equals(snapshot.getVisibleScope())) {
+            return false;
+        }
+        return visibilityPolicyService == null || visibilityPolicyService.canViewContent(snapshot.getActorUserId(), operatorUserId);
+    }
+
+    private Set<String> enabledFeedTypes(String operatorUserId) {
+        ContentUserFeedSetting setting = feedSettingMapper == null ? null : feedSettingMapper.selectByUserId(operatorUserId);
+        if (setting == null || setting.getActivityTypes() == null || setting.getActivityTypes().trim().isEmpty()) {
+            return Set.of("PUBLISH", "LIKE", "FAVORITE");
+        }
+        return java.util.Arrays.stream(setting.getActivityTypes().split(","))
+            .map(String::trim)
+            .filter(type -> !type.isEmpty())
+            .collect(Collectors.toSet());
     }
 
     private List<ContentRelationUserItemVO> buildRelationUserItems(List<ContentUserRelation> relations) {
@@ -615,6 +730,23 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
             && (Boolean.TRUE.equals(reverseRelation.getBlacklisted()) || Boolean.TRUE.equals(reverseRelation.getBlockedByOwner()))) {
             throw new JeecgBootException("对方已拉黑当前用户，无法关注");
         }
+    }
+
+    private void syncFollowCount(String operatorUserId, String targetUserId, boolean before, boolean after) {
+        if (before == after) {
+            return;
+        }
+        int delta = after ? 1 : -1;
+        // 关注数和粉丝数必须同源更新，避免列表统计与主页计数长期漂移。
+        profileMapper.changeFollowingCount(operatorUserId, delta);
+        profileMapper.changeFollowerCount(targetUserId, delta);
+    }
+
+    private void syncSpecialFollowCount(String operatorUserId, boolean before, boolean after) {
+        if (before == after) {
+            return;
+        }
+        profileMapper.changeSpecialFollowCount(operatorUserId, after ? 1 : -1);
     }
 
     private ContentUserRelation getOrCreate(String operatorUserId, String targetUserId) {

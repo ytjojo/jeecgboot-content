@@ -3,10 +3,12 @@ package org.jeecg.modules.content.user.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.user.entity.ContentUserActivitySnapshot;
+import org.jeecg.modules.content.user.entity.ContentUserFeedSetting;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserRelation;
 import org.jeecg.modules.content.user.entity.ContentUserRelationGroup;
 import org.jeecg.modules.content.user.mapper.ContentUserActivitySnapshotMapper;
+import org.jeecg.modules.content.user.mapper.ContentUserFeedSettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationGroupMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationMapper;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class ContentUserRelationServiceTest {
@@ -42,7 +45,13 @@ class ContentUserRelationServiceTest {
     private ContentUserActivitySnapshotMapper activitySnapshotMapper;
 
     @Mock
+    private ContentUserFeedSettingMapper feedSettingMapper;
+
+    @Mock
     private ContentUserProfileMapper profileMapper;
+
+    @Mock
+    private IContentUserVisibilityPolicyService visibilityPolicyService;
 
     @InjectMocks
     private ContentUserRelationServiceImpl relationService;
@@ -441,6 +450,63 @@ class ContentUserRelationServiceTest {
     }
 
     @Test
+    void shouldSyncCountsOnlyWhenFollowStateActuallyChanges() {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(false)
+            .setSpecialFollow(false)
+            .setBlacklisted(false)
+            .setBlockedByOwner(false);
+        when(profileMapper.selectByUserId("u2")).thenReturn(new ContentUserProfile().setUserId("u2"));
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(relation);
+        when(relationMapper.selectByPair("u2", "u1")).thenReturn(null);
+        when(relationGroupMapper.selectOne(any())).thenReturn(activeGroup("default-g", "u1", "默认分组", true));
+
+        relationService.follow("u1", "u2", null);
+        relationService.follow("u1", "u2", null);
+
+        verify(profileMapper, times(1)).changeFollowingCount("u1", 1);
+        verify(profileMapper, times(1)).changeFollowerCount("u2", 1);
+    }
+
+    @Test
+    void shouldSyncCountsWhenUnfollowClearsSpecialFollow() {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(true)
+            .setSpecialFollowAt(new Date());
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(relation);
+
+        relationService.unfollow("u1", "u2");
+
+        verify(profileMapper).changeFollowingCount("u1", -1);
+        verify(profileMapper).changeFollowerCount("u2", -1);
+        verify(profileMapper).changeSpecialFollowCount("u1", -1);
+    }
+
+    @Test
+    void shouldSyncCountsForSuccessfulBatchItemsOnly() {
+        ContentUserRelation followed = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(true);
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(followed);
+        when(relationMapper.selectByPair("u1", "missing")).thenReturn(null);
+
+        var result = relationService.batchUnfollow("u1", List.of("u2", "missing"));
+
+        assertThat(result.getSuccessCount()).isEqualTo(1);
+        verify(profileMapper).changeFollowingCount("u1", -1);
+        verify(profileMapper).changeFollowerCount("u2", -1);
+        verify(profileMapper).changeSpecialFollowCount("u1", -1);
+        verify(profileMapper, never()).changeFollowerCount("missing", -1);
+    }
+
+    @Test
     void shouldRemoveFromCustomGroupWithoutCancellingFollowState() {
         ContentUserRelation relation = new ContentUserRelation()
             .setOwnerUserId("u1")
@@ -594,6 +660,98 @@ class ContentUserRelationServiceTest {
         assertThat(relation.getMuted()).isFalse();
     }
 
+    @Test
+    void shouldListFollowFeedWithEnabledTypesAndSpecialPriority() {
+        Date older = new Date(1000L);
+        Date newer = new Date(2000L);
+        ContentUserRelation normal = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        ContentUserRelation special = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u3")
+            .setFollowed(true)
+            .setSpecialFollow(true)
+            .setRelationStatus("ACTIVE");
+        when(relationMapper.selectList(any())).thenReturn(List.of(normal, special));
+        when(feedSettingMapper.selectByUserId("u1")).thenReturn(new ContentUserFeedSetting()
+            .setUserId("u1")
+            .setActivityTypes("PUBLISH,LIKE"));
+        when(activitySnapshotMapper.selectList(any())).thenReturn(List.of(
+            snapshot("s-normal", "u2", "PUBLISH", newer, "PUBLIC"),
+            snapshot("s-special", "u3", "LIKE", older, "PUBLIC")
+        ));
+        when(visibilityPolicyService.canViewContent("u2", "u1")).thenReturn(true);
+        when(visibilityPolicyService.canViewContent("u3", "u1")).thenReturn(true);
+
+        var result = relationService.listFollowFeed("u1", 1L, 10L);
+
+        assertThat(result.getTotal()).isEqualTo(2L);
+        assertThat(result.getRecords()).extracting("snapshotId")
+            .containsExactly("s-special", "s-normal");
+        assertThat(result.getHasMore()).isFalse();
+    }
+
+    @Test
+    void shouldHideUnfollowedMutedBlockedAndInvisibleActivitiesFromFeed() {
+        ContentUserRelation visible = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setMuted(false)
+            .setRelationStatus("ACTIVE");
+        ContentUserRelation muted = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u3")
+            .setFollowed(true)
+            .setMuted(true)
+            .setRelationStatus("ACTIVE");
+        when(relationMapper.selectList(any())).thenReturn(List.of(visible, muted));
+        when(feedSettingMapper.selectByUserId("u1")).thenReturn(new ContentUserFeedSetting()
+            .setUserId("u1")
+            .setActivityTypes("PUBLISH,FAVORITE"));
+        when(activitySnapshotMapper.selectList(any())).thenReturn(List.of(
+            snapshot("s-visible", "u2", "PUBLISH", new Date(3000L), "PUBLIC"),
+            snapshot("s-private", "u2", "PUBLISH", new Date(4000L), "PRIVATE"),
+            snapshot("s-muted", "u3", "PUBLISH", new Date(5000L), "PUBLIC")
+        ));
+        when(visibilityPolicyService.canViewContent("u2", "u1")).thenReturn(true);
+
+        var result = relationService.listFollowFeed("u1", 1L, 10L);
+
+        assertThat(result.getRecords()).extracting("snapshotId")
+            .containsExactly("s-visible");
+    }
+
+    @Test
+    void shouldReturnStableFollowFeedPage() {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setRelationStatus("ACTIVE");
+        when(relationMapper.selectList(any())).thenReturn(List.of(relation));
+        when(feedSettingMapper.selectByUserId("u1")).thenReturn(new ContentUserFeedSetting()
+            .setUserId("u1")
+            .setActivityTypes("PUBLISH"));
+        when(activitySnapshotMapper.selectList(any())).thenReturn(List.of(
+            snapshot("s3", "u2", "PUBLISH", new Date(3000L), "PUBLIC"),
+            snapshot("s2", "u2", "PUBLISH", new Date(2000L), "PUBLIC"),
+            snapshot("s1", "u2", "PUBLISH", new Date(1000L), "PUBLIC")
+        ));
+        when(visibilityPolicyService.canViewContent("u2", "u1")).thenReturn(true);
+
+        var result = relationService.listFollowFeed("u1", 2L, 1L);
+
+        assertThat(result.getRecords()).extracting("snapshotId")
+            .containsExactly("s2");
+        assertThat(result.getHasMore()).isTrue();
+    }
+
     private ContentUserRelationGroup activeGroup(String groupId, String ownerUserId, String groupName, boolean defaultGroup) {
         ContentUserRelationGroup group = new ContentUserRelationGroup()
             .setOwnerUserId(ownerUserId)
@@ -603,5 +761,19 @@ class ContentUserRelationServiceTest {
             .setGroupStatus("ACTIVE");
         group.setId(groupId);
         return group;
+    }
+
+    private ContentUserActivitySnapshot snapshot(String id, String actorUserId, String activityType, Date activityTime, String visibleScope) {
+        ContentUserActivitySnapshot snapshot = new ContentUserActivitySnapshot()
+            .setActorUserId(actorUserId)
+            .setActivityType(activityType)
+            .setBizType("ARTICLE")
+            .setBizId(id + "-biz")
+            .setSummary("动态")
+            .setActivityTime(activityTime)
+            .setVisibleScope(visibleScope)
+            .setSnapshotStatus("ACTIVE");
+        snapshot.setId(id);
+        return snapshot;
     }
 }

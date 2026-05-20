@@ -10,10 +10,13 @@ import org.jeecg.modules.content.user.req.relation.ContentRelationBatchReq;
 import org.jeecg.modules.content.user.req.relation.ContentRelationGroupMoveReq;
 import org.jeecg.modules.content.user.req.relation.ContentRelationGroupRemoveReq;
 import org.jeecg.modules.content.user.req.relation.ContentRelationGroupReq;
+import org.jeecg.modules.content.user.service.IContentUserFollowRecommendationService;
 import org.jeecg.modules.content.user.service.IContentUserRelationService;
 import org.jeecg.modules.content.user.vo.ContentRelationBatchResultVO;
 import org.jeecg.modules.content.user.vo.ContentRelationGroupVO;
 import org.jeecg.modules.content.user.vo.ContentRelationUserPageVO;
+import org.jeecg.modules.content.user.vo.ContentFollowFeedPageVO;
+import org.jeecg.modules.content.user.vo.ContentFollowRecommendationPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserRelationVO;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +32,9 @@ public class ContentUserRelationController {
 
     @Resource
     private IContentUserRelationService relationService;
+
+    @Resource
+    private IContentUserFollowRecommendationService recommendationService;
 
     /**
      * Creates or refreshes a follow relationship to the target user.
@@ -230,5 +236,28 @@ public class ContentUserRelationController {
                                                                @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
                                                                @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
         return Result.OK(relationService.listSpecialFollowedUsers(userId, pageNo, pageSize));
+    }
+
+    /**
+     * 分页查询关注流动态。
+     */
+    @Operation(summary = "分页查询关注流")
+    @GetMapping("/feed")
+    public Result<ContentFollowFeedPageVO> followFeed(@RequestParam("userId") String userId,
+                                                      @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
+                                                      @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
+        return Result.OK(relationService.listFollowFeed(userId, pageNo, pageSize));
+    }
+
+    /**
+     * 分页查询关注推荐。
+     */
+    @Operation(summary = "分页查询关注推荐")
+    @GetMapping("/recommendations")
+    public Result<ContentFollowRecommendationPageVO> recommendations(@RequestParam("userId") String userId,
+                                                                     @RequestParam(value = "interestTag", required = false) String interestTag,
+                                                                     @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
+                                                                     @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
+        return Result.OK(recommendationService.listRecommendations(userId, interestTag, pageNo, pageSize));
     }
 }

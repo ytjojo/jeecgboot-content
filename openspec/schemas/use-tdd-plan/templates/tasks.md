@@ -1,13 +1,13 @@
-# Tasks
+## 1. <!-- Task Group Name -->
 
-<!-- 每个 task 只能是一个 TDD 阶段 -->
-<!-- 必须使用 checkbox 格式 -->
+- [ ] 1.1 <!-- Task description -->
+- [ ] 1.2 <!-- Task description -->
 
-## Atomic TDD Task List
-<!-- 每个 task 只能是一个 TDD 阶段 -->
-<!-- 必须使用 checkbox 格式 -->
+## 2. <!-- Task Group Name -->
 
-### [Feature name]
+- [ ] 2.1 <!-- Task description -->
+- [ ] 2.2 <!-- Task description -->
 
-- [ ] RED: ...
-- [ ] GREEN: ...
+## 3. Validation
+
+- [ ] 3.1 <!-- Verify commands and checks -->

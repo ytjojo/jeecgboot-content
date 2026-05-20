@@ -1,55 +1,71 @@
-功能正确性(Correctness)
+## Readiness Decision
 
-* 需求实现正确
-* 边界条件完整
-* 异常流程正确
+<!-- ready | ready with conditions | blocked -->
 
+## Execution Mode
 
-架构(Architecture)
+<!-- standard | tdd-preferred | tdd-required -->
 
-* 分层合理
-* 无越层依赖
-* 模块边界清晰
+## Verification Mode
 
-安全(Security)
+<!-- inline-only | retained-recommended | retained-required -->
 
-* 无敏感日志
-* 权限安全
-* 输入校验
+## Debug Mode
 
+<!-- standard | systematic-debugging -->
 
-测试/日志埋点(Testability/Observability)
+## Review Request
 
-* 单测存在
-* 埋点完整
+<!-- Optional: why review is being requested, what kind of review is needed, and when it is expected. -->
 
-稳定性(Robustness)
+## Review Scope
 
-系统是否抗异常。
+<!-- Optional: files, modules, risks, or decisions that should be reviewed. -->
 
-重点：
+## Review Focus
 
-* 是否处理异常
-* 是否有 fallback
-* 是否可恢复
-* 是否存在状态错乱
+<!-- Optional: the most important aspects reviewers should check. -->
 
-规范一致性(Consistency)
+## Review Status
 
-包括：
+<!-- not-requested | requested | findings-received | resolved -->
 
-* 命名规范
-* 目录结构
-* API 风格
-* 注释风格
-* 错误处理风格
+## Delegation Mode
 
-业务风险（Business Risk）
+<!-- single-agent | subagent-eligible | subagent-required -->
 
+## Parallelization Mode
 
-重点：
+<!-- serial-only | parallel-eligible | parallel-required -->
 
-* 是否影响核心链路
-* 是否兼容旧数据
-* 是否会影响线上用户
-* 是否支持灰度/回滚
+## Worktree Mode
+
+<!-- same-tree | worktree-eligible | worktree-required -->
+
+## Branch Finish Mode
+
+<!-- standard | finish-recommended | finish-required -->
+
+## Blocked By
+
+<!-- List blocking issues. Use `none` if there are no blockers. -->
+
+## Observed Failure
+
+<!-- For bugfix or diagnosis changes, record the symptom, reproduction signal, or inspection boundary that defines the problem before implementation starts. -->
+
+## Validation Focus
+
+<!-- Highlight the validation paths that plan.md must carry forward, and that an optional verification companion note should later record. -->
+
+## Key Risks
+
+<!-- Capture the main implementation risks that remain active before apply starts. -->
+
+## Findings Summary
+
+<!-- Optional: summarize review findings, plus whether each is accepted, deferred, or rejected with reason. -->
+
+## Manual Adjustments
+
+<!-- Optional human notes that bridge-enabled writeback should preserve. -->

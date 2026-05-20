@@ -93,6 +93,15 @@ public class ContentUserProfile extends JeecgEntity {
     @Schema(description = "成长值")
     private Integer growthValue;
 
+    @Schema(description = "关注数")
+    private Integer followingCount;
+
+    @Schema(description = "粉丝数")
+    private Integer followerCount;
+
+    @Schema(description = "特别关注数")
+    private Integer specialFollowCount;
+
     @TableField(exist = false)
     private String birthdayVisibility;
 }

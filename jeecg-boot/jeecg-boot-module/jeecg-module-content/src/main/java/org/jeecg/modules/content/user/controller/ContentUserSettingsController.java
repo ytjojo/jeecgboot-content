@@ -6,10 +6,13 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq;
+import org.jeecg.modules.content.user.req.settings.ContentFeedSettingUpdateReq;
 import org.jeecg.modules.content.user.req.settings.ContentUserNotificationUpdateReq;
+import org.jeecg.modules.content.user.service.IContentUserFeedSettingService;
 import org.jeecg.modules.content.user.service.IContentUserNotificationSettingService;
 import org.jeecg.modules.content.user.service.IContentUserProfileService;
 import org.jeecg.modules.content.user.service.IContentUserVisibilityPolicyService;
+import org.jeecg.modules.content.user.vo.ContentUserFeedSettingVO;
 import org.jeecg.modules.content.user.vo.ContentUserNotificationSettingVO;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +32,9 @@ public class ContentUserSettingsController {
 
     @Resource
     private IContentUserNotificationSettingService notificationSettingService;
+
+    @Resource
+    private IContentUserFeedSettingService feedSettingService;
 
     /**
      * 更新用户隐私、可见性与发现设置。
@@ -58,6 +64,25 @@ public class ContentUserSettingsController {
     public Result<ContentUserNotificationSettingVO> updateNotification(@RequestParam("userId") String userId,
                                                                        @Valid @RequestBody ContentUserNotificationUpdateReq req) {
         return Result.OK(notificationSettingService.updateSetting(userId, req));
+    }
+
+    /**
+     * 查询关注流动态类型设置。
+     */
+    @Operation(summary = "查询关注流动态类型设置")
+    @GetMapping("/feed")
+    public Result<ContentUserFeedSettingVO> getFeedSetting(@RequestParam("userId") String userId) {
+        return Result.OK(feedSettingService.getSetting(userId));
+    }
+
+    /**
+     * 更新关注流动态类型设置。
+     */
+    @Operation(summary = "更新关注流动态类型设置")
+    @PostMapping("/feed/update")
+    public Result<ContentUserFeedSettingVO> updateFeedSetting(@RequestParam("userId") String userId,
+                                                              @Valid @RequestBody ContentFeedSettingUpdateReq req) {
+        return Result.OK(feedSettingService.updateSetting(userId, req));
     }
 
     /**

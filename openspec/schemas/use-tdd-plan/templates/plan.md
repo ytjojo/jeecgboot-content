@@ -1,4 +1,6 @@
 # Execution Plan
+> **For agentic workers:** Use superpowers:subagent-driven-development
+> to implement this plan task-by-task.
 
 ## Steps
 
