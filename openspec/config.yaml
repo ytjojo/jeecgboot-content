@@ -36,6 +36,6 @@ rules:
     - 每个任务是且仅是一个 TDD 阶段（RED / GREEN / REFACTOR）
     - 任务严格交替 RED → GREEN →（可选 REFACTOR）
     - GREEN 任务必须引用对应的 RED 任务
-  plans:
+  plan:
     - 每个计划步骤精确对应一个任务
     - 必须指定验证命令和预期证据
