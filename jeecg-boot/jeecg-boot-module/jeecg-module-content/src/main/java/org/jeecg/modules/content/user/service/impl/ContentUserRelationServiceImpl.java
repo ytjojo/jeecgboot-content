@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.common.util.UUIDGenerator;
+import org.jeecg.modules.content.user.constant.ContentUserCacheConstant;
 import org.jeecg.modules.content.user.entity.ContentUserActivitySnapshot;
+import org.jeecg.modules.content.user.entity.ContentUserBlock;
 import org.jeecg.modules.content.user.entity.ContentUserFeedSetting;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserRelation;
 import org.jeecg.modules.content.user.entity.ContentUserRelationGroup;
 import org.jeecg.modules.content.user.mapper.ContentUserActivitySnapshotMapper;
+import org.jeecg.modules.content.user.mapper.ContentUserBlockMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserFeedSettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationGroupMapper;
@@ -24,7 +27,10 @@ import org.jeecg.modules.content.user.vo.ContentRelationBatchResultVO;
 import org.jeecg.modules.content.user.vo.ContentRelationGroupVO;
 import org.jeecg.modules.content.user.vo.ContentRelationUserItemVO;
 import org.jeecg.modules.content.user.vo.ContentRelationUserPageVO;
+import org.jeecg.modules.content.user.vo.ContentUserBlacklistItemVO;
+import org.jeecg.modules.content.user.vo.ContentUserBlacklistPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserRelationVO;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,9 +56,13 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
     private static final long DEFAULT_PAGE_SIZE = 10L;
     private static final long MAX_PAGE_SIZE = 100L;
     private static final String ACTIVE_STATUS = "ACTIVE";
+    private static final String CANCELLED_STATUS = "CANCELLED";
 
     @Resource
     private ContentUserRelationMapper relationMapper;
+
+    @Resource
+    private ContentUserBlockMapper blockMapper;
 
     @Resource
     private ContentUserRelationGroupMapper relationGroupMapper;
@@ -65,6 +75,9 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
 
     @Resource
     private ContentUserProfileMapper profileMapper;
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Resource
     private IContentUserVisibilityPolicyService visibilityPolicyService;
@@ -159,6 +172,8 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
     @Transactional(rollbackFor = Exception.class)
     public void blacklist(String operatorUserId, String targetUserId) {
         validateRelationIdentity(operatorUserId, targetUserId);
+        validateTargetExists(targetUserId);
+        saveActiveBlock(operatorUserId, targetUserId);
         ContentUserRelation relation = getOrCreate(operatorUserId, targetUserId);
         ContentUserRelation reverseRelation = getOrCreate(targetUserId, operatorUserId);
         boolean wasFollowed = Boolean.TRUE.equals(relation.getFollowed());
@@ -179,6 +194,7 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         syncSpecialFollowCount(operatorUserId, wasSpecialFollow, false);
         syncFollowCount(targetUserId, operatorUserId, reverseWasFollowed, false);
         syncSpecialFollowCount(targetUserId, reverseWasSpecialFollow, false);
+        evictRelationBoundaryCache(operatorUserId, targetUserId);
     }
 
     /**
@@ -188,12 +204,25 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
     @Transactional(rollbackFor = Exception.class)
     public void unblacklist(String operatorUserId, String targetUserId) {
         validateRelationIdentity(operatorUserId, targetUserId);
-        ContentUserRelation relation = getOrCreate(operatorUserId, targetUserId);
-        relation.setBlacklisted(Boolean.FALSE);
-        relation.setMuted(Boolean.FALSE);
-        relation.setBlockedByOwner(Boolean.FALSE);
-        relation.setBlacklistedAt(null);
-        relationMapper.updateById(relation);
+        boolean changed = false;
+        ContentUserBlock block = blockMapper == null ? null : blockMapper.selectByPair(operatorUserId, targetUserId);
+        if (block != null) {
+            block.setStatus(CANCELLED_STATUS);
+            blockMapper.updateById(block);
+            changed = true;
+        }
+        ContentUserRelation relation = relationMapper.selectByPair(operatorUserId, targetUserId);
+        if (relation != null) {
+            relation.setBlacklisted(Boolean.FALSE);
+            relation.setMuted(Boolean.FALSE);
+            relation.setBlockedByOwner(Boolean.FALSE);
+            relation.setBlacklistedAt(null);
+            relationMapper.updateById(relation);
+            changed = true;
+        }
+        if (changed) {
+            evictRelationBoundaryCache(operatorUserId, targetUserId);
+        }
     }
 
     /**
@@ -428,6 +457,26 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
     }
 
     /**
+     * 分页查询当前用户黑名单，按拉黑时间倒序展示。
+     */
+    @Override
+    public ContentUserBlacklistPageVO listBlacklist(String operatorUserId, Long pageNo, Long pageSize) {
+        requireValidUserId(operatorUserId, "当前用户ID不能为空", "当前用户ID长度不能超过64位");
+        long currentPage = normalizePageNo(pageNo);
+        long currentSize = normalizePageSize(pageSize);
+        IPage<ContentUserBlock> page = blockMapper.selectPage(new Page<>(currentPage, currentSize),
+            Wrappers.<ContentUserBlock>lambdaQuery()
+                .eq(ContentUserBlock::getUserId, operatorUserId)
+                .eq(ContentUserBlock::getStatus, ACTIVE_STATUS)
+                .orderByDesc(ContentUserBlock::getBlockTime));
+        return new ContentUserBlacklistPageVO()
+            .setRecords(buildBlacklistItems(page.getRecords()))
+            .setTotal(page.getTotal())
+            .setPageNo(currentPage)
+            .setPageSize(currentSize);
+    }
+
+    /**
      * 查询关注流，按特别关注优先和动态时间倒序返回可见动态。
      */
     @Override
@@ -631,6 +680,22 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
             .toList();
     }
 
+    private List<ContentUserBlacklistItemVO> buildBlacklistItems(List<ContentUserBlock> blocks) {
+        if (blocks == null || blocks.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> blockedUserIds = blocks.stream()
+            .map(ContentUserBlock::getBlockedUserId)
+            .toList();
+        Map<String, ContentUserProfile> profileMap = profileMapper.selectList(Wrappers.<ContentUserProfile>lambdaQuery()
+                .in(ContentUserProfile::getUserId, blockedUserIds))
+            .stream()
+            .collect(Collectors.toMap(ContentUserProfile::getUserId, Function.identity(), (left, right) -> left));
+        return blocks.stream()
+            .map(block -> ContentUserBlacklistItemVO.from(block, profileMap.get(block.getBlockedUserId())))
+            .toList();
+    }
+
     private void rejectDuplicateGroupName(String operatorUserId, String groupName, String currentGroupId) {
         ContentUserRelationGroup duplicate = relationGroupMapper.selectOne(Wrappers.<ContentUserRelationGroup>lambdaQuery()
             .eq(ContentUserRelationGroup::getOwnerUserId, operatorUserId)
@@ -721,6 +786,28 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         }
     }
 
+    private void saveActiveBlock(String operatorUserId, String targetUserId) {
+        if (blockMapper == null) {
+            return;
+        }
+        ContentUserBlock block = blockMapper.selectByPair(operatorUserId, targetUserId);
+        if (block == null) {
+            block = new ContentUserBlock()
+                .setUserId(operatorUserId)
+                .setBlockedUserId(targetUserId)
+                .setBlockTime(new Date())
+                .setStatus(ACTIVE_STATUS);
+            block.setId(UUIDGenerator.generate());
+            blockMapper.insert(block);
+            return;
+        }
+        if (!ACTIVE_STATUS.equals(block.getStatus())) {
+            block.setStatus(ACTIVE_STATUS);
+            block.setBlockTime(new Date());
+            blockMapper.updateById(block);
+        }
+    }
+
     private void validateFollowAllowed(String operatorUserId, String targetUserId, ContentUserRelation relation) {
         if (Boolean.TRUE.equals(relation.getBlacklisted()) || Boolean.TRUE.equals(relation.getBlockedByOwner())) {
             throw new JeecgBootException("拉黑关系中不可关注");
@@ -747,6 +834,19 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
             return;
         }
         profileMapper.changeSpecialFollowCount(operatorUserId, after ? 1 : -1);
+    }
+
+    private void evictRelationBoundaryCache(String operatorUserId, String targetUserId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        // 拉黑会改变双向关系、可见性与信息流过滤资格，成功提交前统一失效相关缓存。
+        redisTemplate.delete(ContentUserCacheConstant.relationCacheKey(operatorUserId, targetUserId));
+        redisTemplate.delete(ContentUserCacheConstant.relationCacheKey(targetUserId, operatorUserId));
+        redisTemplate.delete(ContentUserCacheConstant.visibilityCacheKey(operatorUserId, targetUserId));
+        redisTemplate.delete(ContentUserCacheConstant.visibilityCacheKey(targetUserId, operatorUserId));
+        redisTemplate.delete(ContentUserCacheConstant.feedFilterCacheKey(operatorUserId));
+        redisTemplate.delete(ContentUserCacheConstant.feedFilterCacheKey(targetUserId));
     }
 
     private ContentUserRelation getOrCreate(String operatorUserId, String targetUserId) {

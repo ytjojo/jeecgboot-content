@@ -17,6 +17,9 @@ class ContentUserCacheConstantTest {
         assertThat(ContentUserCacheConstant.privacyCacheKey("u1")).isEqualTo("content:user:privacy:u1");
         assertThat(ContentUserCacheConstant.publicProfileCacheKey("u1")).isEqualTo("content:user:profile:public:u1");
         assertThat(ContentUserCacheConstant.viewerProfileCacheKey("u1", "OWNER")).isEqualTo("content:user:profile:u1:OWNER");
+        assertThat(ContentUserCacheConstant.relationCacheKey("u1", "u2")).isEqualTo("content:user:relation:u1:u2");
+        assertThat(ContentUserCacheConstant.visibilityCacheKey("u1", "u2")).isEqualTo("content:user:visibility:u1:u2");
+        assertThat(ContentUserCacheConstant.feedFilterCacheKey("u1")).isEqualTo("content:feed:filter:u1");
     }
 
     @Test
@@ -26,5 +29,6 @@ class ContentUserCacheConstantTest {
         assertThatThrownBy(() -> ContentUserCacheConstant.profileCacheKey("a".repeat(65))).hasMessageContaining("用户ID不合法");
         assertThatThrownBy(() -> ContentUserCacheConstant.viewerProfileCacheKey("u1", null)).hasMessageContaining("查看者范围不能为空");
         assertThatThrownBy(() -> ContentUserCacheConstant.viewerProfileCacheKey("u1", "BAD")).hasMessageContaining("查看者范围不合法");
+        assertThatThrownBy(() -> ContentUserCacheConstant.relationCacheKey("u1", "bad:user")).hasMessageContaining("目标用户ID不合法");
     }
 }

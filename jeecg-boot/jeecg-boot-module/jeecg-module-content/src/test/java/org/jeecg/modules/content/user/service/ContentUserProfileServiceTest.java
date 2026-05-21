@@ -3,6 +3,7 @@ package org.jeecg.modules.content.user.service;
 import org.jeecg.modules.content.user.entity.ContentUserPrivacySetting;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserProfileReview;
+import org.jeecg.modules.content.user.biz.ContentUserRelationBoundaryBizService;
 import org.jeecg.modules.content.user.mapper.ContentUserVerificationBadgeMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserHomepageModuleMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserPrivacySettingMapper;
@@ -42,6 +43,9 @@ class ContentUserProfileServiceTest {
 
     @Mock
     private IContentUserVisibilityPolicyService visibilityPolicyService;
+
+    @Mock
+    private ContentUserRelationBoundaryBizService relationBoundaryBizService;
 
     @Mock
     private ContentUserProfileReviewMapper profileReviewMapper;
@@ -87,6 +91,28 @@ class ContentUserProfileServiceTest {
         when(visibilityPolicyService.canViewField("author_1", "viewer_2", "FOLLOWERS_ONLY")).thenReturn(false);
 
         assertThat(profileService.getProfile("author_1", "viewer_2").getBirthday()).isNull();
+    }
+
+    @Test
+    void shouldRejectProfileWhenViewerHasBlockedOwner() {
+        when(relationBoundaryBizService.isBlockedEitherWay("viewer_1", "author_2")).thenReturn(true);
+        when(relationBoundaryBizService.isBlockedBy("viewer_1", "author_2")).thenReturn(true);
+
+        assertThatThrownBy(() -> profileService.getProfile("author_2", "viewer_1"))
+            .isInstanceOf(org.jeecg.common.exception.JeecgBootException.class)
+            .hasMessage("您已拉黑该用户，无法查看其内容");
+        verify(profileMapper, never()).selectByUserId("author_2");
+    }
+
+    @Test
+    void shouldReturnNonRevealingErrorWhenViewerIsBlockedByOwner() {
+        when(relationBoundaryBizService.isBlockedEitherWay("viewer_1", "author_2")).thenReturn(true);
+        when(relationBoundaryBizService.isBlockedBy("viewer_1", "author_2")).thenReturn(false);
+
+        assertThatThrownBy(() -> profileService.getProfile("author_2", "viewer_1"))
+            .isInstanceOf(org.jeecg.common.exception.JeecgBootException.class)
+            .hasMessage("用户不存在");
+        verify(profileMapper, never()).selectByUserId("author_2");
     }
 
     @Test

@@ -3,11 +3,13 @@ package org.jeecg.modules.content.user.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.user.entity.ContentUserActivitySnapshot;
+import org.jeecg.modules.content.user.entity.ContentUserBlock;
 import org.jeecg.modules.content.user.entity.ContentUserFeedSetting;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserRelation;
 import org.jeecg.modules.content.user.entity.ContentUserRelationGroup;
 import org.jeecg.modules.content.user.mapper.ContentUserActivitySnapshotMapper;
+import org.jeecg.modules.content.user.mapper.ContentUserBlockMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserFeedSettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationGroupMapper;
@@ -20,7 +22,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +44,9 @@ class ContentUserRelationServiceTest {
     private ContentUserRelationMapper relationMapper;
 
     @Mock
+    private ContentUserBlockMapper blockMapper;
+
+    @Mock
     private ContentUserRelationGroupMapper relationGroupMapper;
 
     @Mock
@@ -49,6 +57,9 @@ class ContentUserRelationServiceTest {
 
     @Mock
     private ContentUserProfileMapper profileMapper;
+
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Mock
     private IContentUserVisibilityPolicyService visibilityPolicyService;
@@ -68,6 +79,8 @@ class ContentUserRelationServiceTest {
             .setTargetUserId("u1")
             .setFollowed(true)
             .setSpecialFollow(true);
+        when(profileMapper.selectByUserId("u2")).thenReturn(new ContentUserProfile().setUserId("u2"));
+        when(blockMapper.selectByPair("u1", "u2")).thenReturn(null);
         when(relationMapper.selectByPair("u1", "u2")).thenReturn(relation);
         when(relationMapper.selectByPair("u2", "u1")).thenReturn(reverseRelation);
 
@@ -77,10 +90,82 @@ class ContentUserRelationServiceTest {
         assertThat(relation.getBlacklisted()).isTrue();
         assertThat(reverseRelation.getFollowed()).isFalse();
         assertThat(reverseRelation.getSpecialFollow()).isFalse();
+        verify(blockMapper).insert(any(ContentUserBlock.class));
+        verify(redisTemplate).delete("content:user:relation:u1:u2");
+        verify(redisTemplate).delete("content:user:relation:u2:u1");
+        verify(redisTemplate).delete("content:user:visibility:u1:u2");
+        verify(redisTemplate).delete("content:user:visibility:u2:u1");
+        verify(redisTemplate).delete("content:feed:filter:u1");
+        verify(redisTemplate).delete("content:feed:filter:u2");
+    }
+
+    @Test
+    void shouldRemoveOnlyExistingOneWayFollowWhenRequesterBlacklistsTarget() {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(true)
+            .setBlacklisted(false);
+        ContentUserRelation reverseRelation = new ContentUserRelation()
+            .setOwnerUserId("u2")
+            .setTargetUserId("u1")
+            .setFollowed(false)
+            .setSpecialFollow(false);
+        when(profileMapper.selectByUserId("u2")).thenReturn(new ContentUserProfile().setUserId("u2"));
+        when(blockMapper.selectByPair("u1", "u2")).thenReturn(null);
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(relation);
+        when(relationMapper.selectByPair("u2", "u1")).thenReturn(reverseRelation);
+
+        relationService.blacklist("u1", "u2");
+
+        assertThat(relation.getFollowed()).isFalse();
+        assertThat(relation.getSpecialFollow()).isFalse();
+        assertThat(reverseRelation.getFollowed()).isFalse();
+        verify(profileMapper).changeFollowingCount("u1", -1);
+        verify(profileMapper).changeFollowerCount("u2", -1);
+        verify(profileMapper).changeSpecialFollowCount("u1", -1);
+        verify(profileMapper, never()).changeFollowingCount("u2", -1);
+        verify(profileMapper, never()).changeFollowerCount("u1", -1);
+    }
+
+    @Test
+    void shouldKeepBlacklistOperationTransactionalWhenFollowRemovalFails() throws NoSuchMethodException {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setBlacklisted(false);
+        ContentUserRelation reverseRelation = new ContentUserRelation()
+            .setOwnerUserId("u2")
+            .setTargetUserId("u1")
+            .setFollowed(true);
+        when(profileMapper.selectByUserId("u2")).thenReturn(new ContentUserProfile().setUserId("u2"));
+        when(blockMapper.selectByPair("u1", "u2")).thenReturn(null);
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(relation);
+        when(relationMapper.selectByPair("u2", "u1")).thenReturn(reverseRelation);
+        when(relationMapper.updateById(any(ContentUserRelation.class))).thenAnswer(invocation -> {
+            ContentUserRelation updated = invocation.getArgument(0);
+            if (updated == reverseRelation) {
+                throw new RuntimeException("解除反向关注失败");
+            }
+            return 1;
+        });
+
+        assertThatThrownBy(() -> relationService.blacklist("u1", "u2"))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("解除反向关注失败");
+        Method method = ContentUserRelationServiceImpl.class.getMethod("blacklist", String.class, String.class);
+        assertThat(method.getAnnotation(Transactional.class).rollbackFor()).contains(Exception.class);
+        verify(redisTemplate, never()).delete(any(String.class));
     }
 
     @Test
     void shouldReopenInteractionWhenRequesterRemovesTargetFromBlacklist() {
+        ContentUserBlock block = new ContentUserBlock()
+            .setUserId("u1")
+            .setBlockedUserId("u2")
+            .setStatus("ACTIVE");
         ContentUserRelation relation = new ContentUserRelation()
             .setOwnerUserId("u1")
             .setTargetUserId("u2")
@@ -89,13 +174,134 @@ class ContentUserRelationServiceTest {
             .setBlockedByOwner(true)
             .setFollowed(false)
             .setSpecialFollow(false);
+        when(blockMapper.selectByPair("u1", "u2")).thenReturn(block);
         when(relationMapper.selectByPair("u1", "u2")).thenReturn(relation);
 
         relationService.unblacklist("u1", "u2");
 
+        assertThat(block.getStatus()).isEqualTo("CANCELLED");
         assertThat(relation.getBlacklisted()).isFalse();
         assertThat(relation.getMuted()).isFalse();
         assertThat(relation.getBlockedByOwner()).isFalse();
+        assertThat(relation.getFollowed()).isFalse();
+        assertThat(relation.getSpecialFollow()).isFalse();
+        verify(blockMapper).updateById(block);
+    }
+
+    @Test
+    void shouldKeepUnblacklistIdempotentWhenBlockRelationDoesNotExist() {
+        when(blockMapper.selectByPair("u1", "u2")).thenReturn(null);
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(null);
+
+        relationService.unblacklist("u1", "u2");
+
+        verify(blockMapper, never()).insert(any(ContentUserBlock.class));
+        verify(blockMapper, never()).updateById(any(ContentUserBlock.class));
+        verify(relationMapper, never()).insert(any(ContentUserRelation.class));
+        verify(relationMapper, never()).updateById(any(ContentUserRelation.class));
+    }
+
+    @Test
+    void shouldRejectInvalidUnblacklistTargetBeforeWritingAnything() {
+        assertThatThrownBy(() -> relationService.unblacklist("u1", null))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID不能为空");
+
+        assertThatThrownBy(() -> relationService.unblacklist("u1", " "))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID不能为空");
+
+        assertThatThrownBy(() -> relationService.unblacklist("u1", "t".repeat(65)))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID长度不能超过64位");
+
+        verify(blockMapper, never()).updateById(any(ContentUserBlock.class));
+        verify(relationMapper, never()).insert(any(ContentUserRelation.class));
+    }
+
+    @Test
+    void shouldNotTouchReverseBlockWhenRequesterRemovesOwnBlacklist() {
+        ContentUserBlock block = new ContentUserBlock()
+            .setUserId("u1")
+            .setBlockedUserId("u2")
+            .setStatus("ACTIVE");
+        ContentUserBlock reverseBlock = new ContentUserBlock()
+            .setUserId("u2")
+            .setBlockedUserId("u1")
+            .setStatus("ACTIVE");
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setBlacklisted(true)
+            .setFollowed(false);
+        when(blockMapper.selectByPair("u1", "u2")).thenReturn(block);
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(relation);
+
+        relationService.unblacklist("u1", "u2");
+
+        assertThat(block.getStatus()).isEqualTo("CANCELLED");
+        assertThat(reverseBlock.getStatus()).isEqualTo("ACTIVE");
+        verify(blockMapper).updateById(block);
+        verify(blockMapper, never()).updateById(reverseBlock);
+    }
+
+    @Test
+    void shouldRejectInvalidBlacklistTargetBeforeWritingBlockRecord() {
+        assertThatThrownBy(() -> relationService.blacklist("u1", null))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID不能为空");
+
+        assertThatThrownBy(() -> relationService.blacklist("u1", " "))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID不能为空");
+
+        assertThatThrownBy(() -> relationService.blacklist("u1", "t".repeat(65)))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID长度不能超过64位");
+
+        assertThatThrownBy(() -> relationService.blacklist("u1", "u1"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("不能关注或操作自己");
+
+        verify(blockMapper, never()).insert(any(ContentUserBlock.class));
+    }
+
+    @Test
+    void shouldRejectUnknownBlacklistTargetBeforeWritingBlockRecord() {
+        when(profileMapper.selectByUserId("missing-user")).thenReturn(null);
+
+        assertThatThrownBy(() -> relationService.blacklist("u1", "missing-user"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户不存在");
+
+        verify(blockMapper, never()).insert(any(ContentUserBlock.class));
+    }
+
+    @Test
+    void shouldKeepBlacklistWriteIdempotentWhenActiveBlockExists() {
+        ContentUserBlock block = new ContentUserBlock()
+            .setUserId("u1")
+            .setBlockedUserId("u2")
+            .setStatus("ACTIVE");
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(false)
+            .setSpecialFollow(false);
+        ContentUserRelation reverseRelation = new ContentUserRelation()
+            .setOwnerUserId("u2")
+            .setTargetUserId("u1")
+            .setFollowed(false)
+            .setSpecialFollow(false);
+        when(profileMapper.selectByUserId("u2")).thenReturn(new ContentUserProfile().setUserId("u2"));
+        when(blockMapper.selectByPair("u1", "u2")).thenReturn(block);
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(relation);
+        when(relationMapper.selectByPair("u2", "u1")).thenReturn(reverseRelation);
+
+        relationService.blacklist("u1", "u2");
+
+        verify(blockMapper, never()).insert(any(ContentUserBlock.class));
+        verify(blockMapper, never()).updateById(any(ContentUserBlock.class));
     }
 
     @Test
@@ -629,6 +835,60 @@ class ContentUserRelationServiceTest {
         assertThat(result.getRecords().get(0).getSpecialFollow()).isTrue();
         assertThat(result.getRecords().get(0).getLatestActivityHint()).isEqualTo("发布了新内容");
         assertThat(result.getRecords().get(0).getLatestActivityTime()).isEqualTo(latestActivityTime);
+    }
+
+    @Test
+    void shouldListBlacklistByBlockTimeDescWithProfileSummary() {
+        Date newer = new Date(3000L);
+        Date older = new Date(1000L);
+        ContentUserBlock first = new ContentUserBlock()
+            .setUserId("u1")
+            .setBlockedUserId("u3")
+            .setBlockTime(newer)
+            .setStatus("ACTIVE");
+        ContentUserBlock second = new ContentUserBlock()
+            .setUserId("u1")
+            .setBlockedUserId("u2")
+            .setBlockTime(older)
+            .setStatus("ACTIVE");
+        when(blockMapper.selectPage(any(), any())).thenAnswer(invocation -> {
+            Page<ContentUserBlock> page = invocation.getArgument(0);
+            page.setRecords(List.of(first, second));
+            page.setTotal(2L);
+            return page;
+        });
+        when(profileMapper.selectList(any())).thenReturn(List.of(
+            new ContentUserProfile().setUserId("u2").setNickname("旧用户").setAvatar("old.png"),
+            new ContentUserProfile().setUserId("u3").setNickname("新用户").setAvatar("new.png")
+        ));
+
+        var result = relationService.listBlacklist("u1", 1L, 10L);
+
+        assertThat(result.getTotal()).isEqualTo(2L);
+        assertThat(result.getRecords()).extracting("blockedUserId")
+            .containsExactly("u3", "u2");
+        assertThat(result.getRecords().get(0).getNickname()).isEqualTo("新用户");
+        assertThat(result.getRecords().get(0).getAvatar()).isEqualTo("new.png");
+        assertThat(result.getRecords().get(0).getBlockTime()).isEqualTo(newer);
+    }
+
+    @Test
+    void shouldNormalizeBlacklistPageAndRejectOversizedPage() {
+        when(blockMapper.selectPage(any(), any())).thenAnswer(invocation -> {
+            Page<ContentUserBlock> page = invocation.getArgument(0);
+            page.setRecords(List.of());
+            page.setTotal(0L);
+            return page;
+        });
+
+        var result = relationService.listBlacklist("u1", 0L, 0L);
+
+        assertThat(result.getPageNo()).isEqualTo(1L);
+        assertThat(result.getPageSize()).isEqualTo(10L);
+        assertThat(result.getRecords()).isEmpty();
+        assertThatThrownBy(() -> relationService.listBlacklist("u1", 1L, 101L))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("分页大小不能超过100");
     }
 
     @Test

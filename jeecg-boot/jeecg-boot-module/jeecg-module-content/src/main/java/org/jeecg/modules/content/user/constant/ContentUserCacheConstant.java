@@ -17,6 +17,9 @@ public interface ContentUserCacheConstant {
     /** 用户可见性判定缓存前缀。 */
     String VISIBILITY_CACHE_PREFIX = "content:user:visibility:";
 
+    /** 用户信息流过滤缓存前缀。 */
+    String FEED_FILTER_CACHE_PREFIX = "content:feed:filter:";
+
     /** 用户资料修改次数缓存前缀。 */
     String PROFILE_UPDATE_COUNT_PREFIX = "content:user:profile:update_count:";
 
@@ -49,6 +52,18 @@ public interface ContentUserCacheConstant {
 
     static String viewerProfileCacheKey(String userId, String viewerScope) {
         return PROFILE_CACHE_PREFIX + requireSafeKeyPart(userId, "用户ID") + ":" + requireViewerScope(viewerScope);
+    }
+
+    static String relationCacheKey(String userId, String targetUserId) {
+        return RELATION_CACHE_PREFIX + requireSafeKeyPart(userId, "用户ID") + ":" + requireSafeKeyPart(targetUserId, "目标用户ID");
+    }
+
+    static String visibilityCacheKey(String userId, String targetUserId) {
+        return VISIBILITY_CACHE_PREFIX + requireSafeKeyPart(userId, "用户ID") + ":" + requireSafeKeyPart(targetUserId, "目标用户ID");
+    }
+
+    static String feedFilterCacheKey(String userId) {
+        return FEED_FILTER_CACHE_PREFIX + requireSafeKeyPart(userId, "用户ID");
     }
 
     private static String requireViewerScope(String viewerScope) {

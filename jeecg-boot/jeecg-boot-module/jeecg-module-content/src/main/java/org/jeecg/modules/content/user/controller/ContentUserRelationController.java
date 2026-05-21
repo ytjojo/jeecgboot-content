@@ -17,6 +17,7 @@ import org.jeecg.modules.content.user.vo.ContentRelationGroupVO;
 import org.jeecg.modules.content.user.vo.ContentRelationUserPageVO;
 import org.jeecg.modules.content.user.vo.ContentFollowFeedPageVO;
 import org.jeecg.modules.content.user.vo.ContentFollowRecommendationPageVO;
+import org.jeecg.modules.content.user.vo.ContentUserBlacklistPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserRelationVO;
 import org.springframework.web.bind.annotation.*;
 
@@ -236,6 +237,17 @@ public class ContentUserRelationController {
                                                                @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
                                                                @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
         return Result.OK(relationService.listSpecialFollowedUsers(userId, pageNo, pageSize));
+    }
+
+    /**
+     * 分页查询当前用户黑名单。
+     */
+    @Operation(summary = "分页查询黑名单")
+    @GetMapping("/blacklist")
+    public Result<ContentUserBlacklistPageVO> blacklist(@RequestParam("userId") String userId,
+                                                        @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
+                                                        @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
+        return Result.OK(relationService.listBlacklist(userId, pageNo, pageSize));
     }
 
     /**

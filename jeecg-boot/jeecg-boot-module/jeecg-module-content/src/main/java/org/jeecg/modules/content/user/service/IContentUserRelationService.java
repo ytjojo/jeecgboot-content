@@ -5,6 +5,7 @@ import org.jeecg.modules.content.user.vo.ContentRelationBatchResultVO;
 import org.jeecg.modules.content.user.vo.ContentRelationGroupVO;
 import org.jeecg.modules.content.user.vo.ContentRelationUserPageVO;
 import org.jeecg.modules.content.user.vo.ContentFollowFeedPageVO;
+import org.jeecg.modules.content.user.vo.ContentUserBlacklistPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserRelationVO;
 
 import java.util.List;
@@ -51,6 +52,8 @@ public interface IContentUserRelationService {
     ContentRelationUserPageVO listFollowedUsers(String operatorUserId, String relationGroupId, String keyword, Long pageNo, Long pageSize);
 
     ContentRelationUserPageVO listSpecialFollowedUsers(String operatorUserId, Long pageNo, Long pageSize);
+
+    ContentUserBlacklistPageVO listBlacklist(String operatorUserId, Long pageNo, Long pageSize);
 
     ContentFollowFeedPageVO listFollowFeed(String operatorUserId, Long pageNo, Long pageSize);
 }

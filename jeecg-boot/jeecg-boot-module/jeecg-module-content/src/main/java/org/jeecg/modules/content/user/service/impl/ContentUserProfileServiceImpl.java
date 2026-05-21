@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.common.util.UUIDGenerator;
+import org.jeecg.modules.content.user.biz.ContentUserRelationBoundaryBizService;
 import org.jeecg.modules.content.user.constant.ContentUserCacheConstant;
 import org.jeecg.modules.content.user.entity.ContentUserHomepageModule;
 import org.jeecg.modules.content.user.entity.ContentUserPrivacySetting;
@@ -76,6 +77,9 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
     private IContentUserVisibilityPolicyService visibilityPolicyService;
 
     @Resource
+    private ContentUserRelationBoundaryBizService relationBoundaryBizService;
+
+    @Resource
     private IContentUserProfileAuditAdapter profileAuditAdapter;
 
     @Resource
@@ -95,6 +99,7 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
      */
     @Override
     public ContentUserProfileVO getProfile(String ownerUserId, String viewerUserId) {
+        assertHomepageBlockBoundary(ownerUserId, viewerUserId);
         ContentUserProfile profile = requireProfile(ownerUserId);
         ContentUserPrivacySetting privacy = defaultPrivacy(privacyMapper.selectByUserId(ownerUserId), ownerUserId);
         boolean birthdayVisible = visibilityPolicyService.canViewField(ownerUserId, viewerUserId, privacy.getBirthdayVisibility());
@@ -127,6 +132,17 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
             vo.setModuleOrderJson(null);
         }
         return vo;
+    }
+
+    private void assertHomepageBlockBoundary(String ownerUserId, String viewerUserId) {
+        if (relationBoundaryBizService == null || Objects.equals(ownerUserId, viewerUserId)
+            || !relationBoundaryBizService.isBlockedEitherWay(viewerUserId, ownerUserId)) {
+            return;
+        }
+        if (relationBoundaryBizService.isBlockedBy(viewerUserId, ownerUserId)) {
+            throw new JeecgBootException("您已拉黑该用户，无法查看其内容");
+        }
+        throw new JeecgBootException("用户不存在");
     }
 
     /**
