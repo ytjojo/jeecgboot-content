@@ -17,4 +17,6 @@ public interface IContentUserProfileService {
     void updatePrivacy(String userId, ContentUserPrivacyUpdateReq req);
 
     void handleProfileReview(ContentUserReviewHandleReq req);
+
+    int initializeCompatibilityData();
 }

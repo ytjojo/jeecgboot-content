@@ -3,6 +3,7 @@ package org.jeecg.modules.content.user.service;
 import org.jeecg.modules.content.user.entity.ContentUserPrivacySetting;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserProfileReview;
+import org.jeecg.modules.content.user.mapper.ContentUserVerificationBadgeMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserHomepageModuleMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserPrivacySettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
@@ -18,12 +19,15 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +48,9 @@ class ContentUserProfileServiceTest {
 
     @Mock
     private ContentUserHomepageModuleMapper homepageModuleMapper;
+
+    @Mock
+    private ContentUserVerificationBadgeMapper verificationBadgeMapper;
 
     @Mock
     private IContentUserProfileAuditAdapter profileAuditAdapter;
@@ -122,5 +129,198 @@ class ContentUserProfileServiceTest {
             .hasMessageContaining("今日资料修改次数已达上限");
 
         verify(profileMapper, never()).updateById(any(ContentUserProfile.class));
+    }
+
+    @Test
+    void shouldAllowFifthProfileUpdateAndRejectSixthForDailyQuota() {
+        ContentUserProfile profile = new ContentUserProfile()
+            .setUserId("u1")
+            .setNickname("旧昵称")
+            .setAvatar("https://cdn.example.com/old.png");
+        ContentUserProfileUpdateReq req = new ContentUserProfileUpdateReq()
+            .setNickname("新昵称")
+            .setAvatar("https://cdn.example.com/new.png");
+        when(profileMapper.selectByUserId("u1")).thenReturn(profile);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.increment(anyString())).thenReturn(5L, 6L);
+        when(profileAuditAdapter.review(any(ContentUserProfileUpdateReq.class)))
+            .thenReturn(new IContentUserProfileAuditAdapter.AuditResult(false, null));
+
+        profileService.updateProfile("u1", req);
+
+        assertThatThrownBy(() -> profileService.updateProfile("u1", req))
+            .hasMessageContaining("今日资料修改次数已达上限");
+        verify(valueOperations, times(2)).increment(anyString());
+    }
+
+    @Test
+    void shouldExpireProfileQuotaKeyOnFirstDailyUpdate() {
+        ContentUserProfile profile = new ContentUserProfile()
+            .setUserId("u1")
+            .setNickname("旧昵称")
+            .setAvatar("https://cdn.example.com/old.png");
+        ContentUserProfileUpdateReq req = new ContentUserProfileUpdateReq()
+            .setNickname("新昵称")
+            .setAvatar("https://cdn.example.com/new.png");
+        when(profileMapper.selectByUserId("u1")).thenReturn(profile);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.increment(anyString())).thenReturn(1L);
+        when(profileAuditAdapter.review(any(ContentUserProfileUpdateReq.class)))
+            .thenReturn(new IContentUserProfileAuditAdapter.AuditResult(false, null));
+
+        profileService.updateProfile("u1", req);
+
+        verify(redisTemplate).expire(anyString(), org.mockito.ArgumentMatchers.eq(1L), org.mockito.ArgumentMatchers.eq(TimeUnit.DAYS));
+    }
+
+    @Test
+    void shouldRejectPendingReviewBeforeChangingProfileAgain() {
+        ContentUserProfile profile = new ContentUserProfile()
+            .setUserId("u1")
+            .setNickname("旧昵称")
+            .setAvatar("https://cdn.example.com/old.png");
+        ContentUserProfileUpdateReq req = new ContentUserProfileUpdateReq()
+            .setNickname("新昵称")
+            .setAvatar("https://cdn.example.com/new.png");
+        when(profileMapper.selectByUserId("u1")).thenReturn(profile);
+        when(profileReviewMapper.selectPendingByUserId("u1")).thenReturn(new ContentUserProfileReview());
+
+        assertThatThrownBy(() -> profileService.updateProfile("u1", req))
+            .hasMessageContaining("资料正在审核中");
+
+        verify(profileMapper, never()).updateById(any(ContentUserProfile.class));
+    }
+
+    @Test
+    void shouldApproveReviewAndRecordEffectiveHistory() {
+        ContentUserProfile profile = new ContentUserProfile()
+            .setUserId("u1")
+            .setNickname("旧昵称")
+            .setAvatar("https://cdn.example.com/old.png");
+        ContentUserProfileReview review = new ContentUserProfileReview()
+            .setUserId("u1")
+            .setReviewStatus("PENDING")
+            .setTargetSnapshotJson("{\"nickname\":\"新昵称\",\"avatar\":\"https://cdn.example.com/new.png\"}");
+        review.setId("review1");
+        when(profileReviewMapper.selectById("review1")).thenReturn(review);
+        when(profileMapper.selectByUserId("u1")).thenReturn(profile);
+
+        profileService.handleProfileReview(new org.jeecg.modules.content.user.req.profile.ContentUserReviewHandleReq()
+            .setReviewId("review1")
+            .setReviewStatus("APPROVED")
+            .setOperatorUserId("admin"));
+
+        verify(historyService).recordEffectiveChange("u1", "NICKNAME", "旧昵称", "review1");
+        verify(historyService).recordEffectiveChange("u1", "AVATAR", "https://cdn.example.com/old.png", "review1");
+        verify(profileMapper).updateById(org.mockito.ArgumentMatchers.argThat(
+            (ContentUserProfile item) -> "新昵称".equals(item.getNickname()) && "NONE".equals(item.getProfileReviewStatus())
+        ));
+    }
+
+    @Test
+    void shouldRejectReviewAndKeepOldProfileValue() {
+        ContentUserProfile profile = new ContentUserProfile()
+            .setUserId("u1")
+            .setNickname("旧昵称")
+            .setAvatar("https://cdn.example.com/old.png");
+        ContentUserProfileReview review = new ContentUserProfileReview()
+            .setUserId("u1")
+            .setReviewStatus("PENDING")
+            .setTargetSnapshotJson("{\"nickname\":\"新昵称\",\"avatar\":\"https://cdn.example.com/new.png\"}");
+        review.setId("review1");
+        when(profileReviewMapper.selectById("review1")).thenReturn(review);
+        when(profileMapper.selectByUserId("u1")).thenReturn(profile);
+
+        profileService.handleProfileReview(new org.jeecg.modules.content.user.req.profile.ContentUserReviewHandleReq()
+            .setReviewId("review1")
+            .setReviewStatus("REJECTED")
+            .setRejectReason("昵称违规")
+            .setOperatorUserId("admin"));
+
+        assertThat(profile.getNickname()).isEqualTo("旧昵称");
+        assertThat(review.getRejectReason()).isEqualTo("昵称违规");
+        verify(historyService, never()).recordEffectiveChange(anyString(), anyString(), anyString(), any());
+    }
+
+    @Test
+    void shouldRejectInvalidProfileFieldsBeforePublishing() {
+        ContentUserProfile profile = new ContentUserProfile()
+            .setUserId("u1")
+            .setNickname("旧昵称")
+            .setAvatar("https://cdn.example.com/old.png");
+        when(profileMapper.selectByUserId("u1")).thenReturn(profile);
+
+        assertThatThrownBy(() -> profileService.updateProfile("u1", new ContentUserProfileUpdateReq().setNickname("").setAvatar("a.png")))
+            .hasMessageContaining("昵称不能为空");
+        assertThatThrownBy(() -> profileService.updateProfile("u1", new ContentUserProfileUpdateReq().setNickname("123456789012345678901").setAvatar("a.png")))
+            .hasMessageContaining("昵称长度不能超过20位");
+        assertThatThrownBy(() -> profileService.updateProfile("u1", new ContentUserProfileUpdateReq().setNickname("新昵称").setAvatar("a.png").setBio("a".repeat(501))))
+            .hasMessageContaining("个人简介长度不能超过500位");
+        assertThatThrownBy(() -> profileService.updateProfile("u1", new ContentUserProfileUpdateReq().setNickname("新昵称").setAvatar("a.png").setGender(9)))
+            .hasMessageContaining("性别取值不合法");
+        assertThatThrownBy(() -> profileService.updateProfile("u1", new ContentUserProfileUpdateReq().setNickname("新昵称").setAvatar("a.png").setBirthday(new Date(System.currentTimeMillis() + 86_400_000L))))
+            .hasMessageContaining("生日不能晚于当前日期");
+        assertThatThrownBy(() -> profileService.updateProfile("u1", new ContentUserProfileUpdateReq().setNickname("新昵称").setAvatar("a.png").setRegion("a".repeat(65))))
+            .hasMessageContaining("地区长度不能超过64位");
+        assertThatThrownBy(() -> profileService.updateProfile("u1", new ContentUserProfileUpdateReq().setNickname("新昵称").setAvatar("a.png").setProfession("a".repeat(65))))
+            .hasMessageContaining("职业长度不能超过64位");
+        assertThatThrownBy(() -> profileService.updateProfile("u1", new ContentUserProfileUpdateReq().setNickname("新昵称").setAvatar("a.png").setPersonalLink("ftp://example.com")))
+            .hasMessageContaining("个人链接格式不合法");
+    }
+
+    @Test
+    void shouldApplyAllPrivacyFieldVisibilityAndEvictPublicCache() {
+        ContentUserPrivacySetting privacy = new ContentUserPrivacySetting()
+            .setUserId("u1")
+            .setBirthdayVisibility("PUBLIC")
+            .setGenderVisibility("PUBLIC");
+        when(privacyMapper.selectByUserId("u1")).thenReturn(privacy);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.increment(anyString())).thenReturn(1L);
+
+        profileService.updatePrivacy("u1", new org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq()
+            .setBirthdayVisibility("PRIVATE")
+            .setGenderVisibility("FOLLOWERS_ONLY")
+            .setRegionVisibility("MUTUAL_ONLY")
+            .setProfessionVisibility("PRIVATE")
+            .setPersonalLinkVisibility("PUBLIC")
+            .setVerificationBadgeVisibility("PRIVATE")
+            .setContactBadgeVisibility("PRIVATE")
+            .setHomepageVisibility("PUBLIC")
+            .setDynamicVisibility("FOLLOWERS_ONLY"));
+
+        assertThat(privacy.getBirthdayVisibility()).isEqualTo("PRIVATE");
+        verify(redisTemplate).delete("content:user:profile:public:u1");
+    }
+
+    @Test
+    void shouldRejectPrivacyLimitAndInvalidVisibility() {
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.increment(anyString())).thenReturn(11L);
+
+        assertThatThrownBy(() -> profileService.updatePrivacy("u1", new org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq()))
+            .hasMessageContaining("隐私设置修改过于频繁");
+
+        when(valueOperations.increment(anyString())).thenReturn(1L);
+        assertThatThrownBy(() -> profileService.updatePrivacy("u1", new org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq()
+            .setBirthdayVisibility("BAD")))
+            .hasMessageContaining("可见范围取值不合法");
+    }
+
+    @Test
+    void shouldInitializeLegacyCertificationAndDefaultHomepageModulesIdempotently() {
+        ContentUserProfile profile = new ContentUserProfile()
+            .setUserId("u1")
+            .setCertificationType("PERSONAL")
+            .setCertificationLabel("个人认证");
+        when(profileMapper.selectList(null)).thenReturn(List.of(profile));
+        when(homepageModuleMapper.selectByUserId("u1")).thenReturn(List.of(), List.of(new org.jeecg.modules.content.user.entity.ContentUserHomepageModule()));
+        when(verificationBadgeMapper.selectActiveByUserId("u1")).thenReturn(List.of(), List.of(new org.jeecg.modules.content.user.entity.ContentUserVerificationBadge()));
+
+        assertThat(profileService.initializeCompatibilityData()).isEqualTo(5);
+        assertThat(profileService.initializeCompatibilityData()).isZero();
+
+        verify(homepageModuleMapper, times(4)).insert(any(org.jeecg.modules.content.user.entity.ContentUserHomepageModule.class));
+        verify(verificationBadgeMapper).insert(any(org.jeecg.modules.content.user.entity.ContentUserVerificationBadge.class));
     }
 }

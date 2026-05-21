@@ -100,4 +100,28 @@ public interface ContentUserErrorCode {
 
     /** 订阅通知配置不合法。 */
     int SOCIAL_SUBSCRIPTION_NOTIFICATION_INVALID = 5496;
+
+    /** 资料更新请求不合法。 */
+    int PROFILE_UPDATE_INVALID = 5500;
+
+    /** 资料修改次数超过限制。 */
+    int PROFILE_UPDATE_LIMIT_EXCEEDED = 5501;
+
+    /** 资料正在审核中。 */
+    int PROFILE_REVIEW_PENDING = 5502;
+
+    /** 主页配置不合法。 */
+    int PROFILE_HOMEPAGE_INVALID = 5510;
+
+    /** 认证标识不可见或不存在。 */
+    int PROFILE_VERIFICATION_BADGE_NOT_FOUND = 5520;
+
+    /** 隐私设置不合法。 */
+    int PROFILE_PRIVACY_INVALID = 5530;
+
+    /** 隐私设置修改次数超过限制。 */
+    int PROFILE_PRIVACY_LIMIT_EXCEEDED = 5531;
+
+    /** 资料历史不存在或已过期。 */
+    int PROFILE_HISTORY_UNAVAILABLE = 5540;
 }

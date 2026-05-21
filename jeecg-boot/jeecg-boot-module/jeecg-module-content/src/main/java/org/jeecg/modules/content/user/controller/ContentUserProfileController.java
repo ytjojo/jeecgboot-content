@@ -6,6 +6,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.req.profile.ContentUserHomepageUpdateReq;
+import org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq;
 import org.jeecg.modules.content.user.req.profile.ContentUserProfileUpdateReq;
 import org.jeecg.modules.content.user.req.profile.ContentUserReviewHandleReq;
 import org.jeecg.modules.content.user.service.IContentUserHomepageService;
@@ -69,6 +70,17 @@ public class ContentUserProfileController {
     public Result<String> handleReview(@Valid @RequestBody ContentUserReviewHandleReq req) {
         profileService.handleProfileReview(req);
         return Result.OK("处理成功");
+    }
+
+    /**
+     * 更新资料字段隐私配置。
+     */
+    @Operation(summary = "更新资料隐私配置")
+    @PostMapping("/privacy/update")
+    public Result<String> updatePrivacy(@RequestParam("userId") String userId,
+                                        @Valid @RequestBody ContentUserPrivacyUpdateReq req) {
+        profileService.updatePrivacy(userId, req);
+        return Result.OK("更新成功");
     }
 
     /**

@@ -9,6 +9,7 @@ import org.jeecg.modules.content.user.entity.ContentUserHomepageModule;
 import org.jeecg.modules.content.user.entity.ContentUserPrivacySetting;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserProfileReview;
+import org.jeecg.modules.content.user.entity.ContentUserVerificationBadge;
 import org.jeecg.modules.content.user.enums.ContentProfileHistoryTypeEnum;
 import org.jeecg.modules.content.user.enums.ContentProfileReviewStatusEnum;
 import org.jeecg.modules.content.user.enums.ContentUserVisibilityEnum;
@@ -16,6 +17,7 @@ import org.jeecg.modules.content.user.mapper.ContentUserHomepageModuleMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserPrivacySettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileReviewMapper;
+import org.jeecg.modules.content.user.mapper.ContentUserVerificationBadgeMapper;
 import org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq;
 import org.jeecg.modules.content.user.req.profile.ContentUserProfileUpdateReq;
 import org.jeecg.modules.content.user.req.profile.ContentUserReviewHandleReq;
@@ -40,6 +42,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,6 +53,8 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
 
     private static final int PROFILE_DAILY_LIMIT = 5;
     private static final int PRIVACY_HOURLY_LIMIT = 10;
+    private static final List<String> DEFAULT_MODULES = List.of("POSTS", "COLLECTIONS", "BADGES", "ABOUT");
+    private static final Set<String> SUPPORTED_VISIBILITIES = Set.of("PUBLIC", "FOLLOWERS_ONLY", "MUTUAL_ONLY", "PRIVATE");
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Resource
@@ -63,6 +68,9 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
 
     @Resource
     private ContentUserHomepageModuleMapper homepageModuleMapper;
+
+    @Resource
+    private ContentUserVerificationBadgeMapper verificationBadgeMapper;
 
     @Resource
     private IContentUserVisibilityPolicyService visibilityPolicyService;
@@ -193,6 +201,44 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
         review.setReviewedAt(new Date());
         profileReviewMapper.updateById(review);
         evictProfileCache(review.getUserId());
+    }
+
+    /**
+     * 将旧资料表中的认证字段和缺省主页模块初始化到新扩展表，重复执行不产生重复数据。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int initializeCompatibilityData() {
+        int changed = 0;
+        List<ContentUserProfile> profiles = profileMapper.selectList(null);
+        for (ContentUserProfile profile : profiles) {
+            if (homepageModuleMapper.selectByUserId(profile.getUserId()).isEmpty()) {
+                for (int i = 0; i < DEFAULT_MODULES.size(); i++) {
+                    ContentUserHomepageModule module = new ContentUserHomepageModule()
+                        .setUserId(profile.getUserId())
+                        .setModuleKey(DEFAULT_MODULES.get(i))
+                        .setModuleName(DEFAULT_MODULES.get(i))
+                        .setVisible(Boolean.TRUE)
+                        .setSortOrder(i);
+                    module.setId(UUIDGenerator.generate());
+                    homepageModuleMapper.insert(module);
+                    changed++;
+                }
+            }
+            if (!isBlank(profile.getCertificationType()) && verificationBadgeMapper.selectActiveByUserId(profile.getUserId()).isEmpty()) {
+                ContentUserVerificationBadge badge = new ContentUserVerificationBadge()
+                    .setUserId(profile.getUserId())
+                    .setBadgeType(profile.getCertificationType())
+                    .setBadgeLabel(firstNonNull(profile.getCertificationLabel(), profile.getCertificationType()))
+                    .setDescription(profile.getCertificationLabel())
+                    .setStatus("ACTIVE")
+                    .setVerifiedAt(new Date());
+                badge.setId(UUIDGenerator.generate());
+                verificationBadgeMapper.insert(badge);
+                changed++;
+            }
+        }
+        return changed;
     }
 
     private ContentUserProfileUpdateReq mergeAndNormalize(ContentUserProfile profile, ContentUserProfileUpdateReq req) {
@@ -437,7 +483,11 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
             if (value.trim().isEmpty()) {
                 throw new JeecgBootException("可见范围不能为空");
             }
-            consumer.accept(value);
+            String normalized = value.trim();
+            if (!SUPPORTED_VISIBILITIES.contains(normalized)) {
+                throw new JeecgBootException("可见范围取值不合法");
+            }
+            consumer.accept(normalized);
         }
     }
 
