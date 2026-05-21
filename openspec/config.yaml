@@ -20,22 +20,4 @@ schema: use-tdd-plan
 #       - Break tasks into chunks of max 2 hours
 
 rules:
-  proposal:
-    - 用 WHEN/THEN 格式列出每一个可测试行为
-    - 不要描述实现细节
-  specs:
-    - 每个场景使用 GIVEN/WHEN/THEN 格式
-    - 每个场景必须可独立测试
-    - Scenario必须使用#### 四级标题，否则会被静默忽略
-  design:
-    - 涉及数据库migration的设计，必须包含回滚方案
-    - 必须指定精确的测试文件路径
-    - 必须指定每个文件的测试策略
-  tasks:
-    - 必须使用 checkbox 格式 "- [ ]"
-    - 每个任务是且仅是一个 TDD 阶段（RED / GREEN / REFACTOR）
-    - 任务严格交替 RED → GREEN →（可选 REFACTOR）
-    - GREEN 任务必须引用对应的 RED 任务
-  plan:
-    - 每个计划步骤精确对应一个任务
-    - 必须指定验证命令和预期证据
+  
