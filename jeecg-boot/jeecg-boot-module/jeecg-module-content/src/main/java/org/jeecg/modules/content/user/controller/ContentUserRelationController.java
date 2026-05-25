@@ -12,6 +12,7 @@ import org.jeecg.modules.content.user.req.relation.ContentRelationGroupRemoveReq
 import org.jeecg.modules.content.user.req.relation.ContentRelationGroupReq;
 import org.jeecg.modules.content.user.service.IContentUserFollowRecommendationService;
 import org.jeecg.modules.content.user.service.IContentUserRelationService;
+import org.jeecg.modules.content.user.vo.ContentBlockMuteHelpVO;
 import org.jeecg.modules.content.user.vo.ContentRelationBatchResultVO;
 import org.jeecg.modules.content.user.vo.ContentRelationGroupVO;
 import org.jeecg.modules.content.user.vo.ContentRelationUserPageVO;
@@ -259,6 +260,15 @@ public class ContentUserRelationController {
                                                       @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
                                                       @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
         return Result.OK(relationService.listFollowFeed(userId, pageNo, pageSize));
+    }
+
+    /**
+     * 返回拉黑、屏蔽、解除拉黑的确认文案和帮助说明。
+     */
+    @Operation(summary = "获取拉黑/屏蔽帮助说明")
+    @GetMapping("/block-mute/help")
+    public Result<ContentBlockMuteHelpVO> blockMuteHelp() {
+        return Result.OK(relationService.getBlockMuteHelp());
     }
 
     /**

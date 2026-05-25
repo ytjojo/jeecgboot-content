@@ -7,6 +7,7 @@ import org.jeecg.modules.content.user.entity.ContentUserActivitySnapshot;
 import org.jeecg.modules.content.user.entity.ContentUserRelation;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 关注流动态条目。
@@ -40,6 +41,12 @@ public class ContentFollowFeedItemVO {
     @Schema(description = "是否特别关注")
     private Boolean specialFollow;
 
+    @Schema(description = "是否命中屏蔽词")
+    private Boolean keywordMatched;
+
+    @Schema(description = "命中的屏蔽词列表")
+    private List<String> matchedKeywords;
+
     public static ContentFollowFeedItemVO from(ContentUserActivitySnapshot snapshot, ContentUserRelation relation) {
         return new ContentFollowFeedItemVO()
             .setSnapshotId(snapshot.getId())
@@ -49,6 +56,8 @@ public class ContentFollowFeedItemVO {
             .setBizId(snapshot.getBizId())
             .setSummary(snapshot.getSummary())
             .setActivityTime(snapshot.getActivityTime())
-            .setSpecialFollow(relation != null && Boolean.TRUE.equals(relation.getSpecialFollow()));
+            .setSpecialFollow(relation != null && Boolean.TRUE.equals(relation.getSpecialFollow()))
+            .setKeywordMatched(Boolean.FALSE)
+            .setMatchedKeywords(List.of());
     }
 }

@@ -3,8 +3,10 @@ package org.jeecg.modules.content.user.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.modules.content.user.entity.ContentUserBlock;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserFollowRecommendation;
+import org.jeecg.modules.content.user.mapper.ContentUserBlockMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserFollowRecommendationMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationMapper;
@@ -41,6 +43,9 @@ public class ContentUserFollowRecommendationServiceImpl
 
     @Resource
     private ContentUserRelationMapper relationMapper;
+
+    @Resource
+    private ContentUserBlockMapper blockMapper;
 
     @Override
     public ContentFollowRecommendationPageVO listRecommendations(String userId, String interestTag, Long pageNo, Long pageSize) {
@@ -105,12 +110,20 @@ public class ContentUserFollowRecommendationServiceImpl
         if (profile == null || INACTIVE_PROFILE_STATUS.contains(profile.getStatus())) {
             return false;
         }
+        // 正向拉黑：当前用户拉黑了候选用户
         var relation = relationMapper.selectByPair(userId, targetUserId);
-        return relation == null
-            || (!Boolean.TRUE.equals(relation.getFollowed())
-            && !Boolean.TRUE.equals(relation.getBlacklisted())
-            && !Boolean.TRUE.equals(relation.getBlockedByOwner())
-            && !Boolean.TRUE.equals(relation.getMuted()));
+        if (relation != null
+            && (Boolean.TRUE.equals(relation.getBlacklisted())
+            || Boolean.TRUE.equals(relation.getBlockedByOwner())
+            || Boolean.TRUE.equals(relation.getMuted()))) {
+            return false;
+        }
+        // 反向拉黑：候选用户拉黑了当前用户
+        ContentUserBlock reverseBlock = blockMapper.selectByPair(targetUserId, userId);
+        if (reverseBlock != null && ACTIVE_STATUS.equals(reverseBlock.getStatus())) {
+            return false;
+        }
+        return relation == null || !Boolean.TRUE.equals(relation.getFollowed());
     }
 
     private void requireValidUserId(String userId) {

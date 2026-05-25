@@ -1,6 +1,7 @@
 package org.jeecg.modules.content.user.service;
 
 import org.jeecg.modules.content.user.req.relation.ContentRelationGroupReq;
+import org.jeecg.modules.content.user.vo.ContentBlockMuteHelpVO;
 import org.jeecg.modules.content.user.vo.ContentRelationBatchResultVO;
 import org.jeecg.modules.content.user.vo.ContentRelationGroupVO;
 import org.jeecg.modules.content.user.vo.ContentRelationUserPageVO;
@@ -56,4 +57,9 @@ public interface IContentUserRelationService {
     ContentUserBlacklistPageVO listBlacklist(String operatorUserId, Long pageNo, Long pageSize);
 
     ContentFollowFeedPageVO listFollowFeed(String operatorUserId, Long pageNo, Long pageSize);
+
+    /**
+     * 返回拉黑、屏蔽、解除拉黑的确认文案和帮助说明。
+     */
+    ContentBlockMuteHelpVO getBlockMuteHelp();
 }

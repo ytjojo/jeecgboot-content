@@ -1,9 +1,11 @@
 package org.jeecg.modules.content.user.service;
 
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.modules.content.user.entity.ContentUserBlock;
 import org.jeecg.modules.content.user.entity.ContentUserFollowRecommendation;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserRelation;
+import org.jeecg.modules.content.user.mapper.ContentUserBlockMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserFollowRecommendationMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationMapper;
@@ -39,6 +41,9 @@ class ContentUserFollowRecommendationServiceTest {
     @Mock
     private ContentUserRelationMapper relationMapper;
 
+    @Mock
+    private ContentUserBlockMapper blockMapper;
+
     @InjectMocks
     private ContentUserFollowRecommendationServiceImpl recommendationService;
 
@@ -51,6 +56,8 @@ class ContentUserFollowRecommendationServiceTest {
         when(profileMapper.selectByUserId("u3")).thenReturn(profile("u3", "NORMAL", 30));
         when(relationMapper.selectByPair("u1", "u2")).thenReturn(null);
         when(relationMapper.selectByPair("u1", "u3")).thenReturn(null);
+        when(blockMapper.selectByPair("u2", "u1")).thenReturn(null);
+        when(blockMapper.selectByPair("u3", "u1")).thenReturn(null);
 
         var result = recommendationService.listRecommendations("u1", "科技", 1L, 10L);
 
@@ -67,6 +74,7 @@ class ContentUserFollowRecommendationServiceTest {
         when(profileMapper.selectList(any())).thenReturn(List.of(creator));
         when(profileMapper.selectByUserId("u2")).thenReturn(creator);
         when(relationMapper.selectByPair("u1", "u2")).thenReturn(null);
+        when(blockMapper.selectByPair("u2", "u1")).thenReturn(null);
 
         var result = recommendationService.listRecommendations("u1", null, 1L, 10L);
 
@@ -92,11 +100,57 @@ class ContentUserFollowRecommendationServiceTest {
         when(relationMapper.selectByPair("u1", "u2")).thenReturn(new ContentUserRelation().setFollowed(true));
         when(relationMapper.selectByPair("u1", "u3")).thenReturn(new ContentUserRelation().setBlacklisted(true));
         when(relationMapper.selectByPair("u1", "u5")).thenReturn(null);
+        when(blockMapper.selectByPair("u2", "u1")).thenReturn(null);
+        when(blockMapper.selectByPair("u5", "u1")).thenReturn(null);
 
         var result = recommendationService.listRecommendations("u1", null, 1L, 10L);
 
         assertThat(result.getRecords()).extracting("targetUserId")
             .containsExactly("u5");
+    }
+
+    @Test
+    void shouldExcludeCandidateWhoBlockedCurrentUser() {
+        when(recommendationMapper.selectList(any())).thenReturn(List.of(
+            recommendation("u1", "u2", "POPULAR_CREATOR", "被反向拉黑", 98),
+            recommendation("u1", "u3", "POPULAR_CREATOR", "正常候选", 95)
+        ));
+        when(profileMapper.selectByUserId("u2")).thenReturn(profile("u2", "NORMAL", 10));
+        when(profileMapper.selectByUserId("u3")).thenReturn(profile("u3", "NORMAL", 10));
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(null);
+        when(relationMapper.selectByPair("u1", "u3")).thenReturn(null);
+        // u2 拉黑了 u1，应该被过滤
+        ContentUserBlock reverseBlock = new ContentUserBlock()
+            .setUserId("u2")
+            .setBlockedUserId("u1")
+            .setStatus("ACTIVE");
+        when(blockMapper.selectByPair("u2", "u1")).thenReturn(reverseBlock);
+        when(blockMapper.selectByPair("u3", "u1")).thenReturn(null);
+
+        var result = recommendationService.listRecommendations("u1", null, 1L, 10L);
+
+        assertThat(result.getRecords()).hasSize(1);
+        assertThat(result.getRecords().get(0).getTargetUserId()).isEqualTo("u3");
+    }
+
+    @Test
+    void shouldReturnEmptyRecommendationWhenAllCandidatesBlockedCurrentUser() {
+        when(recommendationMapper.selectList(any())).thenReturn(List.of(
+            recommendation("u1", "u2", "POPULAR_CREATOR", "被拉黑", 98)
+        ));
+        when(profileMapper.selectByUserId("u2")).thenReturn(profile("u2", "NORMAL", 10));
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(null);
+        ContentUserBlock reverseBlock = new ContentUserBlock()
+            .setUserId("u2")
+            .setBlockedUserId("u1")
+            .setStatus("ACTIVE");
+        when(blockMapper.selectByPair("u2", "u1")).thenReturn(reverseBlock);
+
+        var result = recommendationService.listRecommendations("u1", null, 1L, 10L);
+
+        assertThat(result.getRecords()).isEmpty();
+        assertThat(result.getTotal()).isZero();
+        assertThat(result.getHasMore()).isFalse();
     }
 
     @Test

@@ -1,6 +1,7 @@
 package org.jeecg.modules.content.user.controller;
 
 import org.jeecg.modules.content.user.service.IContentUserSubscriptionService;
+import org.jeecg.modules.content.user.vo.ContentUserSubscriptionVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,11 +48,21 @@ class ContentUserSubscriptionControllerWebMvcTest {
 
     @Test
     void shouldPauseSubscriptionSuccessfully() throws Exception {
+        ContentUserSubscriptionVO paused = new ContentUserSubscriptionVO()
+            .setSubscriptionId("sub-1")
+            .setSourceType("topic")
+            .setSourceId("topic-1")
+            .setPaused(true)
+            .setSubscriptionStatus("PAUSED");
+        org.mockito.Mockito.when(subscriptionService.pauseSubscription("u1", "sub-1")).thenReturn(paused);
+
         mockMvc.perform(post("/content/user/subscription/pause")
                 .param("userId", "u1")
                 .param("subscriptionId", "sub-1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.result").value("暂停订阅成功"));
+            .andExpect(jsonPath("$.result.subscriptionId").value("sub-1"))
+            .andExpect(jsonPath("$.result.paused").value(true))
+            .andExpect(jsonPath("$.result.subscriptionStatus").value("PAUSED"));
     }
 }

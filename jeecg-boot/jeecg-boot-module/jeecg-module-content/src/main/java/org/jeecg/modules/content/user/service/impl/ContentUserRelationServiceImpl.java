@@ -14,12 +14,15 @@ import org.jeecg.modules.content.user.entity.ContentUserRelation;
 import org.jeecg.modules.content.user.entity.ContentUserRelationGroup;
 import org.jeecg.modules.content.user.mapper.ContentUserActivitySnapshotMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserBlockMapper;
+import org.jeecg.modules.content.user.entity.ContentUserFilterRule;
 import org.jeecg.modules.content.user.mapper.ContentUserFeedSettingMapper;
+import org.jeecg.modules.content.user.mapper.ContentUserFilterRuleMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationGroupMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.req.relation.ContentRelationGroupReq;
 import org.jeecg.modules.content.user.service.IContentUserVisibilityPolicyService;
+import org.jeecg.modules.content.user.vo.ContentBlockMuteHelpVO;
 import org.jeecg.modules.content.user.vo.ContentFollowFeedItemVO;
 import org.jeecg.modules.content.user.vo.ContentFollowFeedPageVO;
 import org.jeecg.modules.content.user.service.IContentUserRelationService;
@@ -72,6 +75,9 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
 
     @Resource
     private ContentUserFeedSettingMapper feedSettingMapper;
+
+    @Resource
+    private ContentUserFilterRuleMapper filterRuleMapper;
 
     @Resource
     private ContentUserProfileMapper profileMapper;
@@ -488,8 +494,11 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
             .eq(ContentUserRelation::getOwnerUserId, operatorUserId)
             .eq(ContentUserRelation::getFollowed, Boolean.TRUE)
             .eq(ContentUserRelation::getRelationStatus, ACTIVE_STATUS));
+        // 预加载被当前用户关注的目标中，反向拉黑了当前用户的用户集合
+        Set<String> reverseBlockedUserIds = findReverseBlockedUserIds(operatorUserId);
         List<ContentUserRelation> visibleRelations = followedRelations.stream()
             .filter(this::isFeedRelationVisible)
+            .filter(relation -> !reverseBlockedUserIds.contains(relation.getTargetUserId()))
             .toList();
         if (visibleRelations.isEmpty()) {
             return emptyFeedPage(currentPage, currentSize);
@@ -500,6 +509,7 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
             .map(ContentUserRelation::getTargetUserId)
             .toList();
         Set<String> enabledTypes = enabledFeedTypes(operatorUserId);
+        List<String> wordRules = loadActiveWordRules(operatorUserId);
         List<ContentUserActivitySnapshot> snapshots = activitySnapshotMapper.selectList(Wrappers.<ContentUserActivitySnapshot>lambdaQuery()
             .in(ContentUserActivitySnapshot::getActorUserId, actorUserIds)
             .in(ContentUserActivitySnapshot::getActivityType, enabledTypes)
@@ -508,6 +518,7 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
             .filter(snapshot -> relationMap.containsKey(snapshot.getActorUserId()))
             .filter(snapshot -> isSnapshotVisible(operatorUserId, snapshot))
             .map(snapshot -> ContentFollowFeedItemVO.from(snapshot, relationMap.get(snapshot.getActorUserId())))
+            .peek(item -> applyKeywordMatching(item, wordRules))
             .sorted(Comparator.comparing(ContentFollowFeedItemVO::getSpecialFollow, Comparator.nullsLast(Comparator.reverseOrder()))
                 .thenComparing(ContentFollowFeedItemVO::getActivityTime, Comparator.nullsLast(Comparator.reverseOrder()))
                 .thenComparing(ContentFollowFeedItemVO::getSnapshotId, Comparator.nullsLast(String::compareTo)))
@@ -647,6 +658,22 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         return visibilityPolicyService == null || visibilityPolicyService.canViewContent(snapshot.getActorUserId(), operatorUserId);
     }
 
+    /**
+     * 查询指定用户列表中反向拉黑了 operatorUserId 的用户 ID 集合。
+     * 即：targetUserId 拉黑了 operatorUserId。
+     */
+    private Set<String> findReverseBlockedUserIds(String operatorUserId) {
+        if (blockMapper == null) {
+            return Collections.emptySet();
+        }
+        return blockMapper.selectList(Wrappers.<ContentUserBlock>lambdaQuery()
+                .eq(ContentUserBlock::getBlockedUserId, operatorUserId)
+                .eq(ContentUserBlock::getStatus, ACTIVE_STATUS))
+            .stream()
+            .map(ContentUserBlock::getUserId)
+            .collect(Collectors.toSet());
+    }
+
     private Set<String> enabledFeedTypes(String operatorUserId) {
         ContentUserFeedSetting setting = feedSettingMapper == null ? null : feedSettingMapper.selectByUserId(operatorUserId);
         if (setting == null || setting.getActivityTypes() == null || setting.getActivityTypes().trim().isEmpty()) {
@@ -656,6 +683,42 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
             .map(String::trim)
             .filter(type -> !type.isEmpty())
             .collect(Collectors.toSet());
+    }
+
+    /**
+     * 加载当前用户活跃的 WORD 类型屏蔽词规则。
+     */
+    private List<String> loadActiveWordRules(String operatorUserId) {
+        if (filterRuleMapper == null) {
+            return Collections.emptyList();
+        }
+        Date now = new Date();
+        return filterRuleMapper.selectList(Wrappers.<ContentUserFilterRule>lambdaQuery()
+                .eq(ContentUserFilterRule::getUserId, operatorUserId)
+                .eq(ContentUserFilterRule::getRuleType, "WORD")
+                .eq(ContentUserFilterRule::getStatus, ACTIVE_STATUS))
+            .stream()
+            .filter(rule -> rule.getExpiresAt() == null || rule.getExpiresAt().after(now))
+            .map(ContentUserFilterRule::getRuleValue)
+            .filter(value -> value != null && !value.trim().isEmpty())
+            .toList();
+    }
+
+    /**
+     * 将屏蔽词规则应用于动态条目，标记命中情况。
+     */
+    private void applyKeywordMatching(ContentFollowFeedItemVO item, List<String> wordRules) {
+        if (wordRules.isEmpty() || item.getSummary() == null || item.getSummary().trim().isEmpty()) {
+            return;
+        }
+        String summary = item.getSummary();
+        List<String> matched = wordRules.stream()
+            .filter(summary::contains)
+            .toList();
+        if (!matched.isEmpty()) {
+            item.setKeywordMatched(Boolean.TRUE);
+            item.setMatchedKeywords(matched);
+        }
     }
 
     private List<ContentRelationUserItemVO> buildRelationUserItems(List<ContentUserRelation> relations) {
@@ -866,5 +929,14 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         relation.setRelationStatus(ACTIVE_STATUS);
         relationMapper.insert(relation);
         return relation;
+    }
+
+    @Override
+    public ContentBlockMuteHelpVO getBlockMuteHelp() {
+        return new ContentBlockMuteHelpVO()
+            .setBlockConfirmation("拉黑该用户后，双方将无法查看对方的主页和内容，已有的互相关注关系将被自动解除。")
+            .setMuteConfirmation("屏蔽该用户后，你将不再在推荐流和关注流中看到此用户的内容，不影响关注关系，对方不受影响。")
+            .setUnblockConfirmation("解除拉黑后，双方将恢复正常可见性，但之前的关注关系不会自动恢复，如需关注请重新操作。")
+            .setBlockVsMuteComparison("拉黑是双向切断：双方无法查看对方主页和内容，并自动解除互相关注。\n屏蔽是单向降噪：你不再看到对方信息流内容，但关注关系保留，对方不受影响。");
     }
 }

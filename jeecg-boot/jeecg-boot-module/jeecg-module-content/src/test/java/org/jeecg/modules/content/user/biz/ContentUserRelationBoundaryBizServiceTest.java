@@ -79,6 +79,18 @@ class ContentUserRelationBoundaryBizServiceTest {
             .setStatus("ACTIVE");
     }
 
+    @Test
+    void shouldRejectOversizedUserIdInAssertCanInteract() {
+        String longUserId = "a".repeat(65);
+        assertThatThrownBy(() -> relationBoundaryBizService.assertCanInteract(longUserId, "u2"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("当前用户ID长度不能超过64位");
+        assertThatThrownBy(() -> relationBoundaryBizService.assertCanInteract("u1", longUserId))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID长度不能超过64位");
+        verify(blockMapper, never()).selectByPair(longUserId, "u2");
+    }
+
     private ContentUserBlock cancelledBlock(String userId, String blockedUserId) {
         return new ContentUserBlock()
             .setUserId(userId)

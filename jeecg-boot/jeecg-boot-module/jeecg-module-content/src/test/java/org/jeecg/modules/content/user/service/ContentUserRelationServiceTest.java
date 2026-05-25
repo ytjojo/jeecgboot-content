@@ -14,6 +14,8 @@ import org.jeecg.modules.content.user.mapper.ContentUserFeedSettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationGroupMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserRelationMapper;
+import org.jeecg.modules.content.user.entity.ContentUserFilterRule;
+import org.jeecg.modules.content.user.mapper.ContentUserFilterRuleMapper;
 import org.jeecg.modules.content.user.req.relation.ContentRelationGroupReq;
 import org.jeecg.modules.content.user.service.impl.ContentUserRelationServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -57,6 +59,9 @@ class ContentUserRelationServiceTest {
 
     @Mock
     private ContentUserProfileMapper profileMapper;
+
+    @Mock
+    private ContentUserFilterRuleMapper filterRuleMapper;
 
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
@@ -921,6 +926,124 @@ class ContentUserRelationServiceTest {
     }
 
     @Test
+    void shouldRejectMuteWithInvalidTargetUserId() {
+        assertThatThrownBy(() -> relationService.mute("u1", null))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID不能为空");
+        assertThatThrownBy(() -> relationService.mute("u1", " "))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID不能为空");
+        assertThatThrownBy(() -> relationService.mute("u1", "a".repeat(65)))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID长度不能超过64位");
+        assertThatThrownBy(() -> relationService.mute("u1", "u1"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("不能关注或操作自己");
+        verify(relationMapper, never()).selectByPair(any(), any());
+    }
+
+    @Test
+    void shouldCreateRelationWhenMutingUnknownUser() {
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(null);
+
+        relationService.mute("u1", "u2");
+
+        ArgumentCaptor<ContentUserRelation> captor = ArgumentCaptor.forClass(ContentUserRelation.class);
+        verify(relationMapper).insert(captor.capture());
+        ContentUserRelation created = captor.getValue();
+        assertThat(created.getOwnerUserId()).isEqualTo("u1");
+        assertThat(created.getTargetUserId()).isEqualTo("u2");
+        assertThat(created.getMuted()).isTrue();
+        assertThat(created.getMutedAt()).isNotNull();
+        assertThat(created.getFollowed()).isFalse();
+    }
+
+    @Test
+    void shouldIdempotentlyMuteAlreadyMutedUser() {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setMuted(true)
+            .setMutedAt(new Date(1000L));
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(relation);
+
+        relationService.mute("u1", "u2");
+
+        assertThat(relation.getMuted()).isTrue();
+        verify(relationMapper).updateById(relation);
+    }
+
+    @Test
+    void shouldPreserveFollowRelationshipWhenMuting() {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setMuted(false);
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(relation);
+
+        relationService.mute("u1", "u2");
+
+        assertThat(relation.getFollowed()).isTrue();
+        assertThat(relation.getMuted()).isTrue();
+    }
+
+    @Test
+    void shouldOnlyMuteInOneDirection() {
+        ContentUserRelation aToB = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setMuted(false);
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(aToB);
+
+        relationService.mute("u1", "u2");
+
+        assertThat(aToB.getMuted()).isTrue();
+        // B→A relation is not affected
+        verify(relationMapper, never()).selectByPair("u2", "u1");
+    }
+
+    @Test
+    void shouldRejectUnmuteWithInvalidTargetUserId() {
+        assertThatThrownBy(() -> relationService.unmute("u1", null))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID不能为空");
+        assertThatThrownBy(() -> relationService.unmute("u1", "a".repeat(65)))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("目标用户ID长度不能超过64位");
+    }
+
+    @Test
+    void shouldCreateRelationWhenUnmutingUnknownUser() {
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(null);
+
+        relationService.unmute("u1", "u2");
+
+        ArgumentCaptor<ContentUserRelation> captor = ArgumentCaptor.forClass(ContentUserRelation.class);
+        verify(relationMapper).insert(captor.capture());
+        ContentUserRelation created = captor.getValue();
+        assertThat(created.getMuted()).isFalse();
+        assertThat(created.getMutedAt()).isNull();
+    }
+
+    @Test
+    void shouldRestoreFeedVisibilityAfterUnmute() {
+        ContentUserRelation muted = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setMuted(true)
+            .setMutedAt(new Date(1000L));
+        when(relationMapper.selectByPair("u1", "u2")).thenReturn(muted);
+
+        relationService.unmute("u1", "u2");
+
+        assertThat(muted.getMuted()).isFalse();
+        assertThat(muted.getMutedAt()).isNull();
+        assertThat(muted.getFollowed()).isTrue();
+    }
+
+    @Test
     void shouldListFollowFeedWithEnabledTypesAndSpecialPriority() {
         Date older = new Date(1000L);
         Date newer = new Date(2000L);
@@ -1012,6 +1135,114 @@ class ContentUserRelationServiceTest {
         assertThat(result.getHasMore()).isTrue();
     }
 
+    @Test
+    void shouldExcludeActivitiesFromUserWhoBlockedOperatorInFollowFeed() {
+        ContentUserRelation followNormal = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        ContentUserRelation followBlocked = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u3")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        when(relationMapper.selectList(any())).thenReturn(List.of(followNormal, followBlocked));
+        // u3 拉黑了 u1
+        ContentUserBlock reverseBlock = new ContentUserBlock()
+            .setUserId("u3")
+            .setBlockedUserId("u1")
+            .setStatus("ACTIVE");
+        when(blockMapper.selectList(any())).thenReturn(List.of(reverseBlock));
+        when(feedSettingMapper.selectByUserId("u1")).thenReturn(new ContentUserFeedSetting()
+            .setUserId("u1")
+            .setActivityTypes("PUBLISH"));
+        when(activitySnapshotMapper.selectList(any())).thenReturn(List.of(
+            snapshot("s-normal", "u2", "PUBLISH", new Date(3000L), "PUBLIC"),
+            snapshot("s-blocked", "u3", "PUBLISH", new Date(4000L), "PUBLIC")
+        ));
+        when(visibilityPolicyService.canViewContent("u2", "u1")).thenReturn(true);
+
+        var result = relationService.listFollowFeed("u1", 1L, 10L);
+
+        // u3 的动态应被反向拉黑过滤
+        assertThat(result.getRecords()).hasSize(1);
+        assertThat(result.getRecords().get(0).getSnapshotId()).isEqualTo("s-normal");
+    }
+
+    @Test
+    void shouldReturnEmptyFeedWhenAllFollowedUsersBlockedOperator() {
+        ContentUserRelation followBlocked = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        when(relationMapper.selectList(any())).thenReturn(List.of(followBlocked));
+        // u2 拉黑了 u1
+        ContentUserBlock reverseBlock = new ContentUserBlock()
+            .setUserId("u2")
+            .setBlockedUserId("u1")
+            .setStatus("ACTIVE");
+        when(blockMapper.selectList(any())).thenReturn(List.of(reverseBlock));
+
+        var result = relationService.listFollowFeed("u1", 1L, 10L);
+
+        assertThat(result.getRecords()).isEmpty();
+        assertThat(result.getTotal()).isZero();
+        assertThat(result.getHasMore()).isFalse();
+    }
+
+    @Test
+    void shouldReturnCorrectPageAfterReverseBlockFiltering() {
+        ContentUserRelation followA = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        ContentUserRelation followB = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u3")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        ContentUserRelation followC = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u4")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        when(relationMapper.selectList(any())).thenReturn(List.of(followA, followB, followC));
+        // u3 拉黑了 u1，u3 应被过滤
+        ContentUserBlock reverseBlock = new ContentUserBlock()
+            .setUserId("u3")
+            .setBlockedUserId("u1")
+            .setStatus("ACTIVE");
+        when(blockMapper.selectList(any())).thenReturn(List.of(reverseBlock));
+        when(feedSettingMapper.selectByUserId("u1")).thenReturn(new ContentUserFeedSetting()
+            .setUserId("u1")
+            .setActivityTypes("PUBLISH"));
+        when(activitySnapshotMapper.selectList(any())).thenReturn(List.of(
+            snapshot("s-a1", "u2", "PUBLISH", new Date(5000L), "PUBLIC"),
+            snapshot("s-b1", "u3", "PUBLISH", new Date(4000L), "PUBLIC"),
+            snapshot("s-c1", "u4", "PUBLISH", new Date(3000L), "PUBLIC")
+        ));
+        when(visibilityPolicyService.canViewContent("u2", "u1")).thenReturn(true);
+        when(visibilityPolicyService.canViewContent("u4", "u1")).thenReturn(true);
+
+        // 请求 pageSize=2，u3 被过滤后剩余 2 条，应返回 2 条
+        var result = relationService.listFollowFeed("u1", 1L, 2L);
+
+        assertThat(result.getRecords()).hasSize(2);
+        assertThat(result.getRecords()).extracting("snapshotId")
+            .containsExactly("s-a1", "s-c1");
+        assertThat(result.getTotal()).isEqualTo(2L);
+        assertThat(result.getHasMore()).isFalse();
+    }
+
     private ContentUserRelationGroup activeGroup(String groupId, String ownerUserId, String groupName, boolean defaultGroup) {
         ContentUserRelationGroup group = new ContentUserRelationGroup()
             .setOwnerUserId(ownerUserId)
@@ -1030,6 +1261,201 @@ class ContentUserRelationServiceTest {
             .setBizType("ARTICLE")
             .setBizId(id + "-biz")
             .setSummary("动态")
+            .setActivityTime(activityTime)
+            .setVisibleScope(visibleScope)
+            .setSnapshotStatus("ACTIVE");
+        snapshot.setId(id);
+        return snapshot;
+    }
+
+    // ===== 任务 6.5-6.6: 屏蔽词匹配接入信息流 =====
+
+    @Test
+    void shouldMarkFeedItemAsKeywordMatchedWhenSummaryContainsActiveWordRule() {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        when(relationMapper.selectList(any())).thenReturn(List.of(relation));
+        when(blockMapper.selectList(any())).thenReturn(List.of());
+        when(filterRuleMapper.selectList(any())).thenReturn(List.of(
+            createWordRule("广告")
+        ));
+        when(feedSettingMapper.selectByUserId("u1")).thenReturn(new ContentUserFeedSetting()
+            .setUserId("u1")
+            .setActivityTypes("PUBLISH"));
+        when(activitySnapshotMapper.selectList(any())).thenReturn(List.of(
+            snapshotWithSummary("s1", "u2", "PUBLISH", new Date(3000L), "PUBLIC", "今日广告推荐"),
+            snapshotWithSummary("s2", "u2", "PUBLISH", new Date(2000L), "PUBLIC", "普通动态")
+        ));
+        when(visibilityPolicyService.canViewContent("u2", "u1")).thenReturn(true);
+
+        var result = relationService.listFollowFeed("u1", 1L, 10L);
+
+        assertThat(result.getRecords()).hasSize(2);
+        // 包含"广告"的条目应被标记为关键词匹配
+        var keywordItem = result.getRecords().stream()
+            .filter(item -> item.getSnapshotId().equals("s1")).findFirst().orElseThrow();
+        var normalItem = result.getRecords().stream()
+            .filter(item -> item.getSnapshotId().equals("s2")).findFirst().orElseThrow();
+        assertThat(keywordItem.getKeywordMatched()).isTrue();
+        assertThat(normalItem.getKeywordMatched()).isFalse();
+    }
+
+    @Test
+    void shouldMarkFeedItemAsKeywordMatchedWhenSummaryContainsAnyActiveWordRule() {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        when(relationMapper.selectList(any())).thenReturn(List.of(relation));
+        when(blockMapper.selectList(any())).thenReturn(List.of());
+        when(filterRuleMapper.selectList(any())).thenReturn(List.of(
+            createWordRule("敏感"),
+            createWordRule("广告")
+        ));
+        when(feedSettingMapper.selectByUserId("u1")).thenReturn(new ContentUserFeedSetting()
+            .setUserId("u1")
+            .setActivityTypes("PUBLISH"));
+        when(activitySnapshotMapper.selectList(any())).thenReturn(List.of(
+            snapshotWithSummary("s1", "u2", "PUBLISH", new Date(3000L), "PUBLIC", "敏感词内容"),
+            snapshotWithSummary("s2", "u2", "PUBLISH", new Date(2000L), "PUBLIC", "广告内容"),
+            snapshotWithSummary("s3", "u2", "PUBLISH", new Date(1000L), "PUBLIC", "安全内容")
+        ));
+        when(visibilityPolicyService.canViewContent("u2", "u1")).thenReturn(true);
+
+        var result = relationService.listFollowFeed("u1", 1L, 10L);
+
+        assertThat(result.getRecords()).hasSize(3);
+        var s1 = result.getRecords().stream().filter(item -> item.getSnapshotId().equals("s1")).findFirst().orElseThrow();
+        var s2 = result.getRecords().stream().filter(item -> item.getSnapshotId().equals("s2")).findFirst().orElseThrow();
+        var s3 = result.getRecords().stream().filter(item -> item.getSnapshotId().equals("s3")).findFirst().orElseThrow();
+        assertThat(s1.getKeywordMatched()).isTrue();
+        assertThat(s2.getKeywordMatched()).isTrue();
+        assertThat(s3.getKeywordMatched()).isFalse();
+    }
+
+    @Test
+    void shouldNotMarkFeedItemWhenNoActiveWordRulesExist() {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        when(relationMapper.selectList(any())).thenReturn(List.of(relation));
+        when(blockMapper.selectList(any())).thenReturn(List.of());
+        when(filterRuleMapper.selectList(any())).thenReturn(List.of());
+        when(feedSettingMapper.selectByUserId("u1")).thenReturn(new ContentUserFeedSetting()
+            .setUserId("u1")
+            .setActivityTypes("PUBLISH"));
+        when(activitySnapshotMapper.selectList(any())).thenReturn(List.of(
+            snapshotWithSummary("s1", "u2", "PUBLISH", new Date(3000L), "PUBLIC", "广告内容")
+        ));
+        when(visibilityPolicyService.canViewContent("u2", "u1")).thenReturn(true);
+
+        var result = relationService.listFollowFeed("u1", 1L, 10L);
+
+        assertThat(result.getRecords()).hasSize(1);
+        assertThat(result.getRecords().get(0).getKeywordMatched()).isFalse();
+    }
+
+    @Test
+    void shouldNotMarkFeedItemWhenWordRulesExistButDoNotMatch() {
+        ContentUserRelation relation = new ContentUserRelation()
+            .setOwnerUserId("u1")
+            .setTargetUserId("u2")
+            .setFollowed(true)
+            .setSpecialFollow(false)
+            .setRelationStatus("ACTIVE");
+        when(relationMapper.selectList(any())).thenReturn(List.of(relation));
+        when(blockMapper.selectList(any())).thenReturn(List.of());
+        when(filterRuleMapper.selectList(any())).thenReturn(List.of(
+            createWordRule("禁止词")
+        ));
+        when(feedSettingMapper.selectByUserId("u1")).thenReturn(new ContentUserFeedSetting()
+            .setUserId("u1")
+            .setActivityTypes("PUBLISH"));
+        when(activitySnapshotMapper.selectList(any())).thenReturn(List.of(
+            snapshotWithSummary("s1", "u2", "PUBLISH", new Date(3000L), "PUBLIC", "普通内容")
+        ));
+        when(visibilityPolicyService.canViewContent("u2", "u1")).thenReturn(true);
+
+        var result = relationService.listFollowFeed("u1", 1L, 10L);
+
+        assertThat(result.getRecords()).hasSize(1);
+        assertThat(result.getRecords().get(0).getKeywordMatched()).isFalse();
+    }
+
+    private ContentUserFilterRule createWordRule(String keyword) {
+        ContentUserFilterRule rule = new ContentUserFilterRule()
+            .setUserId("u1")
+            .setRuleType("WORD")
+            .setRuleValue(keyword)
+            .setNormalizedValue(keyword.trim().toLowerCase())
+            .setStatus("ACTIVE");
+        rule.setId("rule-" + keyword);
+        return rule;
+    }
+
+    // ===== 7.7-7.8 拉黑/屏蔽帮助说明测试 =====
+
+    @Test
+    void shouldReturnBlockMuteHelpText() {
+        var help = relationService.getBlockMuteHelp();
+        assertThat(help).isNotNull();
+    }
+
+    @Test
+    void shouldContainBlockConfirmation() {
+        var help = relationService.getBlockMuteHelp();
+        assertThat(help.getBlockConfirmation())
+            .isNotBlank()
+            .contains("拉黑");
+    }
+
+    @Test
+    void shouldContainMuteConfirmation() {
+        var help = relationService.getBlockMuteHelp();
+        assertThat(help.getMuteConfirmation())
+            .isNotBlank()
+            .contains("屏蔽");
+    }
+
+    @Test
+    void shouldContainUnblockConfirmation() {
+        var help = relationService.getBlockMuteHelp();
+        assertThat(help.getUnblockConfirmation())
+            .isNotBlank()
+            .contains("解除拉黑")
+            .contains("不会自动恢复");
+    }
+
+    @Test
+    void shouldContainBlockVsMuteComparison() {
+        var help = relationService.getBlockMuteHelp();
+        assertThat(help.getBlockVsMuteComparison())
+            .isNotBlank()
+            .contains("拉黑")
+            .contains("屏蔽")
+            .contains("双向")
+            .contains("单向");
+    }
+
+    // ===== 6.5-6.6 屏蔽词匹配测试 =====
+
+    private ContentUserActivitySnapshot snapshotWithSummary(String id, String actorUserId, String activityType,
+                                                             Date activityTime, String visibleScope, String summary) {
+        ContentUserActivitySnapshot snapshot = new ContentUserActivitySnapshot()
+            .setActorUserId(actorUserId)
+            .setActivityType(activityType)
+            .setBizType("ARTICLE")
+            .setBizId(id + "-biz")
+            .setSummary(summary)
             .setActivityTime(activityTime)
             .setVisibleScope(visibleScope)
             .setSnapshotStatus("ACTIVE");
