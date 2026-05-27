@@ -279,4 +279,18 @@ public class ContentUserAuditLog extends JeecgEntity {
             .setEventContent("unbind_email")
             .setEventTime(new Date());
     }
+
+    /**
+     * 记录版主操作审计事件。
+     */
+    public static ContentUserAuditLog moderatorAction(String userId, String operatorUserId,
+                                                       String actionType, String targetId, String reason) {
+        return new ContentUserAuditLog()
+            .setUserId(userId)
+            .setOperatorUserId(operatorUserId)
+            .setEventType("MODERATOR_ACTION")
+            .setEventContent(actionType)
+            .setExtraDataJson("{\"targetId\":\"" + targetId + "\",\"reason\":\"" + reason + "\"}")
+            .setEventTime(new Date());
+    }
 }

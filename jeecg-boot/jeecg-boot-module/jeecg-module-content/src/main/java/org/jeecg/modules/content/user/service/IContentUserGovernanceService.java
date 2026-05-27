@@ -26,4 +26,22 @@ public interface IContentUserGovernanceService {
     List<ContentUserDeviceSession> listDeviceSessions(String userId);
 
     void offlineDeviceSession(String userId, String sessionId);
+
+    /**
+     * Deletes a comment as a moderator action.
+     *
+     * @param operatorUserId the user performing the action (must be MODERATOR or ADMIN)
+     * @param commentId      the comment to delete
+     * @param reason         the reason for deletion
+     */
+    void deleteComment(String operatorUserId, String commentId, String reason);
+
+    /**
+     * Warns a user as a moderator action.
+     *
+     * @param operatorUserId the user performing the action (must be MODERATOR or ADMIN)
+     * @param targetUserId   the user to warn
+     * @param reason         the reason for the warning
+     */
+    void warnUser(String operatorUserId, String targetUserId, String reason);
 }

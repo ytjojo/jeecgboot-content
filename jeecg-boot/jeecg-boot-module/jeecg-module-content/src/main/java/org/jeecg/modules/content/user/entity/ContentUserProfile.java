@@ -84,6 +84,9 @@ public class ContentUserProfile extends JeecgEntity {
     @Schema(description = "当前用户状态")
     private String status;
 
+    @Schema(description = "社区角色")
+    private String communityRole;
+
     @Schema(description = "等级")
     private Integer level;
 

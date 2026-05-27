@@ -76,6 +76,9 @@ public class ContentUserProfileVO {
     @Schema(description = "等级", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private Integer level;
 
+    @Schema(description = "社区角色", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private String communityRole;
+
     /**
      * Builds the current object from the given request or entity.
      */

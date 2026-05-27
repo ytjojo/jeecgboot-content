@@ -231,6 +231,42 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
         deviceSessionMapper.updateById(session);
     }
 
+    /**
+     * Deletes a comment as a moderator action.
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteComment(String operatorUserId, String commentId, String reason) {
+        requireModeratorOrAdmin(operatorUserId);
+        if (commentId == null || commentId.isBlank()) {
+            throw new JeecgBootException("评论ID不能为空");
+        }
+        auditLogMapper.insert(ContentUserAuditLog.moderatorAction(
+            null, operatorUserId, "DELETE_COMMENT", commentId, reason));
+    }
+
+    /**
+     * Warns a user as a moderator action.
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void warnUser(String operatorUserId, String targetUserId, String reason) {
+        requireModeratorOrAdmin(operatorUserId);
+        if (targetUserId == null || targetUserId.isBlank()) {
+            throw new JeecgBootException("目标用户ID不能为空");
+        }
+        auditLogMapper.insert(ContentUserAuditLog.moderatorAction(
+            targetUserId, operatorUserId, "WARN_USER", null, reason));
+    }
+
+    private void requireModeratorOrAdmin(String operatorUserId) {
+        ContentUserProfile profile = profileMapper.selectByUserId(operatorUserId);
+        String role = (profile != null && profile.getCommunityRole() != null) ? profile.getCommunityRole() : "NORMAL";
+        if (!"MODERATOR".equals(role) && !"ADMIN".equals(role)) {
+            throw new JeecgBootException("无权执行此操作，需要版主或管理员权限");
+        }
+    }
+
     private void validateTransition(ContentUserStatusChangeReq req) {
         if (!ContentUserStatusEnum.codes().contains(req.getCurrentStatus())) {
             throw new JeecgBootException("当前状态非法");

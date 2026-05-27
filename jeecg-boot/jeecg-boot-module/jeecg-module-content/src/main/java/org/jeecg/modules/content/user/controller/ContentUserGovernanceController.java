@@ -91,6 +91,30 @@ public class ContentUserGovernanceController {
         return Result.OK("下线成功");
     }
 
+    /**
+     * Deletes a comment. Only MODERATOR or ADMIN can perform this action.
+     */
+    @Operation(summary = "版主删除评论")
+    @PostMapping("/moderator/comment/delete")
+    public Result<String> deleteComment(@RequestParam("commentId") String commentId,
+                                        @RequestParam("reason") String reason) {
+        String operatorUserId = resolveUserId(null);
+        governanceService.deleteComment(operatorUserId, commentId, reason);
+        return Result.OK("评论删除成功");
+    }
+
+    /**
+     * Warns a user. Only MODERATOR or ADMIN can perform this action.
+     */
+    @Operation(summary = "版主警告用户")
+    @PostMapping("/moderator/user/warn")
+    public Result<String> warnUser(@RequestParam("targetUserId") String targetUserId,
+                                   @RequestParam("reason") String reason) {
+        String operatorUserId = resolveUserId(null);
+        governanceService.warnUser(operatorUserId, targetUserId, reason);
+        return Result.OK("警告发送成功");
+    }
+
     private String resolveUserId(String userId) {
         if (userId != null && !userId.isBlank()) {
             return userId;
