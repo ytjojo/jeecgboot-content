@@ -45,6 +45,9 @@ public class ContentUserRelationVO {
     @Schema(description = "特别关注时间", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Date specialFollowAt;
 
+    @Schema(description = "是否互相关注", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private Boolean mutualFollow;
+
     /**
      * Builds the current object from the given request or entity.
      */

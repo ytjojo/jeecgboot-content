@@ -272,6 +272,18 @@ public class ContentUserRelationController {
     }
 
     /**
+     * 分页查询互关好友列表。
+     */
+    @Operation(summary = "分页查询互关好友列表")
+    @GetMapping("/mutual-follow-list")
+    public Result<ContentRelationUserPageVO> mutualFollowList(@RequestParam("userId") String userId,
+                                                               @RequestParam(value = "keyword", required = false) String keyword,
+                                                               @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
+                                                               @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
+        return Result.OK(relationService.getMutualFollowList(userId, keyword, pageNo, pageSize));
+    }
+
+    /**
      * 分页查询关注推荐。
      */
     @Operation(summary = "分页查询关注推荐")

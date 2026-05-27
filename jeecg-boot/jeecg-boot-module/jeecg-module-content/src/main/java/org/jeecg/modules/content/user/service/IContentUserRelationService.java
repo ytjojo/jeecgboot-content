@@ -62,4 +62,14 @@ public interface IContentUserRelationService {
      * 返回拉黑、屏蔽、解除拉黑的确认文案和帮助说明。
      */
     ContentBlockMuteHelpVO getBlockMuteHelp();
+
+    /**
+     * 判断两个用户是否互相关注。
+     */
+    boolean isMutualFollow(String userIdA, String userIdB);
+
+    /**
+     * 分页查询互关好友列表。
+     */
+    ContentRelationUserPageVO getMutualFollowList(String operatorUserId, String keyword, Long pageNo, Long pageSize);
 }

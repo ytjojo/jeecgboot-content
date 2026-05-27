@@ -275,7 +275,9 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
                 .setBlockedByOwner(Boolean.FALSE)
                 .setRelationStatus(ACTIVE_STATUS);
         }
-        return ContentUserRelationVO.from(relation);
+        ContentUserRelationVO vo = ContentUserRelationVO.from(relation);
+        vo.setMutualFollow(isMutualFollow(operatorUserId, targetUserId));
+        return vo;
     }
 
     /**
@@ -929,6 +931,49 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         relation.setRelationStatus(ACTIVE_STATUS);
         relationMapper.insert(relation);
         return relation;
+    }
+
+    @Override
+    public boolean isMutualFollow(String userIdA, String userIdB) {
+        if (userIdA == null || userIdB == null || userIdA.equals(userIdB)) {
+            return false;
+        }
+        ContentUserRelation aToB = relationMapper.selectByPair(userIdA, userIdB);
+        if (aToB == null || !Boolean.TRUE.equals(aToB.getFollowed())) {
+            return false;
+        }
+        ContentUserRelation bToA = relationMapper.selectByPair(userIdB, userIdA);
+        return bToA != null && Boolean.TRUE.equals(bToA.getFollowed());
+    }
+
+    @Override
+    public ContentRelationUserPageVO getMutualFollowList(String operatorUserId, String keyword, Long pageNo, Long pageSize) {
+        requireValidUserId(operatorUserId, "当前用户ID不能为空", "当前用户ID长度不能超过64位");
+        validateKeyword(keyword);
+        List<String> keywordTargetIds = findProfileUserIdsByKeyword(keyword);
+        if (keyword != null && !keyword.trim().isEmpty() && keywordTargetIds.isEmpty()) {
+            return emptyRelationPage(pageNo, pageSize, null);
+        }
+        long currentPage = normalizePageNo(pageNo);
+        long currentSize = normalizePageSize(pageSize);
+        // 查找当前用户关注的人
+        IPage<ContentUserRelation> page = relationMapper.selectPage(new Page<>(currentPage, currentSize),
+            Wrappers.<ContentUserRelation>lambdaQuery()
+                .eq(ContentUserRelation::getOwnerUserId, operatorUserId)
+                .eq(ContentUserRelation::getFollowed, Boolean.TRUE)
+                .eq(ContentUserRelation::getRelationStatus, ACTIVE_STATUS)
+                .in(keywordTargetIds != null && !keywordTargetIds.isEmpty(), ContentUserRelation::getTargetUserId, keywordTargetIds)
+                .orderByDesc(ContentUserRelation::getFollowedAt));
+        // 过滤出互关的
+        List<ContentUserRelation> mutualRelations = page.getRecords().stream()
+            .filter(relation -> isMutualFollow(operatorUserId, relation.getTargetUserId()))
+            .toList();
+        List<ContentRelationUserItemVO> records = buildRelationUserItems(mutualRelations);
+        return new ContentRelationUserPageVO()
+            .setRecords(records)
+            .setTotal((long) mutualRelations.size())
+            .setPageNo(currentPage)
+            .setPageSize(currentSize);
     }
 
     @Override

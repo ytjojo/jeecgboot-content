@@ -32,4 +32,10 @@ public interface IContentUserVisibilityPolicyService {
      * 当用户禁用搜索引擎索引时返回 true。
      */
     boolean shouldNoindexProfile(String profileUserId);
+
+    /**
+     * 判断查看者是否可以看到作者的"仅互关可见"内容。
+     * 需要双向关注关系才允许查看。
+     */
+    boolean canViewMutualFollowOnlyContent(String authorUserId, String viewerUserId);
 }

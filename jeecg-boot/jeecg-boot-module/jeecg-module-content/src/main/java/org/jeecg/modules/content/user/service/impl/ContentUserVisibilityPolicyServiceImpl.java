@@ -141,6 +141,23 @@ public class ContentUserVisibilityPolicyServiceImpl implements IContentUserVisib
     }
 
     /**
+     * 判断查看者是否可以看到作者的"仅互关可见"内容。
+     * 需要双向关注关系才允许查看。
+     */
+    @Override
+    public boolean canViewMutualFollowOnlyContent(String authorUserId, String viewerUserId) {
+        if (Objects.equals(authorUserId, viewerUserId)) {
+            return true;
+        }
+        ContentUserRelation viewerToAuthor = relationMapper.selectByPair(viewerUserId, authorUserId);
+        if (viewerToAuthor == null || !Boolean.TRUE.equals(viewerToAuthor.getFollowed())) {
+            return false;
+        }
+        ContentUserRelation authorToViewer = relationMapper.selectByPair(authorUserId, viewerUserId);
+        return authorToViewer != null && Boolean.TRUE.equals(authorToViewer.getFollowed());
+    }
+
+    /**
      * 判断资料页面是否应返回 noindex 指令。
      * 当 allowSearchEngineIndex 为 false 或未设置时返回 true（默认不索引）。
      */
