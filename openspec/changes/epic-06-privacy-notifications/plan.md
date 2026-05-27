@@ -29,25 +29,25 @@
 - Modify: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/IContentUserVisibilityPolicyService.java`
 - Modify: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/impl/ContentUserNotificationSettingServiceImpl.java`
 - Modify: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/impl/ContentUserVisibilityPolicyServiceImpl.java`
-- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/entity/ContentUserNotificationDeliveryLog.java`
-- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/entity/ContentThirdPartyAuthorization.java`
-- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/mapper/ContentUserNotificationDeliveryLogMapper.java`
-- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/mapper/ContentThirdPartyAuthorizationMapper.java`
-- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/IContentThirdPartyAuthorizationService.java`
+- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/entity/ContentNotificationAuditLog.java`
+- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/entity/ContentUserThirdPartyAuth.java`
+- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/mapper/ContentNotificationAuditLogMapper.java`
+- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/mapper/ContentUserThirdPartyAuthMapper.java`
+- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/IContentUserThirdPartyAuthService.java`
 - Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/ContentThirdPartyTokenRevocationPort.java`
-- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/impl/ContentThirdPartyAuthorizationServiceImpl.java`
+- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/impl/ContentUserThirdPartyAuthServiceImpl.java`
 - Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/impl/ContentNoopThirdPartyTokenRevocationPort.java`
-- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/dto/ContentNotificationDecisionDTO.java`
+- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentSubscriptionNotificationDecisionVO.java`
 - Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/req/settings/ContentThirdPartyAuthorizationRevokeReq.java`
-- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentThirdPartyAuthorizationVO.java`
+- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentThirdPartyAuthVO.java`
 - Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentThirdPartyAuthorizationDetailVO.java`
-- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentAccountSecuritySettingVO.java`
+- Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentUserSecuritySettingVO.java`
 - Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/V3.9.1_58__content_privacy_notifications.sql`
 - Create: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/V3.9.1_58__content_privacy_notifications_rollback.sql`
 - Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentPrivacyNotificationsMigrationTest.java`
 - Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentUserNotificationSettingServiceTest.java`
 - Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentUserVisibilityPolicyServiceTest.java`
-- Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentThirdPartyAuthorizationServiceTest.java`
+- Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentUserThirdPartyAuthServiceTest.java`
 - Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/controller/ContentUserControllerWebMvcTest.java`
 - Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/req/ContentUserReqValidationTest.java`
 
@@ -68,7 +68,7 @@
 **Maps to task:** `1.2 Add or extend entities, mappers, DTOs, request objects, and response objects for notification decisions, privacy visibility, third-party authorizations, and account security settings.`
 
 - [ ] Extend `ContentUserPrivacySetting` with new visibility fields and Chinese comments.
-- [ ] Create `ContentUserNotificationDeliveryLog` and `ContentThirdPartyAuthorization` entities with `@TableName` and project-consistent base fields.
+- [ ] Create `ContentNotificationAuditLog` and `ContentUserThirdPartyAuth` entities with `@TableName` and project-consistent base fields.
 - [ ] Create mappers for notification delivery logs and third-party authorizations.
 - [ ] Create `ContentNotificationDecisionDTO`, third-party authorization VOs, revoke request, and account security VO.
 - [ ] Add validation annotations and Chinese validation messages to request objects.
@@ -109,7 +109,7 @@
 
 **Maps to task:** `2.3 Persist notification delivery decision logs with enough detail to audit sent and skipped notification outcomes.`
 
-- [ ] Inject `ContentUserNotificationDeliveryLogMapper` into `ContentUserNotificationSettingServiceImpl`.
+- [ ] Inject `ContentNotificationAuditLogMapper` into `ContentUserNotificationSettingServiceImpl`.
 - [ ] Write one decision log for each delivery decision with user id, notice type, requested channel, final channels, allowed flag, skip reason, and security bypass flag.
 - [ ] Add tests proving both sent and skipped decisions create audit rows.
 - [ ] Run the same `ContentUserNotificationSettingServiceTest` Maven command.
@@ -177,11 +177,11 @@
 
 **Maps to task:** `4.1 Add third-party authorization list, detail, and revoke service methods with owner isolation and idempotent revoke behavior.`
 
-- [ ] Create `IContentThirdPartyAuthorizationService` with list, detail, revoke, and revoked-access check methods.
-- [ ] Implement `ContentThirdPartyAuthorizationServiceImpl` using `ContentThirdPartyAuthorizationMapper`.
+- [ ] Create `IContentUserThirdPartyAuthService` with list, detail, revoke, and revoked-access check methods.
+- [ ] Implement `ContentUserThirdPartyAuthServiceImpl` using `ContentUserThirdPartyAuthMapper`.
 - [ ] Ensure list/detail queries are scoped by current user id and revoke is idempotent for already revoked records.
-- [ ] Add `ContentThirdPartyAuthorizationServiceTest` for list, detail, owner isolation, revoke, and idempotent revoke.
-- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentThirdPartyAuthorizationServiceTest test"`.
+- [ ] Add `ContentUserThirdPartyAuthServiceTest` for list, detail, owner isolation, revoke, and idempotent revoke.
+- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserThirdPartyAuthServiceTest test"`.
 - [ ] Commit point: `feat(content): manage third-party authorizations`.
 
 ### Step 4.2: Wire Token Revocation Port
@@ -208,16 +208,16 @@
 
 **Maps to task:** `4.4 Add service and controller tests for list, detail, owner isolation, revoke, token revocation invocation, revoked access rejection, and reauthorization requirement.`
 
-- [ ] Complete `ContentThirdPartyAuthorizationServiceTest` coverage for revoked access rejection and reauthorization requirement.
+- [ ] Complete `ContentUserThirdPartyAuthServiceTest` coverage for revoked access rejection and reauthorization requirement.
 - [ ] Complete `ContentUserControllerWebMvcTest` coverage for HTTP response shapes and owner isolation.
-- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentThirdPartyAuthorizationServiceTest,ContentUserControllerWebMvcTest test"`.
+- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserThirdPartyAuthServiceTest,ContentUserControllerWebMvcTest test"`.
 - [ ] Commit point: `test(content): cover third-party authorization management`.
 
 ### Step 5.1: Add Account Security Settings Response Model
 
 **Maps to task:** `5.1 Add account security settings response model that exposes device management, password change, two-step verification, and login reminder entries.`
 
-- [ ] Implement `ContentAccountSecuritySettingVO` with entries for device management, password change, two-step verification, and login reminders.
+- [ ] Implement `ContentUserSecuritySettingVO` with entries for device management, password change, two-step verification, and login reminders.
 - [ ] Include route keys or route paths matching the existing device management and password change flows.
 - [ ] Add WebMvc expectations for all four entries.
 - [ ] Commit point: `feat(content): add account security settings model`.
@@ -294,7 +294,7 @@
 
 **Maps to task:** `7.2 Run targeted Maven tests for notification settings, visibility policy, third-party authorization, settings controller, request validation, and migration coverage.`
 
-- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserNotificationSettingServiceTest,ContentUserVisibilityPolicyServiceTest,ContentThirdPartyAuthorizationServiceTest,ContentUserControllerWebMvcTest,ContentUserReqValidationTest,ContentPrivacyNotificationsMigrationTest,ContentSubscriptionNotificationPreferenceServiceTest,ContentUserProfileServiceTest test"`.
+- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserNotificationSettingServiceTest,ContentUserVisibilityPolicyServiceTest,ContentUserThirdPartyAuthServiceTest,ContentUserControllerWebMvcTest,ContentUserReqValidationTest,ContentPrivacyNotificationsMigrationTest,ContentSubscriptionNotificationPreferenceServiceTest,ContentUserProfileServiceTest test"`.
 - [ ] Fix only failures directly caused by EPIC-06 changes.
 - [ ] Rerun the same targeted Maven command until it passes.
 - [ ] Commit point: `test(content): pass epic 06 targeted tests`.

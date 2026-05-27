@@ -80,8 +80,36 @@ public class ContentUserPrivacyUpdateReq {
     @Schema(description = "动态可见范围", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String dynamicVisibility;
 
-    @Schema(description = "是否展示在线状态", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    @Schema(description = "是否展示在线状态（旧字段，兼容保留）", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Boolean onlineStatusVisible;
+
+    @Pattern(
+        regexp = "^(PUBLIC|HIDDEN|MUTUAL_ONLY)$",
+        message = "在线状态可见性取值不合法，仅支持 PUBLIC/HIDDEN/MUTUAL_ONLY"
+    )
+    @Schema(description = "在线状态可见性", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private String onlineStatusVisibility;
+
+    @Pattern(
+        regexp = "^(PUBLIC|FOLLOWERS_ONLY|MUTUAL_ONLY|PRIVATE)$",
+        message = "浏览历史可见范围取值不合法"
+    )
+    @Schema(description = "浏览历史可见范围", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private String browseHistoryVisibility;
+
+    @Pattern(
+        regexp = "^(PUBLIC|FOLLOWERS_ONLY|MUTUAL_ONLY|PRIVATE)$",
+        message = "点赞活动可见范围取值不合法"
+    )
+    @Schema(description = "点赞活动可见范围", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private String likeActivityVisibility;
+
+    @Pattern(
+        regexp = "^(PUBLIC|FOLLOWERS_ONLY|MUTUAL_ONLY|PRIVATE)$",
+        message = "收藏可见范围取值不合法"
+    )
+    @Schema(description = "收藏可见范围", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private String favoriteVisibility;
 
     @Schema(description = "是否允许搜索引擎收录", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Boolean allowSearchEngineIndex;

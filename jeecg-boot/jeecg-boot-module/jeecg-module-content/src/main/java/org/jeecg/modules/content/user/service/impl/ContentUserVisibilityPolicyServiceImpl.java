@@ -102,4 +102,54 @@ public class ContentUserVisibilityPolicyServiceImpl implements IContentUserVisib
     public boolean canMention(String ownerUserId, String viewerUserId) {
         return canViewContent(ownerUserId, viewerUserId);
     }
+
+    /**
+     * 判断查看者是否可以看到目标用户的在线状态。
+     * 支持三级可见性：PUBLIC（公开）、HIDDEN（隐藏）、MUTUAL_ONLY（仅互关可见）。
+     */
+    @Override
+    public boolean canViewOnlineStatus(String ownerUserId, String viewerUserId) {
+        if (Objects.equals(ownerUserId, viewerUserId)) {
+            return true;
+        }
+        var privacySetting = privacySettingMapper.selectByUserId(ownerUserId);
+        String visibility = (privacySetting != null && privacySetting.getOnlineStatusVisibility() != null)
+            ? privacySetting.getOnlineStatusVisibility() : "PUBLIC";
+        if ("PUBLIC".equals(visibility)) {
+            return true;
+        }
+        if ("HIDDEN".equals(visibility)) {
+            return false;
+        }
+        if ("MUTUAL_ONLY".equals(visibility)) {
+            ContentUserRelation viewerToOwner = relationMapper.selectByPair(viewerUserId, ownerUserId);
+            ContentUserRelation ownerToViewer = relationMapper.selectByPair(ownerUserId, viewerUserId);
+            return viewerToOwner != null && ownerToViewer != null
+                && Boolean.TRUE.equals(viewerToOwner.getFollowed())
+                && Boolean.TRUE.equals(ownerToViewer.getFollowed());
+        }
+        return false;
+    }
+
+    /**
+     * 判断查看者是否可以看到目标用户的活动（浏览历史、点赞、收藏等）。
+     * 直接复用 canViewField 的可见性判断逻辑。
+     */
+    @Override
+    public boolean canViewActivity(String ownerUserId, String viewerUserId, String visibility) {
+        return canViewField(ownerUserId, viewerUserId, visibility);
+    }
+
+    /**
+     * 判断资料页面是否应返回 noindex 指令。
+     * 当 allowSearchEngineIndex 为 false 或未设置时返回 true（默认不索引）。
+     */
+    @Override
+    public boolean shouldNoindexProfile(String profileUserId) {
+        var privacySetting = privacySettingMapper.selectByUserId(profileUserId);
+        if (privacySetting == null) {
+            return true;
+        }
+        return !Boolean.TRUE.equals(privacySetting.getAllowSearchEngineIndex());
+    }
 }

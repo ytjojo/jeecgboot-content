@@ -156,6 +156,39 @@ class ContentUserReqValidationTest {
     }
 
     @Test
+    void shouldRejectInvalidOnlineStatusVisibility() {
+        ContentUserPrivacyUpdateReq req = new ContentUserPrivacyUpdateReq()
+            .setOnlineStatusVisibility("INVALID");
+
+        Set<String> fields = validate(req);
+
+        assertTrue(fields.contains("onlineStatusVisibility"));
+    }
+
+    @Test
+    void shouldAcceptValidOnlineStatusVisibility() {
+        for (String value : List.of("PUBLIC", "HIDDEN", "MUTUAL_ONLY")) {
+            ContentUserPrivacyUpdateReq req = new ContentUserPrivacyUpdateReq()
+                .setOnlineStatusVisibility(value);
+
+            Set<String> fields = validate(req);
+
+            assertTrue(!fields.contains("onlineStatusVisibility"),
+                "Expected no violation for onlineStatusVisibility='" + value + "'");
+        }
+    }
+
+    @Test
+    void shouldAcceptNullOnlineStatusVisibility() {
+        ContentUserPrivacyUpdateReq req = new ContentUserPrivacyUpdateReq();
+
+        Set<String> fields = validate(req);
+
+        assertTrue(!fields.contains("onlineStatusVisibility"),
+            "Expected no violation for null onlineStatusVisibility");
+    }
+
+    @Test
     void shouldRejectInvalidProfileUpdateRequest() {
         ContentUserProfileUpdateReq req = new ContentUserProfileUpdateReq()
             .setNickname("123456789012345678901")

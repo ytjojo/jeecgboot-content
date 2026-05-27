@@ -9,6 +9,7 @@ import org.jeecg.modules.content.user.mapper.ContentUserHomepageModuleMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserPrivacySettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileReviewMapper;
+import org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq;
 import org.jeecg.modules.content.user.req.profile.ContentUserProfileUpdateReq;
 import org.jeecg.modules.content.user.service.impl.ContentUserProfileServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,9 @@ class ContentUserProfileServiceTest {
 
     @Mock
     private IContentUserVerificationBadgeService verificationBadgeService;
+
+    @Mock
+    private ContentUserSettingsCacheService settingsCacheService;
 
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
@@ -348,5 +352,89 @@ class ContentUserProfileServiceTest {
 
         verify(homepageModuleMapper, times(4)).insert(any(org.jeecg.modules.content.user.entity.ContentUserHomepageModule.class));
         verify(verificationBadgeMapper).insert(any(org.jeecg.modules.content.user.entity.ContentUserVerificationBadge.class));
+    }
+
+    /** 更新浏览历史/点赞/收藏可见性应写入实体并驱逐缓存。 */
+    @Test
+    void shouldApplyBrowseHistoryLikeAndFavoriteVisibility() {
+        ContentUserPrivacySetting privacy = new ContentUserPrivacySetting()
+            .setUserId("u1")
+            .setBirthdayVisibility("PUBLIC");
+        when(privacyMapper.selectByUserId("u1")).thenReturn(privacy);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.increment(anyString())).thenReturn(1L);
+
+        ContentUserPrivacyUpdateReq req = new ContentUserPrivacyUpdateReq()
+            .setBrowseHistoryVisibility("FOLLOWERS_ONLY")
+            .setLikeActivityVisibility("MUTUAL_ONLY")
+            .setFavoriteVisibility("PUBLIC");
+
+        profileService.updatePrivacy("u1", req);
+
+        assertThat(privacy.getBrowseHistoryVisibility()).isEqualTo("FOLLOWERS_ONLY");
+        assertThat(privacy.getLikeActivityVisibility()).isEqualTo("MUTUAL_ONLY");
+        assertThat(privacy.getFavoriteVisibility()).isEqualTo("PUBLIC");
+        verify(settingsCacheService).evictPrivacy("u1");
+    }
+
+    /** 新隐私字段未设置时应保留原值不变。 */
+    @Test
+    void shouldPreserveExistingVisibilityWhenNewFieldsNotProvided() {
+        ContentUserPrivacySetting privacy = new ContentUserPrivacySetting()
+            .setUserId("u1")
+            .setBrowseHistoryVisibility("PUBLIC")
+            .setLikeActivityVisibility("FOLLOWERS_ONLY")
+            .setFavoriteVisibility("MUTUAL_ONLY");
+        when(privacyMapper.selectByUserId("u1")).thenReturn(privacy);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.increment(anyString())).thenReturn(1L);
+
+        ContentUserPrivacyUpdateReq req = new ContentUserPrivacyUpdateReq()
+            .setBirthdayVisibility("PRIVATE");
+
+        profileService.updatePrivacy("u1", req);
+
+        assertThat(privacy.getBrowseHistoryVisibility()).isEqualTo("PUBLIC");
+        assertThat(privacy.getLikeActivityVisibility()).isEqualTo("FOLLOWERS_ONLY");
+        assertThat(privacy.getFavoriteVisibility()).isEqualTo("MUTUAL_ONLY");
+    }
+
+    /** 新隐私字段默认值应为 PRIVATE（最安全），通过 getProfile 读取时验证。 */
+    @Test
+    void shouldDefaultNewPrivacyFieldsToPrivateWhenNull() {
+        ContentUserProfile profile = new ContentUserProfile()
+            .setUserId("u1")
+            .setNickname("用户");
+        // 旧记录：三个新字段均为 null
+        ContentUserPrivacySetting privacy = new ContentUserPrivacySetting()
+            .setUserId("u1");
+        when(profileMapper.selectByUserId("u1")).thenReturn(profile);
+        when(privacyMapper.selectByUserId("u1")).thenReturn(privacy);
+        when(visibilityPolicyService.canViewField(anyString(), anyString(), anyString())).thenReturn(true);
+
+        // getProfile 内部调用 defaultPrivacy，应为 null 字段填充 PRIVATE
+        profileService.getProfile("u1", "u1");
+
+        // 验证 defaultPrivacy 被调用后字段已填充默认值
+        assertThat(privacy.getBrowseHistoryVisibility()).isEqualTo("PRIVATE");
+        assertThat(privacy.getLikeActivityVisibility()).isEqualTo("PRIVATE");
+        assertThat(privacy.getFavoriteVisibility()).isEqualTo("PRIVATE");
+    }
+
+    /** 更新隐私设置后应驱逐隐私缓存。 */
+    @Test
+    void shouldEvictPrivacyCacheOnPrivacyUpdate() {
+        ContentUserPrivacySetting privacy = new ContentUserPrivacySetting()
+            .setUserId("u1")
+            .setBirthdayVisibility("PUBLIC");
+        when(privacyMapper.selectByUserId("u1")).thenReturn(privacy);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.increment(anyString())).thenReturn(1L);
+        ContentUserPrivacyUpdateReq req = new ContentUserPrivacyUpdateReq()
+            .setBirthdayVisibility("PRIVATE");
+
+        profileService.updatePrivacy("u1", req);
+
+        verify(settingsCacheService).evictPrivacy("u1");
     }
 }

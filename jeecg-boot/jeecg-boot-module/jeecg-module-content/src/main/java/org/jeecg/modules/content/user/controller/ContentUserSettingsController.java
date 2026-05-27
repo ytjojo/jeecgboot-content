@@ -7,13 +7,17 @@ import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq;
 import org.jeecg.modules.content.user.req.settings.ContentFeedSettingUpdateReq;
+import org.jeecg.modules.content.user.req.settings.ContentNotificationDndRuleReq;
 import org.jeecg.modules.content.user.req.settings.ContentUserNotificationUpdateReq;
 import org.jeecg.modules.content.user.service.IContentUserFeedSettingService;
 import org.jeecg.modules.content.user.service.IContentUserNotificationSettingService;
 import org.jeecg.modules.content.user.service.IContentUserProfileService;
+import org.jeecg.modules.content.user.service.IContentUserSecuritySettingService;
 import org.jeecg.modules.content.user.service.IContentUserVisibilityPolicyService;
+import org.jeecg.modules.content.user.vo.ContentNotificationDndRuleVO;
 import org.jeecg.modules.content.user.vo.ContentUserFeedSettingVO;
 import org.jeecg.modules.content.user.vo.ContentUserNotificationSettingVO;
+import org.jeecg.modules.content.user.vo.ContentUserSecuritySettingVO;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -35,6 +39,9 @@ public class ContentUserSettingsController {
 
     @Resource
     private IContentUserFeedSettingService feedSettingService;
+
+    @Resource
+    private IContentUserSecuritySettingService securitySettingService;
 
     /**
      * 更新用户隐私、可见性与发现设置。
@@ -93,5 +100,24 @@ public class ContentUserSettingsController {
     public Result<Boolean> canViewContent(@RequestParam("ownerUserId") String ownerUserId,
                                           @RequestParam("viewerUserId") String viewerUserId) {
         return Result.OK(visibilityPolicyService.canViewContent(ownerUserId, viewerUserId));
+    }
+
+    /**
+     * 单独更新免打扰规则。
+     */
+    @Operation(summary = "更新免打扰规则")
+    @PostMapping("/notification/dnd/update")
+    public Result<ContentNotificationDndRuleVO> updateDndRule(@RequestParam("userId") String userId,
+                                                              @Valid @RequestBody ContentNotificationDndRuleReq req) {
+        return Result.OK(notificationSettingService.updateDndRule(userId, req));
+    }
+
+    /**
+     * 查询用户账号安全设置。
+     */
+    @Operation(summary = "查询账号安全设置")
+    @GetMapping("/security")
+    public Result<ContentUserSecuritySettingVO> getSecuritySetting(@RequestParam("userId") String userId) {
+        return Result.OK(securitySettingService.getSecuritySetting(userId));
     }
 }

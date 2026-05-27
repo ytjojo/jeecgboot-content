@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
+import org.jeecg.modules.content.user.service.ContentUserSettingsCacheService;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
@@ -93,6 +94,9 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Resource
+    private ContentUserSettingsCacheService settingsCacheService;
 
     /**
      * 按查看者身份返回经过隐私裁剪的用户资料。
@@ -183,11 +187,13 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
             privacy.setId(UUIDGenerator.generate());
             privacyMapper.insert(privacy);
             evictProfileCache(userId);
+            settingsCacheService.evictPrivacy(userId);
             return;
         }
         applyPrivacyUpdate(privacy, req);
         privacyMapper.updateById(privacy);
         evictProfileCache(userId);
+        settingsCacheService.evictPrivacy(userId);
     }
 
     /**
@@ -371,7 +377,11 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
         setIfPresent(req.getContactBadgeVisibility(), privacy::setContactBadgeVisibility);
         setIfPresent(req.getHomepageVisibility(), privacy::setHomepageVisibility);
         setIfPresent(req.getDynamicVisibility(), privacy::setDynamicVisibility);
+        setIfPresent(req.getBrowseHistoryVisibility(), privacy::setBrowseHistoryVisibility);
+        setIfPresent(req.getLikeActivityVisibility(), privacy::setLikeActivityVisibility);
+        setIfPresent(req.getFavoriteVisibility(), privacy::setFavoriteVisibility);
         privacy.setOnlineStatusVisible(firstNonNull(req.getOnlineStatusVisible(), privacy.getOnlineStatusVisible()));
+        setIfPresent(req.getOnlineStatusVisibility(), privacy::setOnlineStatusVisibility);
         privacy.setAllowSearchEngineIndex(firstNonNull(req.getAllowSearchEngineIndex(), privacy.getAllowSearchEngineIndex()));
         privacy.setAllowUserSearch(firstNonNull(req.getAllowUserSearch(), privacy.getAllowUserSearch()));
     }
@@ -447,6 +457,15 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
         }
         if (privacy.getDynamicVisibility() == null) {
             privacy.setDynamicVisibility(ContentUserVisibilityEnum.PUBLIC.getCode());
+        }
+        if (privacy.getBrowseHistoryVisibility() == null) {
+            privacy.setBrowseHistoryVisibility(ContentUserVisibilityEnum.PRIVATE.getCode());
+        }
+        if (privacy.getLikeActivityVisibility() == null) {
+            privacy.setLikeActivityVisibility(ContentUserVisibilityEnum.PRIVATE.getCode());
+        }
+        if (privacy.getFavoriteVisibility() == null) {
+            privacy.setFavoriteVisibility(ContentUserVisibilityEnum.PRIVATE.getCode());
         }
         if (privacy.getOnlineStatusVisible() == null) {
             privacy.setOnlineStatusVisible(Boolean.TRUE);

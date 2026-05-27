@@ -47,8 +47,20 @@ public class ContentUserPrivacySetting extends JeecgEntity {
     @Schema(description = "动态可见范围")
     private String dynamicVisibility;
 
-    @Schema(description = "在线状态是否可见")
+    @Schema(description = "在线状态是否可见（旧字段，兼容保留）")
     private Boolean onlineStatusVisible;
+
+    @Schema(description = "在线状态可见性：PUBLIC/HIDDEN/MUTUAL_ONLY")
+    private String onlineStatusVisibility;
+
+    @Schema(description = "浏览历史可见范围")
+    private String browseHistoryVisibility;
+
+    @Schema(description = "点赞活动可见范围")
+    private String likeActivityVisibility;
+
+    @Schema(description = "收藏可见范围")
+    private String favoriteVisibility;
 
     @Schema(description = "是否允许搜索引擎索引")
     private Boolean allowSearchEngineIndex;

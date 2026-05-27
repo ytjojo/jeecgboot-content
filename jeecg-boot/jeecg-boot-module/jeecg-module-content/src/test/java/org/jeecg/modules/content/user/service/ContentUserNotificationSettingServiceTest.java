@@ -1,6 +1,7 @@
 package org.jeecg.modules.content.user.service;
 
 import org.jeecg.modules.content.user.entity.ContentUserNotificationSetting;
+import org.jeecg.modules.content.user.mapper.ContentNotificationAuditLogMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserNotificationSettingMapper;
 import org.jeecg.modules.content.user.req.settings.ContentNotificationChannelConfigReq;
 import org.jeecg.modules.content.user.req.settings.ContentNotificationDndRuleReq;
@@ -18,6 +19,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,12 @@ class ContentUserNotificationSettingServiceTest {
 
     @Mock
     private ContentUserNotificationSettingMapper notificationSettingMapper;
+
+    @Mock
+    private ContentNotificationAuditLogMapper auditLogMapper;
+
+    @Mock
+    private ContentUserSettingsCacheService settingsCacheService;
 
     @InjectMocks
     private ContentUserNotificationSettingServiceImpl notificationSettingService;
@@ -83,5 +91,89 @@ class ContentUserNotificationSettingServiceTest {
         boolean allowed = notificationSettingService.canSendNotice("u1", "SECURITY", "SMS", LocalTime.of(23, 30));
 
         assertThat(allowed).isTrue();
+    }
+
+    @Test
+    void shouldAutoUpgradeOldDndFormatToMultiPeriod() {
+        // 旧单时段 JSON：有 startTime/endTime 但无 dndRules
+        ContentUserNotificationSetting setting = ContentUserNotificationSetting.defaults("u1")
+            .setDndRuleJson("{\"enabled\":true,\"startTime\":\"22:00\",\"endTime\":\"08:00\"}");
+        when(notificationSettingMapper.selectByUserId("u1")).thenReturn(setting);
+
+        ContentUserNotificationSettingVO result = notificationSettingService.getSetting("u1");
+
+        // 应自动升级为单元素列表
+        assertThat(result.getDndRule().getDndRules()).hasSize(1);
+        assertThat(result.getDndRule().getDndRules().get(0).getStartTime()).isEqualTo("22:00");
+        assertThat(result.getDndRule().getDndRules().get(0).getEndTime()).isEqualTo("08:00");
+        assertThat(result.getDndRule().getDndRules().get(0).getDayType()).isEqualTo("DAILY");
+    }
+
+    @Test
+    void shouldBlockNoticeDuringMultiPeriodDnd() {
+        // 多时段免打扰：22:00-08:00 DAILY
+        ContentUserNotificationSetting setting = ContentUserNotificationSetting.defaults("u1")
+            .setDndRuleJson("{\"enabled\":true,\"dndRules\":[{\"enabled\":true,\"startTime\":\"22:00\",\"endTime\":\"08:00\",\"dayType\":\"DAILY\",\"summaryMode\":false}]}");
+        when(notificationSettingMapper.selectByUserId("u1")).thenReturn(setting);
+
+        boolean allowed = notificationSettingService.canSendNotice("u1", "LIKE", "IN_APP", LocalTime.of(23, 30));
+
+        assertThat(allowed).isFalse();
+    }
+
+    @Test
+    void shouldAllowNoticeOutsideAllDndPeriods() {
+        // 多时段免打扰：12:00-13:00 WORKDAY，10:00 不在免打扰时段内
+        ContentUserNotificationSetting setting = ContentUserNotificationSetting.defaults("u1")
+            .setDndRuleJson("{\"enabled\":true,\"dndRules\":[{\"enabled\":true,\"startTime\":\"12:00\",\"endTime\":\"13:00\",\"dayType\":\"WORKDAY\",\"summaryMode\":false}]}");
+        when(notificationSettingMapper.selectByUserId("u1")).thenReturn(setting);
+
+        boolean allowed = notificationSettingService.canSendNotice("u1", "LIKE", "IN_APP", LocalTime.of(10, 0));
+
+        assertThat(allowed).isTrue();
+    }
+
+    @Test
+    void shouldRespectTemporaryDisable() {
+        // 免打扰已启用，但临时关闭到未来时间
+        long futureTs = System.currentTimeMillis() + 3600_000; // 1小时后
+        ContentUserNotificationSetting setting = ContentUserNotificationSetting.defaults("u1")
+            .setDndRuleJson("{\"enabled\":true,\"temporaryDisableUntil\":" + futureTs + ",\"dndRules\":[{\"enabled\":true,\"startTime\":\"00:00\",\"endTime\":\"23:59\",\"dayType\":\"DAILY\",\"summaryMode\":false}]}");
+        when(notificationSettingMapper.selectByUserId("u1")).thenReturn(setting);
+
+        boolean allowed = notificationSettingService.canSendNotice("u1", "LIKE", "IN_APP", LocalTime.of(12, 0));
+
+        // 临时关闭期间应允许发送
+        assertThat(allowed).isTrue();
+    }
+
+    /** 更新通知设置后应驱逐通知缓存。 */
+    @Test
+    void shouldEvictNotificationCacheOnSettingUpdate() {
+        ContentUserNotificationSetting setting = ContentUserNotificationSetting.defaults("u1");
+        setting.setId("setting-1");
+        when(notificationSettingMapper.selectByUserId("u1")).thenReturn(setting);
+        ContentUserNotificationUpdateReq req = new ContentUserNotificationUpdateReq()
+            .setCommentNoticeEnabled(Boolean.FALSE);
+
+        notificationSettingService.updateSetting("u1", req);
+
+        verify(settingsCacheService).evictNotification("u1");
+    }
+
+    /** 更新免打扰规则后应驱逐通知缓存。 */
+    @Test
+    void shouldEvictNotificationCacheOnDndRuleUpdate() {
+        ContentUserNotificationSetting setting = ContentUserNotificationSetting.defaults("u1");
+        setting.setId("setting-1");
+        when(notificationSettingMapper.selectByUserId("u1")).thenReturn(setting);
+        ContentNotificationDndRuleReq req = new ContentNotificationDndRuleReq()
+            .setEnabled(Boolean.TRUE)
+            .setStartTime("22:00")
+            .setEndTime("08:00");
+
+        notificationSettingService.updateDndRule("u1", req);
+
+        verify(settingsCacheService).evictNotification("u1");
     }
 }
