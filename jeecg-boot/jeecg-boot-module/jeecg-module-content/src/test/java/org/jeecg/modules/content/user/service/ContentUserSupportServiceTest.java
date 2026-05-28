@@ -2,11 +2,13 @@ package org.jeecg.modules.content.user.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.modules.content.user.entity.ContentCustomerServiceSession;
 import org.jeecg.modules.content.user.entity.ContentUserAppeal;
 import org.jeecg.modules.content.user.entity.ContentUserAuditLog;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserReport;
 import org.jeecg.modules.content.user.entity.ContentUserStatusRecord;
+import org.jeecg.modules.content.user.mapper.ContentCustomerServiceSessionMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserAppealMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserAuditLogMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
@@ -16,11 +18,16 @@ import org.jeecg.modules.content.user.req.support.ContentAppealCreateReq;
 import org.jeecg.modules.content.user.req.support.ContentAppealHandleReq;
 import org.jeecg.modules.content.user.req.support.ContentReportHandleReq;
 import org.jeecg.modules.content.user.req.support.ContentReportCreateReq;
+import org.jeecg.modules.content.user.req.support.ContentServiceSessionQueryReq;
 import org.jeecg.modules.content.user.req.support.ContentUserReportAdminQueryReq;
 import org.jeecg.modules.content.user.service.impl.ContentUserSupportServiceImpl;
 import org.jeecg.modules.content.user.vo.ContentCustomerServiceVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterEntryVO;
+import org.jeecg.modules.content.user.vo.ContentChangelogVO;
+import org.jeecg.modules.content.user.vo.ContentHelpSearchResultVO;
+import org.jeecg.modules.content.user.vo.ContentServiceSessionPageVO;
+import org.jeecg.modules.content.user.vo.ContentServiceSessionVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealProgressVO;
@@ -66,6 +73,9 @@ class ContentUserSupportServiceTest {
     private ContentUserStatusRecordMapper statusRecordMapper;
 
     @Mock
+    private ContentCustomerServiceSessionMapper serviceSessionMapper;
+
+    @Mock
     private IContentUserGrowthPenaltyRecoveryService growthPenaltyRecoveryService;
 
     @Mock
@@ -76,6 +86,9 @@ class ContentUserSupportServiceTest {
 
     @Mock
     private IContentUserGrowthPenaltyRecordService growthPenaltyRecordService;
+
+    @Mock
+    private IContentNotificationService notificationService;
     @InjectMocks
     private ContentUserSupportServiceImpl supportService;
 
@@ -85,6 +98,15 @@ class ContentUserSupportServiceTest {
 
         assertThat(appealId).isNotBlank();
         verify(auditLogMapper).insert(argThat((ContentUserAuditLog it) -> "USER_APPEAL_CREATED".equals(it.getEventType())));
+    }
+
+    @Test
+    void shouldRejectAppealWhenExceedingMaxAttemptCount() {
+        when(appealMapper.selectCount(any())).thenReturn(3L);
+
+        assertThatThrownBy(() -> supportService.createAppeal(createAppealReq()))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("同一事项最多申诉 3 次，已达上限");
     }
 
     @Test
@@ -171,6 +193,15 @@ class ContentUserSupportServiceTest {
     }
 
     @Test
+    void shouldRejectDuplicateReportForSameUserAndTarget() {
+        when(reportMapper.selectOne(any())).thenReturn(new ContentUserReport().setUserId("u1"));
+
+        assertThatThrownBy(() -> supportService.createReport(createReportReq()))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("您已对此内容提交过举报，请勿重复提交");
+    }
+
+    @Test
     void shouldHandlePendingReportToResolved() {
         ContentUserReport report = new ContentUserReport()
             .setUserId("u1")
@@ -231,6 +262,34 @@ class ContentUserSupportServiceTest {
         supportService.handleReport(req);
 
         verifyNoInteractions(growthPenaltyRecordService);
+    }
+
+    @Test
+    void shouldSendNotificationWhenReportHandled() {
+        ContentUserReport report = new ContentUserReport()
+            .setUserId("u1")
+            .setStatus("PENDING")
+            .setReportType("SPAM");
+        report.setId("report-1");
+        when(reportMapper.selectById("report-1")).thenReturn(report);
+
+        supportService.handleReport(createHandleReportReq());
+
+        verify(notificationService).sendNotification("u1", "REPORT_RESULT", "举报处理结果", "您的举报已处理，结果：CONFIRMED");
+    }
+
+    @Test
+    void shouldSendNotificationWhenAppealApproved() {
+        ContentUserAppeal appeal = new ContentUserAppeal()
+            .setUserId("u1")
+            .setStatus("PENDING")
+            .setAppealType("PENALTY");
+        appeal.setId("appeal-1");
+        when(appealMapper.selectById("appeal-1")).thenReturn(appeal);
+
+        supportService.handleAppeal(createHandleReq());
+
+        verify(notificationService).sendNotification("u1", "APPEAL_RESULT", "申诉处理结果", "您的申诉已处理，结果：APPROVED");
     }
 
     @Test
@@ -620,7 +679,7 @@ class ContentUserSupportServiceTest {
         when(profileMapper.selectByUserId("u100"))
             .thenReturn(new ContentUserProfile()
                 .setUserId("u100")
-                .setLevel(5)
+                .setLevel(15)
                 .setGrowthValue(420)
                 .setStatus("NORMAL"));
 
@@ -668,6 +727,128 @@ class ContentUserSupportServiceTest {
     }
 
     @Test
+    void shouldSearchHelpArticlesByKeyword() {
+        List<ContentHelpSearchResultVO> results = supportService.searchHelpArticles("u1", "账号");
+
+        assertThat(results).isNotEmpty();
+        assertThat(results).anyMatch(r -> r.getTitle().contains("账号安全") || r.getDescription().contains("账号"));
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoHelpArticleMatched() {
+        List<ContentHelpSearchResultVO> results = supportService.searchHelpArticles("u1", "xyznonexistent");
+
+        assertThat(results).isEmpty();
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenHelpSearchKeywordIsBlank() {
+        List<ContentHelpSearchResultVO> results = supportService.searchHelpArticles("u1", "  ");
+
+        assertThat(results).isEmpty();
+    }
+
+    @Test
+    void shouldCreateServiceSession() {
+        String sessionId = supportService.createServiceSession("u1", "SMART_BOT");
+
+        assertThat(sessionId).isNotBlank();
+        verify(serviceSessionMapper).insert(argThat((ContentCustomerServiceSession it) ->
+            "u1".equals(it.getUserId())
+                && "SMART_BOT".equals(it.getSessionType())
+                && "ACTIVE".equals(it.getStatus())));
+    }
+
+    @Test
+    void shouldListServiceSessionsForUser() {
+        ContentCustomerServiceSession session = new ContentCustomerServiceSession();
+        session.setId("session-1");
+        session.setUserId("u1");
+        session.setSessionType("SMART_BOT");
+        session.setStatus("CLOSED");
+        session.setRating(5);
+        session.setStartTime(new Date());
+        session.setCreateTime(new Date());
+        when(serviceSessionMapper.selectPage(any(), any())).thenAnswer(invocation -> {
+            IPage<ContentCustomerServiceSession> page = invocation.getArgument(0);
+            page.setRecords(List.of(session));
+            page.setTotal(1L);
+            return page;
+        });
+
+        ContentServiceSessionPageVO result = supportService.listServiceSessions(
+            new ContentServiceSessionQueryReq().setUserId("u1").setPageNo(1L).setPageSize(10L));
+
+        assertThat(result.getTotal()).isEqualTo(1L);
+        assertThat(result.getRecords()).hasSize(1);
+        assertThat(result.getRecords().get(0).getSessionId()).isEqualTo("session-1");
+        assertThat(result.getRecords().get(0).getExpired()).isFalse();
+    }
+
+    @Test
+    void shouldRateClosedServiceSession() {
+        ContentCustomerServiceSession session = new ContentCustomerServiceSession();
+        session.setId("session-1");
+        session.setUserId("u1");
+        session.setStatus("CLOSED");
+        when(serviceSessionMapper.selectById("session-1")).thenReturn(session);
+
+        String result = supportService.rateService("u1", "session-1", 5, "很好");
+
+        assertThat(result).isEqualTo("session-1");
+        verify(serviceSessionMapper).updateById(argThat((ContentCustomerServiceSession it) ->
+            it.getRating() == 5 && "很好".equals(it.getRatingComment())));
+    }
+
+    @Test
+    void shouldRejectRatingWhenSessionNotClosed() {
+        ContentCustomerServiceSession session = new ContentCustomerServiceSession();
+        session.setId("session-1");
+        session.setUserId("u1");
+        session.setStatus("ACTIVE");
+        when(serviceSessionMapper.selectById("session-1")).thenReturn(session);
+
+        assertThatThrownBy(() -> supportService.rateService("u1", "session-1", 5, "很好"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("仅已结束的会话可以评分");
+    }
+
+    @Test
+    void shouldRejectRatingWhenRatingOutOfRange() {
+        ContentCustomerServiceSession session = new ContentCustomerServiceSession();
+        session.setId("session-1");
+        session.setUserId("u1");
+        session.setStatus("CLOSED");
+        when(serviceSessionMapper.selectById("session-1")).thenReturn(session);
+
+        assertThatThrownBy(() -> supportService.rateService("u1", "session-1", 6, "好评"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("评分范围为 1-5");
+    }
+
+    @Test
+    void shouldMarkExpiredWhenSessionOlderThan30Days() {
+        ContentCustomerServiceSession session = new ContentCustomerServiceSession();
+        session.setId("session-old");
+        session.setUserId("u1");
+        session.setSessionType("SMART_BOT");
+        session.setStatus("CLOSED");
+        session.setCreateTime(new Date(System.currentTimeMillis() - 31L * 24 * 60 * 60 * 1000));
+        session.setStartTime(new Date(System.currentTimeMillis() - 31L * 24 * 60 * 60 * 1000));
+        when(serviceSessionMapper.selectPage(any(), any())).thenAnswer(invocation -> {
+            IPage<ContentCustomerServiceSession> page = invocation.getArgument(0);
+            page.setRecords(List.of(session));
+            page.setTotal(1L);
+            return page;
+        });
+
+        ContentServiceSessionPageVO result = supportService.listServiceSessions(
+            new ContentServiceSessionQueryReq().setUserId("u1").setPageNo(1L).setPageSize(10L));
+
+        assertThat(result.getRecords().get(0).getExpired()).isTrue();
+    }
+
+    @Test
     void shouldReturnDefaultCustomerServiceEntry() {
         when(profileMapper.selectByUserId("u1")).thenReturn(null);
 
@@ -682,7 +863,7 @@ class ContentUserSupportServiceTest {
         when(profileMapper.selectByUserId("u100"))
             .thenReturn(new ContentUserProfile()
                 .setUserId("u100")
-                .setLevel(5)
+                .setLevel(15)
                 .setGrowthValue(420)
                 .setStatus("NORMAL"));
 
@@ -731,7 +912,7 @@ class ContentUserSupportServiceTest {
         when(profileMapper.selectByUserId("u1")).thenReturn(new ContentUserProfile()
             .setUserId("u1")
             .setStatus("NORMAL")
-            .setLevel(5)
+            .setLevel(15)
             .setGrowthValue(300));
         when(levelBenefitService.isBenefitExplicitlyDisabled("u1", "PRIORITY_CUSTOMER_SERVICE")).thenReturn(false);
 
@@ -793,6 +974,21 @@ class ContentUserSupportServiceTest {
             .setResultStatus("CONFIRMED")
             .setResultNote("违规成立")
             .setProgressNote("已处理完成");
+    }
+
+    @Test
+    void shouldReturnChangelogByVersionDescending() {
+        List<ContentChangelogVO> result = supportService.getChangelog("user-1");
+        assertThat(result).isNotEmpty();
+        assertThat(result.get(0).getVersion()).isEqualTo("3.2.0");
+        assertThat(result.get(0).getAdditions()).contains("新增内容社区举报功能");
+        assertThat(result.get(0).getImprovements()).contains("优化帮助中心搜索体验");
+        assertThat(result.get(0).getFixes()).isNotEmpty();
+        assertThat(result.get(1).getVersion()).isEqualTo("3.1.0");
+        assertThat(result.get(2).getVersion()).isEqualTo("3.0.0");
+        for (int i = 0; i < result.size() - 1; i++) {
+            assertThat(result.get(i).getReleaseDate()).isAfterOrEqualTo(result.get(i + 1).getReleaseDate());
+        }
     }
 
     private ContentHelpCenterEntryVO findEntry(List<ContentHelpCenterEntryVO> entries, String code) {

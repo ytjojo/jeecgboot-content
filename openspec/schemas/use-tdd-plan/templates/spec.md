@@ -11,6 +11,7 @@ Delta spec template for a change.
 - 每個 Requirement MUST 至少有一個 `#### Scenario:`
 - Scenario MUST 用 level-4 (`####`)，level-3 或 bullet 會 silent fail
 -->
+
 ## ADDED Requirements
 
 <!-- 新增行為。列出本 change 要加到 capability 的新 Requirement。 -->
@@ -19,9 +20,9 @@ Delta spec template for a change.
 <!-- requirement text — 須含 SHALL 或 MUST -->
 
 #### Scenario: <!-- scenario name -->
-- GIVEN: [前置条件]
-- WHEN: [操作]
-- THEN: [期望结果]
+- **WHEN** <!-- condition -->
+- **THEN** <!-- expected outcome -->
+
 ---
 
 ## MODIFIED Requirements
@@ -39,9 +40,8 @@ Delta spec template for a change.
 <!-- 修改後的完整 requirement text — 含 SHALL 或 MUST -->
 
 #### Scenario: <!-- scenario name（可新增、可修改） -->
-- GIVEN: [前置条件]
-- WHEN: [操作]
-- THEN: [期望结果]
+- **WHEN** <!-- condition -->
+- **THEN** <!-- expected outcome -->
 
 ---
 

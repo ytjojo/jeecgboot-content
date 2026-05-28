@@ -74,8 +74,10 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { generateInviteCode, listInviteRecords, getInviteStats } from '/@/api/content/invite';
+import { useUserStore } from '/@/store/modules/user';
 import { useMessage } from '/@/hooks/web/useMessage';
 
+const userStore = useUserStore();
 const { createMessage } = useMessage();
 const loading = ref(false);
 const inviteCode = ref('');
@@ -88,7 +90,7 @@ const pagination = reactive({
   showSizeChanger: true,
 });
 
-const userId = ''; // TODO: get from user store
+const userId = String(userStore.getUserInfo.userId || '');
 
 const fetchData = async () => {
   loading.value = true;

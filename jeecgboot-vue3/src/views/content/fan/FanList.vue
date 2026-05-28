@@ -44,8 +44,10 @@
 import { ref, reactive, onMounted } from 'vue';
 import { DownloadOutlined } from '@ant-design/icons-vue';
 import { listFans, exportFansCsv } from '/@/api/content/fan-analytics';
+import { useUserStore } from '/@/store/modules/user';
 import { useMessage } from '/@/hooks/web/useMessage';
 
+const userStore = useUserStore();
 const { createMessage } = useMessage();
 const keyword = ref('');
 const loading = ref(false);
@@ -57,7 +59,7 @@ const pagination = reactive({
   showSizeChanger: true,
 });
 
-const userId = ''; // TODO: get from user store
+const userId = String(userStore.getUserInfo.userId || '');
 
 const fetchData = async () => {
   loading.value = true;

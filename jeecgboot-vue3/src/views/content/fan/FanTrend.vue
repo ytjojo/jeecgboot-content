@@ -37,7 +37,7 @@ let chart: echarts.ECharts | null = null;
 const fetchData = async () => {
   loading.value = true;
   try {
-    const res = await getFanTrend(props.userId, { range: range.value });
+    const res = await getFanTrend(props.userId, { period: range.value });
     const dates: string[] = [];
     const counts: number[] = [];
     (res || []).forEach((item: any) => {

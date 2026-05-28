@@ -234,7 +234,13 @@ public class ContentFanAnalyticsServiceImpl implements IContentFanAnalyticsServi
             .collect(Collectors.toMap(ContentUserActivitySnapshot::getActorUserId, Function.identity(), (a, b) -> a));
 
         return relations.stream()
-            .map(r -> ContentRelationUserItemVO.from(r, profileMap.get(r.getOwnerUserId()), activityMap.get(r.getOwnerUserId())))
+            .map(r -> {
+                // r 的 ownerUserId 是粉丝，profile/activity 也按粉丝 ID 取；from() 默认设 targetUserId 为 relation.getTargetUserId()（即被关注者），
+                // 此处需要覆盖为粉丝 ID，因为返回的列表是粉丝列表。
+                ContentRelationUserItemVO item = ContentRelationUserItemVO.from(r, profileMap.get(r.getOwnerUserId()), activityMap.get(r.getOwnerUserId()));
+                item.setTargetUserId(r.getOwnerUserId());
+                return item;
+            })
             .toList();
     }
 

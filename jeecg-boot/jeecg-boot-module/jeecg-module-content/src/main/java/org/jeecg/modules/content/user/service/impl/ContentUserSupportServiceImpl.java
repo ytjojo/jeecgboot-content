@@ -48,6 +48,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -77,6 +79,37 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
     private static final String HELP_CODE_PRODUCT_UPDATE = "PRODUCT_UPDATE";
     private static final String HELP_CODE_FEATURE_RELEASE = "FEATURE_RELEASE";
     private static final String HELP_CODE_POLICY_NOTICE = "POLICY_NOTICE";
+
+    private static final List<ContentHelpSearchResultVO> STATIC_HELP_ENTRIES = List.of(
+        buildStaticSearchResult(HELP_CODE_ACCOUNT_SECURITY, "账号安全", "账号登录、密码与设备安全相关问题"),
+        buildStaticSearchResult(HELP_CODE_REPORT_APPEAL, "举报申诉", "举报违规内容、处罚申诉与进度跟踪"),
+        buildStaticSearchResult(HELP_CODE_PRIVACY_SETTINGS, "隐私设置", "隐私可见性、通知偏好与账号保护设置"),
+        buildStaticSearchResult(HELP_CODE_BEGINNER_GUIDE, "新手指南", "帮助新用户快速了解社区基础功能"),
+        buildStaticSearchResult(HELP_CODE_COMMUNITY_RULES, "社区规范", "社区规则、治理边界与处罚说明"),
+        buildStaticSearchResult(HELP_CODE_FEATURE_GUIDE, "功能使用说明", "发布、互动与个人主页等功能操作说明"),
+        buildStaticSearchResult(HELP_CODE_PRODUCT_UPDATE, "产品更新", "版本更新与产品能力变更记录"),
+        buildStaticSearchResult(HELP_CODE_FEATURE_RELEASE, "功能上新", "新功能发布与体验优化说明"),
+        buildStaticSearchResult(HELP_CODE_POLICY_NOTICE, "规则公告", "平台规则与治理公告更新"));
+
+    private static final List<ContentChangelogVO> CHANGELOG = List.of(
+        new ContentChangelogVO()
+            .setVersion("3.2.0")
+            .setReleaseDate(Date.from(LocalDate.of(2026, 5, 20).atStartOfDay(ZoneId.systemDefault()).toInstant()))
+            .setAdditions(List.of("新增内容社区举报功能", "新增用户申诉通道"))
+            .setImprovements(List.of("优化帮助中心搜索体验"))
+            .setFixes(List.of("修复客服会话过期判断不准确的问题")),
+        new ContentChangelogVO()
+            .setVersion("3.1.0")
+            .setReleaseDate(Date.from(LocalDate.of(2026, 4, 15).atStartOfDay(ZoneId.systemDefault()).toInstant()))
+            .setAdditions(List.of("新增客服会话管理", "新增用户等级权益体系"))
+            .setImprovements(List.of("优化举报处理流程", "提升治理优先级路由准确度"))
+            .setFixes(List.of("修复申诉进度查询偶现空指针")),
+        new ContentChangelogVO()
+            .setVersion("3.0.0")
+            .setReleaseDate(Date.from(LocalDate.of(2026, 3, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()))
+            .setAdditions(List.of("内容社区模块上线"))
+            .setImprovements(List.of("基础架构搭建"))
+            .setFixes(List.of()));
 
     @Resource
     private ContentUserAppealMapper appealMapper;
@@ -259,17 +292,16 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
     }
 
     /**
-     * 基于关键词搜索帮助文章，使用 LIKE 匹配标题和说明。
+     * 基于关键词搜索帮助文章，使用忽略大小写的子串匹配。
      */
     @Override
     public List<ContentHelpSearchResultVO> searchHelpArticles(String userId, String keyword) {
         if (!StringUtils.hasText(keyword)) {
             return List.of();
         }
-        String likePattern = "%" + keyword.trim() + "%";
-        List<ContentHelpSearchResultVO> allEntries = getAllStaticHelpEntries();
-        return allEntries.stream()
-            .filter(e -> matchesKeyword(e, likePattern))
+        String lowerKeyword = keyword.trim().toLowerCase();
+        return STATIC_HELP_ENTRIES.stream()
+            .filter(e -> matchesKeyword(e, lowerKeyword))
             .toList();
     }
 
@@ -350,7 +382,7 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
         if (!"CLOSED".equals(session.getStatus())) {
             throw new JeecgBootException("仅已结束的会话可以评分");
         }
-        if (rating < 1 || rating > 5) {
+        if (rating == null || rating < 1 || rating > 5) {
             throw new JeecgBootException("评分范围为 1-5");
         }
         session.setRating(rating);
@@ -364,25 +396,7 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
      */
     @Override
     public List<ContentChangelogVO> getChangelog(String userId) {
-        return List.of(
-            new ContentChangelogVO()
-                .setVersion("3.2.0")
-                .setReleaseDate(new Date(126, 4, 20))
-                .setAdditions(List.of("新增内容社区举报功能", "新增用户申诉通道"))
-                .setImprovements(List.of("优化帮助中心搜索体验"))
-                .setFixes(List.of("修复客服会话过期判断不准确的问题")),
-            new ContentChangelogVO()
-                .setVersion("3.1.0")
-                .setReleaseDate(new Date(126, 3, 15))
-                .setAdditions(List.of("新增客服会话管理", "新增用户等级权益体系"))
-                .setImprovements(List.of("优化举报处理流程", "提升治理优先级路由准确度"))
-                .setFixes(List.of("修复申诉进度查询偶现空指针")),
-            new ContentChangelogVO()
-                .setVersion("3.0.0")
-                .setReleaseDate(new Date(126, 2, 1))
-                .setAdditions(List.of("内容社区模块上线"))
-                .setImprovements(List.of("基础架构搭建"))
-                .setFixes(List.of()));
+        return CHANGELOG;
     }
 
     /**
@@ -669,20 +683,7 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
             && !ContentUserStatusEnum.CANCELLED.getCode().equals(profile.getStatus());
     }
 
-    private List<ContentHelpSearchResultVO> getAllStaticHelpEntries() {
-        return List.of(
-            buildSearchResult(HELP_CODE_ACCOUNT_SECURITY, "账号安全", "账号登录、密码与设备安全相关问题"),
-            buildSearchResult(HELP_CODE_REPORT_APPEAL, "举报申诉", "举报违规内容、处罚申诉与进度跟踪"),
-            buildSearchResult(HELP_CODE_PRIVACY_SETTINGS, "隐私设置", "隐私可见性、通知偏好与账号保护设置"),
-            buildSearchResult(HELP_CODE_BEGINNER_GUIDE, "新手指南", "帮助新用户快速了解社区基础功能"),
-            buildSearchResult(HELP_CODE_COMMUNITY_RULES, "社区规范", "社区规则、治理边界与处罚说明"),
-            buildSearchResult(HELP_CODE_FEATURE_GUIDE, "功能使用说明", "发布、互动与个人主页等功能操作说明"),
-            buildSearchResult(HELP_CODE_PRODUCT_UPDATE, "产品更新", "版本更新与产品能力变更记录"),
-            buildSearchResult(HELP_CODE_FEATURE_RELEASE, "功能上新", "新功能发布与体验优化说明"),
-            buildSearchResult(HELP_CODE_POLICY_NOTICE, "规则公告", "平台规则与治理公告更新"));
-    }
-
-    private ContentHelpSearchResultVO buildSearchResult(String code, String title, String description) {
+    private static ContentHelpSearchResultVO buildStaticSearchResult(String code, String title, String description) {
         return new ContentHelpSearchResultVO()
             .setCode(code)
             .setTitle(title)
@@ -690,10 +691,9 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
             .setSnippet(description);
     }
 
-    private boolean matchesKeyword(ContentHelpSearchResultVO entry, String likePattern) {
-        String lowerPattern = likePattern.toLowerCase();
-        return (entry.getTitle() != null && entry.getTitle().toLowerCase().contains(lowerPattern.replace("%", "")))
-            || (entry.getDescription() != null && entry.getDescription().toLowerCase().contains(lowerPattern.replace("%", "")));
+    private boolean matchesKeyword(ContentHelpSearchResultVO entry, String lowerKeyword) {
+        return (entry.getTitle() != null && entry.getTitle().toLowerCase().contains(lowerKeyword))
+            || (entry.getDescription() != null && entry.getDescription().toLowerCase().contains(lowerKeyword));
     }
 
     private ContentServiceSessionVO toSessionVO(ContentCustomerServiceSession session, long thirtyDaysAgoMillis) {

@@ -39,8 +39,10 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { getMutualFollowList } from '/@/api/content/relation';
+import { useUserStore } from '/@/store/modules/user';
 import MutualFollowBadge from '../components/MutualFollowBadge.vue';
 
+const userStore = useUserStore();
 const keyword = ref('');
 const loading = ref(false);
 const list = ref<any[]>([]);
@@ -51,7 +53,7 @@ const pagination = reactive({
   showSizeChanger: true,
 });
 
-const userId = ''; // TODO: get from user store
+const userId = String(userStore.getUserInfo.userId || '');
 
 const fetchData = async () => {
   loading.value = true;

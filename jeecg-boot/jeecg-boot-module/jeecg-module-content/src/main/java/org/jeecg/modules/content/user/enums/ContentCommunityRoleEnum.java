@@ -28,4 +28,17 @@ public enum ContentCommunityRoleEnum {
     public static List<String> codes() {
         return Arrays.stream(values()).map(ContentCommunityRoleEnum::getCode).collect(Collectors.toList());
     }
+
+    /**
+     * Finds enum by code value, returns NORMAL if not found.
+     */
+    public static ContentCommunityRoleEnum fromValue(String code) {
+        if (code == null || code.isBlank()) {
+            return NORMAL;
+        }
+        return Arrays.stream(values())
+            .filter(e -> e.getCode().equals(code))
+            .findFirst()
+            .orElse(NORMAL);
+    }
 }

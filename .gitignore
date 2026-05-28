@@ -24,3 +24,7 @@ derby.log
 **/.project
 **/.settings/
 **/.factorypath
+
+graphify-out/cache/
+graphify-out/manifest.json
+graphify-out/cost.json

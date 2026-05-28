@@ -74,12 +74,7 @@ public interface IContentUserRelationService {
     ContentBlockMuteHelpVO getBlockMuteHelp();
 
     /**
-     * 判断两个用户是否互相关注。
-     */
-    boolean isMutualFollow(String userIdA, String userIdB);
-
-    /**
-     * 分页查询互关好友列表。
+     * 分页查询互关好友列表（带关键词搜索）。
      */
     ContentRelationUserPageVO getMutualFollowList(String operatorUserId, String keyword, Long pageNo, Long pageSize);
 }

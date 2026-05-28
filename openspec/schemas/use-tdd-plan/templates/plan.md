@@ -2,15 +2,20 @@
 > **For agentic workers:** Use superpowers:subagent-driven-development
 > to implement this plan task-by-task.
 
-## Steps
+# [Feature Name] Implementation Plan
 
-### Step 1: RED — [description]
-- Test file: [path]
-- Assertion: [what to test]
-- Expected failure: [reason]
-- Verify: `npx jest [test-file]`
+> **For agentic workers:** Use superpowers:subagent-driven-development
+> to implement this plan task-by-task.
 
-### Step 2: GREEN — [description]
-- Pass test from: Step 1
-- Minimal code: [what to implement]
-- Verify: `npx jest [test-file]`
+**Goal:** <!-- One sentence -->
+
+**Architecture:** <!-- 2-3 sentences -->
+
+**Tech Stack:** <!-- Key technologies -->
+
+---
+
+## Task 1: <!-- Component Name -->
+
+- [ ] **Step 1:** <!-- micro-step -->
+- [ ] **Step 2:** <!-- micro-step -->

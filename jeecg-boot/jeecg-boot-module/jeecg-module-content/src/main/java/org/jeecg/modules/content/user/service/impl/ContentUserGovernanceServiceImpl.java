@@ -394,42 +394,6 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
         return restoredStatus;
     }
 
-    @Override
-    public void deleteComment(String operatorUserId, String commentId, String reason) {
-        ContentUserProfile operator = profileMapper.selectByUserId(operatorUserId);
-        if (operator == null || !isModeratorOrAdmin(operator.getCommunityRole())) {
-            throw new JeecgBootException("权限不足");
-        }
-        ContentUserAuditLog log = new ContentUserAuditLog()
-            .setUserId(operatorUserId)
-            .setEventType("COMMENT_DELETED")
-            .setOperatorUserId(operatorUserId)
-            .setEventContent(commentId)
-            .setExtraDataJson("{\"reason\":\"" + reason + "\"}")
-            .setEventTime(new Date());
-        auditLogMapper.insert(log);
-    }
-
-    @Override
-    public void warnUser(String operatorUserId, String targetUserId, String reason) {
-        ContentUserProfile operator = profileMapper.selectByUserId(operatorUserId);
-        if (operator == null || !isModeratorOrAdmin(operator.getCommunityRole())) {
-            throw new JeecgBootException("权限不足");
-        }
-        ContentUserAuditLog log = new ContentUserAuditLog()
-            .setUserId(targetUserId)
-            .setEventType("USER_WARNED")
-            .setOperatorUserId(operatorUserId)
-            .setEventContent(reason)
-            .setEventTime(new Date());
-        auditLogMapper.insert(log);
-    }
-
-    private boolean isModeratorOrAdmin(String role) {
-        ContentCommunityRoleEnum roleEnum = ContentCommunityRoleEnum.fromValue(role);
-        return roleEnum == ContentCommunityRoleEnum.MODERATOR || roleEnum == ContentCommunityRoleEnum.ADMIN;
-    }
-
     private ContentUserAuditLog buildAutoRecoverAuditLog(ContentUserStatusRecord expiredRecord, String restoredStatus) {
         ContentUserStatusChangeReq req = new ContentUserStatusChangeReq()
             .setUserId(expiredRecord.getUserId())
