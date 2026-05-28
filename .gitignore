@@ -28,4 +28,5 @@ derby.log
 graphify-out/cache/
 graphify-out/cost.json
 graphify-out/manifest.json
+graphify-out/GRAPH_REPORT.md
 
