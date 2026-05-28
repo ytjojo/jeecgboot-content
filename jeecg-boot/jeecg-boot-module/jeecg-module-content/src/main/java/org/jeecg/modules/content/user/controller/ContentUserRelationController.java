@@ -263,6 +263,18 @@ public class ContentUserRelationController {
     }
 
     /**
+     * 分页查询互关好友列表。
+     */
+    @Operation(summary = "分页查询互关好友列表")
+    @GetMapping("/mutual-follow-list")
+    public Result<ContentRelationUserPageVO> mutualFollowList(
+            @RequestParam("userId") String userId,
+            @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
+            @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
+        return Result.OK(relationService.getMutualFollowList(userId, pageNo, pageSize));
+    }
+
+    /**
      * 返回拉黑、屏蔽、解除拉黑的确认文案和帮助说明。
      */
     @Operation(summary = "获取拉黑/屏蔽帮助说明")

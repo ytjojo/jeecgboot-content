@@ -933,6 +933,51 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
         return relation;
     }
 
+    /**
+     * 判断两个用户是否互相关注。
+     */
+    @Override
+    public boolean isMutualFollow(String userIdA, String userIdB) {
+        validateRelationIdentity(userIdA, userIdB);
+        ContentUserRelation aToB = relationMapper.selectByPair(userIdA, userIdB);
+        ContentUserRelation bToA = relationMapper.selectByPair(userIdB, userIdA);
+        return aToB != null && Boolean.TRUE.equals(aToB.getFollowed())
+            && bToA != null && Boolean.TRUE.equals(bToA.getFollowed());
+    }
+
+    /**
+     * 分页查询互关好友列表。
+     */
+    @Override
+    public ContentRelationUserPageVO getMutualFollowList(String operatorUserId, Long pageNo, Long pageSize) {
+        requireValidUserId(operatorUserId, "当前用户ID不能为空", "当前用户ID长度不能超过64位");
+        long currentPage = normalizePageNo(pageNo);
+        long currentSize = normalizePageSize(pageSize);
+        IPage<ContentUserRelation> page = relationMapper.selectPage(new Page<>(currentPage, currentSize),
+            Wrappers.<ContentUserRelation>lambdaQuery()
+                .eq(ContentUserRelation::getOwnerUserId, operatorUserId)
+                .eq(ContentUserRelation::getFollowed, Boolean.TRUE)
+                .eq(ContentUserRelation::getRelationStatus, ACTIVE_STATUS)
+                .orderByDesc(ContentUserRelation::getFollowedAt));
+        List<ContentRelationUserItemVO> records = page.getRecords().stream()
+            .filter(relation -> {
+                ContentUserRelation reverse = relationMapper.selectByPair(relation.getTargetUserId(), operatorUserId);
+                return reverse != null && Boolean.TRUE.equals(reverse.getFollowed());
+            })
+            .map(relation -> new ContentRelationUserItemVO()
+                .setTargetUserId(relation.getTargetUserId())
+                .setFollowed(relation.getFollowed())
+                .setSpecialFollow(relation.getSpecialFollow())
+                .setRelationGroupId(relation.getRelationGroupId())
+                .setFollowedAt(relation.getFollowedAt()))
+            .toList();
+        return new ContentRelationUserPageVO()
+            .setRecords(records)
+            .setTotal((long) records.size())
+            .setPageNo(currentPage)
+            .setPageSize(currentSize);
+    }
+
     @Override
     public boolean isMutualFollow(String userIdA, String userIdB) {
         if (userIdA == null || userIdB == null || userIdA.equals(userIdB)) {

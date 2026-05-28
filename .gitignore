@@ -20,3 +20,7 @@ derby.log
 .claude
 .omc
 .worktrees/
+**/.classpath
+**/.project
+**/.settings/
+**/.factorypath

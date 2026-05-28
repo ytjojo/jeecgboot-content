@@ -39,6 +39,9 @@ public class ContentUserRelationVO {
     @Schema(description = "关系分组ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String relationGroupId;
 
+    @Schema(description = "是否互关", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private Boolean mutualFollow;
+
     @Schema(description = "关注时间", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Date followedAt;
 

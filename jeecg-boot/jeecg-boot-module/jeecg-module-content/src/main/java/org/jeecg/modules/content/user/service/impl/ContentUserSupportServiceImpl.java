@@ -12,6 +12,8 @@ import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserReport;
 import org.jeecg.modules.content.user.entity.ContentUserStatusRecord;
 import org.jeecg.modules.content.user.enums.ContentUserStatusEnum;
+import org.jeecg.modules.content.user.entity.ContentCustomerServiceSession;
+import org.jeecg.modules.content.user.mapper.ContentCustomerServiceSessionMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserAppealMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserAuditLogMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
@@ -21,15 +23,21 @@ import org.jeecg.modules.content.user.req.support.ContentAppealCreateReq;
 import org.jeecg.modules.content.user.req.support.ContentAppealHandleReq;
 import org.jeecg.modules.content.user.req.support.ContentReportCreateReq;
 import org.jeecg.modules.content.user.req.support.ContentReportHandleReq;
+import org.jeecg.modules.content.user.req.support.ContentServiceSessionQueryReq;
 import org.jeecg.modules.content.user.req.support.ContentUserReportAdminQueryReq;
+import org.jeecg.modules.content.user.service.IContentNotificationService;
 import org.jeecg.modules.content.user.service.IContentUserGrowthPenaltyRecordService;
 import org.jeecg.modules.content.user.service.IContentUserGrowthPenaltyRecoveryService;
 import org.jeecg.modules.content.user.service.IContentUserLevelBenefitService;
 import org.jeecg.modules.content.user.service.IContentUserLevelBenefitRecoveryService;
 import org.jeecg.modules.content.user.service.IContentUserSupportService;
+import org.jeecg.modules.content.user.vo.ContentChangelogVO;
 import org.jeecg.modules.content.user.vo.ContentCustomerServiceVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterEntryVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterVO;
+import org.jeecg.modules.content.user.vo.ContentHelpSearchResultVO;
+import org.jeecg.modules.content.user.vo.ContentServiceSessionPageVO;
+import org.jeecg.modules.content.user.vo.ContentServiceSessionVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealProgressVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminDetailVO;
@@ -86,6 +94,9 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
     private ContentUserStatusRecordMapper statusRecordMapper;
 
     @Resource
+    private ContentCustomerServiceSessionMapper serviceSessionMapper;
+
+    @Resource
     private IContentUserGrowthPenaltyRecoveryService growthPenaltyRecoveryService;
 
     @Resource
@@ -96,12 +107,22 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
 
     @Resource
     private IContentUserGrowthPenaltyRecordService growthPenaltyRecordService;
+
+    @Resource
+    private IContentNotificationService notificationService;
     /**
      * Creates a user appeal record and returns its identifier.
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String createAppeal(ContentAppealCreateReq req) {
+        LambdaQueryWrapper<ContentUserAppeal> countCheck = new LambdaQueryWrapper<>();
+        countCheck.eq(ContentUserAppeal::getUserId, req.getUserId())
+            .eq(ContentUserAppeal::getTargetId, req.getTargetId());
+        Long existingCount = appealMapper.selectCount(countCheck);
+        if (existingCount != null && existingCount >= 3) {
+            throw new JeecgBootException("同一事项最多申诉 3 次，已达上限");
+        }
         ContentUserAppeal appeal = ContentUserAppeal.from(req);
         appeal.setId(UUIDGenerator.generate());
         appeal.setProgressNote("已提交，等待处理");
@@ -146,11 +167,18 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String createReport(ContentReportCreateReq req) {
+        LambdaQueryWrapper<ContentUserReport> duplicateCheck = new LambdaQueryWrapper<>();
+        duplicateCheck.eq(ContentUserReport::getUserId, req.getUserId())
+            .eq(ContentUserReport::getTargetType, req.getTargetType())
+            .eq(ContentUserReport::getTargetId, req.getTargetId());
+        if (reportMapper.selectOne(duplicateCheck) != null) {
+            throw new JeecgBootException("您已对此内容提交过举报，请勿重复提交");
+        }
         ContentUserReport report = ContentUserReport.from(req);
         report.setId(UUIDGenerator.generate());
         reportMapper.insert(report);
         auditLogMapper.insert(ContentUserAuditLog.reportCreated(report.getId(), req));
-        return report.getId();
+        return "举报已提交，举报编号：" + report.getId();
     }
 
     /**
@@ -231,6 +259,21 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
     }
 
     /**
+     * 基于关键词搜索帮助文章，使用 LIKE 匹配标题和说明。
+     */
+    @Override
+    public List<ContentHelpSearchResultVO> searchHelpArticles(String userId, String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return List.of();
+        }
+        String likePattern = "%" + keyword.trim() + "%";
+        List<ContentHelpSearchResultVO> allEntries = getAllStaticHelpEntries();
+        return allEntries.stream()
+            .filter(e -> matchesKeyword(e, likePattern))
+            .toList();
+    }
+
+    /**
      * Returns the customer service routing entry based on user profile priority.
      */
     @Override
@@ -259,6 +302,90 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
     }
 
     /**
+     * Lists service sessions for the specified user, with 30-day expiration flag.
+     */
+    @Override
+    public ContentServiceSessionPageVO listServiceSessions(ContentServiceSessionQueryReq req) {
+        long currentPage = req.getPageNo() == null || req.getPageNo() < 1L ? 1L : req.getPageNo();
+        long currentSize = req.getPageSize() == null || req.getPageSize() < 1L ? 10L : req.getPageSize();
+        LambdaQueryWrapper<ContentCustomerServiceSession> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ContentCustomerServiceSession::getUserId, req.getUserId())
+            .orderByDesc(ContentCustomerServiceSession::getCreateTime);
+        IPage<ContentCustomerServiceSession> page = serviceSessionMapper.selectPage(
+            new Page<>(currentPage, currentSize), queryWrapper);
+        long thirtyDaysAgo = System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000;
+        return new ContentServiceSessionPageVO()
+            .setRecords(page.getRecords().stream().map(s -> toSessionVO(s, thirtyDaysAgo)).toList())
+            .setTotal(page.getTotal())
+            .setPageNo(page.getCurrent())
+            .setPageSize(page.getSize());
+    }
+
+    /**
+     * Creates a new customer service session.
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String createServiceSession(String userId, String sessionType) {
+        ContentCustomerServiceSession session = new ContentCustomerServiceSession();
+        session.setId(UUIDGenerator.generate());
+        session.setUserId(userId);
+        session.setSessionType(sessionType);
+        session.setStatus("ACTIVE");
+        session.setStartTime(new Date());
+        serviceSessionMapper.insert(session);
+        return session.getId();
+    }
+
+    /**
+     * Rates a completed service session.
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String rateService(String userId, String sessionId, Integer rating, String comment) {
+        ContentCustomerServiceSession session = serviceSessionMapper.selectById(sessionId);
+        if (session == null || !userId.equals(session.getUserId())) {
+            throw new JeecgBootException("会话不存在或无权操作");
+        }
+        if (!"CLOSED".equals(session.getStatus())) {
+            throw new JeecgBootException("仅已结束的会话可以评分");
+        }
+        if (rating < 1 || rating > 5) {
+            throw new JeecgBootException("评分范围为 1-5");
+        }
+        session.setRating(rating);
+        session.setRatingComment(comment);
+        serviceSessionMapper.updateById(session);
+        return session.getId();
+    }
+
+    /**
+     * 返回更新日志列表，按版本号倒序排列。
+     */
+    @Override
+    public List<ContentChangelogVO> getChangelog(String userId) {
+        return List.of(
+            new ContentChangelogVO()
+                .setVersion("3.2.0")
+                .setReleaseDate(new Date(126, 4, 20))
+                .setAdditions(List.of("新增内容社区举报功能", "新增用户申诉通道"))
+                .setImprovements(List.of("优化帮助中心搜索体验"))
+                .setFixes(List.of("修复客服会话过期判断不准确的问题")),
+            new ContentChangelogVO()
+                .setVersion("3.1.0")
+                .setReleaseDate(new Date(126, 3, 15))
+                .setAdditions(List.of("新增客服会话管理", "新增用户等级权益体系"))
+                .setImprovements(List.of("优化举报处理流程", "提升治理优先级路由准确度"))
+                .setFixes(List.of("修复申诉进度查询偶现空指针")),
+            new ContentChangelogVO()
+                .setVersion("3.0.0")
+                .setReleaseDate(new Date(126, 2, 1))
+                .setAdditions(List.of("内容社区模块上线"))
+                .setImprovements(List.of("基础架构搭建"))
+                .setFixes(List.of()));
+    }
+
+    /**
      * Handles the specified appeal and writes back the final result.
      */
     @Override
@@ -280,6 +407,8 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
         restoreGovernanceStatusIfNecessary(appeal, req);
         growthPenaltyRecoveryService.recoverByAppeal(appeal, req.getOperatorUserId(), resolvedAt, req.getResultNote());
         auditLogMapper.insert(ContentUserAuditLog.appealHandled(appeal, req));
+        notificationService.sendNotification(appeal.getUserId(), "APPEAL_RESULT",
+            "申诉处理结果", "您的申诉已处理，结果：" + req.getResultStatus());
         return appeal.getId();
     }
 
@@ -306,6 +435,8 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
             growthPenaltyRecordService.createFromReportHandle(report, req, null, resolvedAt);
         }
         auditLogMapper.insert(ContentUserAuditLog.reportHandled(report, req));
+        notificationService.sendNotification(report.getUserId(), "REPORT_RESULT",
+            "举报处理结果", "您的举报已处理，结果：" + req.getResultStatus());
         return report.getId();
     }
 
@@ -516,7 +647,7 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
         }
         int level = profile.getLevel() == null ? 1 : profile.getLevel();
         int growthValue = profile.getGrowthValue() == null ? 0 : profile.getGrowthValue();
-        return level >= 5 || growthValue >= 400;
+        return level >= 15 || growthValue >= 400;
     }
 
     private boolean shouldRouteToGovernancePriority(ContentUserProfile profile) {
@@ -536,5 +667,45 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
             && !ContentUserStatusEnum.GUEST.getCode().equals(profile.getStatus())
             && !ContentUserStatusEnum.REGISTERED_INCOMPLETE.getCode().equals(profile.getStatus())
             && !ContentUserStatusEnum.CANCELLED.getCode().equals(profile.getStatus());
+    }
+
+    private List<ContentHelpSearchResultVO> getAllStaticHelpEntries() {
+        return List.of(
+            buildSearchResult(HELP_CODE_ACCOUNT_SECURITY, "账号安全", "账号登录、密码与设备安全相关问题"),
+            buildSearchResult(HELP_CODE_REPORT_APPEAL, "举报申诉", "举报违规内容、处罚申诉与进度跟踪"),
+            buildSearchResult(HELP_CODE_PRIVACY_SETTINGS, "隐私设置", "隐私可见性、通知偏好与账号保护设置"),
+            buildSearchResult(HELP_CODE_BEGINNER_GUIDE, "新手指南", "帮助新用户快速了解社区基础功能"),
+            buildSearchResult(HELP_CODE_COMMUNITY_RULES, "社区规范", "社区规则、治理边界与处罚说明"),
+            buildSearchResult(HELP_CODE_FEATURE_GUIDE, "功能使用说明", "发布、互动与个人主页等功能操作说明"),
+            buildSearchResult(HELP_CODE_PRODUCT_UPDATE, "产品更新", "版本更新与产品能力变更记录"),
+            buildSearchResult(HELP_CODE_FEATURE_RELEASE, "功能上新", "新功能发布与体验优化说明"),
+            buildSearchResult(HELP_CODE_POLICY_NOTICE, "规则公告", "平台规则与治理公告更新"));
+    }
+
+    private ContentHelpSearchResultVO buildSearchResult(String code, String title, String description) {
+        return new ContentHelpSearchResultVO()
+            .setCode(code)
+            .setTitle(title)
+            .setDescription(description)
+            .setSnippet(description);
+    }
+
+    private boolean matchesKeyword(ContentHelpSearchResultVO entry, String likePattern) {
+        String lowerPattern = likePattern.toLowerCase();
+        return (entry.getTitle() != null && entry.getTitle().toLowerCase().contains(lowerPattern.replace("%", "")))
+            || (entry.getDescription() != null && entry.getDescription().toLowerCase().contains(lowerPattern.replace("%", "")));
+    }
+
+    private ContentServiceSessionVO toSessionVO(ContentCustomerServiceSession session, long thirtyDaysAgoMillis) {
+        boolean expired = session.getCreateTime() != null && session.getCreateTime().getTime() < thirtyDaysAgoMillis;
+        return new ContentServiceSessionVO()
+            .setSessionId(session.getId())
+            .setSessionType(session.getSessionType())
+            .setStatus(session.getStatus())
+            .setRating(session.getRating())
+            .setRatingComment(session.getRatingComment())
+            .setStartTime(session.getStartTime())
+            .setEndTime(session.getEndTime())
+            .setExpired(expired);
     }
 }
