@@ -170,6 +170,30 @@ public class SystemUserAccountGatewayImpl implements SystemUserAccountGateway {
         sysUserMapper.updateById(user);
     }
 
+    /**
+     * 通过第三方登录创建平台账号（无手机号/邮箱/密码）。
+     */
+    @Override
+    public String createUserByThirdParty(String nickname) {
+        String username = "tp_" + UUIDGenerator.generate();
+        Date now = new Date();
+        SysUser user = new SysUser()
+            .setId(UUIDGenerator.generate())
+            .setUsername(username)
+            .setRealname(nickname)
+            .setPhone(null)
+            .setEmail(null)
+            .setSalt(null)
+            .setPassword(null)
+            .setAvatar(null)
+            .setStatus(1)
+            .setDelFlag(CommonConstant.DEL_FLAG_0)
+            .setCreateTime(now)
+            .setUpdateTime(now);
+        sysUserMapper.insert(user);
+        return user.getId();
+    }
+
     private SysUser resolveUser(ContentPasswordResetReq req) {
         if (oConvertUtils.isNotEmpty(req.getUserId())) {
             return sysUserMapper.selectById(req.getUserId());

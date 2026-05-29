@@ -27,4 +27,12 @@ public interface SystemUserAccountGateway {
     SysUser unbindEmail(String userId);
 
     void markCancelled(String userId);
+
+    /**
+     * 通过第三方登录创建平台账号（无手机号/邮箱/密码）。
+     *
+     * @param nickname 昵称
+     * @return 用户ID
+     */
+    String createUserByThirdParty(String nickname);
 }

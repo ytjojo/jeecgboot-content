@@ -42,4 +42,19 @@ public class ContentUserThirdPartyAuth extends JeecgEntity {
 
     @Schema(description = "撤销时间")
     private Date revokedAt;
+
+    @Schema(description = "第三方开放ID")
+    private String openId;
+
+    @Schema(description = "第三方联合ID")
+    private String unionId;
+
+    @Schema(description = "第三方昵称")
+    private String nickname;
+
+    @Schema(description = "第三方头像")
+    private String avatar;
+
+    @Schema(description = "原始授权数据JSON")
+    private String rawDataJson;
 }
