@@ -20,8 +20,10 @@ required_sections=(
   "目标与成功指标"
   "范围"
   "用户与场景"
+  "需求层级"
   "功能需求"
   "验收标准"
+  "词汇表"
 )
 
 for section in "${required_sections[@]}"; do
@@ -31,3 +33,24 @@ for section in "${required_sections[@]}"; do
     echo "✗ 缺失: ${section}"
   fi
 done
+
+echo
+echo "=== PRD 层级结构检查 ==="
+
+if grep -qE "^###?[[:space:]]*(EPIC|Epic|epic|EPIC-|Epic-)" "$FILE" 2>/dev/null; then
+  echo "✓ Epic"
+else
+  echo "✗ 缺失: Epic"
+fi
+
+if grep -qE "^####?[[:space:]]*(FEATURE|Feature|feature|FEATURE-|Feature-)" "$FILE" 2>/dev/null; then
+  echo "✓ Feature"
+else
+  echo "✗ 缺失: Feature"
+fi
+
+if grep -qE "^#####[[:space:]]*(STORY|Story|story|STORY-|Story-)" "$FILE" 2>/dev/null; then
+  echo "✓ Story"
+else
+  echo "✗ 缺失: Story"
+fi
