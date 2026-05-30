@@ -48,6 +48,16 @@ public class ChannelMemberServiceImpl extends ServiceImpl<ChannelMemberMapper, C
         if (member == null) {
             throw new JeecgBootException("成员不存在");
         }
+        ChannelMember operator = getByChannelAndUser(member.getChannelId(), operatorId);
+        if (operator == null || operator.getRole() > MemberRole.ADMIN.getCode()) {
+            throw new JeecgBootException("权限不足");
+        }
+        if (role == MemberRole.OWNER) {
+            throw new JeecgBootException("不能通过此接口转让频道主");
+        }
+        if (operator.getRole() >= member.getRole()) {
+            throw new JeecgBootException("权限不足");
+        }
         member.setRole(role.getCode());
         updateById(member);
     }

@@ -3,6 +3,7 @@ package org.jeecg.modules.content.channel.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.biz.ChannelMemberBizService;
 import org.jeecg.modules.content.channel.entity.ChannelInvite;
 import org.jeecg.modules.content.channel.service.ChannelInviteService;
@@ -30,7 +31,7 @@ public class ChannelInviteController {
                                               @RequestParam Integer type,
                                               @RequestParam(required = false) Integer maxUses,
                                               @RequestParam(required = false) Integer expireDays) {
-        String operatorId = "currentUserId"; // TODO: get from session
+        String operatorId = SecureUtil.currentUser().getId();
         ChannelInvite invite = inviteService.createInvite(channelId, type, maxUses, expireDays, operatorId);
         return Result.OK(invite);
     }
@@ -44,7 +45,7 @@ public class ChannelInviteController {
     @Operation(summary = "撤销邀请")
     @PostMapping("/revoke")
     public Result<String> revokeInvite(@RequestParam String inviteId) {
-        String operatorId = "currentUserId";
+        String operatorId = SecureUtil.currentUser().getId();
         inviteService.revokeInvite(inviteId, operatorId);
         return Result.OK("已撤销");
     }
@@ -53,7 +54,7 @@ public class ChannelInviteController {
     @PostMapping("/use")
     public Result<String> useInvite(@RequestParam String channelId,
                                     @RequestParam String code) {
-        String userId = "currentUserId";
+        String userId = SecureUtil.currentUser().getId();
         memberBizService.joinByInvite(channelId, userId, code);
         return Result.OK("加入成功");
     }

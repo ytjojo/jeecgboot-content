@@ -72,12 +72,19 @@ class ChannelMemberServiceTest {
 
     @Test
     void should_assign_role() {
+        ChannelMemberService spyService = spy(memberService);
         ChannelMember member = new ChannelMember();
         member.setId("m1");
+        member.setChannelId("ch1");
         member.setRole(MemberRole.MEMBER.getCode());
         when(memberMapper.selectById("m1")).thenReturn(member);
 
-        memberService.assignRole("m1", MemberRole.ADMIN, "owner1");
+        ChannelMember operator = new ChannelMember();
+        operator.setId("op1");
+        operator.setRole(MemberRole.OWNER.getCode());
+        doReturn(operator).when(spyService).getByChannelAndUser("ch1", "owner1");
+
+        spyService.assignRole("m1", MemberRole.ADMIN, "owner1");
 
         assertThat(member.getRole()).isEqualTo(MemberRole.ADMIN.getCode());
         verify(memberMapper).updateById(member);

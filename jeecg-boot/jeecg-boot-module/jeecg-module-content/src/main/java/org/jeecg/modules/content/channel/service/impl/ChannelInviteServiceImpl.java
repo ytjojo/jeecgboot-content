@@ -1,6 +1,7 @@
 package org.jeecg.modules.content.channel.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.channel.entity.ChannelInvite;
@@ -8,6 +9,7 @@ import org.jeecg.modules.content.channel.enums.InviteStatus;
 import org.jeecg.modules.content.channel.mapper.ChannelInviteMapper;
 import org.jeecg.modules.content.channel.service.ChannelInviteService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -57,6 +59,7 @@ public class ChannelInviteServiceImpl extends ServiceImpl<ChannelInviteMapper, C
     }
 
     @Override
+    @Transactional
     public void useInvite(String code) {
         ChannelInvite invite = getOne(new LambdaQueryWrapper<ChannelInvite>()
             .eq(ChannelInvite::getCode, code));
@@ -64,11 +67,12 @@ public class ChannelInviteServiceImpl extends ServiceImpl<ChannelInviteMapper, C
             throw new JeecgBootException("邀请码不存在");
         }
         validateInvite(code);
-        invite.setUsedCount(invite.getUsedCount() + 1);
-        if (invite.getMaxUses() != null && invite.getUsedCount() >= invite.getMaxUses()) {
-            invite.setStatus(InviteStatus.USED_UP.getCode());
-        }
-        updateById(invite);
+        int newCount = invite.getUsedCount() + 1;
+        boolean usedUp = invite.getMaxUses() != null && newCount >= invite.getMaxUses();
+        baseMapper.update(null, new LambdaUpdateWrapper<ChannelInvite>()
+            .eq(ChannelInvite::getCode, code)
+            .set(ChannelInvite::getUsedCount, newCount)
+            .set(usedUp, ChannelInvite::getStatus, InviteStatus.USED_UP.getCode()));
     }
 
     @Override

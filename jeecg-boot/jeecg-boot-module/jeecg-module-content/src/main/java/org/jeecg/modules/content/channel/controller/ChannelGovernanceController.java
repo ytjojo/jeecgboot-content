@@ -3,6 +3,7 @@ package org.jeecg.modules.content.channel.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.biz.ChannelGovernanceBizService;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class ChannelGovernanceController {
     @PostMapping("/remove")
     public Result<String> removeMember(@RequestParam String memberId,
                                        @RequestParam(required = false) String reason) {
-        String operatorId = "currentUserId";
+        String operatorId = SecureUtil.currentUser().getId();
         governanceBizService.removeMember(memberId, operatorId, reason);
         return Result.OK("已移除");
     }
@@ -31,7 +32,7 @@ public class ChannelGovernanceController {
                                      @RequestParam String userId,
                                      @RequestParam int days,
                                      @RequestParam(required = false) String reason) {
-        String operatorId = "currentUserId";
+        String operatorId = SecureUtil.currentUser().getId();
         governanceBizService.muteMember(channelId, userId, operatorId, reason, days);
         return Result.OK("已禁言");
     }
@@ -40,7 +41,7 @@ public class ChannelGovernanceController {
     @PostMapping("/unmute")
     public Result<String> unmuteMember(@RequestParam String channelId,
                                        @RequestParam String userId) {
-        String operatorId = "currentUserId";
+        String operatorId = SecureUtil.currentUser().getId();
         governanceBizService.unmuteMember(channelId, userId, operatorId);
         return Result.OK("已解除禁言");
     }
@@ -50,7 +51,7 @@ public class ChannelGovernanceController {
     public Result<String> addToBlacklist(@RequestParam String channelId,
                                          @RequestParam String userId,
                                          @RequestParam(required = false) String reason) {
-        String operatorId = "currentUserId";
+        String operatorId = SecureUtil.currentUser().getId();
         governanceBizService.addToBlacklist(channelId, userId, operatorId, reason);
         return Result.OK("已加入黑名单");
     }
@@ -59,7 +60,7 @@ public class ChannelGovernanceController {
     @PostMapping("/blacklist/remove")
     public Result<String> removeFromBlacklist(@RequestParam String channelId,
                                                @RequestParam String userId) {
-        String operatorId = "currentUserId";
+        String operatorId = SecureUtil.currentUser().getId();
         governanceBizService.removeFromBlacklist(channelId, userId, operatorId);
         return Result.OK("已移出黑名单");
     }

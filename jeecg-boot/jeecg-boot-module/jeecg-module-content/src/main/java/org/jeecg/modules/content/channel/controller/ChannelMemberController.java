@@ -10,6 +10,7 @@ import org.jeecg.modules.content.channel.entity.ChannelMember;
 import org.jeecg.modules.content.channel.enums.MemberRole;
 import org.jeecg.modules.content.channel.service.ChannelJoinApplicationService;
 import org.jeecg.modules.content.channel.service.ChannelMemberListService;
+import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.service.ChannelMemberService;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +34,7 @@ public class ChannelMemberController {
     @Operation(summary = "自由加入频道")
     @PostMapping("/join/free")
     public Result<String> joinFree(@RequestParam String channelId) {
-        String userId = "currentUserId";
+        String userId = SecureUtil.currentUser().getId();
         memberBizService.joinByFree(channelId, userId);
         return Result.OK("加入成功");
     }
@@ -42,7 +43,7 @@ public class ChannelMemberController {
     @PostMapping("/join/apply")
     public Result<String> joinApply(@RequestParam String channelId,
                                     @RequestParam(required = false) String reason) {
-        String userId = "currentUserId";
+        String userId = SecureUtil.currentUser().getId();
         memberBizService.joinByReview(channelId, userId, reason);
         return Result.OK("申请已提交");
     }
@@ -50,18 +51,22 @@ public class ChannelMemberController {
     @Operation(summary = "退出频道")
     @PostMapping("/leave")
     public Result<String> leave(@RequestParam String channelId) {
-        String userId = "currentUserId";
+        String userId = SecureUtil.currentUser().getId();
         ChannelMember member = memberService.getByChannelAndUser(channelId, userId);
-        if (member != null) {
-            memberService.removeMember(member.getId());
+        if (member == null) {
+            return Result.error("您不是该频道成员");
         }
+        if (member.getRole() != null && member.getRole() == MemberRole.OWNER.getCode()) {
+            return Result.error("频道主不可直接退出，请先转让频道");
+        }
+        memberService.removeMember(member.getId());
         return Result.OK("已退出");
     }
 
     @Operation(summary = "分配角色")
     @PostMapping("/assign-role")
     public Result<String> assignRole(@RequestParam String memberId, @RequestParam MemberRole role) {
-        String operatorId = "currentUserId";
+        String operatorId = SecureUtil.currentUser().getId();
         memberService.assignRole(memberId, role, operatorId);
         return Result.OK("角色已更新");
     }
@@ -94,7 +99,7 @@ public class ChannelMemberController {
     @PostMapping("/applications/approve")
     public Result<String> approveApplication(@RequestParam String applicationId,
                                               @RequestParam(required = false) String reason) {
-        String reviewerId = "currentUserId";
+        String reviewerId = SecureUtil.currentUser().getId();
         memberBizService.approveAndAddMember(applicationId, reviewerId, reason);
         return Result.OK("已批准");
     }
@@ -103,7 +108,7 @@ public class ChannelMemberController {
     @PostMapping("/applications/reject")
     public Result<String> rejectApplication(@RequestParam String applicationId,
                                              @RequestParam(required = false) String reason) {
-        String reviewerId = "currentUserId";
+        String reviewerId = SecureUtil.currentUser().getId();
         applicationService.reject(applicationId, reviewerId, reason);
         return Result.OK("已拒绝");
     }
