@@ -39,6 +39,9 @@ public class Channel extends JeecgEntity {
     @Schema(description = "隐私设置: 1=公开, 2=私有")
     private Integer privacy;
 
+    @Schema(description = "加入方式: 1=自由加入 2=审核加入 3=邀请加入")
+    private Integer joinMethod;
+
     @Schema(description = "归属分类ID")
     private String categoryId;
 
