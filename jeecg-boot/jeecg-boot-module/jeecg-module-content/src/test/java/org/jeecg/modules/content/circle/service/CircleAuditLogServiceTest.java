@@ -3,11 +3,13 @@ package org.jeecg.modules.content.circle.service;
 import org.jeecg.modules.content.circle.entity.CircleAuditLog;
 import org.jeecg.modules.content.circle.mapper.CircleAuditLogMapper;
 import org.jeecg.modules.content.circle.service.impl.CircleAuditLogServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -30,6 +32,11 @@ class CircleAuditLogServiceTest {
 
     @InjectMocks
     private CircleAuditLogServiceImpl circleAuditLogService;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(circleAuditLogService, "baseMapper", circleAuditLogMapper);
+    }
 
     @Test
     void writeAuditLog_shouldPersistLog() {

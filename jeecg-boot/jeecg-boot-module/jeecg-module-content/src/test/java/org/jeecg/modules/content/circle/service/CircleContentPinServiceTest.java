@@ -1,8 +1,13 @@
 package org.jeecg.modules.content.circle.service;
 
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.jeecg.modules.content.circle.entity.CircleContent;
 import org.jeecg.modules.content.circle.mapper.CircleContentMapper;
 import org.jeecg.modules.content.circle.service.impl.CircleContentPinServiceImpl;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -10,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Date;
 
@@ -30,6 +36,18 @@ class CircleContentPinServiceTest {
     private CircleContentPinServiceImpl circleContentPinService;
 
     private static final String TEST_CONTENT_ID = "content001";
+
+    @BeforeAll
+    static void initMybatisPlusCache() {
+        TableInfoHelper.initTableInfo(
+                new MapperBuilderAssistant(new MybatisConfiguration(), ""),
+                CircleContent.class);
+    }
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(circleContentPinService, "baseMapper", circleContentMapper);
+    }
 
     private CircleContent createTestContent() {
         CircleContent content = new CircleContent();
