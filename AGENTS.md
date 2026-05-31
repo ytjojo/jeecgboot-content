@@ -43,9 +43,45 @@
 - 规则十二：显式失败（Fail loud）若有步骤被静默跳过，宣称“已完成”即为错误。若有测试被跳过，宣称“测试通过”即为错误。默认原则：主动暴露不确定性，绝不掩盖。
 
 
-## git worktree和分支管理
-- 严禁合并到 master 分支,项目仅活跃在springboot3_content,两个分支是并行分支,基础库不同
-- worktree只能合并到来源分支,如果来源分支是springboot3_content,就合并回此分支
+## Git Worktree & 分支管理
+
+### 禁止事项
+- **严禁**向 `master` 分支提交或合并任何代码
+
+### 分支规则
+- 项目活跃分支：`springboot3_content`
+- `master` 与 `springboot3_content` 为**并行分支**，基础库不同，不可互相合并
+
+### Worktree 合并规则
+- worktree 必须合并回**其来源分支**，禁止跨分支合并
+- 示例：从 `springboot3_content` 创建的 worktree → 只能合并回 `springboot3_content`
+
+## 代码实现 Workflow
+
+### 默认实现方式
+- 无特殊要求时，使用 subagent-driven-development
+  `/superpowers:subagent-driven-development`
+
+### 多步任务 / apply 操作
+- 执行 `/opsx:apply` 或多步多task代码任务时，强制使用测试驱动开发
+  `/superpowers:test-driven-development`
+
+### 完成标准（Definition of Done）
+每个代码任务必须按顺序完成以下步骤，**不得跳过**：
+
+1. **实现** — 完成功能代码
+2. **Code Review** — 检查代码质量、命名、边界条件、安全性
+3. **单元测试** — 运行全量测试，确保 **100% 通过**，禁止带红测试提交
+
+---
+
+## 文档审阅 Workflow
+
+- 涉及**审核 / 评审 / 分析 / 审查 / 审计 / review**等操作时，必须通过 subagent 执行，禁止在主 agent 中直接处理
+
+### 适用范围
+- 文档（PRD、设计文档、接口文档、README、需求文档、规范文档 等）
+- Skill 定义文件（`.md` skill 文件）
 
 ## 参考文档
 
