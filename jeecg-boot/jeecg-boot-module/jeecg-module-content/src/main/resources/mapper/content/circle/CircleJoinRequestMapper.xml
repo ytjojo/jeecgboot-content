@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.content.circle.mapper.CircleJoinRequestMapper">
+
+    <resultMap id="BaseResultMap" type="org.jeecg.modules.content.circle.entity.CircleJoinRequest">
+        <id column="id" property="id"/>
+        <result column="circle_id" property="circleId"/>
+        <result column="user_id" property="userId"/>
+        <result column="status" property="status"/>
+        <result column="reject_reason" property="rejectReason"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operate_time" property="operateTime"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectPendingByCircleId" resultMap="BaseResultMap">
+        SELECT * FROM circle_join_request
+        WHERE circle_id = #{circleId} AND status = 'PENDING'
+        ORDER BY create_time ASC
+    </select>
+
+    <select id="selectTimedOutRequests" resultMap="BaseResultMap">
+        SELECT * FROM circle_join_request
+        WHERE status = 'PENDING' AND create_time &lt; DATE_SUB(NOW(), INTERVAL 3 DAY)
+    </select>
+
+</mapper>
