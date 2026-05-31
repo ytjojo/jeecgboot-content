@@ -33,6 +33,6 @@ public interface CircleMapper extends BaseMapper<Circle> {
     /**
      * 查询推荐候选圈子（排除用户已加入的圈子，按成员数降序）
      */
-    @Select("SELECT * FROM content_circle WHERE status = 'ACTIVE' AND privacy_type = 'PUBLIC' AND id NOT IN (SELECT circle_id FROM content_circle_member WHERE user_id = #{userId} AND status = 'ACTIVE') ORDER BY member_count DESC LIMIT #{limit}")
+    @Select("SELECT * FROM content_circle c WHERE c.status = 'ACTIVE' AND c.privacy_type = 'PUBLIC' AND NOT EXISTS (SELECT 1 FROM circle_member m WHERE m.circle_id = c.id AND m.user_id = #{userId} AND m.status = 'ACTIVE') ORDER BY c.member_count DESC LIMIT #{limit}")
     List<Circle> selectRecommendCandidates(@Param("userId") String userId, @Param("limit") int limit);
 }

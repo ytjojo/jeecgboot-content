@@ -43,6 +43,10 @@
 - 规则十二：显式失败（Fail loud）若有步骤被静默跳过，宣称“已完成”即为错误。若有测试被跳过，宣称“测试通过”即为错误。默认原则：主动暴露不确定性，绝不掩盖。
 
 
+## git worktree和分支管理
+- 严禁合并到 master 分支,项目仅活跃在springboot3_content,两个分支是并行分支,基础库不同
+- worktree只能合并到来源分支,如果来源分支是springboot3_content,就合并回此分支
+
 ## 参考文档
 
 - 项目概览：`docs/agent-context/project-overview.md`

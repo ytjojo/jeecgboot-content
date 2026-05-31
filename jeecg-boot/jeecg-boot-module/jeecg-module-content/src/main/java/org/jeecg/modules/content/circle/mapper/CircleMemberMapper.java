@@ -46,6 +46,6 @@ public interface CircleMemberMapper extends BaseMapper<CircleMember> {
     /**
      * 查询用户加入的所有活跃圈子成员记录
      */
-    @Select("SELECT * FROM content_circle_member WHERE user_id = #{userId} AND status = 'ACTIVE'")
+    @Select("SELECT * FROM circle_member WHERE user_id = #{userId} AND status = 'ACTIVE'")
     List<CircleMember> selectByUserId(@Param("userId") String userId);
 }

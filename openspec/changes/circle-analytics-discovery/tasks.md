@@ -1,32 +1,32 @@
 ## 1. 数据库设计与迁移
 
-- [ ] 1.1 创建推荐来源追踪表 circle_recommend_source（字段：id, circle_id, user_id, source_type, source_id, click_time, join_time）
-- [ ] 1.2 创建统计数据缓存表 circle_data_statistics（字段：id, circle_id, stat_date, member_count, post_count, active_count, new_member_count, new_post_count）
-- [ ] 1.3 编写数据库迁移脚本并验证表结构
+- [x] 1.1 创建推荐来源追踪表 circle_recommend_source（字段：id, circle_id, user_id, source_type, source_id, click_time, join_time）
+- [x] 1.2 创建统计数据缓存表 circle_data_statistics（字段：id, circle_id, stat_date, member_count, post_count, active_count, new_member_count, new_post_count）
+- [x] 1.3 编写数据库迁移脚本并验证表结构
 
 ## 2. 数据统计后端实现
 
-- [ ] 2.1 创建 CircleDataStatistics 实体类
-- [ ] 2.2 创建 CircleDataMapper 和 XML（成员统计、发帖统计、活跃度统计查询）
-- [ ] 2.3 实现 CircleDataService（数据聚合、时间范围筛选、缓存策略）
-- [ ] 2.4 实现 CircleDataController（GET /api/circle/{circleId}/data/statistics, GET /api/circle/{circleId}/data/export）
-- [ ] 2.5 编写数据统计单元测试（CircleDataServiceTest, CircleDataControllerTest）
-- [ ] 2.6 实现定时任务（每 30 分钟聚合统计数据）
+- [x] 2.1 创建 CircleDataStatistics 实体类
+- [x] 2.2 创建 CircleDataMapper 和 XML（成员统计、发帖统计、活跃度统计查询）
+- [x] 2.3 实现 CircleDataService（数据聚合、时间范围筛选、缓存策略）
+- [x] 2.4 实现 CircleDataController（GET /api/circle/{circleId}/data/statistics, GET /api/circle/{circleId}/data/export）
+- [x] 2.5 编写数据统计单元测试（CircleDataServiceTest, CircleDataControllerTest）
+- [x] 2.6 实现定时任务（每 30 分钟聚合统计数据）
 
 ## 3. 推荐后端实现
 
-- [ ] 3.1 创建 CircleRecommendSource 实体类
-- [ ] 3.2 创建 CircleRecommendMapper 和 XML（基于规则的推荐查询）
-- [ ] 3.3 实现 CircleRecommendService（推荐算法、分类多样性控制、来源追踪）
-- [ ] 3.4 实现 CircleRecommendController（GET /api/circle/recommend）
-- [ ] 3.5 编写推荐单元测试（CircleRecommendServiceTest, CircleRecommendControllerTest）
+- [x] 3.1 创建 CircleRecommendSource 实体类
+- [x] 3.2 创建 CircleRecommendMapper 和 XML（基于规则的推荐查询）
+- [x] 3.3 实现 CircleRecommendService（推荐算法、分类多样性控制、来源追踪）
+- [x] 3.4 实现 CircleRecommendController（GET /api/circle/recommend）
+- [x] 3.5 编写推荐单元测试（CircleRecommendServiceTest, CircleRecommendControllerTest）
 
 ## 4. 榜单后端实现
 
-- [ ] 4.1 实现 CircleRankingService（热门榜单计算、新增榜单计算、Redis 缓存）
-- [ ] 4.2 实现 CircleRankingController（GET /api/circle/ranking/hot, GET /api/circle/ranking/new）
-- [ ] 4.3 实现定时任务（每小时刷新榜单）
-- [ ] 4.4 编写榜单单元测试（CircleRankingServiceTest, CircleRankingControllerTest）
+- [x] 4.1 实现 CircleRankingService（热门榜单计算、新增榜单计算、Redis 缓存）
+- [x] 4.2 实现 CircleRankingController（GET /api/circle/ranking/hot, GET /api/circle/ranking/new）
+- [x] 4.3 实现定时任务（每小时刷新榜单）
+- [x] 4.4 编写榜单单元测试（CircleRankingServiceTest, CircleRankingControllerTest）
 
 ## 5. 前端实现
 
