@@ -7,13 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.channel.biz.ChannelStatsBiz;
 import org.jeecg.modules.content.channel.constant.ChannelStatsConstant;
+import org.jeecg.modules.content.channel.vo.ChannelHotContentVO;
 import org.jeecg.modules.content.channel.vo.ChannelStatsVO;
 import org.jeecg.modules.content.channel.vo.ChannelTrendVO;
+import org.jeecg.modules.content.channel.vo.ChannelUserAnalysisVO;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -54,5 +57,29 @@ public class ChannelStatsController {
             return Result.error("无效的统计类型: " + statType);
         }
         return Result.OK(channelStatsBiz.getTrendData(channelId, startDate, endDate, statType));
+    }
+
+    @GetMapping("/hot-content")
+    @Operation(summary = "获取热门内容")
+    public Result<List<ChannelHotContentVO>> getHotContent(
+            @Parameter(description = "频道ID", required = true)
+            @RequestParam String channelId,
+            @Parameter(description = "返回数量")
+            @RequestParam(required = false) Integer limit,
+            @Parameter(description = "统计天数")
+            @RequestParam(required = false) Integer days) {
+        return Result.OK(channelStatsBiz.getHotContent(channelId, limit, days));
+    }
+
+    @GetMapping("/user-analysis")
+    @Operation(summary = "获取用户分析")
+    public Result<ChannelUserAnalysisVO> getUserAnalysis(
+            @Parameter(description = "频道ID", required = true)
+            @RequestParam String channelId,
+            @Parameter(description = "开始日期")
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @Parameter(description = "结束日期")
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        return Result.OK(channelStatsBiz.getUserAnalysis(channelId, startDate, endDate));
     }
 }
