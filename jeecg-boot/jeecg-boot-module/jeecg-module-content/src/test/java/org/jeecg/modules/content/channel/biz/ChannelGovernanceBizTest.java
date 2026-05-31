@@ -1,6 +1,7 @@
 package org.jeecg.modules.content.channel.biz;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.channel.biz.impl.ChannelGovernanceBizImpl;
 import org.jeecg.modules.content.channel.entity.ChannelContentPublish;
 import org.jeecg.modules.content.channel.mapper.ChannelContentPublishMapper;
@@ -79,6 +80,7 @@ class ChannelGovernanceBizTest {
         publish.setContentType("article");
         publish.setPublisherId("user-1");
         when(publishMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(publish);
+        when(publishMapper.selectCount(any(LambdaQueryWrapper.class))).thenReturn(0L);
         when(publishMapper.insert(any(ChannelContentPublish.class))).thenReturn(1);
         when(publishMapper.updateById(any(ChannelContentPublish.class))).thenReturn(1);
 
@@ -101,14 +103,11 @@ class ChannelGovernanceBizTest {
         req.setContentId("content-1");
         req.setAction("MOVE");
 
-        assertThrows(IllegalArgumentException.class, () -> biz.executeGovernance(req, "admin-1"));
+        assertThrows(JeecgBootException.class, () -> biz.executeGovernance(req, "admin-1"));
     }
 
     @Test
     void editAssist_shouldRecordEditHistory() {
-        ChannelContentPublish publish = new ChannelContentPublish();
-        when(publishMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(publish);
-
         Map<String, String> editFields = new HashMap<>();
         editFields.put("title", "新标题");
 
@@ -150,7 +149,7 @@ class ChannelGovernanceBizTest {
         req.setContentId("content-1");
         req.setAction("UNKNOWN");
 
-        assertThrows(IllegalArgumentException.class, () -> biz.executeGovernance(req, "admin-1"));
+        assertThrows(JeecgBootException.class, () -> biz.executeGovernance(req, "admin-1"));
         verify(governanceLogService).log(eq("ch-1"), eq("content-1"), eq("admin-1"), eq("UNKNOWN"), isNull(), isNull(), eq("FAILED"));
     }
 }

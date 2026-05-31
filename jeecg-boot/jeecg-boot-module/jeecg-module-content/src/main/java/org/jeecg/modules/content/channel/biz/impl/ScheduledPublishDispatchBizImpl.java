@@ -3,6 +3,7 @@ package org.jeecg.modules.content.channel.biz.impl;
 import org.jeecg.modules.content.channel.biz.ChannelPublishBiz;
 import org.jeecg.modules.content.channel.biz.ScheduledPublishDispatchBiz;
 import org.jeecg.modules.content.channel.entity.ChannelScheduledPublish;
+import org.jeecg.modules.content.channel.enums.PublishStatusEnum;
 import org.jeecg.modules.content.channel.req.publish.ChannelPublishReq;
 import org.jeecg.modules.content.channel.service.ChannelScheduledPublishService;
 import org.jeecg.modules.content.channel.service.ChannelContentGovernanceLogService;
@@ -11,7 +12,6 @@ import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -49,20 +49,23 @@ public class ScheduledPublishDispatchBizImpl implements ScheduledPublishDispatch
             ChannelPublishReq req = new ChannelPublishReq();
             req.setContentId(task.getContentId());
             req.setContentType(task.getContentType());
-            req.setChannelIds(Collections.singletonList(task.getChannelId()));
+            req.setChannelIds(List.of(task.getChannelId()));
 
             List<ChannelPublishResultVO> results = publishBiz.publish(req, task.getPublisherId());
-            if (!results.isEmpty()) {
-                ChannelPublishResultVO result = results.get(0);
-                if ("PUBLISHED".equals(result.getStatus()) || "PENDING".equals(result.getStatus())) {
-                    scheduledPublishService.markPublished(task.getId());
-                    governanceLogService.log(task.getChannelId(), task.getContentId(), task.getPublisherId(),
-                            "SCHEDULED_PUBLISH", "status=" + result.getStatus(), null, "SUCCESS");
-                } else {
-                    scheduledPublishService.markFailed(task.getId(), result.getFailReason());
-                    governanceLogService.log(task.getChannelId(), task.getContentId(), task.getPublisherId(),
-                            "SCHEDULED_PUBLISH", null, result.getFailReason(), "FAILED");
-                }
+            if (results.isEmpty()) {
+                scheduledPublishService.markFailed(task.getId(), "发布无返回结果");
+                return;
+            }
+            ChannelPublishResultVO result = results.get(0);
+            if (PublishStatusEnum.PUBLISHED.getCode().equals(result.getStatus())
+                    || PublishStatusEnum.PENDING.getCode().equals(result.getStatus())) {
+                scheduledPublishService.markPublished(task.getId());
+                governanceLogService.log(task.getChannelId(), task.getContentId(), task.getPublisherId(),
+                        "SCHEDULED_PUBLISH", "status=" + result.getStatus(), null, "SUCCESS");
+            } else {
+                scheduledPublishService.markFailed(task.getId(), result.getFailReason());
+                governanceLogService.log(task.getChannelId(), task.getContentId(), task.getPublisherId(),
+                        "SCHEDULED_PUBLISH", null, result.getFailReason(), "FAILED");
             }
         } catch (Exception e) {
             log.error("定时发布任务执行失败, taskId={}", task.getId(), e);

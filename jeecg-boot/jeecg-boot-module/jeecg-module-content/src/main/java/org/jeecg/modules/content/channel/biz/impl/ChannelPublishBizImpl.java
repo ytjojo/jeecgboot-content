@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.jeecg.modules.content.channel.biz.ChannelPublishBiz;
 import org.jeecg.modules.content.channel.entity.ChannelContentPublish;
 import org.jeecg.modules.content.channel.entity.ChannelContentReview;
+import org.jeecg.modules.content.channel.enums.PublishStatusEnum;
 import org.jeecg.modules.content.channel.mapper.ChannelContentPublishMapper;
 import org.jeecg.modules.content.channel.mapper.ChannelContentReviewMapper;
 import org.jeecg.modules.content.channel.req.publish.ChannelAddExistingContentReq;
@@ -53,7 +54,7 @@ public class ChannelPublishBizImpl implements ChannelPublishBiz {
                 String permissionResult = publishService.checkPublishPermission(userRole, publishPermission, isMuted, isBlacklisted);
 
                 if ("REJECT".equals(permissionResult)) {
-                    result.setStatus("FAILED");
+                    result.setStatus(PublishStatusEnum.FAILED.getCode());
                     result.setFailReason("权限不足");
                 } else if ("REVIEW".equals(permissionResult)) {
                     ChannelContentReview review = new ChannelContentReview();
@@ -61,14 +62,14 @@ public class ChannelPublishBizImpl implements ChannelPublishBiz {
                     review.setContentId(req.getContentId());
                     review.setContentType(req.getContentType());
                     review.setSubmitterId(userId);
-                    review.setReviewStatus("PENDING");
+                    review.setReviewStatus(PublishStatusEnum.PENDING.getCode());
                     reviewMapper.insert(review);
-                    result.setStatus("PENDING");
+                    result.setStatus(PublishStatusEnum.PENDING.getCode());
                 } else {
                     // TODO: 查询发布限额配置和今日/本小时已发布数量
                     String limitResult = limitService.checkLimit(0, 0, 0, 0, 0, 0);
                     if (!"PASS".equals(limitResult)) {
-                        result.setStatus("FAILED");
+                        result.setStatus(PublishStatusEnum.FAILED.getCode());
                         result.setFailReason("发布限额: " + limitResult);
                     } else {
                         ChannelContentPublish publish = new ChannelContentPublish();
@@ -76,9 +77,9 @@ public class ChannelPublishBizImpl implements ChannelPublishBiz {
                         publish.setContentId(req.getContentId());
                         publish.setContentType(req.getContentType());
                         publish.setPublisherId(userId);
-                        publish.setPublishStatus("PUBLISHED");
+                        publish.setPublishStatus(PublishStatusEnum.PUBLISHED.getCode());
                         publishMapper.insert(publish);
-                        result.setStatus("PUBLISHED");
+                        result.setStatus(PublishStatusEnum.PUBLISHED.getCode());
                     }
                 }
             } catch (Exception e) {
@@ -92,6 +93,7 @@ public class ChannelPublishBizImpl implements ChannelPublishBiz {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public List<ChannelPublishResultVO> addExistingContent(ChannelAddExistingContentReq req, String userId) {
         List<ChannelPublishResultVO> results = new ArrayList<>();
 
@@ -101,7 +103,7 @@ public class ChannelPublishBizImpl implements ChannelPublishBiz {
                   .eq(ChannelContentPublish::getContentId, req.getContentId());
         java.util.Set<String> existingChannels = publishMapper.selectList(existQuery).stream()
                 .map(ChannelContentPublish::getChannelId)
-                .collect(java.util.stream.Collectors.toSet());
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
 
         // 权限校验（循环外计算一次）
         // TODO: 查询频道配置获取 publishPermission, 查询用户角色和禁言/黑名单状态
@@ -116,10 +118,10 @@ public class ChannelPublishBizImpl implements ChannelPublishBiz {
             result.setChannelId(channelId);
             try {
                 if (existingChannels.contains(channelId)) {
-                    result.setStatus("FAILED");
+                    result.setStatus(PublishStatusEnum.FAILED.getCode());
                     result.setFailReason("该内容已存在于此频道");
                 } else if ("REJECT".equals(permissionResult)) {
-                    result.setStatus("FAILED");
+                    result.setStatus(PublishStatusEnum.FAILED.getCode());
                     result.setFailReason("权限不足");
                 } else if ("REVIEW".equals(permissionResult)) {
                     ChannelContentReview review = new ChannelContentReview();
@@ -127,20 +129,20 @@ public class ChannelPublishBizImpl implements ChannelPublishBiz {
                     review.setContentId(req.getContentId());
                     review.setContentType(req.getContentType());
                     review.setSubmitterId(userId);
-                    review.setReviewStatus("PENDING");
+                    review.setReviewStatus(PublishStatusEnum.PENDING.getCode());
                     review.setSourceScene("ADD_EXISTING");
                     reviewMapper.insert(review);
-                    result.setStatus("PENDING");
+                    result.setStatus(PublishStatusEnum.PENDING.getCode());
                 } else {
                     ChannelContentPublish publish = new ChannelContentPublish();
                     publish.setChannelId(channelId);
                     publish.setContentId(req.getContentId());
                     publish.setContentType(req.getContentType());
                     publish.setPublisherId(userId);
-                    publish.setPublishStatus("PUBLISHED");
+                    publish.setPublishStatus(PublishStatusEnum.PUBLISHED.getCode());
                     publish.setSourceType("ADD_EXISTING");
                     publishMapper.insert(publish);
-                    result.setStatus("PUBLISHED");
+                    result.setStatus(PublishStatusEnum.PUBLISHED.getCode());
                 }
             } catch (Exception e) {
                 log.error("添加已发布内容到频道失败, channelId={}, contentId={}", channelId, req.getContentId(), e);
