@@ -39,7 +39,7 @@ public class ChannelReviewController {
         wrapper.orderByDesc(ChannelReview::getSubmitTime);
 
         Page<ChannelReview> page = reviewService.page(new Page<>(current, size), wrapper);
-        Page<ChannelReviewVO> voPage = page.convert(this::convertToVO);
+        Page<ChannelReviewVO> voPage = (Page<ChannelReviewVO>) page.convert(this::convertToVO);
         return Result.OK(voPage);
     }
 
