@@ -1,40 +1,40 @@
 ## 1. 数据库迁移与基础实体
 
-- [ ] 1.1 创建 Flyway 迁移脚本：频道统计汇总表（channel_stats）、导出任务表（channel_export_task）、审核记录表（channel_review）、生命周期变更日志表（channel_lifecycle_log）、申诉记录表（channel_appeal）
-- [ ] 1.2 创建实体类：ChannelStats、ChannelExportTask、ChannelReview、ChannelLifecycleLog、ChannelAppeal
-- [ ] 1.3 创建枚举类：ChannelLifecycleStatus、ChannelReviewStatus、ChannelExportStatus、ChannelAppealStatus、ChannelViolationType
-- [ ] 1.4 创建 Mapper 接口和 XML：ChannelStatsMapper、ChannelExportTaskMapper、ChannelReviewMapper、ChannelLifecycleLogMapper、ChannelAppealMapper
+- [x] 1.1 创建 Flyway 迁移脚本：频道统计汇总表（channel_stats）、导出任务表（channel_export_task）、审核记录表（channel_review）、生命周期变更日志表（channel_lifecycle_log）、申诉记录表（channel_appeal）
+- [x] 1.2 创建实体类：ChannelStats、ChannelExportTask、ChannelReview、ChannelLifecycleLog、ChannelAppeal
+- [x] 1.3 创建枚举类：ChannelLifecycleStatus、ChannelReviewStatus、ChannelExportStatus、ChannelAppealStatus、ChannelViolationType
+- [x] 1.4 创建 Mapper 接口和 XML：ChannelStatsMapper、ChannelExportTaskMapper、ChannelReviewMapper、ChannelLifecycleLogMapper、ChannelAppealMapper
 
 ## 2. 统计看板能力（channel-stats-dashboard）
 
-- [ ] 2.1 创建 ChannelStatsService：统计汇总表 CRUD 和查询方法
-- [ ] 2.2 创建 ChannelStatsBiz：核心指标聚合逻辑（订阅数、内容数、PV、UV）
-- [ ] 2.3 创建 ChannelStatsController：统计查询 API（核心指标、趋势数据、互动数据）
+- [x] 2.1 创建 ChannelStatsService：统计汇总表 CRUD 和查询方法
+- [x] 2.2 创建 ChannelStatsBiz：核心指标聚合逻辑（订阅数、内容数、PV、UV）
+- [x] 2.3 创建 ChannelStatsController：统计查询 API（核心指标、趋势数据、互动数据）
 - [ ] 2.4 创建热门内容查询逻辑：按有效互动量排序，排除违规/删除内容
 - [ ] 2.5 创建用户分析查询逻辑：订阅增量/流失、成员活跃度、贡献排行
 - [ ] 2.6 创建定时任务：统计汇总表数据刷新（每 5 分钟）
 
 ## 3. 数据导出能力（channel-data-export）
 
-- [ ] 3.1 创建 ChannelExportTaskService：导出任务表 CRUD
-- [ ] 3.2 创建 ChannelExportBiz：导出任务创建、权限校验、异步处理编排
-- [ ] 3.3 创建 ChannelExportController：导出 API（发起导出、查询状态、下载文件）
+- [x] 3.1 创建 ChannelExportTaskService：导出任务表 CRUD
+- [x] 3.2 创建 ChannelExportBiz：导出任务创建、权限校验、异步处理编排
+- [x] 3.3 创建 ChannelExportController：导出 API（发起导出、查询状态、下载文件）
 - [ ] 3.4 实现 Excel/CSV 文件生成逻辑
 - [ ] 3.5 实现导出记录追踪和文件有效期管理
 
 ## 4. 审核流程能力（channel-review-flow）
 
-- [ ] 4.1 创建 ChannelReviewService：审核记录表 CRUD
-- [ ] 4.2 创建审核队列查询逻辑：按提交时间、频道类型、状态筛选
-- [ ] 4.3 创建 ChannelReviewController：审核 API（列表、详情、通过、拒绝、退回）
+- [x] 4.1 创建 ChannelReviewService：审核记录表 CRUD
+- [x] 4.2 创建审核队列查询逻辑：按提交时间、频道类型、状态筛选
+- [x] 4.3 创建 ChannelReviewController：审核 API（列表、详情、通过、拒绝、退回）
 - [ ] 4.4 实现关键字段修改审核流程
 - [ ] 4.5 实现审核超时标记（24 小时未处理）
 - [ ] 4.6 实现审核结果通知触发
 
 ## 5. 冻结/解冻能力（channel-freeze-unfreeze）
 
-- [ ] 5.1 创建 ChannelLifecycleBiz：生命周期状态变更编排（冻结/解冻）
-- [ ] 5.2 创建 ChannelLifecycleController：冻结/解冻 API
+- [x] 5.1 创建 ChannelLifecycleBiz：生命周期状态变更编排（冻结/解冻）
+- [x] 5.2 创建 ChannelLifecycleController：冻结/解冻 API
 - [ ] 5.3 实现冻结后发布拦截逻辑
 - [ ] 5.4 实现冻结/解冻审计日志记录
 - [ ] 5.5 实现冻结处罚通知和申诉入口
@@ -75,18 +75,18 @@
 
 ## 10. 审计日志与申诉能力（channel-lifecycle-audit）
 
-- [ ] 10.1 创建 ChannelLifecycleLogService：生命周期变更日志 CRUD
-- [ ] 10.2 创建 ChannelAppealService：申诉记录表 CRUD
+- [x] 10.1 创建 ChannelLifecycleLogService：生命周期变更日志 CRUD
+- [x] 10.2 创建 ChannelAppealService：申诉记录表 CRUD
 - [ ] 10.3 实现审计日志查询 API：按频道、操作人、时间筛选
 - [ ] 10.4 实现申诉提交和处理 API
 - [ ] 10.5 实现申诉 SLA 监控（首次响应 <= 3 个工作日）
 
 ## 11. 验证
 
-- [ ] 11.1 编写单元测试：ChannelStatsBizTest（核心指标、趋势、热门内容、用户分析）
+- [x] 11.1 编写单元测试：ChannelStatsBizTest（核心指标、趋势、热门内容、用户分析）
 - [ ] 11.2 编写单元测试：ChannelExportBizTest（导出任务、权限校验、异步处理）
-- [ ] 11.3 编写单元测试：ChannelLifecycleBizTest（状态机流转、审计日志）
+- [x] 11.3 编写单元测试：ChannelLifecycleBizTest（状态机流转、审计日志）
 - [ ] 11.4 编写单元测试：ChannelMergeBizTest（合并流程、数据迁移）
-- [ ] 11.5 运行所有测试并验证通过
+- [x] 11.5 运行所有测试并验证通过
 - [ ] 11.6 验证数据库迁移脚本可执行
 - [ ] 11.7 验证 API 接口符合规范
