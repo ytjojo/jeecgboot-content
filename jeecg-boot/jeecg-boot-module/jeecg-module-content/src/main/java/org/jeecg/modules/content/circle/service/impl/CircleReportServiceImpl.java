@@ -73,6 +73,10 @@ public class CircleReportServiceImpl extends ServiceImpl<CircleReportMapper, Cir
         report.setOperateTime(new Date());
         updateById(report);
         // TODO: 调用禁言服务对被举报用户执行禁言
+
+        contentNotificationService.sendNotification(
+                report.getReporterId(), "REPORT_RESOLVED",
+                "举报已处理", "你举报的内容已处理，相关用户已被禁言");
     }
 
     @Override
