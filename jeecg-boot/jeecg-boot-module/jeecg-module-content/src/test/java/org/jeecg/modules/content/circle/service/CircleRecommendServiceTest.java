@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doAnswer;
 
@@ -71,10 +72,12 @@ class CircleRecommendServiceTest {
 
         when(circleMapper.selectRecommendCandidates(anyString(), anyInt())).thenReturn(Arrays.asList(circle1, circle2));
         doAnswer(invocation -> {
-            CircleRecommendSource source = invocation.getArgument(0);
-            source.setId("source-" + source.getCircleId());
-            return 1;
-        }).when(sourceMapper).insert(any(CircleRecommendSource.class));
+            List<CircleRecommendSource> sources = invocation.getArgument(0);
+            for (int i = 0; i < sources.size(); i++) {
+                sources.get(i).setId("source-" + sources.get(i).getCircleId());
+            }
+            return null;
+        }).when(sourceMapper).insertBatch(anyList());
 
         // When
         CircleRecommendVO result = recommendService.getRecommendations(userId, limit);
@@ -104,10 +107,12 @@ class CircleRecommendServiceTest {
 
         when(circleMapper.selectHotCircles(anyInt())).thenReturn(Collections.singletonList(hotCircle));
         doAnswer(invocation -> {
-            CircleRecommendSource source = invocation.getArgument(0);
-            source.setId("source-" + source.getCircleId());
-            return 1;
-        }).when(sourceMapper).insert(any(CircleRecommendSource.class));
+            List<CircleRecommendSource> sources = invocation.getArgument(0);
+            for (int i = 0; i < sources.size(); i++) {
+                sources.get(i).setId("source-" + sources.get(i).getCircleId());
+            }
+            return null;
+        }).when(sourceMapper).insertBatch(anyList());
 
         // When
         CircleRecommendVO result = recommendService.getRecommendations(userId, limit);

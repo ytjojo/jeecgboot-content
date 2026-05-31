@@ -57,7 +57,7 @@ class CircleRankingServiceTest {
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("circle:ranking:hot")).thenReturn(null);
-        when(circleMapper.selectHotCircles(20)).thenReturn(Arrays.asList(circle1, circle2));
+        when(circleMapper.selectHotCircles(100)).thenReturn(Arrays.asList(circle1, circle2));
 
         // When
         CircleRankingVO result = rankingService.getHotRanking(20);
@@ -98,7 +98,7 @@ class CircleRankingServiceTest {
         // Given
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("circle:ranking:hot")).thenReturn(null);
-        when(circleMapper.selectHotCircles(20)).thenReturn(Collections.emptyList());
+        when(circleMapper.selectHotCircles(100)).thenReturn(Collections.emptyList());
 
         // When
         CircleRankingVO result = rankingService.getHotRanking(20);
@@ -122,7 +122,7 @@ class CircleRankingServiceTest {
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("circle:ranking:new")).thenReturn(null);
-        when(circleMapper.selectNewCircles(20)).thenReturn(Collections.singletonList(newCircle));
+        when(circleMapper.selectNewCircles(100)).thenReturn(Collections.singletonList(newCircle));
 
         // When
         CircleRankingVO result = rankingService.getNewRanking(20);

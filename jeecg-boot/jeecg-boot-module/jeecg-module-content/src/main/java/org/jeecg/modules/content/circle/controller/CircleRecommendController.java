@@ -2,6 +2,8 @@ package org.jeecg.modules.content.circle.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.circle.service.ICircleRecommendService;
@@ -21,7 +23,7 @@ public class CircleRecommendController {
     @Operation(summary = "获取推荐圈子")
     @GetMapping("/recommend")
     public Result<CircleRecommendVO> getRecommendations(
-            @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int limit) {
         String userId = SecureUtil.currentUser().getId();
         return Result.OK(recommendService.getRecommendations(userId, limit));
     }

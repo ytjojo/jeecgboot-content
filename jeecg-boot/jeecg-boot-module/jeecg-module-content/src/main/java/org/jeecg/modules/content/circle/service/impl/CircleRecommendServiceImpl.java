@@ -9,6 +9,7 @@ import org.jeecg.modules.content.circle.mapper.CircleRecommendSourceMapper;
 import org.jeecg.modules.content.circle.service.ICircleRecommendService;
 import org.jeecg.modules.content.circle.vo.CircleRecommendVO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class CircleRecommendServiceImpl implements ICircleRecommendService {
     private CircleRecommendSourceMapper sourceMapper;
 
     @Override
+    @Transactional
     public CircleRecommendVO getRecommendations(String userId, int limit) {
         // limit 上限限制
         limit = Math.min(limit, 100);
@@ -41,13 +43,13 @@ public class CircleRecommendServiceImpl implements ICircleRecommendService {
         List<Circle> candidates;
         String sourceType;
 
+        // 查询更多候选用于多样性控制
+        int queryLimit = Math.min(limit * 2, 100);
         if (joinedCircleIds.isEmpty()) {
-            // 新用户：返回热门榜单
-            candidates = circleMapper.selectHotCircles(limit);
+            candidates = circleMapper.selectHotCircles(queryLimit);
             sourceType = "HOT";
         } else {
-            // 已加入用户：基于兴趣推荐
-            candidates = circleMapper.selectRecommendCandidates(userId, limit);
+            candidates = circleMapper.selectRecommendCandidates(userId, queryLimit);
             sourceType = "RECOMMEND";
         }
 
@@ -57,16 +59,15 @@ public class CircleRecommendServiceImpl implements ICircleRecommendService {
         // 3. 构建返回结果并记录来源
         CircleRecommendVO vo = new CircleRecommendVO();
         List<CircleRecommendVO.CircleRecommendItem> items = new ArrayList<>();
+        List<CircleRecommendSource> sources = new ArrayList<>();
 
         for (Circle circle : candidates) {
-            // 记录推荐来源
             CircleRecommendSource source = new CircleRecommendSource();
             source.setCircleId(circle.getId());
             source.setUserId(userId);
             source.setSourceType(sourceType);
-            sourceMapper.insert(source);
+            sources.add(source);
 
-            // 构建推荐项
             CircleRecommendVO.CircleRecommendItem item = new CircleRecommendVO.CircleRecommendItem();
             item.setCircleId(circle.getId());
             item.setCircleName(circle.getName());
@@ -74,8 +75,15 @@ public class CircleRecommendServiceImpl implements ICircleRecommendService {
             item.setMemberCount(circle.getMemberCount());
             item.setCategory(circle.getCategory());
             item.setPrivacyType(circle.getPrivacyType() != null ? circle.getPrivacyType().name() : null);
-            item.setSourceId(source.getId());
             items.add(item);
+        }
+
+        // 批量插入推荐来源记录
+        sourceMapper.insertBatch(sources);
+
+        // 设置sourceId
+        for (int i = 0; i < items.size(); i++) {
+            items.get(i).setSourceId(sources.get(i).getId());
         }
 
         vo.setItems(items);
@@ -84,12 +92,12 @@ public class CircleRecommendServiceImpl implements ICircleRecommendService {
 
     @Override
     public void recordClick(String sourceId, String userId) {
-        sourceMapper.updateClickTime(sourceId);
+        sourceMapper.updateClickTime(sourceId, userId);
     }
 
     @Override
     public void recordJoin(String sourceId, String userId) {
-        sourceMapper.updateJoinTime(sourceId);
+        sourceMapper.updateJoinTime(sourceId, userId);
     }
 
     private List<Circle> applyDiversityControl(List<Circle> candidates, int limit) {

@@ -56,8 +56,8 @@ public class CircleDataAggregationScheduler {
                 CircleDataStatistics stats = new CircleDataStatistics();
                 stats.setCircleId(circle.getId());
                 stats.setStatDate(today);
-                stats.setMemberCount((int) memberCount);
-                stats.setNewMemberCount((int) newMemberCount);
+                stats.setMemberCount(Math.toIntExact(memberCount));
+                stats.setNewMemberCount(Math.toIntExact(newMemberCount));
                 stats.setPostCount(0); // TODO: 需要 CircleContentMapper 支持
                 stats.setNewPostCount(0);
                 stats.setActiveCount(0); // TODO: 需要活跃用户统计逻辑
@@ -79,6 +79,7 @@ public class CircleDataAggregationScheduler {
             log.info("圈子数据聚合定时任务执行完成，处理 {} 个圈子", circles.size());
         } catch (Exception e) {
             log.error("圈子数据聚合定时任务执行异常", e);
+            throw e;
         }
     }
 }
