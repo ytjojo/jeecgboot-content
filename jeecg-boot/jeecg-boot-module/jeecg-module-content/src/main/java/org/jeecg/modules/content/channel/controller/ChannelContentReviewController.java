@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @RestController
 @RequestMapping("/content/channel/review")
-public class ChannelReviewController {
+public class ChannelContentReviewController {
 
     @Resource
     private ChannelReviewBiz channelReviewBiz;
