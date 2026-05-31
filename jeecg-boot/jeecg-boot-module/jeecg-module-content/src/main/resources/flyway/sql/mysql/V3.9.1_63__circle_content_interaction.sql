@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS circle_join_request (
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_circle_status (circle_id, status),
     INDEX idx_user (user_id),
-    INDEX idx_create_time (create_time)
+    INDEX idx_create_time (create_time),
+    INDEX idx_status_create_time (status, create_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='圈子加入申请表';
 
 -- 圈子内容举报表

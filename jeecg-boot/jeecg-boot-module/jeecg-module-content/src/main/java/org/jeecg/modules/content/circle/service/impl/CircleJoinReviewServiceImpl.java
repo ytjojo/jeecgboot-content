@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * 圈子加入申请审核服务实现。
@@ -25,6 +26,9 @@ public class CircleJoinReviewServiceImpl extends ServiceImpl<CircleJoinRequestMa
     @Override
     public void approve(String requestId, String operatorId) {
         CircleJoinRequest request = getById(requestId);
+        if (request == null) {
+            throw new NoSuchElementException("加入申请不存在: " + requestId);
+        }
         request.setStatus(CircleJoinRequestStatusEnum.APPROVED.getCode());
         request.setOperatorId(operatorId);
         request.setOperateTime(new Date());
@@ -38,6 +42,9 @@ public class CircleJoinReviewServiceImpl extends ServiceImpl<CircleJoinRequestMa
     @Override
     public void reject(String requestId, String operatorId, String reason) {
         CircleJoinRequest request = getById(requestId);
+        if (request == null) {
+            throw new NoSuchElementException("加入申请不存在: " + requestId);
+        }
         request.setStatus(CircleJoinRequestStatusEnum.REJECTED.getCode());
         request.setOperatorId(operatorId);
         request.setOperateTime(new Date());

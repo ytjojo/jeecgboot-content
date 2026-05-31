@@ -20,6 +20,7 @@
         SELECT * FROM circle_join_request
         WHERE circle_id = #{circleId} AND status = 'PENDING'
         ORDER BY create_time ASC
+        LIMIT 200
     </select>
 
     <select id="selectTimedOutRequests" resultMap="BaseResultMap">

@@ -88,8 +88,8 @@ class CircleMentionServiceTest {
         @Test
         @DisplayName("有关键词 - 返回匹配成员")
         void getMentionCandidates_withKeyword_shouldFilterMembers() {
-            List<String> members = Arrays.asList("user-001", "user-002", "admin-001");
-            when(circleMemberMapper.selectMemberUserIds(TEST_CIRCLE_ID)).thenReturn(members);
+            List<String> matched = Collections.singletonList("admin-001");
+            when(circleMemberMapper.selectMemberUserIdsByKeyword(TEST_CIRCLE_ID, "admin")).thenReturn(matched);
 
             List<String> result = circleMentionService.getMentionCandidates(TEST_CIRCLE_ID, "admin");
 
@@ -106,10 +106,11 @@ class CircleMentionServiceTest {
         @Test
         @DisplayName("跳过已退出成员")
         void sendMentionNotifications_shouldSkipExitedMembers() {
-            List<String> activeMembers = Collections.singletonList("user-001");
-            when(circleMemberMapper.selectMemberUserIds(TEST_CIRCLE_ID)).thenReturn(activeMembers);
-
             List<String> mentionedUserIds = Arrays.asList("user-001", "user-002");
+            List<String> activeMembers = Collections.singletonList("user-001");
+            when(circleMemberMapper.selectActiveMemberUserIds(TEST_CIRCLE_ID, mentionedUserIds))
+                    .thenReturn(activeMembers);
+
             circleMentionService.sendMentionNotifications(
                     TEST_CIRCLE_ID, TEST_CONTENT_ID, mentionedUserIds, TEST_PUBLISHER_ID);
 

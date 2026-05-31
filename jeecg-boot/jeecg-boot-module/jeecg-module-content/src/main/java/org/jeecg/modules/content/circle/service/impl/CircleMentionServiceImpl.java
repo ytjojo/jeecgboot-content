@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * 圈子@提及服务实现。
@@ -46,21 +46,18 @@ public class CircleMentionServiceImpl implements ICircleMentionService {
 
     @Override
     public List<String> getMentionCandidates(String circleId, String keyword) {
-        List<String> allMembers = circleMemberMapper.selectMemberUserIds(circleId);
         if (keyword == null || keyword.isEmpty()) {
-            return allMembers;
+            return circleMemberMapper.selectMemberUserIds(circleId);
         }
-        return allMembers.stream()
-                .filter(userId -> userId.contains(keyword))
-                .collect(Collectors.toList());
+        return circleMemberMapper.selectMemberUserIdsByKeyword(circleId, keyword);
     }
 
     @Async
     @Override
     public void sendMentionNotifications(String circleId, String contentId,
                                          List<String> mentionedUserIds, String publisherId) {
-        Set<String> activeMembers = circleMemberMapper.selectMemberUserIds(circleId)
-                .stream().collect(Collectors.toSet());
+        Set<String> activeMembers = new HashSet<>(
+                circleMemberMapper.selectActiveMemberUserIds(circleId, mentionedUserIds));
 
         for (String userId : mentionedUserIds) {
             if (!activeMembers.contains(userId)) {

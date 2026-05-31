@@ -24,6 +24,7 @@
         SELECT * FROM circle_content
         WHERE circle_id = #{circleId} AND deleted = 0
         ORDER BY is_pinned DESC, pinned_at DESC, create_time DESC
+        LIMIT 500
     </select>
 
 </mapper>

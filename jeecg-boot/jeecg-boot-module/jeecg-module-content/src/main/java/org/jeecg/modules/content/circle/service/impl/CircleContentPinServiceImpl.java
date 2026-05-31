@@ -7,6 +7,7 @@ import org.jeecg.modules.content.circle.service.ICircleContentPinService;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.NoSuchElementException;
 
 /**
  * 圈子内容置顶与精华服务实现。
@@ -54,6 +55,9 @@ public class CircleContentPinServiceImpl extends ServiceImpl<CircleContentMapper
     @Override
     public void togglePin(String contentId) {
         CircleContent content = getById(contentId);
+        if (content == null) {
+            throw new NoSuchElementException("内容不存在: " + contentId);
+        }
         if (Boolean.TRUE.equals(content.getIsPinned())) {
             unpinContent(contentId);
         } else {
@@ -64,6 +68,9 @@ public class CircleContentPinServiceImpl extends ServiceImpl<CircleContentMapper
     @Override
     public void toggleFeature(String contentId) {
         CircleContent content = getById(contentId);
+        if (content == null) {
+            throw new NoSuchElementException("内容不存在: " + contentId);
+        }
         if (Boolean.TRUE.equals(content.getIsFeatured())) {
             unfeatureContent(contentId);
         } else {

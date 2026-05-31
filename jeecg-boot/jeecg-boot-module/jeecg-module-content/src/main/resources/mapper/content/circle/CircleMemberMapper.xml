@@ -7,4 +7,19 @@
         WHERE circle_id = #{circleId} AND status = 'ACTIVE'
     </select>
 
+    <select id="selectActiveMemberUserIds" resultType="java.lang.String">
+        SELECT user_id FROM circle_member
+        WHERE circle_id = #{circleId} AND status = 'ACTIVE'
+        AND user_id IN
+        <foreach collection="userIds" item="uid" open="(" separator="," close=")">
+            #{uid}
+        </foreach>
+    </select>
+
+    <select id="selectMemberUserIdsByKeyword" resultType="java.lang.String">
+        SELECT user_id FROM circle_member
+        WHERE circle_id = #{circleId} AND status = 'ACTIVE'
+        AND user_id LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+
 </mapper>
