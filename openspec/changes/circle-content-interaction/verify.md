@@ -13,7 +13,7 @@
 | Dimension | Status |
 |-----------|--------|
 | Completeness | 41/41 tasks, 15/15 requirements |
-| Correctness | 22/23 sub-requirements fully met, 3 partially met |
+| Correctness | 23/23 sub-requirements fully met, 2 partially met (circle-core deps) |
 | Coherence | 6/6 design decisions followed |
 
 ---
@@ -35,7 +35,7 @@
 | @Mention | 2 | 4/4 | 0 | 0 |
 | Content Report | 5 | 5/7 | 2 | 0 |
 | Join Request Review | 3 | 4/5 | 1 | 0 |
-| **Total** | **15** | **24/27** | **3** | **0** |
+| **Total** | **15** | **25/27** | **2** | **0** |
 
 ---
 
@@ -147,7 +147,7 @@ plan.md 無 `[~]` 標記，本節不需填寫。
 | # | Warning | Blocking? | Follow-up |
 |---|---------|-----------|-----------|
 | W1 | 禁言動作未實現 (TODO) | No | 待 circle-core 禁言服務就緒 |
-| W2 | 禁言處理未通知舉報者 | No | 補充 `sendNotification()` 調用 |
+| W2 | ~~禁言處理未通知舉報者~~ | ~~No~~ | ✅ 已修復 (a80a225d) |
 | W3 | 批准加入未創建圈員記錄 | No | 待 circle-core 成員服務就緒 |
 
 **下一步**: W2 可立即修復；W1、W3 依賴 circle-core 模組，建議在 circle-core 完成後補充。
