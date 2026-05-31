@@ -3,24 +3,24 @@
 > 此檔案在 apply 完成後產生，用以確認實作與 specs / design / tasks 的一致性。
 
 **Change**: `channel-privacy-membership`
-**Verified at**: `pending - awaiting implementation`
+**Verified at**: `2026-05-31`
 **Verifier**: `auto`
 
 ---
 
 ## 1. Structural Validation (`openspec validate --all --json`)
 
-- [ ] 全數 items `"valid": true`
+- [x] 全數 items `"valid": true`
 
-**結果**：待实现后运行
+**結果**：PASS — 1 item, 0 issues
 
 ---
 
 ## 2. Task Completion (`tasks.md`)
 
-- [ ] 所有 `- [ ]` 已變為 `- [x]`
+- [x] 所有 `- [ ]` 已變為 `- [x]`
 
-**未完成任務**：待实现后检查
+**完成數**：43/43 tasks complete
 
 ---
 
@@ -28,16 +28,16 @@
 
 | Capability | Sync 狀態 | 備註 |
 |---|---|---|
-| channel-privacy | N/A | 新 capability |
-| channel-join-method | N/A | 新 capability |
-| channel-join-review | N/A | 新 capability |
-| channel-subscription | N/A | 新 capability |
-| channel-subscription-list | N/A | 新 capability |
-| channel-member-roles | N/A | 新 capability |
-| channel-member-list | N/A | 新 capability |
-| channel-member-removal | N/A | 新 capability |
-| channel-member-mute | N/A | 新 capability |
-| channel-blacklist | N/A | 新 capability |
+| channel-privacy | ✅ | 新 capability，已实现 |
+| channel-join-method | ✅ | 新 capability，已实现 |
+| channel-join-review | ✅ | 新 capability，已实现 |
+| channel-subscription | ✅ | 新 capability，已实现 |
+| channel-subscription-list | ✅ | 新 capability，已实现 |
+| channel-member-roles | ✅ | 新 capability，已实现 |
+| channel-member-list | ✅ | 新 capability，已实现 |
+| channel-member-removal | ✅ | 新 capability，已实现 |
+| channel-member-mute | ✅ | 新 capability，已实现 |
+| channel-blacklist | ✅ | 新 capability，已实现 |
 
 ---
 
@@ -57,28 +57,34 @@
 
 ## 5. Implementation Signal
 
-- [ ] Worktree 內無未 staged 的檔案
+- [x] Worktree 內無未 staged 的檔案
 
-**Commit 範圍**：待实现后记录
+**Commit 範圍**：
+- `621c8447` — feat(channel): add DTOs, VOs, constants, and comprehensive test coverage (31 files)
+- `a53daad3` — fix(channel): remove duplicate constant and magic number from code review (2 files)
+- `60eeb38e` — feat(channel): 频道隐私与成员管理功能 (merge commit)
 
 ---
 
 ## 6. Front-Door Routing Leak Detector
 
-待实现后检查
+- Controller 层无直接访问 Mapper 的情况
+- 所有 Controller → BizService → Service → Mapper 分层正确
 
 ---
 
 ## 7. Deferred Manual Dogfood vs Automated Test Equivalence
 
-待实现后检查
+- 101 个单元测试全部通过
+- 覆盖：隐私设置、加入方式、邀请流程、申请审核、订阅、成员角色、治理操作（移除/禁言/黑名单）
+- Code Review 已完成，修复了重复常量和魔法数字问题
 
 ---
 
 ## Overall Decision
 
-- [ ] ✅ PASS — 可進入 finishing-a-development-branch 與 archive
+- [x] ✅ PASS — 可進入 finishing-a-development-branch 與 archive
 - [ ] ⚠️ PASS WITH WARNINGS
 - [ ] ❌ FAIL
 
-**下一步**：运行 `/opsx:apply` 开始实现
+**下一步**：`/opsx:archive` 归档此 change
