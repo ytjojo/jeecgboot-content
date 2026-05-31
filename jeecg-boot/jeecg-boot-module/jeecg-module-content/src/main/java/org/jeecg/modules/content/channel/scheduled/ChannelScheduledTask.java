@@ -6,6 +6,7 @@ import org.jeecg.modules.content.channel.entity.Channel;
 import org.jeecg.modules.content.channel.entity.ChannelTransfer;
 import org.jeecg.modules.content.channel.enums.ChannelStatus;
 import org.jeecg.modules.content.channel.enums.TransferStatus;
+import org.jeecg.modules.content.channel.biz.ScheduledPublishDispatchBiz;
 import org.jeecg.modules.content.channel.service.ChannelService;
 import org.jeecg.modules.content.channel.service.ChannelTransferService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,6 +24,9 @@ public class ChannelScheduledTask {
 
     @Resource
     private ChannelTransferService channelTransferService;
+
+    @Resource
+    private ScheduledPublishDispatchBiz scheduledPublishDispatchBiz;
 
     /**
      * 每小时扫描冷静期到期的频道，批量处理为 Deleted
@@ -50,5 +54,13 @@ public class ChannelScheduledTask {
         if (updated) {
             log.info("转让请求超时处理完成");
         }
+    }
+
+    /**
+     * 每分钟扫描到期的定时发布任务（错开10分钟执行）
+     */
+    @Scheduled(cron = "0 10 * * * ?")
+    public void processScheduledPublish() {
+        scheduledPublishDispatchBiz.dispatch();
     }
 }

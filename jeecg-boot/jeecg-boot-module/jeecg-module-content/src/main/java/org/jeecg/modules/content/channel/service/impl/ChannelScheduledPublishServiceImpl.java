@@ -1,7 +1,9 @@
 package org.jeecg.modules.content.channel.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.channel.entity.ChannelScheduledPublish;
+import org.jeecg.modules.content.channel.enums.PublishStatusEnum;
 import org.jeecg.modules.content.channel.mapper.ChannelScheduledPublishMapper;
 import org.jeecg.modules.content.channel.service.ChannelScheduledPublishService;
 import jakarta.annotation.Resource;
@@ -19,7 +21,7 @@ public class ChannelScheduledPublishServiceImpl implements ChannelScheduledPubli
     public List<ChannelScheduledPublish> findDueTasks() {
         LambdaQueryWrapper<ChannelScheduledPublish> wrapper = new LambdaQueryWrapper<>();
         wrapper.le(ChannelScheduledPublish::getScheduledTime, new Date())
-               .eq(ChannelScheduledPublish::getPublishStatus, "SCHEDULED");
+               .eq(ChannelScheduledPublish::getPublishStatus, PublishStatusEnum.SCHEDULED.getCode());
         return scheduledPublishMapper.selectList(wrapper);
     }
 
@@ -27,9 +29,9 @@ public class ChannelScheduledPublishServiceImpl implements ChannelScheduledPubli
     public void markPublished(String taskId) {
         ChannelScheduledPublish task = scheduledPublishMapper.selectById(taskId);
         if (task == null) {
-            throw new IllegalArgumentException("定时发布任务不存在: " + taskId);
+            throw new JeecgBootException("定时发布任务不存在: " + taskId);
         }
-        task.setPublishStatus("PUBLISHED");
+        task.setPublishStatus(PublishStatusEnum.PUBLISHED.getCode());
         scheduledPublishMapper.updateById(task);
     }
 
@@ -37,9 +39,9 @@ public class ChannelScheduledPublishServiceImpl implements ChannelScheduledPubli
     public void markFailed(String taskId, String reason) {
         ChannelScheduledPublish task = scheduledPublishMapper.selectById(taskId);
         if (task == null) {
-            throw new IllegalArgumentException("定时发布任务不存在: " + taskId);
+            throw new JeecgBootException("定时发布任务不存在: " + taskId);
         }
-        task.setPublishStatus("FAILED");
+        task.setPublishStatus(PublishStatusEnum.FAILED.getCode());
         task.setFailReason(reason);
         scheduledPublishMapper.updateById(task);
     }
