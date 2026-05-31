@@ -10,6 +10,7 @@ public enum ChannelLifecycleStatus {
     ACTIVE("Active", "正常"),
     READONLY_FROZEN("ReadonlyFrozen", "只读冻结"),
     HIDDEN("Hidden", "强制隐藏"),
+    RESTRICTED("Restricted", "限制推荐"),
     ARCHIVED("Archived", "已归档"),
     MERGED("Merged", "已合并"),
     CLOSED("Closed", "永久关闭"),
