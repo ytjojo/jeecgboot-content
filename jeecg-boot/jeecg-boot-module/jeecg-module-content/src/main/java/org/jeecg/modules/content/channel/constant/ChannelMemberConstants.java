@@ -7,9 +7,6 @@ public final class ChannelMemberConstants {
 
     private ChannelMemberConstants() {}
 
-    /** 冷却期天数（被移除后） */
-    public static final int COOLING_DAYS = 7;
-
     /** 禁言天数：1天 */
     public static final int MUTE_1_DAY = 1;
 

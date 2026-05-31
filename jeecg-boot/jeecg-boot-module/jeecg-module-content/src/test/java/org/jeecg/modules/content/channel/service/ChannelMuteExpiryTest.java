@@ -1,6 +1,7 @@
 package org.jeecg.modules.content.channel.service;
 
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.modules.content.channel.constant.ChannelMemberConstants;
 import org.jeecg.modules.content.channel.entity.ChannelMute;
 import org.jeecg.modules.content.channel.mapper.ChannelMuteMapper;
 import org.jeecg.modules.content.channel.service.impl.ChannelMuteServiceImpl;
@@ -85,7 +86,7 @@ class ChannelMuteExpiryTest {
 
         muteService.unmute("ch1", "user1", "admin1");
 
-        assertThat(mute.getUnmuteType()).isEqualTo(2);
+        assertThat(mute.getUnmuteType()).isEqualTo(ChannelMemberConstants.UNMUTE_TYPE_MANUAL);
         assertThat(mute.getUnmuteTime()).isNotNull();
         verify(muteMapper).updateById(mute);
     }
