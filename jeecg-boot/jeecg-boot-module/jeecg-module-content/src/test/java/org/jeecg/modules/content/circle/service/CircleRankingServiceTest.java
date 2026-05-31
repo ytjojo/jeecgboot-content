@@ -10,12 +10,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,12 +28,18 @@ class CircleRankingServiceTest {
     @Mock
     private CircleMapper circleMapper;
 
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Mock
+    private ValueOperations<String, Object> valueOperations;
+
     @InjectMocks
     private CircleRankingServiceImpl rankingService;
 
     @Test
-    @DisplayName("getHotRanking - 返回热门榜单")
-    void shouldReturnHotRanking() {
+    @DisplayName("getHotRanking - 缓存未命中时从数据库查询")
+    void shouldReturnHotRankingFromDatabaseWhenCacheMiss() {
         // Given
         Circle circle1 = new Circle();
         circle1.setId("circle-1");
@@ -46,6 +55,8 @@ class CircleRankingServiceTest {
         circle2.setCategory("设计");
         circle2.setDescription("设计交流");
 
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("circle:ranking:hot")).thenReturn(null);
         when(circleMapper.selectHotCircles(20)).thenReturn(Arrays.asList(circle1, circle2));
 
         // When
@@ -61,9 +72,32 @@ class CircleRankingServiceTest {
     }
 
     @Test
+    @DisplayName("getHotRanking - 缓存命中时直接返回缓存数据")
+    void shouldReturnHotRankingFromCache() {
+        // Given
+        Circle circle1 = new Circle();
+        circle1.setId("cached-circle-1");
+        circle1.setName("缓存圈子");
+
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("circle:ranking:hot")).thenReturn(Collections.singletonList(circle1));
+
+        // When
+        CircleRankingVO result = rankingService.getHotRanking(20);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getType()).isEqualTo("HOT");
+        assertThat(result.getItems()).hasSize(1);
+        assertThat(result.getItems().get(0).getCircleId()).isEqualTo("cached-circle-1");
+    }
+
+    @Test
     @DisplayName("getHotRanking - 无圈子时返回空榜单")
     void shouldReturnEmptyRankingWhenNoCircles() {
         // Given
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("circle:ranking:hot")).thenReturn(null);
         when(circleMapper.selectHotCircles(20)).thenReturn(Collections.emptyList());
 
         // When
@@ -86,6 +120,8 @@ class CircleRankingServiceTest {
         newCircle.setCategory("生活");
         newCircle.setDescription("新创建的圈子");
 
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("circle:ranking:new")).thenReturn(null);
         when(circleMapper.selectNewCircles(20)).thenReturn(Collections.singletonList(newCircle));
 
         // When

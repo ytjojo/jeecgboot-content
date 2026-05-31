@@ -1,8 +1,8 @@
 package org.jeecg.modules.content.circle.controller;
 
-import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.circle.service.ICircleRecommendService;
 import org.jeecg.modules.content.circle.vo.CircleRecommendVO;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -25,6 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("CircleRecommendController WebMvc 测试")
 class CircleRecommendControllerTest {
 
+    private static final String TEST_USER_ID = "user-1";
+
     private MockMvc mockMvc;
 
     @Mock
@@ -36,6 +41,18 @@ class CircleRecommendControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(recommendController).build();
+        // 模拟 SecurityContext，使 SecureUtil.currentUser() 能获取到用户
+        String loginUserJson = "{\"id\":\"" + TEST_USER_ID + "\",\"username\":\"testUser\"}";
+        Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn(loginUserJson);
+        SecurityContext securityContext = org.mockito.Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -48,11 +65,10 @@ class CircleRecommendControllerTest {
         item.setCircleName("技术圈");
         vo.setItems(Collections.singletonList(item));
 
-        when(recommendService.getRecommendations("user-1", 10)).thenReturn(vo);
+        when(recommendService.getRecommendations(TEST_USER_ID, 10)).thenReturn(vo);
 
         // When & Then
         mockMvc.perform(get("/api/circle/recommend")
-                        .param("userId", "user-1")
                         .param("limit", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -64,8 +80,7 @@ class CircleRecommendControllerTest {
     void shouldRecordClick() throws Exception {
         // When & Then
         mockMvc.perform(post("/api/circle/recommend/click")
-                        .param("sourceId", "source-1")
-                        .param("userId", "user-1"))
+                        .param("sourceId", "source-1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }

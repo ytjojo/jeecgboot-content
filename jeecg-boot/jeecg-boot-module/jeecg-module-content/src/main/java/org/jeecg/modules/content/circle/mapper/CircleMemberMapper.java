@@ -48,4 +48,5 @@ public interface CircleMemberMapper extends BaseMapper<CircleMember> {
      */
     @Select("SELECT * FROM circle_member WHERE user_id = #{userId} AND status = 'ACTIVE'")
     List<CircleMember> selectByUserId(@Param("userId") String userId);
+
 }

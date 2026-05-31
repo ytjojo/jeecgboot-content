@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.jeecg.common.system.base.entity.JeecgEntity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 圈子成员实体。
@@ -26,11 +26,19 @@ public class CircleMember extends JeecgEntity {
     private String userId;
 
     @Schema(description = "角色")
-    private String role;
+    private Role role;
 
     @Schema(description = "状态")
-    private String status;
+    private Status status;
 
-    @Schema(description = "禁言截止时间")
-    private Date mutedUntil;
+    @Schema(description = "禁言结束时间")
+    private LocalDateTime muteEndTime;
+
+    public enum Role {
+        CREATOR, MODERATOR, MEMBER
+    }
+
+    public enum Status {
+        ACTIVE, MUTED, REMOVED
+    }
 }

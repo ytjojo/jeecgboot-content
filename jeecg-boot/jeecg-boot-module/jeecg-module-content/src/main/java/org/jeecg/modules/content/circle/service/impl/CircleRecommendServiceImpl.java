@@ -29,6 +29,9 @@ public class CircleRecommendServiceImpl implements ICircleRecommendService {
 
     @Override
     public CircleRecommendVO getRecommendations(String userId, int limit) {
+        // limit 上限限制
+        limit = Math.min(limit, 100);
+
         // 1. 检查用户是否已加入圈子
         List<CircleMember> joinedMembers = memberMapper.selectByUserId(userId);
         List<String> joinedCircleIds = joinedMembers.stream()
