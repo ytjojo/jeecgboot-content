@@ -9,8 +9,8 @@ import org.jeecg.modules.content.channel.req.ChannelExportReq;
 import org.jeecg.modules.content.channel.vo.ChannelExportTaskVO;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.validation.Valid;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 
 @Slf4j
 @RestController

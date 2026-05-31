@@ -12,8 +12,8 @@ import org.jeecg.modules.content.channel.service.IChannelReviewService;
 import org.jeecg.modules.content.channel.vo.ChannelReviewVO;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.validation.Valid;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -67,7 +67,7 @@ public class ChannelReviewController {
                 .reviewType(review.getReviewType())
                 .status(review.getStatus())
                 .submitTime(review.getSubmitTime())
-                .timeout(review.getTimeoutFlag() == 1)
+                .timeoutFlag(review.getTimeoutFlag())
                 .build();
     }
 

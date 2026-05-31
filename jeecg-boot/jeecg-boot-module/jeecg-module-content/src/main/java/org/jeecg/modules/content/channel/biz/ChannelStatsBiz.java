@@ -6,7 +6,7 @@ import org.jeecg.modules.content.channel.vo.ChannelStatsVO;
 import org.jeecg.modules.content.channel.vo.ChannelTrendVO;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;

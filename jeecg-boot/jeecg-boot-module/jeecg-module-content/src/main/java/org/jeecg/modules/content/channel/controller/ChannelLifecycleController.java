@@ -8,8 +8,8 @@ import org.jeecg.modules.content.channel.biz.ChannelLifecycleBiz;
 import org.jeecg.modules.content.channel.req.ChannelLifecycleActionReq;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.validation.Valid;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 
 @Slf4j
 @RestController
