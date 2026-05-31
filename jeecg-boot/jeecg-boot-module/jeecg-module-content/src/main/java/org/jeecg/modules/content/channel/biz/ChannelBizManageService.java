@@ -11,7 +11,7 @@ import org.jeecg.modules.content.channel.entity.ChannelTransfer;
 import org.jeecg.modules.content.channel.enums.ChannelStatus;
 import org.jeecg.modules.content.channel.enums.ChannelType;
 import org.jeecg.modules.content.channel.enums.ReviewResult;
-import org.jeecg.modules.content.channel.service.ChannelReviewService;
+import org.jeecg.modules.content.channel.service.IChannelReviewService;
 import org.jeecg.modules.content.channel.service.ChannelService;
 import org.jeecg.modules.content.channel.service.ChannelTransferService;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class ChannelBizManageService {
     private ChannelService channelService;
 
     @Resource
-    private ChannelReviewService channelReviewService;
+    private IChannelReviewService channelReviewService;
 
     @Resource
     private ChannelTransferService channelTransferService;
@@ -129,6 +129,7 @@ public class ChannelBizManageService {
         // 关键字段修改触发审核（系统频道除外）
         if (hasCriticalChange && channel.getChannelType() != ChannelType.SYSTEM) {
             channel.setStatus(ChannelStatus.PENDING_REVIEW);
+            channelReviewService.submitReview(channelId, "update_field", userId, "关键字段修改触发审核");
         }
 
         channelService.updateById(channel);

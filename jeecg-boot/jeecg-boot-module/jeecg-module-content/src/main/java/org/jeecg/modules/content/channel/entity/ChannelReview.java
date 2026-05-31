@@ -40,6 +40,9 @@ public class ChannelReview {
     @Schema(description = "审核原因")
     private String reviewReason;
 
+    @Schema(description = "目标频道ID（合并审核时使用）")
+    private String targetChannelId;
+
     @Schema(description = "提交时间")
     private LocalDateTime submitTime;
 

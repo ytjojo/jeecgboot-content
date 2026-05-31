@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.jeecg.modules.content.channel.biz.ChannelPublishBiz;
 import org.jeecg.modules.content.channel.entity.ChannelContentPublish;
 import org.jeecg.modules.content.channel.entity.ChannelContentReview;
+import org.jeecg.modules.content.channel.entity.ChannelLifecycleLog;
+import org.jeecg.modules.content.channel.enums.ChannelLifecycleStatus;
 import org.jeecg.modules.content.channel.enums.PublishStatusEnum;
 import org.jeecg.modules.content.channel.mapper.ChannelContentPublishMapper;
 import org.jeecg.modules.content.channel.mapper.ChannelContentReviewMapper;
@@ -11,6 +13,7 @@ import org.jeecg.modules.content.channel.req.publish.ChannelAddExistingContentRe
 import org.jeecg.modules.content.channel.req.publish.ChannelPublishReq;
 import org.jeecg.modules.content.channel.service.ChannelContentPublishService;
 import org.jeecg.modules.content.channel.service.ChannelPublishLimitService;
+import org.jeecg.modules.content.channel.service.IChannelLifecycleLogService;
 import org.jeecg.modules.content.channel.vo.publish.ChannelPublishResultVO;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
@@ -37,6 +40,9 @@ public class ChannelPublishBizImpl implements ChannelPublishBiz {
     @Resource
     private ChannelContentReviewMapper reviewMapper;
 
+    @Resource
+    private IChannelLifecycleLogService lifecycleLogService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<ChannelPublishResultVO> publish(ChannelPublishReq req, String userId) {
@@ -45,6 +51,24 @@ public class ChannelPublishBizImpl implements ChannelPublishBiz {
             ChannelPublishResultVO result = new ChannelPublishResultVO();
             result.setChannelId(channelId);
             try {
+                // 冻结/隐藏/关闭状态拦截发布
+                ChannelLifecycleLog latestLog = lifecycleLogService.getOne(
+                        new LambdaQueryWrapper<ChannelLifecycleLog>()
+                                .eq(ChannelLifecycleLog::getChannelId, channelId)
+                                .orderByDesc(ChannelLifecycleLog::getCreatedTime)
+                                .last("LIMIT 1"));
+                if (latestLog != null) {
+                    ChannelLifecycleStatus lifecycleStatus = ChannelLifecycleStatus.fromCode(latestLog.getToStatus());
+                    if (lifecycleStatus == ChannelLifecycleStatus.READONLY_FROZEN
+                            || lifecycleStatus == ChannelLifecycleStatus.HIDDEN
+                            || lifecycleStatus == ChannelLifecycleStatus.CLOSED) {
+                        result.setStatus("FAILED");
+                        result.setFailReason("频道当前状态为" + lifecycleStatus.getDesc() + "，不允许发布");
+                        results.add(result);
+                        continue;
+                    }
+                }
+
                 // TODO: 查询频道配置获取 publishPermission, 查询用户角色和禁言/黑名单状态
                 String userRole = "MEMBER";
                 String publishPermission = "ALL_MEMBERS";

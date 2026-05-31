@@ -6,10 +6,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.modules.content.channel.biz.ChannelMergeBiz;
 import org.jeecg.modules.content.channel.entity.ChannelReview;
 import org.jeecg.modules.content.channel.req.ChannelReviewActionReq;
 import org.jeecg.modules.content.channel.service.IChannelReviewService;
 import org.jeecg.modules.content.channel.vo.ChannelReviewVO;
+import org.jeecg.modules.content.user.service.IContentNotificationService;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
@@ -27,6 +29,12 @@ public class ChannelReviewController {
 
     @Resource
     private IChannelReviewService reviewService;
+
+    @Resource
+    private IContentNotificationService notificationService;
+
+    @Resource
+    private ChannelMergeBiz mergeBiz;
 
     @GetMapping("/list")
     @Operation(summary = "审核队列列表")
@@ -63,6 +71,33 @@ public class ChannelReviewController {
         review.setReviewReason(req.getReason());
         review.setReviewTime(LocalDateTime.now());
         reviewService.updateById(review);
+
+        // 合并审核通过后执行合并
+        if ("approved".equals(req.getAction()) && "merge".equals(review.getReviewType())
+                && review.getTargetChannelId() != null) {
+            try {
+                mergeBiz.executeMerge(review.getChannelId(), review.getTargetChannelId(), getCurrentUserId());
+                log.info("合并审核通过，已执行合并: {} -> {}", review.getChannelId(), review.getTargetChannelId());
+            } catch (Exception e) {
+                log.error("合并执行失败: {}", e.getMessage(), e);
+                return Result.error("合并执行失败: " + e.getMessage());
+            }
+        }
+
+        // 审核结果通知申请人
+        if (review.getApplicantId() != null) {
+            String actionLabel = switch (req.getAction()) {
+                case "approved" -> "通过";
+                case "rejected" -> "拒绝";
+                case "returned" -> "退回修改";
+                default -> req.getAction();
+            };
+            String title = "频道审核结果通知";
+            String content = String.format("您的频道（ID: %s）审核已%s。%s",
+                    review.getChannelId(), actionLabel,
+                    req.getReason() != null ? "原因：" + req.getReason() : "");
+            notificationService.sendNotification(review.getApplicantId(), "channel_review", title, content);
+        }
 
         return Result.OK();
     }
