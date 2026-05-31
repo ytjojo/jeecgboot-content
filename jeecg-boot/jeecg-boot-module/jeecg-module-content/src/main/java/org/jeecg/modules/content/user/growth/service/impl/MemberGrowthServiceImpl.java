@@ -1,0 +1,157 @@
+package org.jeecg.modules.content.user.growth.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.jeecg.modules.content.user.growth.constant.GrowthConstant;
+import org.jeecg.modules.content.user.growth.entity.CircleGrowthLog;
+import org.jeecg.modules.content.user.growth.entity.CircleMemberGrowth;
+import org.jeecg.modules.content.user.growth.enums.GrowthActionEnum;
+import org.jeecg.modules.content.user.growth.mapper.CircleGrowthLogMapper;
+import org.jeecg.modules.content.user.growth.mapper.CircleMemberGrowthMapper;
+import org.jeecg.modules.content.user.growth.service.IMemberGrowthService;
+import org.jeecg.modules.content.user.growth.vo.MemberGrowthVO;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.annotation.Resource;
+import java.time.LocalDate;
+import java.util.List;
+
+@Slf4j
+@Service
+public class MemberGrowthServiceImpl extends ServiceImpl<CircleMemberGrowthMapper, CircleMemberGrowth>
+        implements IMemberGrowthService {
+
+    @Resource
+    private CircleGrowthLogMapper growthLogMapper;
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void addExperience(String circleId, String userId, GrowthActionEnum action, String bizId) {
+        LocalDate today = LocalDate.now();
+
+        if (isDailyCapReached(circleId, userId, today)) {
+            log.info("用户{}在圈子{}今日经验值已达上限", userId, circleId);
+            return;
+        }
+
+        CircleGrowthLog growthLog = new CircleGrowthLog()
+                .setCircleId(circleId)
+                .setUserId(userId)
+                .setActionType(action.getCode())
+                .setExpPoints(action.getExpPoints())
+                .setContributionPoints(action.getContributionPoints())
+                .setBizId(bizId)
+                .setBizDate(today)
+                .setRevoked(false);
+        growthLogMapper.insert(growthLog);
+
+        CircleMemberGrowth growth = getOrCreateGrowth(circleId, userId);
+        growth.setExpPoints(growth.getExpPoints() + action.getExpPoints());
+        growth.setContributionPoints(growth.getContributionPoints() + action.getContributionPoints());
+        if (action == GrowthActionEnum.POST) {
+            growth.setPostCount(growth.getPostCount() + 1);
+        } else if (action == GrowthActionEnum.COMMENT) {
+            growth.setCommentCount(growth.getCommentCount() + 1);
+        } else if (action == GrowthActionEnum.FEATURED) {
+            growth.setFeaturedCount(growth.getFeaturedCount() + 1);
+        }
+        this.saveOrUpdate(growth);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void revokeExperience(String circleId, String userId, GrowthActionEnum action, String bizId) {
+        LambdaQueryWrapper<CircleGrowthLog> logQw = new LambdaQueryWrapper<>();
+        logQw.eq(CircleGrowthLog::getCircleId, circleId)
+              .eq(CircleGrowthLog::getUserId, userId)
+              .eq(CircleGrowthLog::getActionType, action.getCode())
+              .eq(CircleGrowthLog::getBizId, bizId)
+              .eq(CircleGrowthLog::getRevoked, false);
+        CircleGrowthLog existingLog = growthLogMapper.selectOne(logQw);
+        if (existingLog == null) {
+            log.warn("未找到可撤销的流水记录: circleId={}, userId={}, action={}, bizId={}", circleId, userId, action, bizId);
+            return;
+        }
+
+        existingLog.setRevoked(true);
+        growthLogMapper.updateById(existingLog);
+
+        CircleMemberGrowth growth = getOrCreateGrowth(circleId, userId);
+        growth.setExpPoints(Math.max(0, growth.getExpPoints() - action.getExpPoints()));
+        growth.setContributionPoints(Math.max(0, growth.getContributionPoints() - action.getContributionPoints()));
+        if (action == GrowthActionEnum.POST) {
+            growth.setPostCount(Math.max(0, growth.getPostCount() - 1));
+        } else if (action == GrowthActionEnum.COMMENT) {
+            growth.setCommentCount(Math.max(0, growth.getCommentCount() - 1));
+        } else if (action == GrowthActionEnum.FEATURED) {
+            growth.setFeaturedCount(Math.max(0, growth.getFeaturedCount() - 1));
+        }
+        this.updateById(growth);
+    }
+
+    @Override
+    public MemberGrowthVO getGrowthInfo(String circleId, String userId) {
+        CircleMemberGrowth growth = getOrCreateGrowth(circleId, userId);
+        MemberGrowthVO vo = new MemberGrowthVO();
+        vo.setCircleId(circleId);
+        vo.setExpPoints(growth.getExpPoints());
+        vo.setContributionPoints(growth.getContributionPoints());
+        vo.setLevel(growth.getLevel());
+        vo.setPostCount(growth.getPostCount());
+        vo.setParticipationDays(getParticipationDays(circleId, userId));
+        return vo;
+    }
+
+    @Override
+    public int getParticipationDays(String circleId, String userId) {
+        LocalDate today = LocalDate.now();
+        LocalDate weekAgo = today.minusDays(6);
+        LambdaQueryWrapper<CircleGrowthLog> qw = new LambdaQueryWrapper<>();
+        qw.eq(CircleGrowthLog::getCircleId, circleId)
+          .eq(CircleGrowthLog::getUserId, userId)
+          .eq(CircleGrowthLog::getRevoked, false)
+          .between(CircleGrowthLog::getBizDate, weekAgo, today)
+          .select(CircleGrowthLog::getBizDate)
+          .groupBy(CircleGrowthLog::getBizDate);
+        List<CircleGrowthLog> logs = growthLogMapper.selectList(qw);
+        return logs.size();
+    }
+
+    private boolean isDailyCapReached(String circleId, String userId, LocalDate date) {
+        LambdaQueryWrapper<CircleGrowthLog> qw = new LambdaQueryWrapper<>();
+        qw.eq(CircleGrowthLog::getCircleId, circleId)
+          .eq(CircleGrowthLog::getUserId, userId)
+          .eq(CircleGrowthLog::getBizDate, date)
+          .eq(CircleGrowthLog::getRevoked, false);
+        List<CircleGrowthLog> todayLogs = growthLogMapper.selectList(qw);
+        int dailyTotal = todayLogs.stream().mapToInt(CircleGrowthLog::getExpPoints).sum();
+        return dailyTotal >= GrowthConstant.DAILY_EXP_CAP;
+    }
+
+    private CircleMemberGrowth getOrCreateGrowth(String circleId, String userId) {
+        LambdaQueryWrapper<CircleMemberGrowth> qw = new LambdaQueryWrapper<>();
+        qw.eq(CircleMemberGrowth::getCircleId, circleId)
+          .eq(CircleMemberGrowth::getUserId, userId);
+        CircleMemberGrowth growth = this.getOne(qw);
+        if (growth == null) {
+            growth = new CircleMemberGrowth()
+                    .setCircleId(circleId)
+                    .setUserId(userId)
+                    .setExpPoints(0)
+                    .setContributionPoints(0)
+                    .setLevel(1)
+                    .setPostCount(0)
+                    .setCommentCount(0)
+                    .setFeaturedCount(0);
+            try {
+                this.save(growth);
+            } catch (Exception e) {
+                // 并发场景下另一个线程已插入，重新查询
+                growth = this.getOne(qw);
+            }
+        }
+        return growth;
+    }
+}

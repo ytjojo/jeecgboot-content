@@ -1,7 +1,7 @@
 ## 1. 数据库与实体层
 
 - [x] 1.1 创建 Flyway SQL 迁移脚本：频道内容发布关联表、待审区表、定时发布任务表、发布限额配置表、回收站表、治理日志表、公告表
-- [x] 1.2 创建 Entity 类：ChannelContentPublish、ChannelContentReview、ChannelScheduledPublish、ChannelPublishLimit、ChannelRecycleBin、ChannelContentGovernanceLog、ChannelAnnouncement
+- [x] 1.2 创建 Entity 类：ChannelContentPublish、ChannelContentReview、ChannelScheduledPublish、ChannelPublishLimit、ChannelRecycleBin、ChannelGovernanceLog、ChannelAnnouncement
 - [x] 1.3 创建 Mapper 接口和 XML：对应7个实体的 CRUD 操作
 
 ## 2. 频道发布权限与选择
