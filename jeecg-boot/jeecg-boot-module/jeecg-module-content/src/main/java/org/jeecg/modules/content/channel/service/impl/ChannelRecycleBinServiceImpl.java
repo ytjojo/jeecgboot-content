@@ -32,6 +32,12 @@ public class ChannelRecycleBinServiceImpl implements ChannelRecycleBinService {
     @Override
     public boolean restore(String recycleBinId, String restoredBy) {
         ChannelRecycleBin bin = recycleBinMapper.selectById(recycleBinId);
+        if (bin == null) {
+            throw new IllegalArgumentException("回收站记录不存在: " + recycleBinId);
+        }
+        if (bin.getIsRestored()) {
+            return false;
+        }
         if (bin.getExpireTime().before(new Date())) {
             return false;
         }

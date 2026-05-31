@@ -28,6 +28,9 @@ public class ChannelAnnouncementServiceImpl implements ChannelAnnouncementServic
     @Override
     public void update(String id, String title, String content) {
         ChannelAnnouncement announcement = announcementMapper.selectById(id);
+        if (announcement == null) {
+            throw new IllegalArgumentException("公告不存在: " + id);
+        }
         announcement.setTitle(title);
         announcement.setContent(content);
         announcementMapper.updateById(announcement);
@@ -36,6 +39,9 @@ public class ChannelAnnouncementServiceImpl implements ChannelAnnouncementServic
     @Override
     public void delete(String id) {
         ChannelAnnouncement announcement = announcementMapper.selectById(id);
+        if (announcement == null) {
+            throw new IllegalArgumentException("公告不存在: " + id);
+        }
         announcement.setStatus("DELETED");
         announcementMapper.updateById(announcement);
     }

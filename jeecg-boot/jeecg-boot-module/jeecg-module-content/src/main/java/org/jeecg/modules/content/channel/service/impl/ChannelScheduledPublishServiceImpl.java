@@ -26,6 +26,9 @@ public class ChannelScheduledPublishServiceImpl implements ChannelScheduledPubli
     @Override
     public void markPublished(String taskId) {
         ChannelScheduledPublish task = scheduledPublishMapper.selectById(taskId);
+        if (task == null) {
+            throw new IllegalArgumentException("定时发布任务不存在: " + taskId);
+        }
         task.setPublishStatus("PUBLISHED");
         scheduledPublishMapper.updateById(task);
     }
@@ -33,6 +36,9 @@ public class ChannelScheduledPublishServiceImpl implements ChannelScheduledPubli
     @Override
     public void markFailed(String taskId, String reason) {
         ChannelScheduledPublish task = scheduledPublishMapper.selectById(taskId);
+        if (task == null) {
+            throw new IllegalArgumentException("定时发布任务不存在: " + taskId);
+        }
         task.setPublishStatus("FAILED");
         task.setFailReason(reason);
         scheduledPublishMapper.updateById(task);

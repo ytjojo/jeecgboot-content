@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.biz.ChannelReviewBiz;
 import org.jeecg.modules.content.channel.req.review.ChannelReviewReq;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +23,8 @@ public class ChannelReviewController {
     @Operation(summary = "审核内容")
     @PostMapping
     public Result<Void> review(@Valid @RequestBody ChannelReviewReq req) {
-        channelReviewBiz.review(req, "current-user-id");
+        String userId = SecureUtil.currentUser().getId();
+        channelReviewBiz.review(req, userId);
         return Result.OK();
     }
 }

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.biz.ChannelGovernanceBiz;
 import org.jeecg.modules.content.channel.req.governance.ChannelGovernanceReq;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +23,8 @@ public class ChannelContentGovernanceController {
     @Operation(summary = "执行治理操作")
     @PostMapping
     public Result<Void> governance(@Valid @RequestBody ChannelGovernanceReq req) {
-        channelGovernanceBiz.executeGovernance(req, "current-user-id");
+        String userId = SecureUtil.currentUser().getId();
+        channelGovernanceBiz.executeGovernance(req, userId);
         return Result.OK();
     }
 }

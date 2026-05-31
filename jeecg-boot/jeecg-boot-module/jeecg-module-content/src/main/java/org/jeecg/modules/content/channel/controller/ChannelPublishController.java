@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.biz.ChannelPublishBiz;
 import org.jeecg.modules.content.channel.req.publish.ChannelPublishReq;
 import org.jeecg.modules.content.channel.vo.publish.ChannelPublishResultVO;
@@ -24,6 +25,7 @@ public class ChannelPublishController {
     @Operation(summary = "发布内容到频道")
     @PostMapping
     public Result<List<ChannelPublishResultVO>> publish(@Valid @RequestBody ChannelPublishReq req) {
-        return Result.OK(channelPublishBiz.publish(req));
+        String userId = SecureUtil.currentUser().getId();
+        return Result.OK(channelPublishBiz.publish(req, userId));
     }
 }

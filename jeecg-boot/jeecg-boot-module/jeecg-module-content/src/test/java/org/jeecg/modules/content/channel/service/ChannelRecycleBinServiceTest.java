@@ -50,6 +50,7 @@ class ChannelRecycleBinServiceTest {
     void restore_shouldFailWhenExpired() {
         ChannelRecycleBin bin = new ChannelRecycleBin();
         bin.setId("bin-1");
+        bin.setIsRestored(false);
         bin.setExpireTime(new Date(System.currentTimeMillis() - 86400000L));
         when(recycleBinMapper.selectById("bin-1")).thenReturn(bin);
 

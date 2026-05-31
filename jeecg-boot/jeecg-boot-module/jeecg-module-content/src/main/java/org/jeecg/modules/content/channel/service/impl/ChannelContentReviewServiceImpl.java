@@ -16,6 +16,9 @@ public class ChannelContentReviewServiceImpl implements ChannelContentReviewServ
     @Override
     public void approve(String reviewId, String reviewerId) {
         ChannelContentReview review = reviewMapper.selectById(reviewId);
+        if (review == null) {
+            throw new IllegalArgumentException("审核记录不存在: " + reviewId);
+        }
         review.setReviewStatus("APPROVED");
         review.setReviewerId(reviewerId);
         review.setReviewTime(new Date());
@@ -25,6 +28,9 @@ public class ChannelContentReviewServiceImpl implements ChannelContentReviewServ
     @Override
     public void reject(String reviewId, String reviewerId, String reason) {
         ChannelContentReview review = reviewMapper.selectById(reviewId);
+        if (review == null) {
+            throw new IllegalArgumentException("审核记录不存在: " + reviewId);
+        }
         review.setReviewStatus("REJECTED");
         review.setReviewerId(reviewerId);
         review.setReviewTime(new Date());
