@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.content.circle.mapper.CircleAuditLogMapper">
+
+    <resultMap id="BaseResultMap" type="org.jeecg.modules.content.circle.entity.CircleAuditLog">
+        <id column="log_id" property="logId"/>
+        <result column="circle_id" property="circleId"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="action" property="action"/>
+        <result column="target_id" property="targetId"/>
+        <result column="target_type" property="targetType"/>
+        <result column="result" property="result"/>
+        <result column="reason" property="reason"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <select id="selectByTarget" resultMap="BaseResultMap">
+        SELECT * FROM circle_audit_log
+        WHERE target_id = #{targetId} AND target_type = #{targetType}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByTimeRange" resultMap="BaseResultMap">
+        SELECT * FROM circle_audit_log
+        WHERE created_at BETWEEN #{startTime} AND #{endTime}
+        ORDER BY created_at DESC
+    </select>
+
+</mapper>
