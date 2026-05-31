@@ -1,0 +1,29 @@
+package org.jeecg.modules.content.channel.controller;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import org.jeecg.common.api.vo.Result;
+import org.jeecg.modules.content.channel.biz.ChannelPublishBiz;
+import org.jeecg.modules.content.channel.req.publish.ChannelPublishReq;
+import org.jeecg.modules.content.channel.vo.publish.ChannelPublishResultVO;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@Tag(name = "频道内容发布", description = "频道内容发布相关接口")
+@Validated
+@RestController
+@RequestMapping("/content/channel/publish")
+public class ChannelPublishController {
+
+    @Resource
+    private ChannelPublishBiz channelPublishBiz;
+
+    @Operation(summary = "发布内容到频道")
+    @PostMapping
+    public Result<List<ChannelPublishResultVO>> publish(@Valid @RequestBody ChannelPublishReq req) {
+        return Result.OK(channelPublishBiz.publish(req));
+    }
+}
