@@ -18,18 +18,7 @@ public interface CircleRecommendSourceMapper extends BaseMapper<CircleRecommendS
     int updateJoinTime(@Param("id") String id, @Param("userId") String userId);
 
     /**
-     * 批量插入推荐来源记录
+     * 真正的批量插入（XML foreach，单条SQL）
      */
-    default void insertBatch(List<CircleRecommendSource> sources) {
-        for (CircleRecommendSource source : sources) {
-            insert(source);
-        }
-    }
-
-    /**
-     * 单条插入（供批量方法调用）
-     */
-    @org.apache.ibatis.annotations.Insert("INSERT INTO circle_recommend_source (id, circle_id, user_id, source_type, create_time) VALUES (#{id, jdbcType=VARCHAR}, #{circleId}, #{userId}, #{sourceType}, NOW())")
-    @org.apache.ibatis.annotations.Options(useGeneratedKeys = true, keyProperty = "id")
-    int insert(CircleRecommendSource source);
+    int insertBatch(@Param("list") List<CircleRecommendSource> sources);
 }

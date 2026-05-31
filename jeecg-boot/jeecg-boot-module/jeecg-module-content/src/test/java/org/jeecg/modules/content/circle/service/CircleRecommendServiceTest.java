@@ -1,7 +1,6 @@
 package org.jeecg.modules.content.circle.service;
 
 import org.jeecg.modules.content.circle.entity.Circle;
-import org.jeecg.modules.content.circle.entity.CircleMember;
 import org.jeecg.modules.content.circle.entity.CircleRecommendSource;
 import org.jeecg.modules.content.circle.mapper.CircleMapper;
 import org.jeecg.modules.content.circle.mapper.CircleMemberMapper;
@@ -25,7 +24,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doAnswer;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CircleRecommendService 测试")
@@ -51,9 +49,7 @@ class CircleRecommendServiceTest {
         int limit = 10;
 
         // 用户已加入的圈子
-        CircleMember member = new CircleMember();
-        member.setCircleId("circle-1");
-        when(memberMapper.selectByUserId(userId)).thenReturn(Collections.singletonList(member));
+        when(memberMapper.selectCircleIdsByUserId(userId)).thenReturn(Collections.singletonList("circle-1"));
 
         // 推荐候选圈子
         Circle circle1 = new Circle();
@@ -71,13 +67,7 @@ class CircleRecommendServiceTest {
         circle2.setPrivacyType(Circle.PrivacyType.PUBLIC);
 
         when(circleMapper.selectRecommendCandidates(anyString(), anyInt())).thenReturn(Arrays.asList(circle1, circle2));
-        doAnswer(invocation -> {
-            List<CircleRecommendSource> sources = invocation.getArgument(0);
-            for (int i = 0; i < sources.size(); i++) {
-                sources.get(i).setId("source-" + sources.get(i).getCircleId());
-            }
-            return null;
-        }).when(sourceMapper).insertBatch(anyList());
+        when(sourceMapper.insertBatch(anyList())).thenReturn(1);
 
         // When
         CircleRecommendVO result = recommendService.getRecommendations(userId, limit);
@@ -96,7 +86,7 @@ class CircleRecommendServiceTest {
         String userId = "new-user";
         int limit = 10;
 
-        when(memberMapper.selectByUserId(userId)).thenReturn(Collections.emptyList());
+        when(memberMapper.selectCircleIdsByUserId(userId)).thenReturn(Collections.emptyList());
 
         // 热门圈子
         Circle hotCircle = new Circle();
@@ -106,13 +96,7 @@ class CircleRecommendServiceTest {
         hotCircle.setPrivacyType(Circle.PrivacyType.PUBLIC);
 
         when(circleMapper.selectHotCircles(anyInt())).thenReturn(Collections.singletonList(hotCircle));
-        doAnswer(invocation -> {
-            List<CircleRecommendSource> sources = invocation.getArgument(0);
-            for (int i = 0; i < sources.size(); i++) {
-                sources.get(i).setId("source-" + sources.get(i).getCircleId());
-            }
-            return null;
-        }).when(sourceMapper).insertBatch(anyList());
+        when(sourceMapper.insertBatch(anyList())).thenReturn(1);
 
         // When
         CircleRecommendVO result = recommendService.getRecommendations(userId, limit);

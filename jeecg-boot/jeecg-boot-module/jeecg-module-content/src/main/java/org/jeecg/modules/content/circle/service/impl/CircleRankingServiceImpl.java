@@ -11,6 +11,7 @@ import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.IntFunction;
 
 @Service
 public class CircleRankingServiceImpl implements ICircleRankingService {
@@ -26,33 +27,25 @@ public class CircleRankingServiceImpl implements ICircleRankingService {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    @SuppressWarnings("unchecked")
     public CircleRankingVO getHotRanking(int limit) {
-        limit = Math.max(1, Math.min(limit, CACHE_LIMIT));
-
-        List<Circle> circles = (List<Circle>) redisTemplate.opsForValue().get(HOT_RANKING_KEY);
-        if (circles == null) {
-            circles = circleMapper.selectHotCircles(CACHE_LIMIT);
-            redisTemplate.opsForValue().set(HOT_RANKING_KEY, circles, 2, TimeUnit.HOURS);
-        }
-        // 按请求的limit截取
-        List<Circle> result = circles.size() > limit ? circles.subList(0, limit) : circles;
-        return buildRankingVO("HOT", result);
+        return getRanking(HOT_RANKING_KEY, "HOT", limit, circleMapper::selectHotCircles);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public CircleRankingVO getNewRanking(int limit) {
-        limit = Math.max(1, Math.min(limit, CACHE_LIMIT));
+        return getRanking(NEW_RANKING_KEY, "NEW", limit, circleMapper::selectNewCircles);
+    }
 
-        List<Circle> circles = (List<Circle>) redisTemplate.opsForValue().get(NEW_RANKING_KEY);
+    @SuppressWarnings("unchecked")
+    private CircleRankingVO getRanking(String redisKey, String type, int limit,
+                                        IntFunction<List<Circle>> loader) {
+        List<Circle> circles = (List<Circle>) redisTemplate.opsForValue().get(redisKey);
         if (circles == null) {
-            circles = circleMapper.selectNewCircles(CACHE_LIMIT);
-            redisTemplate.opsForValue().set(NEW_RANKING_KEY, circles, 2, TimeUnit.HOURS);
+            circles = loader.apply(CACHE_LIMIT);
+            redisTemplate.opsForValue().set(redisKey, circles, 2, TimeUnit.HOURS);
         }
-        // 按请求的limit截取
         List<Circle> result = circles.size() > limit ? circles.subList(0, limit) : circles;
-        return buildRankingVO("NEW", result);
+        return buildRankingVO(type, result);
     }
 
     private CircleRankingVO buildRankingVO(String type, List<Circle> circles) {

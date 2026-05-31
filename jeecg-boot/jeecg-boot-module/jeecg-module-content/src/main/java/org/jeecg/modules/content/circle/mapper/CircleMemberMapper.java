@@ -6,8 +6,10 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.jeecg.modules.content.circle.entity.CircleMember;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 圈子成员 Mapper 接口。
@@ -44,9 +46,15 @@ public interface CircleMemberMapper extends BaseMapper<CircleMember> {
                                               @Param("keyword") String keyword);
 
     /**
-     * 查询用户加入的所有活跃圈子成员记录
+     * 查询用户加入的所有活跃圈子ID
      */
-    @Select("SELECT * FROM circle_member WHERE user_id = #{userId} AND status = 'ACTIVE'")
-    List<CircleMember> selectByUserId(@Param("userId") String userId);
+    @Select("SELECT circle_id FROM circle_member WHERE user_id = #{userId} AND status = 'ACTIVE'")
+    List<String> selectCircleIdsByUserId(@Param("userId") String userId);
+
+    /**
+     * 聚合查询所有圈子的成员统计（单条SQL替代N+1循环）
+     * 返回 List of Map: {circle_id, member_count, new_member_count}
+     */
+    List<Map<String, Object>> selectMemberStatsGroupByCircle(@Param("todayStart") LocalDateTime todayStart);
 
 }

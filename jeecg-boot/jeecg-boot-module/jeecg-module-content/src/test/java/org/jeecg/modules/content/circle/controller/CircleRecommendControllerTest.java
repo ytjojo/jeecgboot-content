@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,12 +43,11 @@ class CircleRecommendControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(recommendController).build();
         // 模拟 SecurityContext，使 SecureUtil.currentUser() 能获取到用户
-        String loginUserJson = "{\"id\":\"" + TEST_USER_ID + "\",\"username\":\"testUser\"}";
-        Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
-        when(authentication.getName()).thenReturn(loginUserJson);
-        SecurityContext securityContext = org.mockito.Mockito.mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("{\"id\":\"" + TEST_USER_ID + "\",\"username\":\"testUser\"}");
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
     }
 
     @AfterEach

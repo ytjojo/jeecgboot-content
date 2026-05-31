@@ -1,7 +1,7 @@
 package org.jeecg.modules.content.circle.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import org.jeecg.modules.content.circle.entity.Circle;
-import org.jeecg.modules.content.circle.entity.CircleMember;
 import org.jeecg.modules.content.circle.entity.CircleRecommendSource;
 import org.jeecg.modules.content.circle.mapper.CircleMapper;
 import org.jeecg.modules.content.circle.mapper.CircleMemberMapper;
@@ -31,20 +31,14 @@ public class CircleRecommendServiceImpl implements ICircleRecommendService {
     @Override
     @Transactional
     public CircleRecommendVO getRecommendations(String userId, int limit) {
-        // limit 上限限制
-        limit = Math.min(limit, 100);
-
         // 1. 检查用户是否已加入圈子
-        List<CircleMember> joinedMembers = memberMapper.selectByUserId(userId);
-        List<String> joinedCircleIds = joinedMembers.stream()
-                .map(CircleMember::getCircleId)
-                .collect(Collectors.toList());
+        List<String> joinedCircleIds = memberMapper.selectCircleIdsByUserId(userId);
 
         List<Circle> candidates;
         String sourceType;
 
         // 查询更多候选用于多样性控制
-        int queryLimit = Math.min(limit * 2, 100);
+        int queryLimit = limit * 2;
         if (joinedCircleIds.isEmpty()) {
             candidates = circleMapper.selectHotCircles(queryLimit);
             sourceType = "HOT";
@@ -63,6 +57,7 @@ public class CircleRecommendServiceImpl implements ICircleRecommendService {
 
         for (Circle circle : candidates) {
             CircleRecommendSource source = new CircleRecommendSource();
+            source.setId(IdWorker.getIdStr());
             source.setCircleId(circle.getId());
             source.setUserId(userId);
             source.setSourceType(sourceType);

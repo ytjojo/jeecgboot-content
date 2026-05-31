@@ -11,4 +11,12 @@
         <result column="join_time" property="joinTime"/>
         <result column="create_time" property="createTime"/>
     </resultMap>
+
+    <insert id="insertBatch">
+        INSERT INTO circle_recommend_source (id, circle_id, user_id, source_type, create_time)
+        VALUES
+        <foreach collection="list" item="s" separator=",">
+            (#{s.id}, #{s.circleId}, #{s.userId}, #{s.sourceType}, NOW())
+        </foreach>
+    </insert>
 </mapper>

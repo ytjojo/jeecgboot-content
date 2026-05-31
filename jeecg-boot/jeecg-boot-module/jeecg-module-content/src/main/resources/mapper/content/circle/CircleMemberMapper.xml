@@ -22,4 +22,13 @@
         AND user_id LIKE CONCAT('%', #{keyword}, '%')
     </select>
 
+    <select id="selectMemberStatsGroupByCircle" resultType="java.util.Map">
+        SELECT circle_id,
+               COUNT(*) AS member_count,
+               SUM(CASE WHEN create_time >= #{todayStart} THEN 1 ELSE 0 END) AS new_member_count
+        FROM circle_member
+        WHERE status = 'ACTIVE'
+        GROUP BY circle_id
+    </select>
+
 </mapper>
