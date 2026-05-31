@@ -14,12 +14,19 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/content/channel/stats")
+@RequestMapping("/jeecg-boot/api/v1/content/channel/stats")
 @Tag(name = "频道统计", description = "频道数据统计看板接口")
 public class ChannelStatsController {
+
+    private static final Set<String> VALID_STAT_TYPES = Set.of(
+            ChannelStatsConstant.STAT_TYPE_DAILY,
+            ChannelStatsConstant.STAT_TYPE_WEEKLY,
+            ChannelStatsConstant.STAT_TYPE_MONTHLY
+    );
 
     @Resource
     private ChannelStatsBiz channelStatsBiz;
@@ -43,6 +50,9 @@ public class ChannelStatsController {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
             @Parameter(description = "统计类型：daily/weekly/monthly")
             @RequestParam(defaultValue = ChannelStatsConstant.STAT_TYPE_DAILY) String statType) {
+        if (!VALID_STAT_TYPES.contains(statType)) {
+            return Result.error("无效的统计类型: " + statType);
+        }
         return Result.OK(channelStatsBiz.getTrendData(channelId, startDate, endDate, statType));
     }
 }

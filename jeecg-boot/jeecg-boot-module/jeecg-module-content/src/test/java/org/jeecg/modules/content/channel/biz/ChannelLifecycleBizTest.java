@@ -24,43 +24,44 @@ class ChannelLifecycleBizTest {
 
     @Test
     void shouldAllowFreezeFromActive() {
-        // Given
+        // Given: 频道无历史日志，默认 ACTIVE 状态
         String channelId = "CH001";
-        String operatorId = "USER001";
-        String reason = "违规内容";
-
+        when(lifecycleLogService.getOne(any())).thenReturn(null);
         when(lifecycleLogService.save(any(ChannelLifecycleLog.class))).thenReturn(true);
 
         // When
-        assertDoesNotThrow(() -> lifecycleBiz.freeze(channelId, operatorId, reason));
+        assertDoesNotThrow(() -> lifecycleBiz.freeze(channelId, "USER001", "违规内容"));
 
         // Then
         verify(lifecycleLogService).save(any(ChannelLifecycleLog.class));
     }
 
     @Test
-    void shouldThrowWhenFreezeFromInvalidStatus() {
-        // Given
+    void shouldThrowWhenFreezeFromArchivedStatus() {
+        // Given: 频道当前为 ARCHIVED 状态
         String channelId = "CH001";
-        String operatorId = "USER001";
-        String reason = "违规内容";
+        ChannelLifecycleLog existingLog = new ChannelLifecycleLog()
+                .setChannelId(channelId)
+                .setToStatus(ChannelLifecycleStatus.ARCHIVED.getCode());
+        when(lifecycleLogService.getOne(any())).thenReturn(existingLog);
 
-        // When & Then
+        // When & Then: ARCHIVED 不在 FREEZE_ALLOWED_FROM 中
         assertThrows(IllegalStateException.class,
-                () -> lifecycleBiz.freeze(channelId, operatorId, reason, ChannelLifecycleStatus.ARCHIVED));
+                () -> lifecycleBiz.freeze(channelId, "USER001", "违规内容"));
     }
 
     @Test
     void shouldAllowUnfreezeFromFrozen() {
-        // Given
+        // Given: 频道当前为 READONLY_FROZEN 状态
         String channelId = "CH001";
-        String operatorId = "USER001";
-        String reason = "整改完成";
-
+        ChannelLifecycleLog existingLog = new ChannelLifecycleLog()
+                .setChannelId(channelId)
+                .setToStatus(ChannelLifecycleStatus.READONLY_FROZEN.getCode());
+        when(lifecycleLogService.getOne(any())).thenReturn(existingLog);
         when(lifecycleLogService.save(any(ChannelLifecycleLog.class))).thenReturn(true);
 
         // When
-        assertDoesNotThrow(() -> lifecycleBiz.unfreeze(channelId, operatorId, reason));
+        assertDoesNotThrow(() -> lifecycleBiz.unfreeze(channelId, "USER001", "整改完成"));
 
         // Then
         verify(lifecycleLogService).save(any(ChannelLifecycleLog.class));

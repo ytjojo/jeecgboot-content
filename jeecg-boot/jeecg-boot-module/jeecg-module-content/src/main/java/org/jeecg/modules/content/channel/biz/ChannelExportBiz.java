@@ -7,7 +7,6 @@ import org.jeecg.modules.content.channel.vo.ChannelExportTaskVO;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
-import java.util.UUID;
 
 @Service
 public class ChannelExportBiz {
@@ -16,9 +15,7 @@ public class ChannelExportBiz {
     private IChannelExportTaskService exportTaskService;
 
     public ChannelExportTaskVO createExport(ChannelExportReq req, String userId) {
-        String taskId = UUID.randomUUID().toString();
         ChannelExportTask task = new ChannelExportTask()
-                .setTaskId(taskId)
                 .setChannelId(req.getChannelId())
                 .setUserId(userId)
                 .setExportType(req.getExportType())
@@ -27,9 +24,11 @@ public class ChannelExportBiz {
                 .setEndDate(req.getEndDate())
                 .setStatus("pending");
         exportTaskService.save(task);
+        task.setTaskId(task.getId());
+        exportTaskService.updateById(task);
 
         return ChannelExportTaskVO.builder()
-                .taskId(taskId)
+                .taskId(task.getTaskId())
                 .status("pending")
                 .build();
     }

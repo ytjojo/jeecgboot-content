@@ -14,7 +14,7 @@ import jakarta.validation.Valid;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/content/channel/export")
+@RequestMapping("/jeecg-boot/api/v1/content/channel/export")
 @Tag(name = "频道数据导出", description = "频道数据导出接口")
 public class ChannelExportController {
 
@@ -30,7 +30,11 @@ public class ChannelExportController {
     @GetMapping("/status")
     @Operation(summary = "查询导出状态")
     public Result<ChannelExportTaskVO> getExportStatus(@RequestParam String taskId) {
-        return Result.OK(exportBiz.getExportStatus(taskId));
+        ChannelExportTaskVO vo = exportBiz.getExportStatus(taskId);
+        if (vo == null) {
+            return Result.error("导出任务不存在");
+        }
+        return Result.OK(vo);
     }
 
     private String getCurrentUserId() {

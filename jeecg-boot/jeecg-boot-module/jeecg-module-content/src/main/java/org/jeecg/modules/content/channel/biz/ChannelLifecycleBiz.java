@@ -1,5 +1,6 @@
 package org.jeecg.modules.content.channel.biz;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.jeecg.modules.content.channel.entity.ChannelLifecycleLog;
 import org.jeecg.modules.content.channel.enums.ChannelLifecycleStatus;
 import org.jeecg.modules.content.channel.service.IChannelLifecycleLogService;
@@ -10,7 +11,6 @@ import jakarta.annotation.Resource;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class ChannelLifecycleBiz {
@@ -36,31 +36,43 @@ public class ChannelLifecycleBiz {
 
     @Transactional(rollbackFor = Exception.class)
     public void freeze(String channelId, String operatorId, String reason) {
-        freeze(channelId, operatorId, reason, ChannelLifecycleStatus.ACTIVE);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public void freeze(String channelId, String operatorId, String reason, ChannelLifecycleStatus currentStatus) {
+        ChannelLifecycleStatus currentStatus = getCurrentStatus(channelId);
         validateTransition(currentStatus, ChannelLifecycleStatus.READONLY_FROZEN, FREEZE_ALLOWED_FROM);
         saveLog(channelId, "freeze", currentStatus.getCode(), ChannelLifecycleStatus.READONLY_FROZEN.getCode(), operatorId, reason, null);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void unfreeze(String channelId, String operatorId, String reason) {
-        validateTransition(ChannelLifecycleStatus.READONLY_FROZEN, ChannelLifecycleStatus.ACTIVE, UNFREEZE_ALLOWED_FROM);
-        saveLog(channelId, "unfreeze", ChannelLifecycleStatus.READONLY_FROZEN.getCode(), ChannelLifecycleStatus.ACTIVE.getCode(), operatorId, reason, null);
+        ChannelLifecycleStatus currentStatus = getCurrentStatus(channelId);
+        validateTransition(currentStatus, ChannelLifecycleStatus.ACTIVE, UNFREEZE_ALLOWED_FROM);
+        saveLog(channelId, "unfreeze", currentStatus.getCode(), ChannelLifecycleStatus.ACTIVE.getCode(), operatorId, reason, null);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void hide(String channelId, String operatorId, String reason) {
-        validateTransition(ChannelLifecycleStatus.ACTIVE, ChannelLifecycleStatus.HIDDEN, HIDE_ALLOWED_FROM);
-        saveLog(channelId, "hide", ChannelLifecycleStatus.ACTIVE.getCode(), ChannelLifecycleStatus.HIDDEN.getCode(), operatorId, reason, null);
+        ChannelLifecycleStatus currentStatus = getCurrentStatus(channelId);
+        validateTransition(currentStatus, ChannelLifecycleStatus.HIDDEN, HIDE_ALLOWED_FROM);
+        saveLog(channelId, "hide", currentStatus.getCode(), ChannelLifecycleStatus.HIDDEN.getCode(), operatorId, reason, null);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void close(String channelId, String operatorId, String reason) {
-        validateTransition(ChannelLifecycleStatus.ACTIVE, ChannelLifecycleStatus.CLOSED, CLOSE_ALLOWED_FROM);
-        saveLog(channelId, "close", ChannelLifecycleStatus.ACTIVE.getCode(), ChannelLifecycleStatus.CLOSED.getCode(), operatorId, reason, null);
+        ChannelLifecycleStatus currentStatus = getCurrentStatus(channelId);
+        validateTransition(currentStatus, ChannelLifecycleStatus.CLOSED, CLOSE_ALLOWED_FROM);
+        saveLog(channelId, "close", currentStatus.getCode(), ChannelLifecycleStatus.CLOSED.getCode(), operatorId, reason, null);
+    }
+
+    private ChannelLifecycleStatus getCurrentStatus(String channelId) {
+        ChannelLifecycleLog latestLog = lifecycleLogService.getOne(
+                new LambdaQueryWrapper<ChannelLifecycleLog>()
+                        .eq(ChannelLifecycleLog::getChannelId, channelId)
+                        .orderByDesc(ChannelLifecycleLog::getCreatedTime)
+                        .last("LIMIT 1")
+        );
+        if (latestLog == null) {
+            return ChannelLifecycleStatus.ACTIVE;
+        }
+        return ChannelLifecycleStatus.fromCode(latestLog.getToStatus());
     }
 
     private void validateTransition(ChannelLifecycleStatus from, ChannelLifecycleStatus to, Set<ChannelLifecycleStatus> allowedFrom) {
@@ -73,7 +85,6 @@ public class ChannelLifecycleBiz {
     private void saveLog(String channelId, String actionType, String fromStatus, String toStatus,
                          String operatorId, String reason, String targetChannelId) {
         ChannelLifecycleLog log = new ChannelLifecycleLog()
-                .setLogId(UUID.randomUUID().toString())
                 .setChannelId(channelId)
                 .setActionType(actionType)
                 .setFromStatus(fromStatus)

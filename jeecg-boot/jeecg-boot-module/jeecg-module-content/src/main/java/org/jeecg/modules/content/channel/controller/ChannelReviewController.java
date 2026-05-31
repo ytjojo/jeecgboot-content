@@ -15,12 +15,15 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/content/channel/review")
+@RequestMapping("/jeecg-boot/api/v1/content/channel/review")
 @Tag(name = "频道审核", description = "频道审核管理接口")
 public class ChannelReviewController {
+
+    private static final Set<String> VALID_ACTIONS = Set.of("approved", "rejected", "returned");
 
     @Resource
     private IChannelReviewService reviewService;
@@ -46,6 +49,10 @@ public class ChannelReviewController {
     @PostMapping("/action")
     @Operation(summary = "审核操作")
     public Result<Void> reviewAction(@Valid @RequestBody ChannelReviewActionReq req) {
+        if (!VALID_ACTIONS.contains(req.getAction())) {
+            return Result.error("无效的审核操作: " + req.getAction());
+        }
+
         ChannelReview review = reviewService.getById(req.getReviewId());
         if (review == null) {
             return Result.error("审核记录不存在");

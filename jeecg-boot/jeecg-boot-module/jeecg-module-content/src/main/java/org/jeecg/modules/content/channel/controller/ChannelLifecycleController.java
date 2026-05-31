@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/content/channel/lifecycle")
+@RequestMapping("/jeecg-boot/api/v1/content/channel/lifecycle")
 @Tag(name = "频道生命周期", description = "频道生命周期管理接口")
 public class ChannelLifecycleController {
 
