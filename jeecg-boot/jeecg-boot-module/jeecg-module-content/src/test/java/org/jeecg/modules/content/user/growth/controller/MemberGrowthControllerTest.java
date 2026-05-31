@@ -1,0 +1,56 @@
+package org.jeecg.modules.content.user.growth.controller;
+
+import org.jeecg.modules.content.user.growth.service.IMemberGrowthService;
+import org.jeecg.modules.content.user.growth.vo.MemberGrowthVO;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class MemberGrowthControllerTest {
+
+    @Mock
+    private IMemberGrowthService memberGrowthService;
+
+    @InjectMocks
+    private MemberGrowthController controller;
+
+    @Test
+    @DisplayName("获取成长信息返回200和正确数据")
+    void getGrowthInfo_returnsOkWithData() {
+        MemberGrowthVO vo = new MemberGrowthVO();
+        vo.setCircleId("c1");
+        vo.setExpPoints(50);
+        vo.setContributionPoints(30);
+        vo.setLevel(2);
+        vo.setPostCount(5);
+        vo.setParticipationDays(3);
+        when(memberGrowthService.getGrowthInfo("c1", "u1")).thenReturn(vo);
+
+        var result = controller.getGrowthInfo("c1", "u1");
+
+        assertThat(result.getCode()).isEqualTo(200);
+        assertThat(result.getResult().getCircleId()).isEqualTo("c1");
+        assertThat(result.getResult().getExpPoints()).isEqualTo(50);
+        verify(memberGrowthService).getGrowthInfo("c1", "u1");
+    }
+
+    @Test
+    @DisplayName("获取连续参与进度返回200和天数")
+    void getParticipationDays_returnsOkWithDays() {
+        when(memberGrowthService.getParticipationDays("c1", "u1")).thenReturn(5);
+
+        var result = controller.getParticipationDays("c1", "u1");
+
+        assertThat(result.getCode()).isEqualTo(200);
+        assertThat(result.getResult()).isEqualTo(5);
+        verify(memberGrowthService).getParticipationDays("c1", "u1");
+    }
+}
