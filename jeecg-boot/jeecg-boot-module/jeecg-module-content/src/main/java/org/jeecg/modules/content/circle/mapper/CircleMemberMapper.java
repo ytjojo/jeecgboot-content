@@ -3,6 +3,7 @@ package org.jeecg.modules.content.circle.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.jeecg.modules.content.circle.entity.CircleMember;
 
 import java.util.Collection;
@@ -41,4 +42,10 @@ public interface CircleMemberMapper extends BaseMapper<CircleMember> {
      */
     List<String> selectMemberUserIdsByKeyword(@Param("circleId") String circleId,
                                               @Param("keyword") String keyword);
+
+    /**
+     * 查询用户加入的所有活跃圈子成员记录
+     */
+    @Select("SELECT * FROM content_circle_member WHERE user_id = #{userId} AND status = 'ACTIVE'")
+    List<CircleMember> selectByUserId(@Param("userId") String userId);
 }
