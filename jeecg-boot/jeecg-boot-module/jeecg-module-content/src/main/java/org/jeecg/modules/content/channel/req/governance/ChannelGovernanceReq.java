@@ -3,6 +3,7 @@ package org.jeecg.modules.content.channel.req.governance;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import java.util.Map;
 
 @Data
 @Schema(description = "频道治理操作请求")
@@ -25,4 +26,7 @@ public class ChannelGovernanceReq {
 
     @Schema(description = "操作原因")
     private String reason;
+
+    @Schema(description = "编辑字段（EDIT_ASSIST 时使用，key=字段名, value=新值）")
+    private Map<String, String> editFields;
 }

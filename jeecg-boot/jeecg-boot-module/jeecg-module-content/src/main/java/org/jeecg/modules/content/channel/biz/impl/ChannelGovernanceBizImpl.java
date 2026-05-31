@@ -7,10 +7,12 @@ import org.jeecg.modules.content.channel.entity.ChannelRecycleBin;
 import org.jeecg.modules.content.channel.mapper.ChannelContentPublishMapper;
 import org.jeecg.modules.content.channel.req.governance.ChannelGovernanceReq;
 import org.jeecg.modules.content.channel.service.ChannelContentGovernanceLogService;
+import org.jeecg.modules.content.channel.service.ChannelEditAssistService;
 import org.jeecg.modules.content.channel.service.ChannelRecycleBinService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Map;
 
 @Service
 public class ChannelGovernanceBizImpl implements ChannelGovernanceBiz {
@@ -23,6 +25,9 @@ public class ChannelGovernanceBizImpl implements ChannelGovernanceBiz {
 
     @Resource
     private ChannelContentGovernanceLogService governanceLogService;
+
+    @Resource
+    private ChannelEditAssistService editAssistService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -47,6 +52,12 @@ public class ChannelGovernanceBizImpl implements ChannelGovernanceBiz {
                     break;
                 case "RESTORE":
                     handleRestore(req, operatorId);
+                    break;
+                case "MOVE":
+                    handleMove(req, operatorId);
+                    break;
+                case "EDIT_ASSIST":
+                    handleEditAssist(req, operatorId);
                     break;
                 default:
                     throw new IllegalArgumentException("不支持的操作类型: " + action);
@@ -78,15 +89,40 @@ public class ChannelGovernanceBizImpl implements ChannelGovernanceBiz {
     }
 
     private void handleRestore(ChannelGovernanceReq req, String operatorId) {
-        LambdaQueryWrapper<ChannelRecycleBin> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ChannelRecycleBin::getChannelId, req.getChannelId())
-               .eq(ChannelRecycleBin::getContentId, req.getContentId())
-               .eq(ChannelRecycleBin::getIsRestored, false);
-        // TODO: 注入 ChannelRecycleBinMapper 或在 ChannelRecycleBinService 增加 findByChannelAndContent 方法
-        // 暂时通过 publish 记录恢复状态
         ChannelContentPublish publish = getPublishRecord(req);
         publish.setPublishStatus("PUBLISHED");
         publishMapper.updateById(publish);
+    }
+
+    private void handleMove(ChannelGovernanceReq req, String operatorId) {
+        if (req.getTargetChannelId() == null || req.getTargetChannelId().isEmpty()) {
+            throw new IllegalArgumentException("移出频道时目标频道ID不能为空");
+        }
+        ChannelContentPublish publish = getPublishRecord(req);
+        // 在目标频道创建新发布记录
+        ChannelContentPublish newPublish = new ChannelContentPublish();
+        newPublish.setChannelId(req.getTargetChannelId());
+        newPublish.setContentId(publish.getContentId());
+        newPublish.setContentType(publish.getContentType());
+        newPublish.setPublisherId(publish.getPublisherId());
+        newPublish.setPublishStatus("PUBLISHED");
+        newPublish.setSourceType("MOVE");
+        publishMapper.insert(newPublish);
+        // 标记原频道记录为已回收
+        publish.setPublishStatus("RECYCLED");
+        publishMapper.updateById(publish);
+    }
+
+    private void handleEditAssist(ChannelGovernanceReq req, String operatorId) {
+        Map<String, String> editFields = req.getEditFields();
+        if (editFields == null || editFields.isEmpty()) {
+            throw new IllegalArgumentException("编辑字段不能为空");
+        }
+        ChannelContentPublish publish = getPublishRecord(req);
+        for (Map.Entry<String, String> entry : editFields.entrySet()) {
+            editAssistService.recordEdit(req.getChannelId(), req.getContentId(), operatorId,
+                    entry.getKey(), null, entry.getValue());
+        }
     }
 
     private ChannelContentPublish getPublishRecord(ChannelGovernanceReq req) {

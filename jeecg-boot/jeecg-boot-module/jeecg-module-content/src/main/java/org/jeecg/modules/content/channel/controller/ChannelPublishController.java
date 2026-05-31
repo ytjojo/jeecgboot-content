@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.biz.ChannelPublishBiz;
+import org.jeecg.modules.content.channel.req.publish.ChannelAddExistingContentReq;
 import org.jeecg.modules.content.channel.req.publish.ChannelPublishReq;
 import org.jeecg.modules.content.channel.vo.publish.ChannelPublishResultVO;
 import org.springframework.validation.annotation.Validated;
@@ -27,5 +28,12 @@ public class ChannelPublishController {
     public Result<List<ChannelPublishResultVO>> publish(@Valid @RequestBody ChannelPublishReq req) {
         String userId = SecureUtil.currentUser().getId();
         return Result.OK(channelPublishBiz.publish(req, userId));
+    }
+
+    @Operation(summary = "将已发布内容添加到频道")
+    @PostMapping("/add-existing")
+    public Result<List<ChannelPublishResultVO>> addExistingContent(@Valid @RequestBody ChannelAddExistingContentReq req) {
+        String userId = SecureUtil.currentUser().getId();
+        return Result.OK(channelPublishBiz.addExistingContent(req, userId));
     }
 }
