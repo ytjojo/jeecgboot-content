@@ -40,6 +40,7 @@ If the user provides a partial draft, do not block on missing details. Generate 
 Read supporting files only when needed:
 
 - `templates/prd-template.md`: copy-and-fill scaffold for full PRDs
+- `references/clarification-guide.md`: self-questioning checklist and clarification-question format for uncertain requirements
 - `references/writing-guide.md`: detailed section rules, Epic / Feature / Story guidance, quality checklist, and common bad patterns
 - `references/review-guide.md`: gap-audit mode and review output rules
 - `examples/simple-prd-demo.md`: minimal worked example
@@ -48,10 +49,11 @@ Read supporting files only when needed:
 Default workflow:
 
 1. Identify intent: `Full PRD`, `Lean Spec`, `Rewrite`, or `Gap Audit`.
-2. For generation or rewrite, load `templates/prd-template.md` and `references/writing-guide.md`.
-3. For review mode, run `scripts/check-prd-sections.sh <path>` when a local Markdown file is provided, then load `references/review-guide.md`.
-4. Normalize known information first; mark unknowns as placeholders instead of omitting them.
-5. Ensure each major requirement has scope, priority, business rules, exceptions, NFRs, acceptance criteria, and glossary terms where needed.
+2. Load `references/clarification-guide.md` when uncertainty is likely to affect scope, flow, dependency, data, or acceptance criteria.
+3. For generation or rewrite, load `templates/prd-template.md` and `references/writing-guide.md`.
+4. For review mode, run `scripts/check-prd-sections.sh <path>` when a local Markdown file is provided, then load `references/review-guide.md`.
+5. Normalize known information first; mark unknowns as placeholders instead of omitting them.
+6. Ensure each major requirement has scope, priority, business rules, exceptions, NFRs, acceptance criteria, and glossary terms where needed.
 
 ## Hard Rules
 
@@ -67,6 +69,7 @@ Default workflow:
 - Use measurable statements instead of vague wording.
 - Ensure every major function or Story has acceptance criteria.
 - Add `词汇表 (Glossary)` near the end of the PRD for domain terms, abbreviations, statuses, and ambiguous labels.
+- If self-questioning finds uncertainty that affects scope, flow, dependency, data, or acceptance criteria, output a structured clarification list before finalizing the PRD or add it to `开放问题 / Open Questions` when proceeding with placeholders.
 
 ## Recommended Structure
 
@@ -87,7 +90,7 @@ Use this order by default unless the user requests another template:
 13. Risks, Dependencies, and Assumptions
 14. Milestones or Release Plan
 15. 词汇表 (Glossary)
-16. Open Questions
+16. 开放问题 / Open Questions
 
 ## Output Modes
 
