@@ -1,4 +1,4 @@
--- V2025_001__channel_lifecycle_stats.sql
+-- V3.9.1_69__channel_lifecycle_stats.sql
 -- 频道统计汇总表
 CREATE TABLE IF NOT EXISTS `channel_stats` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
