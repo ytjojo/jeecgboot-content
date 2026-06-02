@@ -229,6 +229,7 @@ groupItemService.saveBatch(newItems);
 
 - 每次 schema 变更必须写迁移脚本，放在 `src/main/resources/db/migration/` 目录
 - 脚本文件名格式：`V{版本号}__{描述}.sql`（如 `V2__add_user_avatar.sql`）
+- 回滚脚本名格式: `R{版本号}__{描述}_rollback.sql`（如 `R2__add_user_avatar_rollback.sql`）
 - 迁移脚本只能追加，不能修改已执行的脚本
 - 大表变更（如加字段）要评估锁表影响，考虑使用 `pt-online-schema-change` 等工具
 - 每个迁移脚本开头加注释说明变更内容和原因
