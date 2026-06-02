@@ -1,0 +1,117 @@
+# Change 到 PRD 文档映射配置
+# 用途：多 Agent 并行生成前端 PRD 时的精确上下文路由
+# 每个 agent 读取此配置，只加载自己负责的 change + 对应 PRD
+
+mapping:
+  # User 域
+  - change: add-user-authentication
+    prd: user/EPIC-01-user-authentication.md
+    domain: user
+    epic: EPIC-01
+
+  - change: complete-profile-management
+    prd: user/EPIC-02-profile-management.md
+    domain: user
+    epic: EPIC-02
+
+  - change: complete-badges-points-growth
+    prd: user/EPIC-03-badges-points-growth.md
+    domain: user
+    epic: EPIC-03
+
+  - change: social-subscription
+    prd: user/EPIC-04-social-subscription.md
+    domain: user
+    epic: EPIC-04
+
+  - change: add-blocking-muting
+    prd: user/EPIC-05-blocking-muting.md
+    domain: user
+    epic: EPIC-05
+
+  - change: privacy-notifications
+    prd: user/EPIC-06-privacy-notifications.md
+    domain: user
+    epic: EPIC-06
+
+  - change: social-extensions
+    prd: user/EPIC-07-social-extensions.md
+    domain: user
+    epic: EPIC-07
+
+  - change: feedback-support-system
+    prd: user/EPIC-08-feedback-support.md
+    domain: user
+    epic: EPIC-08
+
+  - change: user-status-lifecycle
+    prd: user/EPIC-09-user-status-lifecycle.md
+    domain: user
+    epic: EPIC-09
+
+  # Circle 域
+  - change: circle-core
+    prd: circle/EPIC-10-circle-core.md
+    domain: circle
+    epic: EPIC-10
+
+  - change: circle-content-interaction
+    prd: circle/EPIC-11-circle-content-interaction.md
+    domain: circle
+    epic: EPIC-11
+
+  - change: circle-analytics-discovery
+    prd: circle/EPIC-12-circle-analytics-discovery.md
+    domain: circle
+    epic: EPIC-12
+
+  - change: circle-growth-incentive
+    prd: circle/EPIC-13-circle-growth-incentive.md
+    domain: circle
+    epic: EPIC-13
+
+  # Channel 域
+  - change: channel-infrastructure
+    prd: channel/EPIC-20-channel-infrastructure.md
+    domain: channel
+    epic: EPIC-20
+
+  - change: channel-privacy-membership
+    prd: channel/EPIC-21-channel-privacy-membership.md
+    domain: channel
+    epic: EPIC-21
+
+  - change: channel-content-governance
+    prd: channel/EPIC-22-channel-content-governance.md
+    domain: channel
+    epic: EPIC-22
+
+  - change: channel-discovery
+    prd: channel/EPIC-23-channel-discovery.md
+    domain: channel
+    epic: EPIC-23
+
+  - change: channel-lifecycle-stats
+    prd: channel/EPIC-24-channel-lifecycle.md
+    domain: channel
+    epic: EPIC-24
+
+# 路径配置
+paths:
+  changes_dir: /Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/openspec/changes
+  prd_dir: /Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/docs/requirements/prd/decomposition
+  output_dir: /Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/docs/requirements/prd/frontend
+
+# Agent 配置
+agent_config:
+  # 每个 agent 的上下文包含：
+  # 1. 本映射文件（只读自己的条目）
+  # 2. change 目录下的 design.md, proposal.md, specs/
+  # 3. 对应的 PRD 文档
+  # 4. 前端 PRD 模板（如有）
+  context_files:
+    - "{changes_dir}/{change}/design.md"
+    - "{changes_dir}/{change}/proposal.md"
+    - "{changes_dir}/{change}/specs/"
+    - "{prd_dir}/{prd}"
+  output_file: "{output_dir}/{epic}-frontend-prd.md"
