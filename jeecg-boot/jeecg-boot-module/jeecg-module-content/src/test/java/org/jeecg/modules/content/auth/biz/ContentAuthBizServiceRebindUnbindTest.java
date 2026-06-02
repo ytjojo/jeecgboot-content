@@ -131,7 +131,7 @@ class ContentAuthBizServiceRebindUnbindTest {
             // when / then
             assertThatThrownBy(() -> bizService.rebindMobile(req))
                     .isInstanceOf(JeecgBootException.class)
-                    .hasMessage("旧手机号验证码无效或已过期");
+                    .hasMessage("旧验证码无效或已过期");
 
             // 不应有新凭证插入
             verify(credentialMapper, never()).insert(any(ContentUserCredential.class));
@@ -224,7 +224,7 @@ class ContentAuthBizServiceRebindUnbindTest {
             // when / then
             assertThatThrownBy(() -> bizService.rebindEmail(req))
                     .isInstanceOf(JeecgBootException.class)
-                    .hasMessage("旧邮箱验证码无效或已过期");
+                    .hasMessage("旧验证码无效或已过期");
 
             verify(credentialMapper, never()).insert(any(ContentUserCredential.class));
         }

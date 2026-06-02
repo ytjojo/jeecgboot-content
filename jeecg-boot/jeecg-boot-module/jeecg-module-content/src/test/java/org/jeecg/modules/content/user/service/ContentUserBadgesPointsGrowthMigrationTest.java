@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ContentUserBadgesPointsGrowthMigrationTest {
 
     private static final Path MIGRATION = Path.of("src/main/resources/flyway/sql/mysql/V3.9.1_55__content_user_badges_points_growth.sql");
-    private static final Path ROLLBACK = Path.of("src/main/manual-rollback/R3.9.1_55__content_user_badges_points_growth_rollback.sql");
+    private static final Path ROLLBACK = Path.of("src/main/resources/flyway/sql/mysql/R3.9.1_55__content_user_badges_points_growth_rollback.sql");
 
     @Test
     void shouldCreateRewardLevelExchangeAndDecayTables() throws IOException {

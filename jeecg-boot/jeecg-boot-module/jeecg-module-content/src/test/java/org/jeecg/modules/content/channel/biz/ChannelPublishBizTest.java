@@ -5,6 +5,7 @@ import org.jeecg.modules.content.channel.entity.ChannelContentPublish;
 import org.jeecg.modules.content.channel.entity.ChannelContentReview;
 import org.jeecg.modules.content.channel.mapper.ChannelContentPublishMapper;
 import org.jeecg.modules.content.channel.mapper.ChannelContentReviewMapper;
+import org.jeecg.modules.content.channel.service.IChannelLifecycleLogService;
 import org.jeecg.modules.content.channel.req.publish.ChannelPublishReq;
 import org.jeecg.modules.content.channel.service.ChannelContentPublishService;
 import org.jeecg.modules.content.channel.service.ChannelPublishLimitService;
@@ -37,6 +38,9 @@ class ChannelPublishBizTest {
 
     @Mock
     private ChannelContentReviewMapper reviewMapper;
+
+    @Mock
+    private IChannelLifecycleLogService lifecycleLogService;
 
     @Test
     void shouldPublishToMultipleChannels() {

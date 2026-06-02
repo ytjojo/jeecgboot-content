@@ -7,11 +7,13 @@ import org.jeecg.modules.content.channel.mapper.ContentChannelTagMapper;
 import org.jeecg.modules.content.channel.req.create.ChannelTagCreateReq;
 import org.jeecg.modules.content.channel.service.impl.ContentChannelTagServiceImpl;
 import org.jeecg.modules.content.channel.vo.ChannelTagVO;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +32,11 @@ class ContentChannelTagServiceTest {
 
     @InjectMocks
     private ContentChannelTagServiceImpl tagService;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(tagService, "baseMapper", tagMapper);
+    }
 
     @Test
     void createTag_shouldRejectEmptyName() {
@@ -59,7 +67,7 @@ class ContentChannelTagServiceTest {
         activeTag.setChannelId("ch1");
         activeTag.setName("教程");
         activeTag.setStatus(1);
-        when(tagMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(activeTag);
+        when(tagMapper.selectOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(activeTag);
 
         ChannelTagCreateReq req = new ChannelTagCreateReq();
         req.setChannelId("ch1");
@@ -77,7 +85,7 @@ class ContentChannelTagServiceTest {
         deletedTag.setChannelId("ch1");
         deletedTag.setName("教程");
         deletedTag.setStatus(0);
-        when(tagMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(deletedTag);
+        when(tagMapper.selectOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(deletedTag);
         when(tagMapper.updateById(any(ContentChannelTag.class))).thenReturn(1);
 
         ChannelTagCreateReq req = new ChannelTagCreateReq();
@@ -93,7 +101,7 @@ class ContentChannelTagServiceTest {
 
     @Test
     void createTag_shouldCreateValidTag() {
-        when(tagMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(null);
+        when(tagMapper.selectOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(null);
         when(tagMapper.insert(any(ContentChannelTag.class))).thenReturn(1);
 
         ChannelTagCreateReq req = new ChannelTagCreateReq();

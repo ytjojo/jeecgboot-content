@@ -1,11 +1,14 @@
 package org.jeecg.modules.content.auth.controller;
 
+import com.alibaba.fastjson2.JSON;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.auth.biz.ContentAuthBizService;
 import org.jeecg.modules.content.auth.dto.AuthLoginResult;
 import org.jeecg.modules.content.auth.service.IContentDeviceSessionService;
 import org.jeecg.modules.content.auth.vo.DeviceSessionVO;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,12 +18,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -64,6 +71,19 @@ class ContentAuthControllerWebMvcTest {
                 .setValidator(validator)
                 .setControllerAdvice(new TestExceptionHandler())
                 .build();
+
+        LoginUser loginUser = new LoginUser().setId("testUser");
+        String userJson = JSON.toJSONString(loginUser);
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(
+                new UsernamePasswordAuthenticationToken(userJson, null, Collections.emptyList())
+        );
+        SecurityContextHolder.setContext(securityContext);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     // ==================== 注册 ====================
@@ -244,12 +264,12 @@ class ContentAuthControllerWebMvcTest {
         }
 
         @Test
-        @DisplayName("blank userId - returns 400")
-        void blankUserId_returns400() throws Exception {
+        @DisplayName("blank mobile - returns 400")
+        void blankMobile_returns400() throws Exception {
             mockMvc.perform(post("/content/auth/bind/mobile")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"userId":"","mobile":"13800138001","code":"123456"}
+                                    {"mobile":"","code":"123456"}
                                     """))
                     .andExpect(status().isBadRequest());
         }
@@ -264,22 +284,13 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("valid params - returns device list")
         void validParams_returnsDeviceList() throws Exception {
-            when(contentDeviceSessionService.listDevices("u_001", "jti_123"))
+            when(contentDeviceSessionService.listDevices("testUser", "jti_123"))
                     .thenReturn(List.of());
 
             mockMvc.perform(get("/content/auth/devices")
-                            .param("userId", "u_001")
                             .param("currentTokenJti", "jti_123"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
-        }
-
-        @Test
-        @DisplayName("missing userId - returns 400")
-        void missingUserId_returns400() throws Exception {
-            mockMvc.perform(get("/content/auth/devices")
-                            .param("currentTokenJti", "jti_123"))
-                    .andExpect(status().isBadRequest());
         }
 
         @Test

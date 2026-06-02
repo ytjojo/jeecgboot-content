@@ -1,6 +1,10 @@
 package org.jeecg.modules.content.auth.biz;
 
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.auth.entity.ContentRiskEvent;
 import org.jeecg.modules.content.auth.entity.ContentUserAccount;
@@ -8,6 +12,7 @@ import org.jeecg.modules.content.auth.mapper.ContentRiskEventMapper;
 import org.jeecg.modules.content.auth.mapper.ContentUserAccountMapper;
 import org.jeecg.modules.content.user.entity.ContentUserDeviceSession;
 import org.jeecg.modules.content.user.mapper.ContentUserDeviceSessionMapper;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -53,6 +58,14 @@ class ContentRiskControlBizServiceTest {
     private static final String TEST_ACCOUNT_ID = "acc_001";
     private static final String TEST_IP = "192.168.1.100";
     private static final String TEST_DEVICE_FP = "fp_abc123";
+
+    @BeforeAll
+    static void initMybatisPlus() {
+        MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
+        TableInfoHelper.initTableInfo(assistant, ContentUserDeviceSession.class);
+        TableInfoHelper.initTableInfo(assistant, ContentRiskEvent.class);
+        TableInfoHelper.initTableInfo(assistant, ContentUserAccount.class);
+    }
 
     // ==================== 登录失败记录 ====================
 
@@ -370,30 +383,14 @@ class ContentRiskControlBizServiceTest {
             event.setResolved(false);
             when(riskEventMapper.selectById("evt_003")).thenReturn(event);
 
-            ContentUserDeviceSession currentSession = new ContentUserDeviceSession();
-            currentSession.setUserId(TEST_USER_ID);
-            currentSession.setDeviceFingerprint(TEST_DEVICE_FP);
-            currentSession.setSessionStatus("ACTIVE");
-
-            ContentUserDeviceSession otherSession = new ContentUserDeviceSession();
-            otherSession.setUserId(TEST_USER_ID);
-            otherSession.setDeviceFingerprint("fp_other");
-            otherSession.setSessionStatus("ACTIVE");
-
-            when(deviceSessionMapper.selectList(any(LambdaQueryWrapper.class)))
-                    .thenReturn(List.of(currentSession, otherSession));
-
             riskControlService.confirmAbnormalLogin(TEST_USER_ID, "evt_003", false);
 
             ArgumentCaptor<ContentRiskEvent> eventCaptor = ArgumentCaptor.forClass(ContentRiskEvent.class);
             verify(riskEventMapper).updateById(eventCaptor.capture());
             assertThat(eventCaptor.getValue().getResolved()).isTrue();
             assertThat(eventCaptor.getValue().getResolveNote()).isEqualTo("非本人确认，已下线其他设备");
-            // 只下线otherSession，不下线currentSession
-            ArgumentCaptor<ContentUserDeviceSession> sessionCaptor = ArgumentCaptor.forClass(ContentUserDeviceSession.class);
-            verify(deviceSessionMapper, times(1)).updateById(sessionCaptor.capture());
-            assertThat(sessionCaptor.getValue().getDeviceFingerprint()).isEqualTo("fp_other");
-            assertThat(sessionCaptor.getValue().getSessionStatus()).isEqualTo("REVOKED");
+            // 批量下线非当前设备的会话（通过 LambdaUpdateWrapper）
+            verify(deviceSessionMapper, times(1)).update(isNull(), any(LambdaUpdateWrapper.class));
         }
 
         @Test

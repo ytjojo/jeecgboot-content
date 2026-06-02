@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ContentUserProfileManagementMigrationTest {
 
     private static final Path MIGRATION = Path.of("src/main/resources/flyway/sql/mysql/V3.9.1_53__content_user_profile_management.sql");
-    private static final Path ROLLBACK = Path.of("src/main/resources/flyway/sql/mysql/V3.9.1_53__content_user_profile_management_rollback.sql");
+    private static final Path ROLLBACK = Path.of("src/main/resources/flyway/sql/mysql/R3.9.1_53__content_user_profile_management_rollback.sql");
 
     @Test
     void shouldCreateProfileManagementTablesWithIndexesAndDefaults() throws IOException {

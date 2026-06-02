@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ContentBlockingMutingMigrationTest {
 
     private static final Path MIGRATION = Path.of("src/main/resources/flyway/sql/mysql/V3.9.1_57__content_blocking_muting.sql");
-    private static final Path ROLLBACK = Path.of("src/main/resources/flyway/sql/mysql/V3.9.1_57__content_blocking_muting_rollback.sql");
+    private static final Path ROLLBACK = Path.of("src/main/resources/flyway/sql/mysql/R3.9.1_57__content_blocking_muting_rollback.sql");
 
     @Test
     void shouldCreateBlockingMutingFeedbackAndFilterTables() throws IOException {

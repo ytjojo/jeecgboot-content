@@ -1,6 +1,7 @@
 package org.jeecg.modules.content.circle.scheduler;
 
 import org.jeecg.modules.content.circle.mapper.CircleDataStatisticsMapper;
+import org.jeecg.modules.content.circle.mapper.CircleMemberMapper;
 import org.jeecg.modules.content.circle.entity.CircleDataStatistics;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,12 +20,18 @@ class CircleDataAggregationSchedulerTest {
     @Mock
     private CircleDataStatisticsMapper dataMapper;
 
+    @Mock
+    private CircleMemberMapper memberMapper;
+
     @InjectMocks
     private CircleDataAggregationScheduler scheduler;
 
     @Test
     @DisplayName("aggregateData - 正常执行聚合任务")
     void shouldAggregateDataSuccessfully() {
+        // Given
+        when(memberMapper.selectMemberStatsGroupByCircle(any())).thenReturn(java.util.Collections.emptyList());
+
         // When
         scheduler.aggregateData();
 

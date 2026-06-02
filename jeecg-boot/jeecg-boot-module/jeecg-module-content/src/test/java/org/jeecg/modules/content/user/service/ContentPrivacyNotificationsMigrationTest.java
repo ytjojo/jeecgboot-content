@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ContentPrivacyNotificationsMigrationTest {
 
     private static final String MIGRATION_PATH = "flyway/sql/mysql/V3.9.1_58__content_privacy_notifications.sql";
-    private static final String ROLLBACK_PATH = "flyway/sql/mysql/V3.9.1_58__content_privacy_notifications_rollback.sql";
+    private static final String ROLLBACK_PATH = "flyway/sql/mysql/R3.9.1_58__content_privacy_notifications_rollback.sql";
 
     @Test
     void migrationFileShouldExist() {

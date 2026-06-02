@@ -1,8 +1,11 @@
 package org.jeecg.modules.content.auth.controller;
 
+import com.alibaba.fastjson2.JSON;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.auth.biz.IContentAccountCancellationBizService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,11 +15,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -58,6 +66,19 @@ class ContentAccountCancellationControllerWebMvcTest {
                 .setValidator(validator)
                 .setControllerAdvice(new TestExceptionHandler())
                 .build();
+
+        LoginUser loginUser = new LoginUser().setId("testUser");
+        String userJson = JSON.toJSONString(loginUser);
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(
+                new UsernamePasswordAuthenticationToken(userJson, null, Collections.emptyList())
+        );
+        SecurityContextHolder.setContext(securityContext);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Nested
@@ -70,7 +91,7 @@ class ContentAccountCancellationControllerWebMvcTest {
             mockMvc.perform(post("/content/auth/cancellation/apply")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"userId":"u_001","reason":"不想用了","cooldownDays":14}
+                                    {"reason":"不想用了","cooldownDays":14}
                                     """))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
@@ -79,23 +100,12 @@ class ContentAccountCancellationControllerWebMvcTest {
         }
 
         @Test
-        @DisplayName("blank userId - returns 400")
-        void blankUserId_returns400() throws Exception {
-            mockMvc.perform(post("/content/auth/cancellation/apply")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                    {"userId":"","cooldownDays":14}
-                                    """))
-                    .andExpect(status().isBadRequest());
-        }
-
-        @Test
         @DisplayName("cooldownDays below 7 - returns 400")
         void cooldownDaysBelow7_returns400() throws Exception {
             mockMvc.perform(post("/content/auth/cancellation/apply")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"userId":"u_001","cooldownDays":3}
+                                    {"cooldownDays":3}
                                     """))
                     .andExpect(status().isBadRequest());
         }
@@ -106,7 +116,7 @@ class ContentAccountCancellationControllerWebMvcTest {
             mockMvc.perform(post("/content/auth/cancellation/apply")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"userId":"u_001","cooldownDays":60}
+                                    {"cooldownDays":60}
                                     """))
                     .andExpect(status().isBadRequest());
         }
@@ -120,7 +130,7 @@ class ContentAccountCancellationControllerWebMvcTest {
             mockMvc.perform(post("/content/auth/cancellation/apply")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"userId":"u_001","cooldownDays":14}
+                                    {"cooldownDays":14}
                                     """))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(false))
@@ -133,22 +143,14 @@ class ContentAccountCancellationControllerWebMvcTest {
     class Status {
 
         @Test
-        @DisplayName("valid userId - returns status")
-        void validUserId_returnsStatus() throws Exception {
-            when(cancellationBizService.checkCooldownStatus("u_001")).thenReturn("PENDING");
+        @DisplayName("valid request - returns status")
+        void validRequest_returnsStatus() throws Exception {
+            when(cancellationBizService.checkCooldownStatus("testUser")).thenReturn("PENDING");
 
-            mockMvc.perform(get("/content/auth/cancellation/status")
-                            .param("userId", "u_001"))
+            mockMvc.perform(get("/content/auth/cancellation/status"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.result").value("PENDING"));
-        }
-
-        @Test
-        @DisplayName("missing userId - returns 400")
-        void missingUserId_returns400() throws Exception {
-            mockMvc.perform(get("/content/auth/cancellation/status"))
-                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -157,31 +159,22 @@ class ContentAccountCancellationControllerWebMvcTest {
     class Revoke {
 
         @Test
-        @DisplayName("valid userId - returns success")
-        void validUserId_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/auth/cancellation/revoke")
-                            .param("userId", "u_001"))
+        @DisplayName("valid request - returns success")
+        void validRequest_returnsSuccess() throws Exception {
+            mockMvc.perform(post("/content/auth/cancellation/revoke"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
 
-            verify(cancellationBizService).revokeCancellation("u_001");
-        }
-
-        @Test
-        @DisplayName("missing userId - returns 400")
-        void missingUserId_returns400() throws Exception {
-            mockMvc.perform(post("/content/auth/cancellation/revoke"))
-                    .andExpect(status().isBadRequest());
+            verify(cancellationBizService).revokeCancellation("testUser");
         }
 
         @Test
         @DisplayName("no pending cancellation - returns business error")
         void noPending_returnsBusinessError() throws Exception {
             org.mockito.Mockito.doThrow(new JeecgBootException("无待取消的注销申请"))
-                    .when(cancellationBizService).revokeCancellation(eq("u_001"));
+                    .when(cancellationBizService).revokeCancellation(eq("testUser"));
 
-            mockMvc.perform(post("/content/auth/cancellation/revoke")
-                            .param("userId", "u_001"))
+            mockMvc.perform(post("/content/auth/cancellation/revoke"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.message").value("无待取消的注销申请"));

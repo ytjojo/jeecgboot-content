@@ -1,9 +1,12 @@
 package org.jeecg.modules.content.auth.controller;
 
+import com.alibaba.fastjson2.JSON;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.auth.biz.IContentRiskControlBizService;
 import org.jeecg.modules.content.auth.entity.ContentRiskEvent;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,12 +16,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -60,6 +67,19 @@ class ContentRiskControlControllerWebMvcTest {
                 .setValidator(validator)
                 .setControllerAdvice(new TestExceptionHandler())
                 .build();
+
+        LoginUser loginUser = new LoginUser().setId("testUser");
+        String userJson = JSON.toJSONString(loginUser);
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(
+                new UsernamePasswordAuthenticationToken(userJson, null, Collections.emptyList())
+        );
+        SecurityContextHolder.setContext(securityContext);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Nested
@@ -72,13 +92,13 @@ class ContentRiskControlControllerWebMvcTest {
             mockMvc.perform(post("/content/auth/risk/appeal")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"eventId":"evt_001","resolvedBy":"u_001","note":"误操作"}
+                                    {"eventId":"evt_001","note":"误操作"}
                                     """))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.result").value("申诉成功"));
 
-            verify(riskControlBizService).appealRiskEvent("evt_001", "u_001", "误操作");
+            verify(riskControlBizService).appealRiskEvent("evt_001", "testUser", "误操作");
         }
 
         @Test
@@ -87,18 +107,7 @@ class ContentRiskControlControllerWebMvcTest {
             mockMvc.perform(post("/content/auth/risk/appeal")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"eventId":"","resolvedBy":"u_001"}
-                                    """))
-                    .andExpect(status().isBadRequest());
-        }
-
-        @Test
-        @DisplayName("blank resolvedBy - returns 400")
-        void blankResolvedBy_returns400() throws Exception {
-            mockMvc.perform(post("/content/auth/risk/appeal")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                    {"eventId":"evt_001","resolvedBy":""}
+                                    {"eventId":""}
                                     """))
                     .andExpect(status().isBadRequest());
         }
@@ -107,12 +116,12 @@ class ContentRiskControlControllerWebMvcTest {
         @DisplayName("event not found - returns business error")
         void eventNotFound_returnsBusinessError() throws Exception {
             org.mockito.Mockito.doThrow(new JeecgBootException("风险事件不存在"))
-                    .when(riskControlBizService).appealRiskEvent(eq("evt_not_exist"), eq("u_001"), any());
+                    .when(riskControlBizService).appealRiskEvent(eq("evt_not_exist"), eq("testUser"), any());
 
             mockMvc.perform(post("/content/auth/risk/appeal")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"eventId":"evt_not_exist","resolvedBy":"u_001","note":"test"}
+                                    {"eventId":"evt_not_exist","note":"test"}
                                     """))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(false))
@@ -130,7 +139,7 @@ class ContentRiskControlControllerWebMvcTest {
             mockMvc.perform(post("/content/auth/risk/confirm-login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"userId":"u_001","eventId":"evt_002","isSelf":true}
+                                    {"eventId":"evt_002","isSelf":true}
                                     """))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
@@ -138,12 +147,12 @@ class ContentRiskControlControllerWebMvcTest {
         }
 
         @Test
-        @DisplayName("blank userId - returns 400")
-        void blankUserId_returns400() throws Exception {
+        @DisplayName("blank eventId - returns 400")
+        void blankEventId_returns400() throws Exception {
             mockMvc.perform(post("/content/auth/risk/confirm-login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"userId":"","eventId":"evt_002","isSelf":true}
+                                    {"eventId":"","isSelf":true}
                                     """))
                     .andExpect(status().isBadRequest());
         }
@@ -154,7 +163,7 @@ class ContentRiskControlControllerWebMvcTest {
             mockMvc.perform(post("/content/auth/risk/confirm-login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"userId":"u_001","eventId":"evt_002"}
+                                    {"eventId":"evt_002"}
                                     """))
                     .andExpect(status().isBadRequest());
         }
@@ -165,25 +174,17 @@ class ContentRiskControlControllerWebMvcTest {
     class Notifications {
 
         @Test
-        @DisplayName("valid userId - returns list")
-        void validUserId_returnsList() throws Exception {
+        @DisplayName("valid request - returns list")
+        void validRequest_returnsList() throws Exception {
             ContentRiskEvent event = new ContentRiskEvent();
             event.setId("evt_001");
-            event.setUserId("u_001");
-            when(riskControlBizService.getPendingNotifications("u_001")).thenReturn(List.of(event));
+            event.setUserId("testUser");
+            when(riskControlBizService.getPendingNotifications("testUser")).thenReturn(List.of(event));
 
-            mockMvc.perform(get("/content/auth/risk/notifications")
-                            .param("userId", "u_001"))
+            mockMvc.perform(get("/content/auth/risk/notifications"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.result[0].id").value("evt_001"));
-        }
-
-        @Test
-        @DisplayName("missing userId - returns 400")
-        void missingUserId_returns400() throws Exception {
-            mockMvc.perform(get("/content/auth/risk/notifications"))
-                    .andExpect(status().isBadRequest());
         }
     }
 }

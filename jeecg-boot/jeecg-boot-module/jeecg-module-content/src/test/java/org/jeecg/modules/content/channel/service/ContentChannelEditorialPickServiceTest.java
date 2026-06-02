@@ -8,11 +8,13 @@ import org.jeecg.modules.content.channel.req.create.ChannelEditorialPickCreateRe
 import org.jeecg.modules.content.channel.req.update.ChannelEditorialPickUpdateReq;
 import org.jeecg.modules.content.channel.service.impl.ContentChannelEditorialPickServiceImpl;
 import org.jeecg.modules.content.channel.vo.ChannelEditorialPickVO;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -31,6 +33,11 @@ class ContentChannelEditorialPickServiceTest {
 
     @InjectMocks
     private ContentChannelEditorialPickServiceImpl editorialPickService;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(editorialPickService, "baseMapper", editorialPickMapper);
+    }
 
     @Test
     void createPick_shouldCreateValidPick() {
