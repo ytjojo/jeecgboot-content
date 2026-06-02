@@ -40,8 +40,37 @@
 - 规则九：测试验证意图，而非仅验证行为（Tests verify intent, not just behavior）测试必须体现该行为*为何重要*（WHY），而非仅断言它*做了什么*（WHAT）。若业务逻辑变更时测试仍不报错，则该测试设计错误。
 - 规则十：关键步骤后强制设立检查点（Checkpoint after every significant step）总结已完成事项、已验证结果及剩余待办。若无法向我清晰描述当前状态，绝不可继续推进。若丢失上下文或逻辑偏离，立即暂停并重新声明当前状态。
 - 规则十一：严格遵从代码库既有规范，即便持保留意见（Match the codebase's conventions, even if you disagree）在代码库内部：规范一致性 > 个人技术偏好。若确信某规范存在实质危害，请显式提出。切勿暗中另起范式。
-- 规则十二：显式失败（Fail loud）若有步骤被静默跳过，宣称“已完成”即为错误。若有测试被跳过，宣称“测试通过”即为错误。默认原则：主动暴露不确定性，绝不掩盖。
+- 规则十二：显式失败（Fail loud）若有步骤被静默跳过，宣称”已完成”即为错误。若有测试被跳过，宣称”测试通过”即为错误。默认原则：主动暴露不确定性，绝不掩盖。
 
+## 单元测试规范
+
+### 测试必须执行，不能只写不跑
+- 写完测试后，**必须执行该测试类**确认通过，不能仅凭代码逻辑推断正确
+- 代码变更涉及的模块，必须执行**模块级全量测试**（`mvn test -pl <module>`），不能只跑修改的测试类
+- 原因：单个测试类通过不代表与其他测试无冲突，全量测试能发现 mock 泄漏、桩冲突等问题
+
+### Service 测试（extends ServiceImpl）
+- MyBatis-Plus 的 `ServiceImpl` 通过 `@Autowired` 注入 mapper，Mockito 的 `@InjectMocks` 不识别
+- **必须**在 `@BeforeEach` 中添加：`ReflectionTestUtils.setField(service, “baseMapper”, mockMapper);`
+- 模式固定，无例外
+
+### WebMvc 测试（涉及 SecureUtil.currentUser()）
+- 控制器通过 `SecurityContextHolder.getContext().getAuthentication().getName()` 获取当前用户
+- **必须**在 `@BeforeEach` 中设置 SecurityContext，序列化 `LoginUser` 为 JSON 作为 principal
+- `@AfterEach` 中调用 `SecurityContextHolder.clearContext()` 清理
+
+### Mock 完整性
+- 被测类的所有 `@Resource` / `@Autowired` 依赖都必须 `@Mock`，遗漏任何一个都会导致 NPE
+- 写完测试后自检：被测类的每个注入字段是否都有对应的 `@Mock`
+
+### 断言消息对齐
+- `hasMessage` / `hasMessageContaining` 的字符串必须与实际异常消息**完全一致**
+- 修改了异常消息后，必须同步更新所有相关测试断言
+- 优先用 `hasMessageContaining` 匹配关键子串，减少因文案微调导致的测试失败
+
+### Mockito 桩签名
+- `selectOne(wrapper)` 和 `selectOne(wrapper, throwEx)` 是两个不同方法
+- 桩参数必须与实际调用签名匹配，否则触发 `PotentialStubbingProblem`
 
 ## Git Worktree & 分支管理
 
@@ -71,7 +100,9 @@
 
 1. **实现** — 完成功能代码
 2. **Code Review** — 检查代码质量、命名、边界条件、安全性
-3. **单元测试** — 运行全量测试，确保 **100% 通过**，禁止带红测试提交
+3. **单元测试** — 执行**模块级全量测试**（`mvn test -pl <module> -am`），确保 **100% 通过**，禁止带红测试提交
+   - 不能只跑修改的测试类，必须跑模块全量，发现 mock 泄漏和桩冲突
+   - 测试写完必须立即执行验证，不能"写完就算完成"
 
 ---
 
