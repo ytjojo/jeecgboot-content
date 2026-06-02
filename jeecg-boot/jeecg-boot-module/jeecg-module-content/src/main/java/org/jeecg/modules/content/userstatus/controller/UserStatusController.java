@@ -68,7 +68,7 @@ public class UserStatusController {
         vo.setUserId(userId);
         String statusName = profile.getStatus();
         vo.setStatus(statusName);
-        UserStatusEnum statusEnum = UserStatusEnum.valueOf(statusName);
+        UserStatusEnum statusEnum = UserStatusEnum.fromNameOrThrow(statusName);
         vo.setStatusDisplayName(statusEnum.getDisplayName());
         return vo;
     }
@@ -83,7 +83,7 @@ public class UserStatusController {
         if (profile == null) {
             throw new JeecgBootException("用户资料不存在: " + userId);
         }
-        UserStatusEnum currentStatus = UserStatusEnum.valueOf(profile.getStatus());
+        UserStatusEnum currentStatus = UserStatusEnum.fromNameOrThrow(profile.getStatus());
 
         bizManageService.changeStatus(
             userId,
@@ -115,7 +115,7 @@ public class UserStatusController {
         if (profile == null) {
             throw new JeecgBootException("用户资料不存在: " + userId);
         }
-        UserStatusEnum currentStatus = UserStatusEnum.valueOf(profile.getStatus());
+        UserStatusEnum currentStatus = UserStatusEnum.fromNameOrThrow(profile.getStatus());
 
         bizManageService.changeStatus(
             userId,

@@ -2,6 +2,7 @@ package org.jeecg.modules.content.userstatus.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.jeecg.common.exception.JeecgBootException;
 
 /**
  * 用户状态枚举。
@@ -54,5 +55,28 @@ public enum UserStatusEnum {
             }
         }
         return null;
+    }
+
+    /**
+     * 根据状态名称查找枚举值，非法值抛 JeecgBootException。
+     *
+     * <p>用于 Controller / 业务层解析用户资料里的 status 字段。当数据库出现脏数据
+     * （status 字段不在枚举中）时，调用方期望拿到业务异常 {@link JeecgBootException}，
+     * 由全局异常处理转 {@code Result.error(...)} 返回给客户端，而不是 JDK 默认的
+     * {@link IllegalArgumentException}。
+     *
+     * @param name 状态名称（与 {@link #name} 字段一致，如 "NORMAL"、"MUTED"）
+     * @return 对应的枚举值
+     * @throws JeecgBootException 当 {@code name} 为 null、空白或不在枚举中
+     */
+    public static UserStatusEnum fromNameOrThrow(String name) {
+        if (name == null || name.isBlank()) {
+            throw new JeecgBootException("用户状态值不合法: " + name);
+        }
+        try {
+            return UserStatusEnum.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            throw new JeecgBootException("用户状态值不合法: " + name);
+        }
     }
 }
