@@ -159,7 +159,7 @@ class ContentAuthBizServiceRebindUnbindTest {
             // when / then
             assertThatThrownBy(() -> bizService.rebindMobile(req))
                     .isInstanceOf(JeecgBootException.class)
-                    .hasMessage("该手机号已被其他用户绑定");
+                    .hasMessage("手机号已被其他用户绑定");
 
             // 旧凭证不应被禁用
             verify(credentialMapper, never()).updateById(any(ContentUserCredential.class));

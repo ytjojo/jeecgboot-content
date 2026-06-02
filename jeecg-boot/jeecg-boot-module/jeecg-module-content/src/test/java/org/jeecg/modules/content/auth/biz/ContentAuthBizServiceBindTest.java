@@ -131,7 +131,7 @@ class ContentAuthBizServiceBindTest {
         // when & then
         assertThatThrownBy(() -> bizService.bindMobile(req))
                 .isInstanceOf(JeecgBootException.class)
-                .hasMessageContaining("该手机号已被其他账号绑定");
+                .hasMessageContaining("手机号已被其他账号绑定");
     }
 
     // ========== bindMobile 验证码无效/过期 ==========
@@ -213,7 +213,7 @@ class ContentAuthBizServiceBindTest {
         // when & then
         assertThatThrownBy(() -> bizService.bindEmail(req))
                 .isInstanceOf(JeecgBootException.class)
-                .hasMessageContaining("该邮箱已被其他账号绑定");
+                .hasMessageContaining("邮箱已被其他账号绑定");
     }
 
     // ========== bindEmail 验证码无效/过期 ==========
