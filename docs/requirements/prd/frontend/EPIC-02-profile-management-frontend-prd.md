@@ -82,17 +82,21 @@
 
 **入口**: 个人中心 → 头像/昵称区域 → "编辑资料"按钮
 
+**数据来源**: 页面初始化时调用 `GET /content/user/profile/detail?ownerUserId={currentUid}` 获取当前用户资料。
+
 **页面结构**:
 ```
 顶部导航栏（返回箭头 + 页面标题"编辑资料" + 保存按钮）
 ├── 头像区域（居中大头像 + 相机图标触发上传）
+├── 审核状态条（仅在 profileReviewStatus === 'PENDING' 时展示）
+├── 提示条（"今日还可修改 X 次"）
 ├── 表单区域
 │   ├── 昵称（必填，输入框，最大 20 字符）
 │   ├── 简介（选填，文本域，最大 500 字符，显示字数统计）
 │   ├── 性别（选填，单选：男/女/保密）
 │   ├── 生日（选填，日期选择器，不可选未来日期）
 │   ├── 地区（选填，级联选择省/市/区）
-│   ├── 职业（选填，输入框，最大 30 字符）
+│   ├── 职业（选填，输入框，最大 64 字符）  ← 后端 max=64（非 30）
 │   └── 个人链接（选填，URL 输入框，带格式校验）
 └── 底部操作栏（取消 + 保存按钮）
 ```
@@ -104,25 +108,32 @@
 - **审核中状态返回**: 当表单处于审核中状态（字段不可编辑，isDirty 始终为 false）时，点击返回直接返回，不弹出确认框
 
 **交互要求**:
-- 头像区域点击触发文件选择，选择后进入裁剪弹窗（复用 `Cropper` 组件）
+- 头像区域点击触发文件选择，选择后进入裁剪弹窗（复用 `Cropper` 组件，详见 3.2）
+- **提交方式**: 点击保存 → 合并 formData 为 `ContentUserProfileUpdateReq` → 调用 `POST /content/user/profile/update?userId={currentUid}` 一次性提交
+- **必填约束**（前后端共用）: `nickname`、`avatar` 字段在 `@NotBlank` 校验下必须非空，提交前前端表单层必须保证
 - 昵称输入框实时校验：为空时提示"请输入昵称"，含敏感词时提示"昵称包含不当内容，请修改"
 - 简介文本域右下角显示已输入字数/最大字数（如 123/500）
-- 性别使用 Radio.Group 组件
-- 生日使用 DatePicker 组件，`disabledDate` 禁用未来日期
-- 地区使用 Cascader 组件加载省市区数据
-- 个人链接输入框失去焦点时校验 URL 格式
+- 性别使用 Radio.Group 组件（提交时转为 Integer：1=男/2=女/3=保密）
+- 生日使用 DatePicker 组件，`disabledDate` 禁用未来日期，提交时序列化为 ISO 8601 字符串
+- 地区使用 Cascader 组件加载省市区数据，最终合并为字符串（max 64）
+- 个人链接输入框失去焦点时校验 URL 格式（regex `^(https?://|/).*$`）
 - 保存按钮点击后进入 loading 状态，防止重复提交
-- 保存成功后显示全局消息"资料已更新"并返回个人中心
+- 保存成功后显示全局消息"资料已更新"并刷新 `useUserStore` 中的资料缓存，返回个人中心
 - 保存失败时保留已输入内容，显示错误提示
 
-**频率限制交互**:
-- 当日修改次数达到 5 次后，保存按钮置灰，hover 提示"今日修改次数已达上限，请明天再试"
-- 页面加载时查询当日剩余修改次数，在表单顶部显示提示条"今日还可修改 X 次"
+**频率限制交互**（前端 UX，依赖后端错误码）:
+- **不预查**: 后端无独立 `/profile/update-count` 接口，前端**不预查**当日剩余次数
+- **被动拦截**: 当后端返回频率限制错误码（待与后端约定，如 `code = 1101` 或 `message` 包含"今日修改次数已达上限"）时：
+  - 表单顶部显示红色 Alert "今日修改次数已达上限，请明天再试"
+  - 保存按钮置灰，hover 提示同上
+  - 直至用户离开页面或收到后端"重置"信号
+- **本地乐观计数**: 前端可在本地维护 `dailyUpdateCount`，每次提交成功 +1，达到 5 次后主动置灰（仅作 UX 提示，不替代后端判定）
 
 **审核状态交互**:
-- 当资料处于"待审核"状态时，表单顶部显示黄色提示条"您的资料正在审核中，请稍后"
+- **数据来源**: `ContentUserProfileVO.profileReviewStatus` 字段（取值：`NONE` / `PENDING` / `APPROVED` / `REJECTED`）
+- 当 `profileReviewStatus === 'PENDING'`：表单顶部显示黄色提示条"您的资料正在审核中，预计 24 小时内完成"
 - 审核期间保存按钮禁用
-- 审核结果通过 Notification 组件推送通知
+- 审核结果：通过 WebSocket/SSE 推送（详见 3.3 节），前端用 Notification 组件弹出
 
 **状态与边界情况**:
 - **加载中**: 页面显示骨架屏
@@ -130,6 +141,7 @@
 - **审核中**: 表单字段显示当前生效值（旧值），不可编辑
 - **网络错误**: 显示"网络异常，请重试"提示，保留已输入内容
 - **字段超长**: 输入框下方显示红色错误提示，阻止提交
+- **后端校验失败**（如 `@NotBlank nickname`）: 解析后端 `Result.message`，回填到对应字段下方
 
 ---
 
@@ -138,6 +150,8 @@
 #### 组件: 头像裁剪弹窗
 
 **触发**: 编辑资料页点击头像区域
+
+> **架构调整说明**: 后端 `ContentUserProfileController` **不提供**独立的 `/avatar/upload` 接口。头像上传改为**前端 OSS 客户端直传**模式，流程为：裁剪 → 客户端直传 OSS → 获得 CDN URL → 暂存于 formData.avatar → 用户点击"保存"时由 `/profile/update` 统一提交。
 
 **弹窗结构**:
 ```
@@ -154,20 +168,27 @@ Modal 弹窗
 │   └── "确定" 按钮
 ```
 
-**校验规则**:
+**校验规则**（前端 + OSS 服务端双重校验）:
 | 校验项 | 规则 | 错误提示 |
 |--------|------|----------|
 | 文件格式 | 仅 JPG、PNG、WebP | "仅支持 JPG、PNG、WebP 格式" |
-| 文件大小 | ≤ 5MB | "图片大小必须小于 5MB" |
+| 文件大小 | ≤ 5MB（OSS 限制） | "图片大小必须小于 5MB" |
 | 文件内容 | 非空文件 | "请选择有效的图片文件" |
+| CDN URL 长度 | max 500 | 后端 `@Size(max=500)` 校验 |
 
 **交互要求**:
 - 文件选择后立即校验格式和大小，不通过时在文件选择阶段就拦截并提示
 - 校验通过后打开裁剪弹窗，裁剪框默认居中，比例 1:1
 - 支持滚轮缩放和滑块缩放
-- 点击"确定"后上传裁剪结果，弹窗显示上传进度
-- 上传成功后关闭弹窗，编辑页头像区域更新为新头像
-- 上传失败显示"上传失败，请重试"，弹窗不关闭
+- 点击"确定"后调用 OSS 客户端直传通道（复用 JeecgBoot 既有上传组件），弹窗显示上传进度
+- **上传成功**: 获得 CDN URL → 暂存于 formData.avatar → 关闭弹窗 → 编辑页头像区域更新为新头像预览（不直接提交到后端）
+- **上传失败**: 显示"上传失败，请重试"，弹窗不关闭，允许重试
+- 用户最终点击编辑页底部"保存"时，统一走 `/profile/update` 将 avatar URL 与其他字段一并提交
+
+**OSS 直传组件复用**:
+- 优先复用 `src/components/Upload/` 下的既有 OSS 上传组件
+- 若现有组件不支持纯客户端签名，需扩展：前端向后端换取 STS 临时凭证 → 前端携带凭证直传 OSS
+- 上传后的 CDN URL 通过 `useUserStore` 暂存，不立即触发 `useUserStore` 全量更新
 
 ---
 
@@ -213,11 +234,15 @@ Modal 弹窗
 ```
 
 **交互要求**:
-- 背景图上传复用头像上传的校验逻辑（JPG/PNG/WebP，≤5MB），裁剪比例为 16:9
-- 选择主题色后实时更新预览区效果
+- **背景图上传**: 复用 3.2 节的 OSS 客户端直传流程（JPG/PNG/WebP，≤5MB），裁剪比例 16:9；上传后获得 CDN URL 暂存于 formData.homepageBackground
+- **保存方式**: 主页设置页提供两种保存路径
+  - **路径 A**（推荐，仅修改主页）: `POST /content/user/profile/homepage/update?userId={uid}` 提交 `ContentUserHomepageUpdateReq`（含 background/themeColor/modules）
+  - **路径 B**（与基础资料合并保存）: 暂存为 formData，用户返回编辑资料页统一走 `/profile/update`
+- **模块配置**: 通过 `GET /content/user/profile/homepage/modules?userId={uid}` 加载可选模块清单
+- **恢复默认**: 调用 `POST /content/user/profile/homepage/defaults/restore?userId={uid}` 清除自定义配置
+- 选择主题色后实时更新预览区效果（不触发接口，CSS 变量切换）
 - 预设色板选中项显示对勾图标
-- "恢复默认" 清除自定义背景和主题色，使用平台默认样式
-- 保存成功提示"主页设置已更新"
+- 保存成功提示"主页设置已更新"，刷新当前用户主页资料缓存
 
 **无障碍对比度校验**:
 - **自动校验**: 选择主题色后自动计算与白色/黑色文字的对比度（WCAG AA 标准要求对比度 ≥ 4.5:1）
@@ -254,7 +279,8 @@ Modal 弹窗
 - 显隐开关为 Switch 组件，关闭时该模块从主页隐藏
 - 当所有模块开关都关闭时，保存按钮禁用，提示"至少需要保留一个模块"
 - 拖拽排序后自动标记为"未保存"状态，显示"保存"按钮
-- "恢复默认排序" 重置为系统默认模块顺序和显隐配置
+- "恢复默认排序" 复用 `POST /content/user/profile/homepage/defaults/restore?userId={uid}` 端点
+- **保存方式**: 页面 mount 时调用 `GET /content/user/profile/homepage/modules?userId={uid}` 加载模块清单（含 `moduleKey`、`moduleName`、`visible`、`sortOrder`）；用户调整后提交到 `POST /content/user/profile/homepage/update`，body 中 `modules` 字段传入 `List<ContentUserHomepageModuleReq>`（含 `moduleKey`/`visible`/`sortOrder` 必填）
 - 保存成功提示"主页模块配置已更新"
 
 **移动端拖拽交互规范**:
@@ -277,34 +303,44 @@ Modal 弹窗
 
 **展示位置**: 昵称右侧（所有出现昵称的地方）
 
-**标识类型与样式**:
-| 认证类型 | 标识样式 | 颜色 | 图标 |
-|----------|----------|------|------|
-| 个人认证 | 蓝色对勾 | #1890ff | CheckCircleFilled |
-| 企业认证 | 金色徽章 | #faad14 | SafetyCertificateFilled |
-| 大V/达人 | 紫色星标 | #722ed1 | StarFilled |
-| 官方认证 | 红色盾牌 | #f5222d | ShieldFilled |
-| 实名认证 | 灰色盾牌 | #8c8c8c | IdcardFilled |
-| 手机已验证 | 绿色手机 | #52c41a | MobileFilled |
-| 邮箱已验证 | 绿色邮箱 | #52c41a | MailFilled |
+> **数据来源调整**: 认证标识列表已内嵌在 `ContentUserProfileVO.verificationBadges` 字段中，**编辑资料页和个人主页**复用 `/profile/detail` 响应即可，无需额外请求。**认证详情弹窗**才需调用 `GET /content/user/profile/badge/detail?badgeId={id}`。
+> 
+> 字段映射调整（对齐 `ContentUserVerificationBadgeVO`）:
+> - `type` → `badgeType`
+> - `label` → `badgeLabel`
+> - 视觉样式不再硬编码，改由 `visualStyleKey` 映射图标/颜色（前端维护 `visualStyleKey → 图标 + 颜色` 字典）
+
+**标识类型与样式**（前端 `visualStyleKey` 映射）:
+| 视觉样式 Key | 视觉含义 | 颜色 | 图标 |
+|-------------|---------|------|------|
+| `INDIVIDUAL` | 个人认证 | #1890ff | CheckCircleFilled |
+| `ENTERPRISE` | 企业认证 | #faad14 | SafetyCertificateFilled |
+| `INFLUENCER` | 大V/达人 | #722ed1 | StarFilled |
+| `OFFICIAL` | 官方认证 | #f5222d | ShieldFilled |
+| `REAL_NAME` | 实名认证 | #8c8c8c | IdcardFilled |
+| `PHONE_VERIFIED` | 手机已验证 | #52c41a | MobileFilled |
+| `EMAIL_VERIFIED` | 邮箱已验证 | #52c41a | MailFilled |
+| `DEFAULT` | 兜底样式 | #8c8c8c | SafetyCertificateFilled |
+
+> **未识别 visualStyleKey 处理**: 落入 `DEFAULT` 兜底样式，避免显示空白。后续如新增样式仅需扩展映射字典。
 
 **认证详情弹窗**:
 ```
 Modal 弹窗
-├── 认证图标（大尺寸）
-├── 认证类型名称
-├── 认证时间
-├── 认证说明/描述
-├── 企业认证额外显示：企业名称
-├── 达人认证额外显示：认证领域
+├── 认证图标（大尺寸，按 visualStyleKey 映射）
+├── 认证文案（badgeLabel）
+├── 认证时间（verifiedAt，格式 YYYY-MM-DD HH:mm）
+├── 认证说明/描述（description，可选）
+├── 企业认证额外显示：企业名称（从 description 或独立字段解析）
+├── 达人认证额外显示：认证领域（同上）
 └── 关闭按钮
 ```
 
 **交互要求**:
 - 认证标识紧跟昵称右侧显示，与昵称同行
-- 鼠标 hover 标识时显示 Tooltip，简要说明认证类型
-- 点击标识打开认证详情弹窗
-- 多个认证同时存在时，按优先级排列（官方 > 企业 > 达人 > 个人 > 实名 > 手机 > 邮箱）
+- 鼠标 hover 标识时显示 Tooltip，简要说明认证类型（取 `badgeLabel`）
+- 点击标识打开认证详情弹窗，调用 `GET /content/user/profile/badge/detail?badgeId={id}` 拉取详情
+- 多个认证同时存在时，按优先级排列（官方 > 企业 > 达人 > 个人 > 实名 > 手机 > 邮箱），由前端定义的 `BADGE_PRIORITY` 常量控制
 - 无认证时不显示任何标识
 - 认证标识不随昵称审核状态变化，独立展示
 
@@ -319,9 +355,9 @@ Modal 弹窗
 - **徽标样式**: "+N" 使用灰色背景圆角徽标，与认证标识风格统一
 
 **组件封装**:
-- 封装 `VerificationBadge` 组件，Props 包含 `badges: BadgeItem[]`
-- `BadgeItem` 包含 `type`、`label`、`icon`、`color`、`verifiedAt`、`description`
-- 组件内部处理排序和展示逻辑
+- 封装 `VerificationBadge` 组件，Props 包含 `badges: ContentUserVerificationBadgeVO[]`（直接使用后端 VO 类型）
+- 组件内部根据 `visualStyleKey` 映射图标/颜色，按 `BADGE_PRIORITY` 排序，应用折叠策略
+- 组件无状态，仅做展示
 
 ---
 
@@ -331,44 +367,97 @@ Modal 弹窗
 
 **入口**: 设置 → 隐私设置 / 个人中心 → 隐私设置
 
+> **数据加载调整**: 后端无独立 `/privacy/settings` 接口。隐私设置页 mount 时调用 `GET /content/user/profile/detail?ownerUserId={currentUid}`，从 `ContentUserProfileVO` 中推导初始可见性：
+> - 字段值为 `null`（后端隐私裁剪）→ 默认推断为 `PRIVATE`（前端 UX 选择）
+> - 字段有值 → 默认推断为 `PUBLIC`
+> - **精确模式**: 后续可增加 `/privacy/settings` 独立接口返回 16 个字段精确配置（待与后端确认）
+
 **页面结构**:
 ```
 顶部导航栏（返回箭头 + "隐私设置" 标题）
 ├── 说明区域（简要说明隐私设置的作用）
 ├── 批量操作区域
-│   ├── "默认可见性" 设置（Select 组件，设置新字段的默认可见性级别）
-│   └── "一键全部设为" 快捷操作（Select 组件，批量设置所有可修改字段的可见性）
-├── 字段可见性列表
-│   ├── 昵称（默认公开，不可修改）
-│   ├── 头像（默认公开，不可修改）
-│   ├── 简介 → 下拉选择：公开/仅关注者/互关可见/仅自己
-│   ├── 性别 → 下拉选择
-│   ├── 生日 → 下拉选择
-│   ├── 地区 → 下拉选择
-│   ├── 职业 → 下拉选择
-│   ├── 个人链接 → 下拉选择
-│   ├── 手机验证状态 → 下拉选择
-│   └── 邮箱验证状态 → 下拉选择
+│   ├── "一键全部设为" 快捷操作（Select 组件，批量设置所有可修改字段的可见性）
+│   └── 频率限制提示（被动显示，见下文）
+├── 字段可见性列表（按 4 个分组折叠展示）
+│   ├── 📋 基础资料组
+│   │   ├── 昵称（默认公开，不可修改）
+│   │   ├── 头像（默认公开，不可修改）
+│   │   ├── 简介 → 下拉选择
+│   │   ├── 性别 → 下拉选择
+│   │   ├── 生日 → 下拉选择
+│   │   ├── 地区 → 下拉选择
+│   │   ├── 职业 → 下拉选择
+│   │   └── 个人链接 → 下拉选择
+│   ├── 🏆 认证与绑定组
+│   │   ├── 认证标识 → 下拉选择（verificationBadgeVisibility）
+│   │   ├── 绑定标识（手机/邮箱）→ 下拉选择（contactBadgeVisibility）
+│   │   └── 在线状态 → 下拉选择（特殊枚举，见下文）
+│   ├── 🏠 主页与动态组
+│   │   ├── 主页可见性 → 下拉选择（homepageVisibility）
+│   │   ├── 动态可见性 → 下拉选择（dynamicVisibility）
+│   │   ├── 浏览历史 → 下拉选择（browseHistoryVisibility）
+│   │   ├── 点赞活动 → 下拉选择（likeActivityVisibility）
+│   │   └── 收藏 → 下拉选择（favoriteVisibility）
+│   └── 🔍 搜索与发现组
+│       ├── 允许搜索引擎收录 → Switch（allowSearchEngineIndex）
+│       └── 允许站内用户搜索 → Switch（allowUserSearch）
 └── 保存按钮
 ```
 
 **批量操作交互规范**:
-- **默认可见性**: 页面加载时显示用户当前的默认可见性设置，修改后仅影响新添加的字段，不改变已有字段的设置
-- **一键全部设为**: 选择可见性级别后弹出确认框"确定将所有可修改字段设为{级别}吗？此操作会覆盖当前各字段的单独设置"，确认后批量更新所有可修改字段（昵称和头像除外）
+- **默认可见性** (本版移除): 后端无 `defaultVisibility` 字段，移除该 UX 控件
+- **一键全部设为**: 选择可见性级别后弹出确认框"确定将所有可修改字段设为{级别}吗？此操作会覆盖当前各字段的单独设置"，确认后批量更新所有 `*Visibility` 字段（昵称、头像、在线状态除外；Switch 类型字段不参与）
 - **操作反馈**: 批量操作成功后显示"已将 X 个字段设为{级别}"，并在字段列表中高亮变化的字段（2 秒后恢复）
 - **撤销能力**: 批量操作后提供"撤销"按钮（5 秒内有效），点击后恢复批量操作前的状态
 
 **交互要求**:
-- 每个字段右侧使用 Select 组件展示当前可见性级别
-- 可见性选项图标说明：
-  - 🌐 公开：所有人可见
-  - 👥 仅关注者：关注你的人可见
-  - 🤝 互关可见：互相关注的人可见
-  - 🔒 仅自己：仅自己可见
-- 昵称和头像默认公开且不可修改（置灰 + Tooltip 说明"昵称和头像始终公开"）
+- 每个字段右侧使用 Select 组件展示当前可见性级别（Switch 字段除外）
+- 通用可见性选项图标说明：
+  - 🌐 公开（`PUBLIC`）：所有人可见
+  - 👥 仅关注者（`FOLLOWERS_ONLY`）：关注你的人可见
+  - 🤝 互关可见（`MUTUAL_ONLY`）：互相关注的人可见
+  - 🔒 仅自己（`PRIVATE`）：仅自己可见
+- **在线状态特殊枚举**（`onlineStatusVisibility`）:
+  - 🌐 公开（`PUBLIC`）
+  - 🚫 隐藏（`HIDDEN`）
+  - 🤝 互关可见（`MUTUAL_ONLY`）
+  - ⚠️ 不支持 `PRIVATE`，后端 `@Pattern` 拒绝
+- 昵称和头像默认公开且不可修改（**不参与隐私控制**——后端接口不提供对应字段，置灰 + Tooltip 说明"昵称和头像始终公开"）
+- 修改可见性后保存按钮激活
+- 保存成功提示"隐私设置已更新"，调用 `POST /content/user/profile/privacy/update?userId={uid}` 提交，body 为合并后的 `ContentUserPrivacyUpdateReq`
+- **频率限制**: 后端无独立 `/privacy/update-count` 接口，采用**被动拦截**策略：当后端返回"操作过于频繁"错误时，黄色提示条 + 保存按钮禁用 5 分钟（前端 UX 兜底）
+
+**前端提交字段映射**:
+```typescript
+const visibilityMap: Record<string, string> = {
+  PUBLIC: '公开',
+  FOLLOWERS_ONLY: '仅关注者',
+  MUTUAL_ONLY: '互关可见',
+  PRIVATE: '仅自己'
+};
+
+const req: ContentUserPrivacyUpdateReq = {
+  birthdayVisibility: privacyMap.birthday,
+  genderVisibility: privacyMap.gender,
+  regionVisibility: privacyMap.region,
+  professionVisibility: privacyMap.profession,
+  personalLinkVisibility: privacyMap.personalLink,
+  verificationBadgeVisibility: privacyMap.verification,
+  contactBadgeVisibility: privacyMap.contact,
+  homepageVisibility: privacyMap.homepage,
+  dynamicVisibility: privacyMap.dynamic,
+  onlineStatusVisibility: privacyMap.onlineStatus, // PUBLIC/HIDDEN/MUTUAL_ONLY
+  browseHistoryVisibility: privacyMap.browse,
+  likeActivityVisibility: privacyMap.like,
+  favoriteVisibility: privacyMap.favorite,
+  allowSearchEngineIndex: switches.searchEngine,
+  allowUserSearch: switches.userSearch
+};
+```
 - 修改可见性后保存按钮激活
 - 保存成功提示"隐私设置已更新"
-- 频率限制：每小时修改超过 10 次后，保存按钮禁用，提示"操作过于频繁，请稍后再试"
+- **频率限制**: 后端无 `/privacy/update-count` 预查接口，采用**被动拦截**——后端返回"操作过于频繁"错误时，前端展示黄色提示条 + 保存按钮禁用 5 分钟（前端 UX 兜底值，待与后端对齐具体阈值）
 
 **状态与边界情况**:
 - **加载中**: 列表显示骨架屏
@@ -400,20 +489,26 @@ Modal 弹窗
 
 **入口**: 个人中心 → 编辑资料 → "历史记录" 文字链接
 
+> **API 调整说明**: 后端无独立的 `/history/nicknames` 和 `/history/avatars` 接口，改为通过 `historyType` 区分的**统一接口**：
+> - 昵称历史: `GET /content/user/profile/history/list?userId={uid}&historyType=NICKNAME`
+> - 头像历史: `GET /content/user/profile/history/list?userId={uid}&historyType=AVATAR`
+> 
+> 响应字段 `ContentUserProfileHistoryVO`: `id`、`historyType`、`historyValue`（昵称文本或头像 URL）、`createTime`、`expiresAt`
+
 **页面结构**:
 ```
 顶部导航栏（返回箭头 + "历史记录" 标题）
 ├── 标签页切换
-│   ├── 昵称历史 Tab
+│   ├── 昵称历史 Tab（默认激活）
 │   └── 头像历史 Tab
 ├── 当前值展示区
 │   ├── 昵称历史 Tab：当前昵称 + "当前" 标签
 │   └── 头像历史 Tab：当前头像缩略图 + "当前" 标签
 ├── 历史记录列表（倒序排列）
 │   ├── 每条记录
-│   │   ├── 昵称历史项：昵称文本 + 修改时间 + "恢复" 按钮
-│   │   └── 头像历史项：头像缩略图 + 修改时间 + "恢复" 按钮
-│   └── 列表底部说明："最多保留 20 条记录，保留期限 180 天"
+│   │   ├── 昵称历史项：`historyValue` 文本 + `createTime` + "恢复" 按钮
+│   │   └── 头像历史项：`historyValue`（URL）缩略图 + `createTime` + "恢复" 按钮
+│   └── 列表底部说明："最多保留 20 条记录，保留期限 180 天（按 expiresAt 字段判定）"
 └── 空状态
 ```
 
@@ -423,14 +518,14 @@ Modal 弹窗
 - **视觉对比**: 历史记录项的昵称/头像与当前值在视觉上形成对比，帮助用户判断恢复价值
 
 **交互要求**:
-- 使用 Tabs 组件切换昵称/头像历史
-- 列表按时间倒序排列，最新记录在最上方
-- 每条记录显示：旧值 + 修改时间（格式"2026-06-01 14:30"）
-- "恢复" 按钮点击后弹出确认框"确定恢复为 {旧昵称/该头像} 吗？"
-- 确认恢复后，等同于一次新的资料修改，需遵守频率限制
-- 恢复成功提示"{昵称/头像}已恢复"
+- 使用 Tabs 组件切换昵称/头像历史；切换时**重新请求**对应 historyType
+- 列表按 `createTime` 倒序排列，最新记录在最上方
+- 每条记录显示：`historyValue` + `createTime`（格式"YYYY-MM-DD HH:mm"）
+- "恢复" 按钮点击后弹出确认框"确定恢复为 {historyValue} 吗？"
+- 确认恢复后调用 `POST /content/user/profile/history/restore?userId={uid}&historyId={id}`，等同于一次新的资料修改，需遵守频率限制（后端错误码拦截）
+- 恢复成功提示"{昵称/头像}已恢复"，刷新 `useUserStore` 资料缓存
 - 恢复失败（如昵称已被占用）显示对应错误提示
-- 最多显示 20 条记录，超出部分不显示
+- 最多显示 20 条记录（后端控制），超出部分不返回
 
 **状态与边界情况**:
 - **无历史记录**: 空状态插图 + 文案"暂无历史记录"
@@ -528,48 +623,127 @@ Modal 弹窗
 
 ## 5. API 对接
 
-### 5.1 资料管理接口
+> **更新说明（2026-06-03）**: 本节已根据后端 `ContentUserProfileController` 实际实现对齐。所有接口以 `ContentUserProfileController` 的 12 个端点为准（路径前缀 `/content/user/profile`）。后端未提供独立的「上传头像/上传背景图/查询修改次数/查询审核状态/查询隐私修改次数」等接口，对应能力由前端组合现有接口或后端内嵌实现。
+
+### 5.1 资料管理接口（统一端点）
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取当前用户资料 | GET | `/content/user/profile/current` | 获取当前登录用户的完整资料（含隐私裁剪） |
-| 更新基础资料 | POST | `/content/user/profile/update` | 提交昵称、简介、性别、生日等字段 |
-| 上传头像 | POST | `/content/user/profile/avatar/upload` | 上传头像图片，返回裁剪后的 CDN URL |
-| 上传背景图 | POST | `/content/user/profile/background/upload` | 上传主页背景图 |
-| 查询修改次数 | GET | `/content/user/profile/update-count` | 查询当日剩余修改次数 |
-| 查询审核状态 | GET | `/content/user/profile/review-status` | 查询当前资料审核状态 |
+| 获取用户资料 | GET | `/content/user/profile/detail?ownerUserId={uid}&viewerUserId={vid?}` | `ownerUserId` 必填（资料拥有者），`viewerUserId` 选填（当前访问者）。返回完整 `ContentUserProfileVO`，含 `verificationBadges`、`homepageModules`、`profileCompletionState`、`profileReviewStatus` |
+| 更新资料 | POST | `/content/user/profile/update?userId={uid}` | **统一端点**，Body 提交 `ContentUserProfileUpdateReq`。可同时更新基础资料 + 主页背景/主题色 + 模块排序 + 认证展示文案；`nickname`、`avatar` 为 `@NotBlank` 必填 |
+| 处理资料审核 | POST | `/content/user/profile/review/handle` | 管理员处理资料审核（APPROVED/REJECTED），前端不直接调用 |
+
+#### 5.1.1 `ContentUserProfileUpdateReq` 字段
+
+| 字段 | 类型 | 必填 | 约束 | 说明 |
+|------|------|------|------|------|
+| `nickname` | String | ✅ | max 20 | 昵称 |
+| `avatar` | String | ✅ | max 500 | 头像 URL（由前端 OSS 直传后获得，非 multipart 上传） |
+| `bio` | String | ❌ | max 500 | 个人简介 |
+| `gender` | Integer | ❌ | — | 性别（枚举：1=男/2=女/3=保密） |
+| `birthday` | Date | ❌ | — | 生日（ISO 8601 字符串） |
+| `region` | String | ❌ | max 64 | 地区 |
+| `profession` | String | ❌ | max 64 | 职业 |
+| `personalLink` | String | ❌ | max 255，regex `^(https?://\|/).*$` | 个人链接 |
+| `homepageBackground` | String | ❌ | max 500 | 主页背景图 URL |
+| `themeColor` | String | ❌ | max 32 | 主题色（HEX） |
+| `moduleOrderJson` | String | ❌ | max 2000 | 主页模块排序 JSON 字符串 |
+| `certificationType` | String | ❌ | max 64 | 认证类型 |
+| `certificationLabel` | String | ❌ | max 64 | 认证展示文案 |
+
+#### 5.1.2 `ContentUserProfileVO` 关键字段
+
+`userId`、`nickname`、`avatar`、`bio`、`gender`、`birthday`、`region`、`profession`、`personalLink`、`homepageBackground`、`themeColor`、`moduleOrderJson`、`certificationType`、`certificationLabel`、`verificationBadges`、`homepageModules`、`profileCompletionState`、`profileReviewStatus`、`status`、`level`、`communityRole`
+
+> 注意：后端基于 `viewerUserId` 自动裁剪隐私字段。生日/性别/地区/职业/个人链接不可见时返回 `null`。
+
+#### 5.1.3 头像/背景图上传策略
+
+后端无独立上传接口，前端采用 **OSS 客户端直传** 模式：
+1. 前端调用统一的文件上传组件（复用 JeecgBoot 既有 OSS 上传通道）
+2. 上传成功后获得 CDN URL
+3. URL 作为 `avatar` 或 `homepageBackground` 字段提交 `/content/user/profile/update`
+4. 头像裁剪仍由前端完成（复用 `Cropper` 组件，1:1 锁定）
 
 ### 5.2 主页设置接口
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取主页配置 | GET | `/content/user/homepage/config` | 获取背景图、主题色、模块配置 |
-| 更新主页配置 | POST | `/content/user/homepage/config/update` | 更新背景图、主题色 |
-| 更新模块配置 | POST | `/content/user/homepage/modules/update` | 更新模块显隐与排序 |
-| 恢复默认主页 | POST | `/content/user/homepage/restore-default` | 恢复默认背景、主题色、模块配置 |
+| 更新主页配置 | POST | `/content/user/profile/homepage/update?userId={uid}` | Body 提交 `ContentUserHomepageUpdateReq`（含背景、主题色、模块列表） |
+| 恢复主页默认 | POST | `/content/user/profile/homepage/defaults/restore?userId={uid}` | 恢复默认背景、主题色、模块配置 |
+| 查询主页模块 | GET | `/content/user/profile/homepage/modules?userId={uid}` | 返回 `List<ContentUserHomepageModuleVO>`（含 `moduleKey`、`moduleName`、`visible`、`sortOrder`） |
+
+> **简化说明**: 主页配置不再独立于资料更新——`ContentUserProfileUpdateReq` 内的 `homepageBackground`、`themeColor`、`moduleOrderJson` 三个字段已能覆盖主页设置的写入需求。`/profile/homepage/update` 端点用于**单独**提交主页配置（不修改昵称/简介等基础资料）的场景。
+
+#### 5.2.1 `ContentUserHomepageUpdateReq` 字段
+
+| 字段 | 类型 | 必填 | 约束 |
+|------|------|------|------|
+| `homepageBackground` | String | ❌ | max 500 |
+| `themeColor` | String | ❌ | max 32 |
+| `modules` | `List<ContentUserHomepageModuleReq>` | ❌ | 可空 |
+
+`ContentUserHomepageModuleReq`：`moduleKey` (必填), `visible` (Boolean 必填), `sortOrder` (Integer 必填)
 
 ### 5.3 认证标识接口
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取用户认证标识 | GET | `/content/user/verification/badges` | 获取指定用户的认证标识列表 |
-| 获取认证详情 | GET | `/content/user/verification/detail/{badgeId}` | 获取单个认证的详细信息 |
+| 查询认证标识列表 | GET | `/content/user/profile/badge/list?userId={uid}` | 返回 `List<ContentUserVerificationBadgeVO>`，已按隐私裁剪 |
+| 查询认证详情 | GET | `/content/user/profile/badge/detail?badgeId={id}` | 返回 `ContentUserVerificationBadgeVO` |
+
+> **简化说明**: `ContentUserProfileVO.verificationBadges` 字段已内嵌认证列表，**编辑资料页无需额外请求**。仅"认证详情弹窗"需独立请求 `/badge/detail`。
+
+#### 5.3.1 `ContentUserVerificationBadgeVO` 字段
+
+`id`、`badgeType`（注意：不是 `type`）、`badgeLabel`（不是 `label`）、`visualStyleKey`（视觉样式编码：用于映射图标/颜色）、`description`、`verifiedAt`
 
 ### 5.4 隐私设置接口
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取隐私设置 | GET | `/content/user/privacy/settings` | 获取当前用户所有字段的可见性设置 |
-| 更新隐私设置 | POST | `/content/user/privacy/settings/update` | 批量更新字段可见性 |
-| 查询隐私修改次数 | GET | `/content/user/privacy/update-count` | 查询当前小时剩余修改次数 |
+| 更新隐私配置 | POST | `/content/user/profile/privacy/update?userId={uid}` | Body 提交 `ContentUserPrivacyUpdateReq`，按字段逐项更新 |
+
+> **简化说明**: 后端未提供「获取隐私设置」独立接口。隐私字段通过 `/profile/detail` 的响应隐式返回（不可见字段值为 `null`）；前端在打开隐私设置页时从当前 `UserProfileVO` 推导，并维护一份本地 `PrivacyMap` 用于在 UI 上展示所有可选级别。
+> 
+> 「一键全部设为」「默认可见性」属于前端 UX 概念，前端在批量提交前合并本地状态为 `ContentUserPrivacyUpdateReq` 一次性提交。
+
+#### 5.4.1 `ContentUserPrivacyUpdateReq` 字段（15 项）
+
+| 字段 | 可见性枚举 | 说明 |
+|------|-----------|------|
+| `birthdayVisibility` | `PUBLIC` / `FOLLOWERS_ONLY` / `MUTUAL_ONLY` / `PRIVATE` | 生日可见性 |
+| `genderVisibility` | 同上 | 性别可见性 |
+| `regionVisibility` | 同上 | 地区可见性 |
+| `professionVisibility` | 同上 | 职业可见性 |
+| `personalLinkVisibility` | 同上 | 个人链接可见性 |
+| `verificationBadgeVisibility` | 同上 | 认证标识可见性 |
+| `contactBadgeVisibility` | 同上 | 绑定标识（手机/邮箱）可见性 |
+| `homepageVisibility` | 同上 | 主页可见性 |
+| `dynamicVisibility` | 同上 | 动态可见性 |
+| `onlineStatusVisible` | Boolean | **旧字段，兼容保留**，尽量使用新字段 |
+| `onlineStatusVisibility` | `PUBLIC` / `HIDDEN` / `MUTUAL_ONLY` | 在线状态可见性（**特殊枚举，不含 PRIVATE**） |
+| `browseHistoryVisibility` | 同 5.4.1 通用枚举 | 浏览历史可见性 |
+| `likeActivityVisibility` | 同上 | 点赞活动可见性 |
+| `favoriteVisibility` | 同上 | 收藏可见性 |
+| `allowSearchEngineIndex` | Boolean | 是否允许搜索引擎收录 |
+| `allowUserSearch` | Boolean | 是否允许站内用户搜索 |
+
+> **关键约束**:
+> 1. 所有 `*Visibility` 字段受 `@Pattern(regexp = "^(PUBLIC\|FOLLOWERS_ONLY\|MUTUAL_ONLY\|PRIVATE)$")` 约束，**前端必须在提交前转换中文标签为枚举值**。
+> 2. `onlineStatusVisibility` 特殊：不接受 `PRIVATE`，仅 `PUBLIC`/`HIDDEN`/`MUTUAL_ONLY`。
+> 3. 昵称和头像**不参与**隐私控制（始终公开），本接口不提供对应字段。
 
 ### 5.5 历史记录接口
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取昵称历史 | GET | `/content/user/profile/history/nicknames` | 获取曾用昵称列表（倒序，最多 20 条） |
-| 获取头像历史 | GET | `/content/user/profile/history/avatars` | 获取曾用头像列表（倒序，最多 20 条） |
-| 恢复历史值 | POST | `/content/user/profile/history/restore` | 恢复指定的历史昵称或头像 |
+| 查询历史 | GET | `/content/user/profile/history/list?userId={uid}&historyType={NICKNAME\|AVATAR}` | 返回 `List<ContentUserProfileHistoryVO>`，按 `historyType` 区分 |
+| 恢复历史 | POST | `/content/user/profile/history/restore?userId={uid}&historyId={id}` | 恢复指定历史值为当前值（仍走资料修改频率限制） |
+
+#### 5.5.1 `ContentUserProfileHistoryVO` 字段
+
+`id`、`historyType`（`NICKNAME` 或 `AVATAR`）、`historyValue`（昵称文本或头像 URL）、`createTime`、`expiresAt`（后端按 180 天 TTL 清理）
 
 ### 5.6 API 封装规范
 
@@ -577,20 +751,42 @@ Modal 弹窗
 // 使用项目统一封装
 import { defHttp } from '/@/utils/http/axios';
 
-// 响应格式
+// 响应格式（项目 Result<T>）
 interface ApiResponse<T> {
-  code: number;      // 200 表示成功
+  code: number;      // 200 成功，500 业务错误，510 未登录
   result: T;
   message: string;
   success: boolean;
 }
 
-// 示例：获取当前用户资料
-defHttp.get<UserProfileVO>({ url: '/content/user/profile/current' });
+// 示例：获取用户资料
+defHttp.get<Result<ContentUserProfileVO>>({
+  url: '/content/user/profile/detail',
+  params: { ownerUserId: 'xxx', viewerUserId: 'yyy' }
+});
 
-// 示例：更新基础资料
-defHttp.post({ url: '/content/user/profile/update', data: profileUpdateReq });
+// 示例：更新资料（统一端点）
+defHttp.post<Result<string>>({
+  url: '/content/user/profile/update',
+  params: { userId: 'xxx' },
+  data: profileUpdateReq
+});
+
+// 示例：更新隐私
+defHttp.post<Result<string>>({
+  url: '/content/user/profile/privacy/update',
+  params: { userId: 'xxx' },
+  data: privacyUpdateReq
+});
+
+// 示例：查询历史
+defHttp.get<Result<ContentUserProfileHistoryVO[]>>({
+  url: '/content/user/profile/history/list',
+  params: { userId: 'xxx', historyType: 'NICKNAME' }
+});
 ```
+
+> **前端 userId 来源**: 从 `useUserStore.getUserInfo.id` 读取（已登录用户），无需前端硬编码。
 
 ---
 
