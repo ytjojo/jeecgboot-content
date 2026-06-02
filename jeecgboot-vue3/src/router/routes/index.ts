@@ -20,6 +20,8 @@ Object.keys(modules).forEach((key) => {
 
 export const asyncRoutes = [PAGE_NOT_FOUND_ROUTE, ...routeModuleList];
 
+export const contentAuthRoutes: AppRouteRecordRaw[] = (modules as Recordable)['./modules/contentAuth.ts']?.default || [];
+
 export const RootRoute: AppRouteRecordRaw = {
   path: '/',
   name: 'Root',
@@ -65,4 +67,4 @@ export const TokenLoginRoute: AppRouteRecordRaw = {
   },
 };
 // Basic routing without permission
-export const basicRoutes = [LoginRoute, RootRoute, ...mainOutRoutes, REDIRECT_ROUTE, PAGE_NOT_FOUND_ROUTE, TokenLoginRoute, Oauth2LoginRoute];
+export const basicRoutes = [LoginRoute, RootRoute, ...mainOutRoutes, REDIRECT_ROUTE, PAGE_NOT_FOUND_ROUTE, TokenLoginRoute, Oauth2LoginRoute, ...contentAuthRoutes];

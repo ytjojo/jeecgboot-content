@@ -33,6 +33,13 @@ interface UserState {
   tenantid?: string | number;
   shareTenantId?: Nullable<string | number>;
   loginInfo?: Nullable<LoginInfo>;
+  // 内容社区认证扩展字段
+  loginMethod?: 'password' | 'sms' | 'third_party' | null;
+  accountSecurityStatus?: import('/@/api/content/account/security').AccountSecurityStatus | null;
+  deviceCount?: number;
+  cancellationStatus?: import('/@/api/content/account/cancellation').CancellationApplication | null;
+  coolingOffDays?: number;
+  anomalyNotificationCount?: number;
 }
 
 export const useUserStore = defineStore({
@@ -57,6 +64,18 @@ export const useUserStore = defineStore({
     shareTenantId: null,
     //登录返回信息
     loginInfo: null,
+    // 登录方式
+    loginMethod: null,
+    // 账号安全状态
+    accountSecurityStatus: null,
+    // 设备数
+    deviceCount: 0,
+    // 注销状态
+    cancellationStatus: null,
+    // 冷静期剩余天数
+    coolingOffDays: 0,
+    // 异常登录通知未读数
+    anomalyNotificationCount: 0,
   }),
   getters: {
     getUserInfo(): UserInfo {
@@ -92,6 +111,31 @@ export const useUserStore = defineStore({
     },
   },
   actions: {
+    setLoginMethod(method: UserState['loginMethod']) {
+      this.loginMethod = method;
+    },
+    setAccountSecurityStatus(status: UserState['accountSecurityStatus']) {
+      this.accountSecurityStatus = status;
+    },
+    setDeviceCount(count: number) {
+      this.deviceCount = count;
+    },
+    setCancellationStatus(status: UserState['cancellationStatus'], coolingOffDays = 0) {
+      this.cancellationStatus = status;
+      this.coolingOffDays = coolingOffDays;
+    },
+    setAnomalyNotificationCount(count: number) {
+      this.anomalyNotificationCount = count;
+    },
+    async refreshAnomalyNotificationCount() {
+      try {
+        const mod = await import('/@/api/content/account/security');
+        const { records } = await mod.listAnomalyNotifications({ pageNo: 1, pageSize: 1 });
+        this.setAnomalyNotificationCount(records?.length ?? 0);
+      } catch {
+        // 静默
+      }
+    },
     setToken(info: string | undefined) {
       this.token = info ? info : ''; // for null or undefined value
       setAuthCache(TOKEN_KEY, info);
