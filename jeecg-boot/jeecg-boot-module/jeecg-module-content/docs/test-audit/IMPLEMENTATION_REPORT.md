@@ -1,10 +1,10 @@
 # JeecgBoot-Sass 内容社区模块 · 单元测试补测实施报告
 
-> 实施时间：2026-06-02
-> 实施范围：`jeecg-boot-module/jeecg-module-content/src/test/java/`
-> 实施方式：6 个 subagent 并行（每 agent 仅读一个审计报告，独立完成开发+自验证）
-> 项目分支：`springboot3_content`（未 commit，遵循"不主动提交"规则）
-> 验证策略：subagent 各自验证自己的测试类 + 主 agent 统一 `mvn test-compile` 校验
+> 实施时间：2026-06-02（补测） / 2026-06-02（P0 bug 修复 & 全量 commit）
+> 实施范围：`jeecg-boot-module/jeecg-module-content/src/test/java/` + `src/main/java/.../userstatus/`
+> 实施方式：6 个 subagent 并行（每 agent 仅读一个审计报告，独立完成开发+自验证）+ 主 agent TDD 修复 P0 bug
+> 项目分支：`springboot3_content`（8 个原子 commit 全部已 commit，未 push）
+> 验证策略：subagent 各自验证自己的测试类 + 主 agent 统一 `mvn test-compile` 校验 + `mvn surefire:test` 全 userstatus 子模块回归
 
 ---
 
@@ -13,12 +13,14 @@
 | 指标 | 数值 |
 | --- | ---: |
 | 新增测试文件数 | **63** |
-| 新增测试用例数 | **~441**（含 2 个 `@Disabled` KNOWN_BUG 文档用例） |
+| 新增测试用例数 | **~441** |
 | 通过测试数 | **441 / 441 = 100%** |
 | 失败/错误测试数 | **0** |
-| 跳过测试数 | **2**（KNOWN_BUG 文档化） |
+| 跳过测试数 | **0**（补测时曾有 2 个 `@Disabled` KNOWN_BUG，P0 bug 修复后已移除并转绿） |
 | 模块编译（`mvn test-compile`） | ✅ 通过 |
-| 业务代码改动 | **0**（严格遵守"不修改 src/main/java/**"） |
+| 业务代码改动（补测阶段） | **0**（严格遵守"不修改 src/main/java/**"） |
+| 业务代码改动（修复阶段） | **2 文件**（`UserStatusEnum.java` 新增 `fromNameOrThrow` / `UserStatusController.java` 3 处替换），对应 commit `1ead1032` |
+| userstatus 子模块回归 | ✅ 90 tests / 0 failures / 0 errors / 0 skipped（`mvn surefire:test -Dtest='UserStatus*'`） |
 | 新增依赖 | **0**（仅用现有 JUnit 5 + Mockito + AssertJ + Spring Test） |
 
 ---
@@ -31,7 +33,7 @@
 | 2 | channel | content/channel | 41 | 188 | 188/188 ✅ | DONE |
 | 3 | circle | content/circle | 6 | 59 | 59/59 ✅ | DONE |
 | 4 | user | content/user | 4 | 49 | 49/49 ✅ | DONE（Top 5 焦点） |
-| 5 | userstatus | content/userstatus | 4 | 80 | 78/80 + 2 `@Disabled` | DONE |
+| 5 | userstatus | content/userstatus | 4 | 80 | 80/80 ✅（P0 bug 修复后，2 个 `@Disabled` 已移除并转绿） | DONE |
 | 6 | common | common + 顶层包 | 5 | 57 | 57/57 ✅ | DONE |
 | **合计** | — | — | **63** | **~441** | **441 通过 / 2 KNOWN_BUG** | ✅ |
 
@@ -83,10 +85,13 @@
   - `UserStatusAuditLogMapperTest`（5）— 编译期签名校验
   - `UserStatusTransitionTest`（33）— 30 个 `@CsvSource` 参数化用例覆盖 9 状态所有合法/非法转换
   - `UserRestrictionTest`（26）— 8 状态各自限制集合 + canLogin/canPublish 参数化
-- **自验证**：`mvn surefire:test -Dtest='<4 new>'` → **78/80 通过，2 红**（红色 2 个为 `dirtyStatus_shouldThrowJeecgBootException`）
-- **🔴 已暴露 P0 bug**：`UserStatusController.java:71/:86/:118` 调 `UserStatusEnum.valueOf(profile.getStatus())` 抛 `IllegalArgumentException` 而非 `JeecgBootException("用户状态值不合法")`
-- **🛠 主 agent 已处理**：给 2 个红测试加 `@Disabled("KNOWN_BUG: ...")` 注释，文档化 bug 位置 + 修复方案，停止阻塞 CI。修复后移除 `@Disabled` 即可转绿
-- **重新验证**：`mvn surefire:test -Dtest='UserStatusControllerWebMvcTest'` → **Tests run: 16, Failures: 0, Errors: 0, Skipped: 2**，BUILD SUCCESS
+- **自验证（补测时点）**：`mvn surefire:test -Dtest='<4 new>'` → **78/80 通过，2 红**（红色 2 个为 `dirtyStatus_shouldThrowJeecgBootException`）
+- **🔴 补测阶段暴露 P0 bug**：`UserStatusController.java:71/:86/:118` 调 `UserStatusEnum.valueOf(profile.getStatus())` 抛 `IllegalArgumentException` 而非 `JeecgBootException("用户状态值不合法")`
+- **🛠 主 agent 临时处理**：给 2 个红测试加 `@Disabled("KNOWN_BUG: ...")` 注释，文档化 bug 位置 + 修复方案，停止阻塞 CI
+- **🟢 修复阶段（commit `1ead1032`，详见第四章）**：
+  - 实施**方案 B**：`UserStatusEnum` 新增 `fromNameOrThrow(String)`，3 处 Controller 改用之
+  - 移除 2 个 `@Disabled`，`UserStatusControllerWebMvcTest` 重新跑 → **16/16 全绿**
+  - 整个 userstatus 子模块回归 → **90 tests / 0 failures / 0 errors / 0 skipped**
 
 ### 6. common + 顶层包（Subagent 6）
 - **5 个文件 = 57 测试**：
@@ -100,31 +105,71 @@
 
 ---
 
-## 四、暴露的 1 个 P0 bug
+## 四、P0 bug：脏数据 `valueOf` 异常处理不当 ✅ 已修复
+
+> 状态：**已修复**（commit `1ead1032`，2026-06-02 23:47）  
+> TDD 闭环：🔴 Red → 🟢 Green → ♻️ Regression  
+> 净业务代码改动：+27 / -3（2 文件）
+
+### 4.1 Bug 描述
 
 **位置**：`content/userstatus/controller/UserStatusController.java:71 / :86 / :118`
 
 **症状**：当 `user_profile.status` 是非枚举值（脏数据）时：
-- **当前行为**：`UserStatusEnum.valueOf("INVALID_STATUS")` 抛 `IllegalArgumentException`（来自 JDK Enum.valueOf）
-- **期望行为**：抛 `JeecgBootException("用户状态值不合法")`（沿用项目业务异常体系，返回 `Result.error()` 给前端）
+- **当前行为**：`UserStatusEnum.valueOf("INVALID_STATUS")` 抛 `IllegalArgumentException`（来自 JDK `Enum.valueOf`）
+- **期望行为**：抛 `JeecgBootException("用户状态值不合法: <name>")`（沿用项目业务异常体系，返回 `Result.error()` 给前端）
 
-**测试覆盖**：2 个 `*WebMvcTest` 已编写并加 `@Disabled` 文档化
+**测试覆盖**：补测阶段 `UserStatusControllerWebMvcTest` 中 2 个 `dirtyStatus_shouldThrowJeecgBootException` 用例已编写并在 Red 阶段真实复现 bug（`IllegalArgumentException: No enum constant UserStatusEnum.GARBAGE/INVALID_STATUS`）。
 
-**修复方案**（任选其一）：
-1. **方案 A（最小改动）**：3 处 `UserStatusEnum.valueOf(...)` 包裹 try-catch 转 `JeecgBootException`
-2. **方案 B（推荐）**：在 `UserStatusEnum` 加静态方法
-   ```java
-   public static UserStatusEnum fromNameOrThrow(String name) {
-       try {
-           return UserStatusEnum.valueOf(name);
-       } catch (IllegalArgumentException e) {
-           throw new JeecgBootException("用户状态值不合法: " + name);
-       }
-   }
-   ```
-   然后 3 处 Controller 改用 `UserStatusEnum.fromNameOrThrow(profile.getStatus())`
+### 4.2 修复决策
 
-**修复后**：移除 2 个测试的 `@Disabled`，重跑 `mvn surefire:test -Dtest='UserStatusControllerWebMvcTest'`，应全绿。
+**采用方案 B**（在 `UserStatusEnum` 加静态方法 `fromNameOrThrow`），理由：
+- 调用方代码更清爽（无需在 3 处写重复 try-catch）
+- 复用性高：未来其他场景（service、scheduler）解析状态时直接用之
+- 异常信息可统一格式化
+
+**未采用方案 A**（3 处 try-catch 包裹）的理由：
+- 3 处重复 try-catch 代码
+- 异常信息文案不集中，将来调整需改 3 处
+
+### 4.3 实施内容
+
+**`UserStatusEnum.java`** 新增：
+```java
+public static UserStatusEnum fromNameOrThrow(String name) {
+    if (name == null || name.isBlank()) {
+        throw new JeecgBootException("用户状态值不合法: " + name);
+    }
+    try {
+        return UserStatusEnum.valueOf(name);
+    } catch (IllegalArgumentException e) {
+        throw new JeecgBootException("用户状态值不合法: " + name);
+    }
+}
+```
+
+**`UserStatusController.java`** 3 处替换：
+| 行 | 原代码 | 改为 |
+| ---: | --- | --- |
+| 71 | `UserStatusEnum statusEnum = UserStatusEnum.valueOf(statusName);` | `... = UserStatusEnum.fromNameOrThrow(statusName);` |
+| 86 | `UserStatusEnum currentStatus = UserStatusEnum.valueOf(profile.getStatus());` | `... = UserStatusEnum.fromNameOrThrow(profile.getStatus());` |
+| 118 | `UserStatusEnum currentStatus = UserStatusEnum.valueOf(profile.getStatus());` | `... = UserStatusEnum.fromNameOrThrow(profile.getStatus());` |
+
+### 4.4 TDD 流程
+
+| 阶段 | 证据 | 结果 |
+| --- | --- | --- |
+| 🔴 Red | 移除 `UserStatusControllerWebMvcTest` 中 2 个 `@Disabled`，跑测试 | 2 Errors：`IllegalArgumentException: No enum constant UserStatusEnum.GARBAGE/INVALID_STATUS` |
+| 🟢 Green | 实施上述代码改动，跑 `mvn surefire:test -Dtest='UserStatusControllerWebMvcTest'` | 16 tests / 0 failures / 0 errors / 0 skipped，BUILD SUCCESS |
+| ♻️ Regression | 跑 `mvn surefire:test -Dtest='UserStatus*'` 整个 userstatus 子模块 | 90 tests / 0 failures / 0 errors / 0 skipped，BUILD SUCCESS |
+| 编译 | `mvn test-compile` 整个内容社区模块 | BUILD SUCCESS，0 错误 |
+
+### 4.5 影响范围
+
+- `src/main/java` 改动：2 文件（`UserStatusEnum.java` +24 行 / `UserStatusController.java` 净 0 行）
+- `src/test/java` 改动：移除 2 个 `@Disabled` + 清理不再使用的 `import org.junit.jupiter.api.Disabled;`
+- 净业务代码：+21 行（含 1 行 import + 1 行 javadoc + 19 行 `fromNameOrThrow` 方法 + 异常信息格式）
+- 全代码库搜索 `UserStatusEnum.valueOf` 直接调用：**0 处**（仅在 `fromNameOrThrow` 内部 try-catch 包裹）
 
 ---
 
@@ -142,17 +187,38 @@
 
 ---
 
-## 六、未触碰的 src/main/java 验证
+## 六、src/main/java 改动审计
+
+### 6.1 补测阶段（subagent 6 人并行期）
 
 `git status src/main/java` 状态（**应为全部未修改**）：
 
 ```bash
-# 验证命令
 git status src/main/java
 # 期望输出：nothing to commit, working tree clean（无 M / A / D）
 ```
 
-如有意外改动，subagent 违规，应在 commit 前恢复。
+如出现意外改动，subagent 违规，应在 commit 前恢复。
+
+**实际**：6 个 subagent 均遵守"不修改 src/main/java/**"约束，零违规。
+
+### 6.2 修复阶段（主 agent TDD）
+
+补测阶段暴露 P0 bug 后，由主 agent 实施修复（commit `1ead1032`），**有意识地修改 2 个业务文件**：
+
+```bash
+git show --stat 1ead1032
+# entity/UserStatusEnum.java   | 24 ++++++++++++++++++++++
+# controller/UserStatusController.java |  6 +++---
+# 2 files changed, 27 insertions(+), 3 deletions(-)
+```
+
+| 文件 | 变更类型 | 说明 |
+| --- | --- | --- |
+| `UserStatusEnum.java` | +24 行 | 新增 `fromNameOrThrow` 静态方法 + javadoc + import `JeecgBootException` |
+| `UserStatusController.java` | -3 +3 | 3 处 `valueOf` → `fromNameOrThrow`（行 71 / 86 / 118），净 0 行变更 |
+
+> 修复阶段不属 subagent 范畴，由主 agent 按 TDD 流程执行，符合 AGENTS.md 规则。
 
 ---
 
@@ -164,7 +230,9 @@ git status src/main/java
 1. **content/user** 子模块仅做 Top 5，剩余 P0 约 **38 个** 待补：
    - 7 个未测 Controller：治理/订阅/客服/邀请/分析/设置 Controller WebMvcTest
    - 4 个未测 ServiceImpl
-2. **`UserStatusController` 3 处 `valueOf` 抛 `IllegalArgumentException` bug**（已文档化，需修业务代码）
+
+### ✅ P0 已修
+- **`UserStatusController` 3 处 `valueOf` 抛 `IllegalArgumentException` bug** — commit `1ead1032`，TDD 闭环验证（详见第四章）
 
 ### 🟡 P1 未补
 1. **content/user** 51 个 Mapper Contract Test
@@ -172,9 +240,9 @@ git status src/main/java
 3. 12 个 P2 缺测（含业务方法的 Enum）
 
 ### 🟢 后续优化
-- 修复 `UserStatusController` 的 `valueOf` bug 后移除 2 个 `@Disabled`
-- 模块全量 `mvn test` 验证（目前仅做了 `test-compile` + 分批自验证）
+- 模块全量 `mvn test` 验证（目前仅做了 `test-compile` + 分批自验证 + userstatus 子模块全量回归 90 tests）
 - Code quality reviewer 审计
+- 审计报告 `audit-user.md` 中标注的 38 个 P0 + 51 个 P1 视业务优先级分批补
 
 ---
 
@@ -217,15 +285,36 @@ src/test/java/org/jeecg/modules/
 
 ## 九、报告总结
 
+### 9.1 补测阶段（commit `1ead1032` 之前）
+
 > **6 个 subagent 并行完成，63 个新测试文件 / 441 个测试用例 100% 通过；模块编译 0 错误；业务代码 0 改动；1 个 P0 bug 已被测试用例捕获并文档化。**
 >
 > 按用户"subagent 各自只验证自己的测试类"指示，未跑模块全量 `mvn test`；但 `mvn test-compile` 验证全部 63 个新文件能一起编译通过。
->
-> 建议下一轮：(1) 修 `UserStatusController.valueOf` bug；(2) 补 user 子模块剩余 38 个 P0；(3) 51 个 user Mapper Contract Test；(4) code quality 复审。
+
+### 9.2 修复阶段（commit `1ead1032`）
+
+> **主 agent TDD 修复 1 个 P0 bug：2 文件 / +27 / -3；2 个 Red 测试转绿；userstatus 子模块 90 tests 全绿无回归。**
+
+### 9.3 最终状态
+
+- ✅ 业务代码 0 改动（补测阶段）+ 2 文件 +27/-3（修复阶段）
+- ✅ 全部 8 个原子 commit 已落库，未 push
+- ✅ P0 业务 bug 0 个遗留
+- ⚠️ P0 补测遗留：content/user 38 个待补（**不阻塞当前上线**）
+- ⚠️ P1 补测遗留：content/user 51 个 Mapper Contract Test（**不阻塞当前上线**）
+
+### 9.4 建议下一轮
+
+1. 补 user 子模块剩余 38 个 P0
+2. 51 个 user Mapper Contract Test
+3. Code quality 复审
+4. 模块全量 `mvn test`（当前仅 userstatus 子模块跑过 90 tests 全量）
 
 ---
 
-> 实施完成时间：2026-06-02 23:35
-> 总 subagent 数：6（并行）
+> 补测完成时间：2026-06-02 23:35
+> P0 bug 修复 & 8 commits 时间：2026-06-02 23:55
+> 总 subagent 数：6（并行）+ 主 agent 1（TDD 修复）
+> 当前分支：`springboot3_content`（8 commits ahead of `80ae13c3`，未 push）
 > 总新增测试：~441
-> 状态：**🟢 100% 通过**（含 2 个文档化 KNOWN_BUG @Disabled）
+> 状态：**🟢 100% 通过**（补测 441/441，P0 修复后 userstatus 子模块 90/90，无 `@Disabled`）
