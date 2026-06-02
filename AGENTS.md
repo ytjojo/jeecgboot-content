@@ -63,7 +63,7 @@
   `/superpowers:subagent-driven-development`
 
 ### 多步任务 / apply 操作
-- 执行 `/opsx:apply` 或多步多task代码任务时，强制使用测试驱动开发
+- 执行 `/opsx:apply` `/openspec-apply-change` 或多步多task代码任务时，强制使用测试驱动开发
   `/superpowers:test-driven-development`
 
 ### 完成标准（Definition of Done）
