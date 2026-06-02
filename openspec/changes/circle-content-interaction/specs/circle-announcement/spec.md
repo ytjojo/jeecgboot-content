@@ -1,35 +1,53 @@
 ## ADDED Requirements
 
-### Requirement: 发布圈子公告
-
-系统 SHALL 支持圈子版主或创建者发布公告。公告 MUST 展示在圈子顶部，所有成员可见。同一圈子同一时间 MUST 仅展示一条生效公告，新公告发布后替换旧公告展示位置。公告 MUST 支持有效期设置。
+### Requirement: 圈子管理员可发布公告
+圈子管理员（版主/创建者）SHALL 能够发布公告，公告内容使用 Tinymce 富文本编辑器，有效期为必填项（仅截止时间）。
 
 #### Scenario: 版主发布公告
-- **WHEN** 圈子版主编写公告内容并发布
-- **THEN** 系统创建公告记录，status 设为 ACTIVE，公告展示在圈子顶部
+- **WHEN** 版主在圈子管理区域点击"发布公告"，填写内容和有效期，点击"发布"
+- **THEN** 调用 `POST /circle-announcement` 接口，成功后关闭弹窗，圈子顶部展示新公告，Toast 提示"公告已发布"
 
-#### Scenario: 新公告替换旧公告
-- **WHEN** 圈子已有生效公告，版主发布新公告
-- **THEN** 旧公告 status 更新为 INACTIVE，新公告成为当前生效公告
+#### Scenario: 已有公告时发布新公告
+- **WHEN** 版主发布公告，且当前已有生效公告
+- **THEN** 弹出确认框"当前已有生效公告，发布新公告将替换旧公告，是否继续？"，确认后调用 API，旧公告失效
 
-#### Scenario: 公告有效期过期
+#### Scenario: 公告内容为空提交
+- **WHEN** 版主未填写公告内容直接点击"发布"
+- **THEN** 字段下方显示红色错误提示"请输入公告内容"
+
+#### Scenario: 有效期已过提交
+- **WHEN** 版主设置的有效期早于当前时间
+- **THEN** 字段下方显示"有效期不得早于当前时间"
+
+### Requirement: 圈子公告顶部展示
+圈子公告 SHALL 在圈子内容列表页顶部展示，仅当有生效公告时展示。
+
+#### Scenario: 有生效公告时展示
+- **WHEN** 圈子有生效公告
+- **THEN** 内容列表页顶部展示公告栏，显示公告摘要（最多 2 行，超出省略）和有效期
+
+#### Scenario: 无公告时隐藏
+- **WHEN** 圈子无生效公告
+- **THEN** 公告栏整个隐藏，不占空间
+
+#### Scenario: 公告过期自动隐藏
 - **WHEN** 公告到达有效期截止时间
-- **THEN** 公告 status 自动更新为 INACTIVE，不再展示在圈子顶部
+- **THEN** 公告栏自动隐藏
 
-#### Scenario: 普通成员尝试发布公告
-- **WHEN** 普通成员尝试发布公告
-- **THEN** 系统返回"权限不足"提示，操作被拒绝
+#### Scenario: 展开/收起公告
+- **WHEN** 用户点击"展开"
+- **THEN** 显示完整公告内容，按钮变为"收起"
 
-#### Scenario: 查询当前公告
-- **WHEN** 成员进入圈子页面
-- **THEN** 系统返回该圈子 status 为 ACTIVE 且未过期的唯一公告
+### Requirement: 圈子管理员可编辑/删除公告
+圈子管理员 SHALL 能够编辑和删除当前生效公告。
 
----
+#### Scenario: 管理员删除公告
+- **WHEN** 管理员点击"删除"
+- **THEN** 调用 `DELETE /circle-announcement/{id}` 接口，成功后公告栏消失，Toast 提示"公告已删除"
 
-### Requirement: 公告审核日志
+### Requirement: 普通成员不可发布公告
+普通成员 SHALL 看不到"发布公告"按钮入口。
 
-系统 MUST 记录公告发布操作的审核日志，包含操作人、操作时间、操作对象、操作类型和操作结果。记录 MUST 保留不少于 180 天。
-
-#### Scenario: 公告发布写入日志
-- **WHEN** 版主发布公告
-- **THEN** 系统在 circle_audit_log 表写入一条记录，包含 operator_id、action(PUBLISH_ANNOUNCEMENT)、target_id(circle_id)、result、created_at
+#### Scenario: 普通成员查看公告区域
+- **WHEN** 普通成员浏览圈子内容列表
+- **THEN** 仅可查看公告内容，不展示"发布公告""编辑""删除"操作

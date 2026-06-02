@@ -1,64 +1,59 @@
-## 1. 数据库与枚举
+## 1. API 层与 Store 基础设施
 
-- [x] 1.1 编写 Flyway 迁移脚本 V3.9.1_60__circle_content_interaction.sql，创建 circle_announcement、circle_join_request、circle_report、circle_audit_log 表，以及 circle_content 表的 is_pinned/pinned_at/is_featured/featured_at 字段扩展
-- [x] 1.2 创建枚举类 CircleAuditActionEnum、CircleReportStatusEnum、CircleJoinRequestStatusEnum
+- [ ] 1.1 创建 `src/api/circle/content.ts`：封装置顶/精华切换接口（`togglePin`、`toggleFeatured`）
+- [ ] 1.2 创建 `src/api/circle/announcement.ts`：封装公告 CRUD 接口（`createAnnouncement`、`getCurrentAnnouncement`、`deleteAnnouncement`）
+- [ ] 1.3 创建 `src/api/circle/mention.ts`：封装 @成员查询接口（`getMentionableMembers`）
+- [ ] 1.4 创建 `src/api/circle/joinRequest.ts`：封装申请审核接口（`getJoinRequestList`、`approveJoinRequest`、`rejectJoinRequest`）
+- [ ] 1.5 创建 `src/api/circle/report.ts`：封装举报相关接口（`createReport`、`getReportList`、`deleteReportContent`、`ignoreReport`、`muteUser`）
+- [ ] 1.6 创建 `src/store/modules/circleInteraction.ts`：实现 `useCircleInteractionStore`（公告状态、@成员列表、审核统计）
 
 ## 2. 内容置顶与精华
 
-- [x] 2.1 编写 CircleContentPinServiceTest：置顶/取消置顶/精华/取消精华的 CRUD 测试
-- [x] 2.2 创建 CircleContent 实体扩展字段（is_pinned/pinned_at/is_featured/featured_at）
-- [x] 2.3 创建 CircleContentMapper 和 CircleContentMapper.xml（置顶排序查询）
-- [x] 2.4 实现 ICircleContentPinService 和 CircleContentPinServiceImpl
-- [x] 2.5 编写 CircleContentPinBizServiceTest：权限校验 + 操作组合逻辑测试
-- [x] 2.6 实现 CircleContentPinBizService（权限校验 + 操作编排）
-- [x] 2.7 实现 CircleContentPinController（PUT /circle-content/{id}/pin、/featured）
+- [ ] 2.1 创建 `ContentActionMenu` 组件：根据角色权限动态展示置顶/精华/举报菜单项
+- [ ] 2.2 在圈子内容列表页集成 `ContentActionMenu`，置顶内容排序逻辑（置顶在前，多条按 pinned_at 倒序）
+- [ ] 2.3 在内容列表卡片中添加置顶标识和精华标识（金色徽章）展示
+- [ ] 2.4 在内容详情页集成 `ContentActionMenu`，添加置顶/精华标识展示
+- [ ] 2.5 实现置顶/精华操作后的即时列表更新（无需刷新页面）
 
 ## 3. 圈子公告
 
-- [x] 3.1 编写 CircleAnnouncementServiceTest：公告发布/替换/过期逻辑测试
-- [x] 3.2 创建 CircleAnnouncement 实体和 CircleAnnouncementMapper
-- [x] 3.3 实现 ICircleAnnouncementService 和 CircleAnnouncementServiceImpl
-- [x] 3.4 编写 CircleAnnouncementBizServiceTest：公告替换 + 权限校验测试
-- [x] 3.5 实现 CircleAnnouncementBizService（权限校验 + 公告替换编排）
-- [x] 3.6 实现 CircleAnnouncementController 和相关 Req/VO
+- [ ] 3.1 创建 `CircleAnnouncementBar` 组件：展示公告摘要、有效期、展开/收起功能
+- [ ] 3.2 创建公告发布弹窗组件：Tinymce 富文本编辑器 + 有效期选择器 + 表单校验
+- [ ] 3.3 实现公告发布逻辑：已有公告时弹出替换确认框，发布成功后更新公告栏
+- [ ] 3.4 实现公告删除逻辑：确认后调用 API，公告栏消失
+- [ ] 3.5 在圈子内容列表页顶部集成 `CircleAnnouncementBar`，根据角色展示编辑/删除操作
+- [ ] 3.6 实现公告过期自动隐藏（前端定时检查或依赖接口返回）
 
 ## 4. @成员功能
 
-- [x] 4.1 编写 CircleMentionServiceTest：@提及解析、通知发送、已退出成员过滤测试
-- [x] 4.2 创建 CircleMentionMapper（圈子成员查询）
-- [x] 4.3 实现 ICircleMentionService 和 CircleMentionServiceImpl（提及解析 + 异步通知）
-- [x] 4.4 编写 CircleMentionBizServiceTest：提及解析 + 异步通知编排测试
-- [x] 4.5 实现 CircleMentionBizService（业务编排）
+- [ ] 4.1 创建 `MentionMemberPicker` 组件：浮层展示成员列表、搜索过滤、键盘导航
+- [ ] 4.2 实现 @触发逻辑：输入框监听 `@` 字符输入，弹出浮层
+- [ ] 4.3 实现成员搜索：防抖 300ms，调用 `getMentionableMembers` 接口
+- [ ] 4.4 实现提及标记插入：纯文本场景插入 `@{userId:xxx}昵称`，富文本场景插入 `<span class="mention">` 标签
+- [ ] 4.5 实现 @提及内容解析渲染：正则匹配提及标记，渲染为可点击链接（跳转用户主页）
+- [ ] 4.6 在内容发布框和评论输入框中集成 `MentionMemberPicker`
 
 ## 5. 加入申请审核
 
-- [x] 5.1 编写 CircleJoinReviewServiceTest：审核批准/拒绝流程、超时提醒查询、审核日志记录测试
-- [x] 5.2 创建 CircleJoinRequest 实体和 CircleJoinRequestMapper（含超时查询 SQL）
-- [x] 5.3 实现 ICircleJoinReviewService 和 CircleJoinReviewServiceImpl
-- [x] 5.4 编写 CircleJoinReviewBizServiceTest：审核流程 + 超时提醒编排测试
-- [x] 5.5 实现 CircleJoinReviewBizService（权限校验 + 审核编排）
-- [x] 5.6 实现 CircleJoinReviewController 和相关 Req/VO
+- [ ] 5.1 创建加入申请审核页面：Table + useTable，支持待处理/已处理/全部标签页切换
+- [ ] 5.2 创建 `JoinRequestCard` 组件：展示申请信息、超时警告标识、操作按钮
+- [ ] 5.3 实现批准申请逻辑：确认框 + 调用 API + 卡片移出列表 + Toast 反馈
+- [ ] 5.4 实现拒绝申请逻辑：拒绝原因输入弹窗（必填） + 调用 API + 卡片移出列表
+- [ ] 5.5 实现批量批准功能：勾选多条申请后批量调用批准 API
+- [ ] 5.6 实现超时提醒：超过 3 天未处理的申请显示橙色警告标识
+- [ ] 5.7 实现管理入口角标：展示 `pendingJoinRequestCount` 红点/角标
+- [ ] 5.8 实现移动端响应式：卡片列表 + 下拉筛选 + 底部固定操作栏
 
 ## 6. 内容举报处理
 
-- [x] 6.1 编写 CircleReportServiceTest：举报提交/处理、状态流转、处理结果通知测试
-- [x] 6.2 创建 CircleReport 实体和 CircleReportMapper
-- [x] 6.3 实现 ICircleReportService 和 CircleReportServiceImpl
-- [x] 6.4 编写 CircleReportBizServiceTest：举报处理 + 操作编排测试
-- [x] 6.5 实现 CircleReportBizService（权限校验 + 处理编排）
-- [x] 6.6 实现 CircleReportController 和相关 Req/VO
-
-## 7. 审核日志与定时任务
-
-- [x] 7.1 创建 CircleAuditLog 实体（不继承 JeecgEntity）和 CircleAuditLogMapper（含时间范围查询 SQL）
-- [x] 7.2 实现 ICircleAuditLogService 和 CircleAuditLogServiceImpl（writeAuditLog、queryByTarget、queryByTimeRange）
-- [x] 7.3 实现加入申请超时提醒定时任务（@Scheduled 每小时扫描 PENDING 超过 3 天的申请）
-
-## 8. Validation
-
-- [x] 8.1 执行 Flyway 迁移，验证数据库表结构正确
-- [x] 8.2 运行所有单元测试，确保全部通过
-- [x] 8.3 验证置顶内容排序逻辑（置顶在前，按 pinned_at 倒序）
-- [x] 8.4 验证权限控制（普通成员操作返回"权限不足"）
-- [x] 8.5 验证公告同一时间仅一条生效
-- [x] 8.6 验证审核日志完整记录（操作人、时间、类型、对象、结果）
+- [ ] 6.1 创建举报提交弹窗组件：举报原因单选 + 补充说明 + 表单校验
+- [ ] 6.2 实现举报提交逻辑：调用 `createReport` API，成功后 Toast 反馈
+- [ ] 6.3 实现重复举报检测：已举报内容的"举报"选项置灰 + Tooltip 提示
+- [ ] 6.4 创建举报处理页面：Table + useTable，支持待处理/已处理/已忽略标签页切换
+- [ ] 6.5 创建 `ReportCard` 组件：展示举报信息、操作按钮（查看内容/删除/忽略/禁言）
+- [ ] 6.6 实现查看被举报内容详情：Drawer 抽屉展示
+- [ ] 6.7 实现删除被举报内容逻辑：确认框 + 调用 API + 卡片状态更新
+- [ ] 6.8 实现忽略举报逻辑：确认框 + 调用 API + 卡片状态更新
+- [ ] 6.9 实现禁言用户逻辑：禁言时长选择弹窗（1小时/1天/7天/30天/永久） + 调用 API
+- [ ] 6.10 实现权限控制：举报处理页入口仅对管理员可见，禁言操作仅创建者可用
+- [ ] 6.11 实现移动端响应式：卡片列表 + 操作按钮收进"更多"菜单

@@ -1,84 +1,73 @@
-## 1. 数据结构与配置
+## 1. API 封装层
 
-- [x] 1.1 编写奖励规则、奖励事件、等级配置、等级权益配置表 migration
-- [x] 1.2 添加 migration 表结构、索引、默认值、回滚脚本校验测试
-- [x] 1.3 编写兑换商品、兑换订单、功能解锁、礼物记录、衰减状态表 migration
-- [x] 1.4 添加兑换与衰减表字段、约束、索引测试
-- [x] 1.5 扩展勋章定义、勋章授予、积分台账、成长台账审计字段
-- [x] 1.6 添加现有表扩展字段兼容性测试
-- [x] 1.7 创建新增 entity、mapper、service 基础类
-- [x] 1.8 添加 mapper 启动加载和基础 CRUD 测试
+- [ ] 1.1 创建 `src/api/content/badge.ts`：封装勋章相关 API（getBadgeList、getBadgeDetail、getWornBadges、saveWearConfig、getWornBadgesByUserId、recycleBadge）
+- [ ] 1.2 创建 `src/api/content/point.ts`：封装积分相关 API（getPointBalance、getPointLedger、getExchangeGoods、createExchange、unlockFeature、sendGift）
+- [ ] 1.3 创建 `src/api/content/growth.ts`：封装等级相关 API（getLevelInfo、getLevelConfig、getDecayRule）
 
-## 2. 奖励事件与积分成长发放
+## 2. SVG 占位图标资源
 
-- [x] 2.1 定义统一奖励事件请求、结果 DTO 和 sourceType 常量
-- [x] 2.2 添加事件 DTO null、空值、越界校验测试
-- [x] 2.3 实现奖励规则加载和启用状态过滤
-- [x] 2.4 添加规则空 code、重复 code、非法金额、禁用规则测试
-- [x] 2.5 实现事件幂等表和 Redis 事件锁
-- [x] 2.6 添加重复 eventId 只发放一次测试
-- [x] 2.7 实现每日上限 Redis 计数和超限跳过奖励
-- [x] 2.8 添加点赞、分享、评论、转发、关注每日上限测试
-- [x] 2.9 改造 `ContentUserGrowthServiceImpl` 委托统一奖励编排
-- [x] 2.10 添加旧 `/content/user/growth/record` 兼容行为测试
+- [ ] 2.1 创建 `src/assets/icons/badge-fallback/` 目录，添加四个分类的 SVG 占位图标（achievement.svg、identity.svg、activity.svg、relationship.svg）
 
-## 3. 勋章体系
+## 3. Pinia Store 模块
 
-- [x] 3.1 实现勋章分类列表和详情查询服务
-- [x] 3.2 添加分类、禁用、非法规则配置、进度展示测试
-- [x] 3.3 实现勋章进度计算和缓存
-- [x] 3.4 添加发布数量、关系类、活动类进度计算测试
-- [x] 3.5 实现勋章自动授予和有效期计算
-- [x] 3.6 添加首次授予、重复授予幂等、有效期测试
-- [x] 3.7 实现最多 5 个勋章佩戴保存
-- [x] 3.8 添加空列表、超过 5 个、重复、过期、他人勋章测试
-- [x] 3.9 实现勋章过期任务和违规回收接口
-- [x] 3.10 添加过期自动取消佩戴、回收审计、通知测试
+- [ ] 3.1 创建 `src/store/modules/badge.ts`：实现 useBadgeStore（badgeList 缓存、wornBadges 缓存、activeCategory、fetchBadgeList、fetchWornBadges、updateWearConfig、refreshAfterRecycle）
+- [ ] 3.2 创建 `src/store/modules/point.ts`：实现 usePointStore（balance、todayEarn、todaySpend、exchangeGoods、fetchBalance、fetchExchangeGoods、refreshAfterExchange）
+- [ ] 3.3 创建 `src/store/modules/growth.ts`：实现 useGrowthStore（levelInfo、decayState、levelConfig、fetchLevelInfo、fetchLevelConfig、checkLevelUp）+ mitt 事件总线导出
 
-## 4. 积分消耗与明细
+## 4. 全局升级事件机制
 
-- [x] 4.1 实现兑换商品查询和兑换校验
-- [x] 4.2 添加商品空值、禁用、库存不足、积分不足测试
-- [x] 4.3 实现兑换事务扣积分、写台账、创建订单、发权益
-- [x] 4.4 添加兑换成功、权益失败回滚、并发余额不透支测试
-- [x] 4.5 实现功能解锁和重复使用不重复扣费
-- [x] 4.6 添加永久解锁、限时解锁、重复使用测试
-- [x] 4.7 实现虚拟礼物赠送和通知记录
-- [x] 4.8 添加接收人空值、自己赠送、积分不足、通知测试
-- [x] 4.9 实现积分明细分页、类型筛选、时间筛选
-- [x] 4.10 添加分页越界、时间倒置、获取/消耗筛选测试
+- [ ] 4.1 修改 `src/utils/http/axios/index.ts`：在 defHttp 响应拦截器中增加 `levelChanged` 字段检测，检测到时通过 mitt 广播 `growth:level-up` 事件
+- [ ] 4.2 修改 `src/App.vue`：监听 `growth:level-up` 事件，实现 7 天冷却期逻辑，弹出全局祝贺弹窗（LevelUpCongratsModal）
 
-## 5. 等级与权益
+## 5. 勋章系统组件
 
-- [x] 5.1 实现等级阈值配置加载和等级计算
-- [x] 5.2 添加重复等级、负阈值、非递增阈值测试
-- [x] 5.3 实现成长值变更后的自动升级和通知
-- [x] 5.4 添加跨级升级、未升级、升级通知测试
-- [x] 5.5 实现积分与成长值独立展示和明细区分
-- [x] 5.6 添加积分消费不影响成长值和等级测试
-- [x] 5.7 实现等级权益配置和运行时权益查询
-- [x] 5.8 添加上传大小、高清视频、话题额度、优先客服测试
-- [x] 5.9 实现推荐分发等级加权输出接口
-- [x] 5.10 添加加权上限、低等级无加权、质量评分必需测试
+- [ ] 5.1 创建 `src/components/content/BadgeCard/`：勋章卡片组件（图标、名称、状态标签、进度条、勾选模式）
+- [ ] 5.2 创建 `src/components/content/BadgeGrid/`：勋章网格容器组件（基于 CardList 扩展，支持选择模式，最多 5 个）
+- [ ] 5.3 创建 `src/components/content/BadgeDetail/`：勋章详情弹窗内容组件（已获得/未获得/已过期三种状态）
+- [ ] 5.4 创建 `src/components/content/BadgeDisplay/`：佩戴勋章展示组件（prop 驱动，支持 small/medium 尺寸，Tooltip，图片 fallback，懒加载）
 
-## 6. 经验衰减与降级保护
+## 6. 积分系统组件
 
-- [x] 6.1 实现最后活跃时间读取适配和衰减候选筛选
-- [x] 6.2 添加 30 天内不衰减、第 31 天进入衰减测试
-- [x] 6.3 实现衰减任务写负向成长台账和衰减状态
-- [x] 6.4 添加衰减比例、负值保护、重复执行幂等测试
-- [x] 6.5 实现低于等级阈值时进入 7 天保护期
-- [x] 6.6 添加保护期开始、保护期内活跃恢复测试
-- [x] 6.7 实现保护期结束后的降级和通知
-- [x] 6.8 添加保护期结束降级、不满足降级条件不降级测试
-- [x] 6.9 实现衰减规则说明查询接口
-- [x] 6.10 添加规则说明空值、越界配置、禁用衰减测试
+- [ ] 6.1 创建 `src/components/content/PointBalance/`：积分余额展示卡片组件（余额、今日获取、今日消耗）
+- [ ] 6.2 创建 `src/components/content/ExchangeConfirm/`：兑换确认弹窗内容组件（商品信息、积分校验、差额提示、requestId 幂等）
+- [ ] 6.3 创建 `src/components/content/GiftSendModal/`：虚拟礼物赠送弹窗组件
 
-## 7. API 与验收
+## 7. 等级成长组件
 
-- [x] 7.1 补齐勋章、积分、兑换、等级、权益、衰减 controller 接口
-- [x] 7.2 添加 Controller WebMvc 成功响应和参数校验测试
-- [x] 7.3 补齐 Knife4j 注解、中文字段说明、错误码常量
-- [x] 7.4 添加错误码和接口文档关键字段覆盖测试
-- [x] 7.5 运行内容社区用户成长、勋章、积分相关单元测试
-- [x] 7.6 修复测试失败并复跑到通过
+- [ ] 7.1 创建 `src/components/content/LevelCard/`：等级信息卡片组件（徽章、等级名称、经验值进度条、升级提示）
+- [ ] 7.2 创建 `src/components/content/LevelBenefitList/`：等级权益列表展示组件
+- [ ] 7.3 创建 `src/components/content/GrowthProgress/`：经验值进度条组件（含动画过渡、警告色）
+- [ ] 7.4 创建 `src/components/content/DecayWarning/`：衰减状态警告提示组件（衰减中/保护期/已降级三种状态）
+
+## 8. 勋章页面
+
+- [ ] 8.1 创建 `/content/my-badges` 页面：顶部统计区、分类标签页、勋章卡片网格、空状态、加载骨架屏
+- [ ] 8.2 实现勋章佩戴编辑模式：勾选逻辑（最多 5 个）、保存/取消、API 调用、缓存刷新
+- [ ] 8.3 实现勋章详情弹窗：useModal hook 集成、三种状态内容展示、移动端 Drawer 降级
+- [ ] 8.4 创建 `/content/badge-manage` 页面（管理员）：查询表单、数据表格、回收确认弹窗（二次确认、回收原因必填）
+
+## 9. 积分页面
+
+- [ ] 9.1 创建 `/content/point-detail` 页面：余额卡片、筛选区（类型 Select + 时间 DatePicker）、积分流水表格、分页、防抖 300ms
+- [ ] 9.2 实现积分明细响应式：移动端表格转卡片列表
+- [ ] 9.3 创建 `/content/point-mall` 页面：余额展示、分类标签、商品卡片网格、兑换按钮
+- [ ] 9.4 实现兑换交互流程：兑换确认弹窗、积分校验、requestId 幂等、乐观更新、弹窗锁定、防重复提交
+
+## 10. 等级成长页面
+
+- [ ] 10.1 创建 `/content/my-level` 页面：等级信息卡片、积分与成长值分栏、等级权益卡片、等级体系说明（可折叠）、衰减状态提示区
+- [ ] 10.2 实现升级祝贺弹窗组件（LevelUpCongratsModal）：新等级徽章、解锁权益列表、确认按钮
+- [ ] 10.3 实现等级动画效果：CountTo 数字跳动、进度条动画过渡
+
+## 11. 路由配置
+
+- [ ] 11.1 在路由配置中添加 5 个新页面路由：`/content/my-badges`、`/content/point-detail`、`/content/point-mall`、`/content/my-level`、`/content/badge-manage`
+- [ ] 11.2 配置路由权限：勋章管理页需管理员角色权限校验
+
+## 12. 响应式适配
+
+- [ ] 12.1 实现勋章页响应式：桌面 4 列、平板 3 列、移动端 2 列，分类标签横向滚动
+- [ ] 12.2 实现积分明细响应式：筛选区堆叠布局、移动端表格转卡片列表
+- [ ] 12.3 实现商城页响应式：商品卡片网格自适应列数
+- [ ] 12.4 实现等级页响应式：移动端分栏堆叠、权益列表横向滚动卡片
+- [ ] 12.5 实现弹窗响应式：桌面端 Modal、移动端 Drawer

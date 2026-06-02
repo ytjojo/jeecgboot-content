@@ -1,141 +1,85 @@
 ## Context
 
-内容社区已有 `content_user_profile` 中的 `point_balance`、`growth_value`、`level` 汇总字段，也已有 `content_user_point_ledger`、`content_user_growth_ledger`、`content_user_badge_definition`、`content_user_badge_grant`、`ContentUserGrowthServiceImpl` 和等级权益/处罚相关服务。现状能记录简单积分和成长变更，但奖励规则、每日上限、幂等、防刷、兑换、勋章进度、佩戴展示、过期回收、等级阈值配置和经验衰减仍不完整。
+JeecgBoot 内容社区前端基于 Vue 3 + Vite + Ant Design Vue + Pinia 技术栈，已有成熟的组件体系（Table、Form、Modal、CardList 等）和 API 封装模式（defHttp）。EPIC-01 已完成后端数据模型建设，本变更需要构建前端交互层，覆盖勋章、积分、等级成长、经验衰减四大模块。
 
-EPIC-03 依赖 EPIC-01 的用户注册登录，也会在 EPIC-02 的主页、帖子卡片和评论区域展示勋章与等级。因为 EPIC-01/02 仍是独立 OpenSpec 变更，本设计以现有 `userId`、profile 汇总字段和内容社区用户域为兼容边界，后续通过事件和展示聚合对接其他史诗。
+**当前状态**：前端无任何游戏化相关页面和组件，需要从零构建。后端 API 已由 EPIC-01 定义接口规范。
+
+**约束条件**：
+- 桌面端为主，移动端需响应式适配
+- 依赖 EPIC-01 后端 API（勋章/积分/等级数据模型）
+- 帖子列表/详情 API 需后端增加 `authorBadges` 字段
+- 遵循项目既有组件复用模式和 API 封装规范
 
 ## Goals / Non-Goals
 
 **Goals:**
-
-- 在现有用户域上补齐勋章、积分和成长等级闭环，而不是新建平行用户成长体系。
-- 用规则配置驱动积分、成长值、勋章和等级权益，减少硬编码。
-- 保证奖励事件幂等、每日上限准确、积分消费原子、台账可追溯。
-- 支持勋章分类、进度、佩戴、展示、过期和违规回收。
-- 支持积分兑换、功能解锁、虚拟礼物、积分明细查询。
-- 支持成长值驱动等级、等级权益、推荐加权输出、经验衰减和降级保护。
-- 使用 Flyway 管理新增表和字段，并提供回滚方案。
+- 构建完整的勋章系统前端：分类浏览、佩戴设置、详情弹窗、过期管理、管理员回收
+- 构建积分系统前端：余额展示、明细查询、商城兑换、功能解锁、礼物赠送
+- 构建等级成长前端：等级展示、进度条动画、权益列表、全局升级祝贺弹窗
+- 构建经验衰减展示：规则公示、保护期提示、衰减提醒
+- 构建佩戴勋章展示组件：prop 驱动，支持主页/帖子/评论区三处复用
+- 实现跨 Store 状态同步和全局事件监听机制
 
 **Non-Goals:**
-
-- 不实现独立支付结算和创作者收益提现。
-- 不实现完整商城履约、物流、库存采购和财务结算。
-- 不重构推荐算法主体，只输出受限的等级加权信号。
-- 不建设完整任务中心 UI，仅提供任务完成事件与奖励发放承载。
+- 不实现独立支付结算和创作者收益提现页面
+- 不实现完整商城履约、物流、库存管理
+- 不实现推荐算法配置后台
+- 不实现任务中心完整 UI（仅展示任务完成奖励结果）
+- 不实现勋章动态特效自定义上传（本期使用固定枚举样式 key）
 
 ## Decisions
 
-### 1. 采用行为事件驱动的奖励入口
+### D1: 组件架构 — 组合式 API + Pinia Store
 
-新增统一奖励编排服务，接收登录、浏览、点赞、分享、评论、发布、推荐、加精、转发、关注、邀请注册、任务完成等事件。编排流程：
+**选择**: 使用 Vue 3 组合式 API + Pinia 状态管理，每个业务模块独立 Store。
 
-```text
-行为事件
-  -> 幂等检查
-  -> 规则匹配
-  -> Redis 每日上限检查
-  -> 积分/成长台账
-  -> profile 汇总更新
-  -> 勋章进度刷新
-  -> 通知/审计
-```
+**理由**: 项目已有 Pinia 基础设施，组合式 API 便于逻辑复用。勋章/积分/等级三个模块数据独立但有联动场景，通过 Store 内部调用和 mitt 事件总线实现跨模块同步。
 
-理由：现有 `recordBehavior(userId, sourceType, pointDelta, growthDelta)` 太直接，调用方容易绕过上限和幂等规则。统一入口能保护积分与成长体系的一致性。
+**替代方案**: Vuex（项目已迁移至 Pinia，不考虑）。
 
-替代方案：各业务模块直接传 pointDelta/growthDelta。放弃原因是规则散落，难以防刷和追溯。
+### D2: BadgeDisplay 数据传递 — Prop 驱动而非组件内请求
 
-### 2. 规则配置与台账事实分离
+**选择**: BadgeDisplay 组件通过 `badges` prop 接收数据，内部不发起 API 请求。
 
-新增或扩展表：
+**理由**: 帖子列表页可能展示数十条帖子，若每条帖子的 BadgeDisplay 都独立请求佩戴数据，将产生 N+1 请求问题。帖子列表/详情 API 后端增加 `authorBadges` 字段（join 查询），前端直接消费。
 
-- `content_user_reward_rule`: 行为 sourceType 对应积分、成长值、每日上限、是否启用、规则说明。
-- `content_user_reward_event`: 已处理事件幂等表，记录 eventId、sourceType、userId、处理结果。
-- `content_user_level_config`: 等级阈值、等级名称、展示样式。
-- `content_user_level_benefit_config`: 等级权益配置，如上传大小、视频清晰度、话题额度、客服优先级、推荐加权。
-- `content_user_exchange_goods`: 可兑换权益、功能解锁、虚拟礼物配置。
-- `content_user_exchange_order`: 兑换订单和权益发放结果。
-- `content_user_feature_unlock`: 用户功能解锁状态。
-- `content_user_virtual_gift_record`: 虚拟礼物赠送记录。
-- `content_user_growth_decay_state`: 经验衰减和降级保护状态。
+**替代方案**: 组件内请求 + 缓存（仍有首次加载的 N+1 问题，且增加前端复杂度）。
 
-保留现有 point/growth ledger 和 profile 汇总字段作为事实与读模型。理由是配置可调整，台账不可随意改写。
+### D3: 全局升级事件 — defHttp 拦截器 + mitt 事件总线
 
-### 3. Redis 只做短期计数和幂等加速，数据库保存最终事实
+**选择**: 在 defHttp 响应拦截器中检测 `levelChanged` 字段，通过 mitt 广播升级事件，App.vue 监听并弹出祝贺弹窗。
 
-Redis key 建议：
+**理由**: 升级事件可能在任意 API 响应中触发（非仅等级页），需要全局监听。拦截器方案无需修改各页面代码，自动覆盖所有 API 调用。
 
-- `content:growth:daily_cap:{sourceType}:{userId}:{yyyyMMdd}`: 行为每日奖励上限计数。
-- `content:growth:event_lock:{eventId}`: 短期事件处理锁。
-- `content:growth:badge_progress:{userId}:{badgeCode}`: 勋章进度缓存。
-- `content:growth:benefit:{userId}`: 等级权益摘要缓存。
+**替代方案**:
+- 方案 A: 仅在等级页轮询检测（遗漏其他页面的升级事件）
+- 方案 B: WebSocket 推送（增加后端复杂度，本期不需要实时性）
 
-数据库的 `content_user_reward_event` 负责长期幂等，ledger 负责对账。理由是 Redis 可丢失，不能作为积分余额和奖励事实来源。
+### D4: 积分兑换并发控制 — requestId 幂等 + 前端防重
 
-### 4. 积分消费使用事务内余额校验和台账写入
+**选择**: 前端生成唯一 UUID 作为 requestId，后端基于 requestId 做幂等校验。兑换按钮在请求期间完全禁用，弹窗锁定不可关闭。
 
-兑换、功能解锁、赠礼必须在同一事务内完成：
+**理由**: 网络重试、用户快速点击都可能导致重复兑换。幂等校验是分布式系统的标准做法，前端防重是用户体验保障。
 
-```text
-锁定用户 profile 或余额行
-  -> 校验余额/库存/配置
-  -> 扣减 point_balance
-  -> 写负向 point ledger
-  -> 创建订单/解锁/礼物记录
-  -> 发通知
-```
+**替代方案**: 仅前端防重（网络重试仍可能重复）、乐观锁（增加后端复杂度）。
 
-理由：积分是消耗型资产，必须避免余额透支和权益已发但扣款失败。
+### D5: 响应式策略 — 断点 + 组件降级
 
-替代方案：先扣积分再异步发权益。放弃原因是失败补偿复杂且影响用户信任。
+**选择**: 使用 1200px/768px 断点，移动端表格转卡片列表、弹窗转 Drawer。
 
-### 5. 勋章授予和佩戴基于 grant 表扩展
+**理由**: 项目已有响应式基础，表格在移动端体验差，转为卡片列表是常见降级策略。弹窗转 Drawer 符合移动端交互习惯。
 
-继续使用 `content_user_badge_definition` 与 `content_user_badge_grant`，补齐字段或扩展表支持分类、图标、特效、进度规则、排序、佩戴顺序、回收原因、操作人。最多佩戴 5 个通过服务层校验，过期任务将 grant 标记为 `EXPIRED` 并取消展示。
+### D6: 缓存策略 — Pinia + TTL 分级
 
-理由：现有表已表达“定义”和“授予”，增量扩展比重建更稳。
+**选择**: 低频变更数据（勋章列表、等级配置）Pinia 缓存 + 5 分钟 TTL；高频变更数据（积分余额、经验值）每次进入页面刷新。
 
-### 6. 等级计算从硬编码改为配置阈值
-
-`ContentUserGrowthServiceImpl.calculateLevel` 当前按 `growth / 100 + 1` 计算，后续改为读取 `content_user_level_config`。等级权益也从固定高等级判断改为 `content_user_level_benefit_config`。
-
-理由：EPIC-03 要求等级阈值、特权和加权可配置，硬编码无法满足运营调整。
-
-### 7. 衰减状态独立记录，降级保护显式化
-
-衰减任务根据最后活跃时间筛选连续 30 天未登录用户，写负向 growth ledger，进入或更新 `content_user_growth_decay_state`。如果低于当前等级阈值，先进入 7 天保护期；保护期内活跃并恢复阈值则清除状态，否则保护期结束后降级并通知。
-
-理由：衰减与降级是敏感体验，必须可解释、可审计、可恢复。
+**理由**: 勋章和等级配置变更频率低，缓存可减少 API 调用。积分和经验值是实时数据，缓存会导致数据不一致。
 
 ## Risks / Trade-offs
 
-- [刷积分或刷经验] → 奖励事件必须带 eventId，使用 Redis 计数和数据库幂等表双重保护，异常事件写审计。
-- [Redis 丢失导致上限失效] → 数据库 reward_event 和 ledger 可回查；关键高价值事件使用数据库幂等为准。
-- [积分消费并发透支] → 事务内锁定 profile 余额并校验，消费失败整体回滚。
-- [规则调整影响历史对账] → 台账记录当时 sourceType、delta、rule snapshot 或 remark，不回写历史 ledger。
-- [等级衰减引发用户负反馈] → 规则说明可查询，降级前 7 天保护，活跃后停止衰减。
-- [推荐加权破坏公平] → 只输出小幅配置化权重，并设置最大值，推荐系统仍必须结合内容质量评分。
-
-## Migration Plan
-
-1. 新增 Flyway migration，创建奖励规则、奖励事件、等级配置、等级权益配置、兑换商品、兑换订单、功能解锁、礼物记录、衰减状态表。
-2. 扩展 `content_user_badge_definition` 和 `content_user_badge_grant` 的展示、进度、回收、佩戴排序相关字段。
-3. 为 `content_user_point_ledger`、`content_user_growth_ledger` 补齐 source description、event id、rule snapshot 等可选审计字段。
-4. 初始化默认积分规则、成长规则、等级阈值、等级权益和基础勋章定义。
-5. 发布统一奖励事件入口，保留旧 `/content/user/growth/record` 作为兼容入口但内部委托新编排。
-6. 开启 Redis 上限计数和幂等锁，观察奖励发放量、上限命中、重复事件、消费失败率。
-7. 最后开启经验衰减定时任务，先 dry-run 记录待衰减用户，再启用真实扣减。
-
-**Rollback strategy:**
-
-- 应用回滚：旧版本继续使用 profile 汇总、point ledger、growth ledger、badge definition/grant，新增表不影响旧流程。
-- 数据回滚：先导出新增规则、订单、解锁、礼物和衰减状态表，再按创建顺序反向删除新增索引、字段和表。
-- 兼容字段回滚：新增到现有表的字段保持 nullable 或默认值；回滚前停止新逻辑写入，再删除字段。
-- Redis 回滚：删除 `content:growth:*` 相关 key。
-- 规则回滚：将奖励规则和衰减任务置为 disabled，保留已有 ledger 作为历史事实，不做批量反向冲正，除非单独审批补偿方案。
-
-## Open Questions
-
-- 积分兑换商品是否需要真实库存锁定，还是本期只处理虚拟权益库存？
-- 等级推荐加权由当前模块提供权重接口即可，还是需要同步写入内容推荐特征表？
-- 勋章动态特效资源由运营上传配置，还是固定枚举样式 key？
-- 任务体系是否已有独立 EPIC；若后续独立建设，本期只接收任务完成事件。
+- **[Risk] 帖子列表 authorBadges 字段未就绪** → 前端 BadgeDisplay 组件做好降级处理：无 badges 数据时不展示，不报错
+- **[Risk] 大量勋章（50+）渲染性能** → 超过 50 个勋章时启用虚拟滚动（antdv VirtualList）
+- **[Risk] 全局升级弹窗频繁打扰** → 7 天冷却期机制 + 同一轮事件循环内去重
+- **[Risk] 积分兑换并发竞态** → requestId 幂等 + 前端防重 + 乐观更新三重保障
+- **[Trade-off] Prop 驱动增加父组件数据管理负担** → 换取避免 N+1 请求，性能收益远大于代码复杂度增加
+- **[Trade-off] 7 天弹窗冷却期可能导致用户错过升级感知** → 用户进入等级页时仍可通过数据对比感知升级
