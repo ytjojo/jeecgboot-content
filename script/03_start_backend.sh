@@ -63,15 +63,32 @@ backend_pid=$!
 write_pidfile "$BACKEND_PID_FILE" "$backend_pid"
 log_ok "后端进程已 spawn，pid=$backend_pid"
 
-# 3. 等待健康
-log_info "等待后端健康（最多 180s）: $BACKEND_HEALTH_URL"
-if wait_for_url "$BACKEND_HEALTH_URL" 180; then
-  log_ok "后端健康检查通过"
-else
-  log_error "后端在 180s 内未通过健康检查"
+# 3. 等待启动完成（两阶段：端口 LISTEN → banner 输出）
+log_info "等待后端启动（最多 ${BACKEND_BOOT_TIMEOUT}s）"
+
+# 阶段 1：Tomcat 端口开始监听（说明 Spring 容器已开始启动）
+if ! wait_for_port "127.0.0.1" "$BACKEND_PORT" "$BACKEND_BOOT_TIMEOUT"; then
+  log_error "后端在 ${BACKEND_BOOT_TIMEOUT}s 内未监听端口 $BACKEND_PORT"
   log_warn "查看日志: tail -n 80 $BACKEND_LOG"
   exit 1
 fi
+log_ok "端口 $BACKEND_PORT 已 LISTEN（Tomcat 已起）"
+
+# 阶段 2：扫描日志等到 Spring Boot 完全启动（banner 关键字）
+# 注意：仅在端口 LISTEN 之后的内容中匹配，避免旧日志干扰
+log_info "等待 Spring Boot 启动完成（日志关键字: \"${BACKEND_READY_PATTERN}\"）"
+if wait_for_log "$BACKEND_LOG" "$BACKEND_READY_PATTERN" "$BACKEND_BOOT_TIMEOUT"; then
+  log_ok "后端启动完成（banner 已输出）"
+else
+  log_error "后端在 ${BACKEND_BOOT_TIMEOUT}s 内未完成启动（未出现 banner）"
+  log_warn "查看日志: tail -n 80 $BACKEND_LOG"
+  exit 1
+fi
+
+# 阶段 3（冒烟）：访问 doc.html —— OAuth2 白名单可能 200/401 都算活
+# 注：此步仅打印结果，不作为启动判据
+code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$BACKEND_DOC_URL" 2>/dev/null || echo "000")
+log_info "冒烟探测 ${BACKEND_DOC_URL} -> HTTP ${code}"
 
 # 4. 暴露访问信息
 cat <<EOF

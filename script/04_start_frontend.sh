@@ -12,8 +12,14 @@ source "$SCRIPT_DIR/lib/common.sh"
 
 log_step "启动 Vue3 前端（Vite port=${FRONTEND_PORT}）"
 
-# 前置：确保后端在跑
-"$SCRIPT_DIR/03_start_backend.sh"
+# 前置：探测后端端口（不强制 spawn 03，避免与 start_all 重复）
+# 04 既可独立跑（前端 dev 启动不依赖后端进程），也可被 start_all 调用
+if port_in_use "$BACKEND_PORT"; then
+  log_ok "后端端口 ${BACKEND_PORT} 已 LISTEN（假设 03 已运行）"
+else
+  log_warn "后端端口 ${BACKEND_PORT} 未 LISTEN —— 03 可能未运行"
+  log_warn "前端启动后 API 请求会失败；如需后端请先跑 03_start_backend.sh"
+fi
 
 require_cmd pnpm
 [ -d "$FRONTEND_DIR" ] || die "前端目录不存在: $FRONTEND_DIR"
@@ -57,7 +63,7 @@ log_ok "端口 $FRONTEND_PORT 已释放"
 # 3. 启动 Vite
 cd "$FRONTEND_DIR" || die "无法进入 $FRONTEND_DIR"
 : > "$FRONTEND_LOG"
-log_info "后台启动: pnpm dev（日志: $FRONTEND_LOG）"
+log_info "后台启动: pnpm dev（日志: ${FRONTEND_LOG}）"
 nohup pnpm dev > "$FRONTEND_LOG" 2>&1 &
 frontend_pid=$!
 write_pidfile "$FRONTEND_PID_FILE" "$frontend_pid"

@@ -84,6 +84,25 @@ wait_for_url() {
   return 1
 }
 
+# 等待日志文件中出现关键字（说明 Spring Boot 真正完成启动）
+# 用法：wait_for_log <log_file> <pattern> <timeout_sec> [since_offset]
+# 返回 0 = 命中；1 = 超时
+wait_for_log() {
+  local logfile="$1" pattern="$2" timeout="${3:-180}" since_offset="${4:-0}"
+  local i=0
+  while [ "$i" -lt "$timeout" ]; do
+    if [ -f "$logfile" ]; then
+      # 仅在 since_offset 之后搜索，避免旧日志干扰
+      if tail -c +"$((since_offset + 1))" "$logfile" 2>/dev/null | grep -qF "$pattern"; then
+        return 0
+      fi
+    fi
+    sleep 1
+    i=$((i + 1))
+  done
+  return 1
+}
+
 # 优雅杀进程：TERM 等 5s → KILL
 kill_pid() {
   local pid="$1" name="${2:-process}"

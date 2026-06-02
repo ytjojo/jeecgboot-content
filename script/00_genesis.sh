@@ -24,7 +24,7 @@ for cmd in lsof mysql redis-cli pnpm mvn java; do
   if command -v "$cmd" >/dev/null 2>&1; then
     log_ok "已安装: $cmd -> $(command -v "$cmd")"
   else
-    log_warn "未安装: $cmd（运行服务时按需补装）"
+    log_warn "未安装: ${cmd}（运行服务时按需补装）"
   fi
 done
 
@@ -38,7 +38,7 @@ install_if_missing() {
     if brew install "$formula" 2>&1 | tee -a "$INSTALL_LOG" | tail -5; then
       log_ok "安装完成: $formula"
     else
-      die "安装失败: $formula，请查看 $INSTALL_LOG"
+      die "安装失败: ${formula}，请查看 $INSTALL_LOG"
     fi
   fi
 }

@@ -25,7 +25,10 @@ MAIN_CLASS="org.jeecg.JeecgSystemApplication"
 MVN_PROFILE="dev"                  # 与 pom.xml <profile.name>dev</profile.name> 对齐
 BACKEND_PORT=8080
 BACKEND_CONTEXT="/jeecg-boot"
-BACKEND_HEALTH_URL="http://127.0.0.1:${BACKEND_PORT}${BACKEND_CONTEXT}/sys/user/queryUsername"
+# 启动完成的判据（来源：JeecgSystemApplication.main 末尾的 log.info）
+BACKEND_READY_PATTERN="Application Jeecg-Boot is running!"
+BACKEND_BOOT_TIMEOUT=240           # 首次依赖下载+启动可能很慢
+# 仅作冒烟（401/200 都接受，证实 Tomcat 正常处理请求） —— 不是启动判定
 BACKEND_DOC_URL="http://127.0.0.1:${BACKEND_PORT}${BACKEND_CONTEXT}/doc.html"
 
 # ========== 前端 ==========

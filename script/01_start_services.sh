@@ -39,7 +39,7 @@ if MYSQL_PWD="$MYSQL_PASS" mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_US
   local_ver=$(MYSQL_PWD="$MYSQL_PASS" mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -N -B -e 'SELECT VERSION();' 2>/dev/null)
   log_ok "MySQL 鉴权通过 (version=$local_ver)"
 else
-  die "MySQL 鉴权失败，请检查账号密码（user=$MYSQL_USER）"
+  die "MySQL 鉴权失败，请检查账号密码（user=${MYSQL_USER}）"
 fi
 
 # ========== Redis ==========
