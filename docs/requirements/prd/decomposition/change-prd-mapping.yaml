@@ -1,117 +1,151 @@
 # Change 到 PRD 文档映射配置
-# 用途：多 Agent 并行生成前端 PRD 时的精确上下文路由
+# 用途：多 Agent 并行生成 PRD 时的精确上下文路由
 # 每个 agent 读取此配置，只加载自己负责的 change + 对应 PRD
+#
+# 命名规范：{domain}-{epic_number}-{name}[_frontend]
+# 字段说明：
+#   backend_change  — 后端 change 目录名（openspec/changes/ 下）
+#   prd             — 后端 PRD 路径（相对于 prd_dir）
+#   frontend_change — 前端 change 目录名（带 _frontend 后缀），无则为 null
+#   frontend_prd    — 前端 PRD 文件名（相对于 frontend_prd_dir），无则为 null
+#   domain          — 业务域（user / circle / channel）
+#   epic            — EPIC 编号
+#   status          — archived 表示已归档，null 或省略表示活跃
 
 mapping:
-  # User 域
-  - change: add-user-authentication
+  # ── User 域 ──
+  - backend_change: user-01-authentication
     prd: user/EPIC-01-user-authentication.md
+    frontend_change: user-01-authentication-frontend
+    frontend_prd: EPIC-01-user-authentication-frontend-prd.md
     domain: user
     epic: EPIC-01
 
-  - change: complete-profile-management
+  - backend_change: user-02-profile-management
     prd: user/EPIC-02-profile-management.md
+    frontend_change: user-02-profile-management-frontend
+    frontend_prd: EPIC-02-profile-management-frontend-prd.md
     domain: user
     epic: EPIC-02
+    status: archived
 
-  - change: complete-badges-points-growth
+  - backend_change: user-03-badges-points-growth
     prd: user/EPIC-03-badges-points-growth.md
+    frontend_change: user-03-badges-points-growth-frontend
+    frontend_prd: EPIC-03-badges-points-growth-frontend-prd.md
     domain: user
     epic: EPIC-03
 
-  - change: social-subscription
+  - backend_change: user-04-social-subscription
     prd: user/EPIC-04-social-subscription.md
+    frontend_change: user-04-social-subscription-frontend
+    frontend_prd: EPIC-04-social-subscription-frontend-prd.md
     domain: user
     epic: EPIC-04
 
-  - change: add-blocking-muting
+  - backend_change: user-05-blocking-muting
     prd: user/EPIC-05-blocking-muting.md
+    frontend_change: null
+    frontend_prd: EPIC-05-blocking-muting-frontend-prd.md
     domain: user
     epic: EPIC-05
 
-  - change: privacy-notifications
+  - backend_change: user-06-privacy-notifications
     prd: user/EPIC-06-privacy-notifications.md
+    frontend_change: user-06-privacy-notifications-frontend
+    frontend_prd: EPIC-06-privacy-notifications-frontend-prd.md
     domain: user
     epic: EPIC-06
 
-  - change: social-extensions
+  - backend_change: user-07-social-extensions
     prd: user/EPIC-07-social-extensions.md
+    frontend_change: user-07-social-extensions-frontend
+    frontend_prd: EPIC-07-social-extensions-frontend-prd.md
     domain: user
     epic: EPIC-07
 
-  - change: feedback-support-system
+  - backend_change: user-08-feedback-support
     prd: user/EPIC-08-feedback-support.md
+    frontend_change: user-08-feedback-support-frontend
+    frontend_prd: EPIC-08-feedback-support-frontend-prd.md
     domain: user
     epic: EPIC-08
 
-  - change: user-status-lifecycle
+  - backend_change: user-09-status-lifecycle
     prd: user/EPIC-09-user-status-lifecycle.md
+    frontend_change: user-09-status-lifecycle-frontend
+    frontend_prd: EPIC-09-user-status-lifecycle-frontend-prd.md
     domain: user
     epic: EPIC-09
 
-  # Circle 域
-  - change: circle-core
+  # ── Circle 域 ──
+  - backend_change: circle-10-core
     prd: circle/EPIC-10-circle-core.md
+    frontend_change: circle-10-core-frontend
+    frontend_prd: EPIC-10-circle-core-frontend-prd.md
     domain: circle
     epic: EPIC-10
 
-  - change: circle-content-interaction
+  - backend_change: circle-11-content-interaction
     prd: circle/EPIC-11-circle-content-interaction.md
+    frontend_change: circle-11-content-interaction-frontend
+    frontend_prd: EPIC-11-circle-content-interaction-frontend-prd.md
     domain: circle
     epic: EPIC-11
 
-  - change: circle-analytics-discovery
+  - backend_change: circle-12-analytics-discovery
     prd: circle/EPIC-12-circle-analytics-discovery.md
+    frontend_change: circle-12-analytics-discovery-frontend
+    frontend_prd: EPIC-12-circle-analytics-discovery-frontend-prd.md
     domain: circle
     epic: EPIC-12
 
-  - change: circle-growth-incentive
+  - backend_change: circle-13-growth-incentive
     prd: circle/EPIC-13-circle-growth-incentive.md
+    frontend_change: circle-13-growth-incentive-frontend
+    frontend_prd: EPIC-13-circle-growth-incentive-frontend-prd.md
     domain: circle
     epic: EPIC-13
 
-  # Channel 域
-  - change: channel-infrastructure
+  # ── Channel 域 ──
+  - backend_change: channel-20-infrastructure
     prd: channel/EPIC-20-channel-infrastructure.md
+    frontend_change: channel-20-infrastructure-frontend
+    frontend_prd: EPIC-20-channel-infrastructure-frontend-prd.md
     domain: channel
     epic: EPIC-20
 
-  - change: channel-privacy-membership
+  - backend_change: channel-21-privacy-membership
     prd: channel/EPIC-21-channel-privacy-membership.md
+    frontend_change: channel-21-privacy-membership-frontend
+    frontend_prd: EPIC-21-channel-privacy-membership-frontend-prd.md
     domain: channel
     epic: EPIC-21
 
-  - change: channel-content-governance
+  - backend_change: channel-22-content-governance
     prd: channel/EPIC-22-channel-content-governance.md
+    frontend_change: channel-22-content-governance-frontend
+    frontend_prd: EPIC-22-channel-content-governance-frontend-prd.md
     domain: channel
     epic: EPIC-22
 
-  - change: channel-discovery
+  - backend_change: channel-23-discovery
     prd: channel/EPIC-23-channel-discovery.md
+    frontend_change: channel-23-discovery-frontend
+    frontend_prd: EPIC-23-channel-discovery-frontend-prd.md
     domain: channel
     epic: EPIC-23
 
-  - change: channel-lifecycle-stats
+  - backend_change: channel-24-lifecycle-stats
     prd: channel/EPIC-24-channel-lifecycle.md
+    frontend_change: channel-24-lifecycle-frontend
+    frontend_prd: EPIC-24-channel-lifecycle-frontend-prd.md
     domain: channel
     epic: EPIC-24
 
 # 路径配置
 paths:
   changes_dir: /Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/openspec/changes
+  archive_dir: /Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/openspec/changes/archive
   prd_dir: /Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/docs/requirements/prd/decomposition
-  output_dir: /Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/docs/requirements/prd/frontend
-
-# Agent 配置
-agent_config:
-  # 每个 agent 的上下文包含：
-  # 1. 本映射文件（只读自己的条目）
-  # 2. change 目录下的 design.md, proposal.md, specs/
-  # 3. 对应的 PRD 文档
-  # 4. 前端 PRD 模板（如有）
-  context_files:
-    - "{changes_dir}/{change}/design.md"
-    - "{changes_dir}/{change}/proposal.md"
-    - "{changes_dir}/{change}/specs/"
-    - "{prd_dir}/{prd}"
-  output_file: "{output_dir}/{epic}-frontend-prd.md"
+  frontend_prd_dir: /Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/docs/requirements/prd/frontend
