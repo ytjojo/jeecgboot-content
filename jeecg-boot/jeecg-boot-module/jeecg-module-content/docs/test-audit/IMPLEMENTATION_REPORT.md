@@ -1,10 +1,10 @@
 # JeecgBoot-Sass 内容社区模块 · 单元测试补测实施报告
 
-> 实施时间：2026-06-02（补测） / 2026-06-02（P0 bug 修复 & 全量 commit）
+> 实施时间：2026-06-02（补测） / 2026-06-02（P0 bug 修复 & 全量 commit） / 2026-06-03（P0 user 子模块补测）
 > 实施范围：`jeecg-boot-module/jeecg-module-content/src/test/java/` + `src/main/java/.../userstatus/`
-> 实施方式：6 个 subagent 并行（每 agent 仅读一个审计报告，独立完成开发+自验证）+ 主 agent TDD 修复 P0 bug
-> 项目分支：`springboot3_content`（8 个原子 commit 全部已 commit，未 push）
-> 验证策略：subagent 各自验证自己的测试类 + 主 agent 统一 `mvn test-compile` 校验 + `mvn surefire:test` 全 userstatus 子模块回归
+> 实施方式：6 个 subagent 并行（每 agent 仅读一个审计报告，独立完成开发+自验证）+ 主 agent TDD 修复 P0 bug + subagent-driven-development 补测 user 子模块
+> 项目分支：`springboot3_content`（8 个原子 commit + feature/user-p0-batch 1 commit，未 push）
+> 验证策略：subagent 各自验证自己的测试类 + 主 agent 统一 `mvn test-compile` 校验 + `mvn surefire:test` 全 userstatus 子模块回归 + user 子模块 10 文件 53 测试全量回归
 
 ---
 
@@ -12,9 +12,9 @@
 
 | 指标 | 数值 |
 | --- | ---: |
-| 新增测试文件数 | **63** |
-| 新增测试用例数 | **~441** |
-| 通过测试数 | **441 / 441 = 100%** |
+| 新增测试文件数 | **73**（63 初始 + 10 user P0 补测） |
+| 新增测试用例数 | **~494**（~441 初始 + 53 user P0 补测） |
+| 通过测试数 | **494 / 494 = 100%** |
 | 失败/错误测试数 | **0** |
 | 跳过测试数 | **0**（补测时曾有 2 个 `@Disabled` KNOWN_BUG，P0 bug 修复后已移除并转绿） |
 | 模块编译（`mvn test-compile`） | ✅ 通过 |
@@ -67,13 +67,26 @@
 - **自验证**：`mvn test -Dtest='<6 new>' -Dmaven.compiler.failOnError=false` → BUILD SUCCESS，59/59 通过
 - **注**：channel 模块有 7 个预存在编译错误（不在本任务范围），用 `failOnError=false` 跳过
 
-### 4. content/user（Subagent 4）
-- **4 个新文件 = 49 测试**（Top 5 焦点）：
+### 4. content/user（Subagent 4 + P0 补测）
+- **初始 4 个新文件 = 49 测试**（Top 5 焦点）：
   - `SystemUserAccountGatewayImplTest`（24）：createUser/createUserByEmail/createUserByThirdParty/resetPassword/getById/bindMobile/bindEmail/unbindMobile/unbindEmail/markCancelled 全 10 路径 + 异常
   - `CircleGrowthSchedulerTest`（6）：圈子等级更新 / 排行榜刷新 / 空集合 / 单点失败不中断
   - `ContentFanTrendAggregationTaskTest`（6）：新增与更新 / 空集合 / 关注过滤 / 日期范围 / 分组聚合
   - `ContentUserSupportControllerWebMvcTest`（13）：管理端 4 端点 + 用户端 9 端点
-- **自验证**：JUnit Platform Launcher + javac 隔离编译 → 5 容器 / 50 测试（含 1 已有）/ 0 失败
+- **P0 补测 10 个新文件 = 53 测试**（2026-06-03，feature/user-p0-batch）：
+  - 4 个 Controller WebMvcTest：
+    - `ContentFanAnalyticsControllerWebMvcTest`（5）：listFans/listFansWithDefaults/getFanTrend/getFanProfile/exportFans
+    - `ContentInviteControllerWebMvcTest`（5）：generateInviteCode/bindInviteRelation/listInviteRecords/listInviteRecordsWithDefaults/getInviteStats
+    - `ContentUserSupportAdminControllerWebMvcTest`（6）：handleAppeal/rejectAppealWithBlankFields/handleReport/rejectReportWithBlankFields/listReportsForAdmin/getReportDetail
+    - `ContentUserSettingsControllerWebMvcTest`（8）：updatePrivacy/getNotificationSetting/updateNotificationSetting/getFeedSetting/updateFeedSetting/checkContentVisibility/updateDndRule/getSecuritySetting
+  - 6 个 Service/Adapter 测试：
+    - `ContentNotificationServiceTest`（3）：sendNotification/handleNullTitleAndContent/generateUniqueId
+    - `ContentSocialSubscriptionDefaultsServiceTest`（3）：allDefaultsMissing/allExist/backFillNotificationFields
+    - `ContentUserLevelBenefitRecoveryServiceTest`（9）：nullRecordGuard/blankIdGuard/noPendingRecords/multipleRecoveries/previousEnabledRestoration/nullPreviousEnabled/blankUserIdGuard/benefitExists/notExists
+    - `ContentUserProfileAuditAdapterTest`（7）：cleanProfile/riskWordInNickname/bio/avatar/caseInsensitive/nullFields/firstMatch
+    - `ContentUserContactBindingAdapterTest`（3）：alwaysReturnsFalse/handlesNullUserId/handlesEmptyUserId
+    - `ContentNoopThirdPartyTokenRevocationPortTest`（3）：alwaysReturnsTrue/handlesNullAuthId/handlesNullTokens
+- **自验证**：JUnit Platform Launcher + javac 隔离编译 → 5 容器 / 50 测试（含 1 已有）/ 0 失败（初始）；P0 补测 53/53 全绿
 - **遗留**（明确未做）：
   - P0 弱覆盖 12 项（12 个方法仅部分 happy-path）
   - P1 Mapper 弱覆盖 51 项（51 个 mapper 方法）
@@ -226,10 +239,13 @@ git show --stat 1ead1032
 
 按优先级排序：
 
+### ✅ P0 已补（2026-06-03）
+- **content/user** 子模块 P0 补测完成：10 个新文件 / 53 测试，feature/user-p0-batch 分支 commit `199a3ea7`
+  - 4 个 Controller WebMvcTest：FanAnalytics(5) / Invite(5) / SupportAdmin(6) / Settings(8)
+  - 6 个 Service/Adapter 测试：Notification(3) / SubscriptionDefaults(3) / LevelBenefitRecovery(9) / ProfileAudit(7) / ContactBinding(3) / NoopTokenRevocation(3)
+
 ### 🔴 P0 未补
-1. **content/user** 子模块仅做 Top 5，剩余 P0 约 **38 个** 待补：
-   - 7 个未测 Controller：治理/订阅/客服/邀请/分析/设置 Controller WebMvcTest
-   - 4 个未测 ServiceImpl
+1. **content/user** 子模块剩余 P0 弱覆盖 **12 项**（12 个方法仅部分 happy-path）
 
 ### ✅ P0 已修
 - **`UserStatusController` 3 处 `valueOf` 抛 `IllegalArgumentException` bug** — commit `1ead1032`，TDD 闭环验证（详见第四章）
@@ -270,11 +286,23 @@ src/test/java/org/jeecg/modules/
 │   │   ├── controller/4 WebMvcTest
 │   │   ├── mapper/CircleMapperCompilationTest.java
 │   │   └── task/CircleJoinRequestTimeoutTaskTest.java
-│   ├── user/                                          [4 文件, 49 测试]   ← Subagent 4
-│   │   ├── controller/ContentUserSupportControllerWebMvcTest.java
-│   │   ├── gateway/SystemUserAccountGatewayImplTest.java
-│   │   ├── growth/CircleGrowthSchedulerTest.java
-│   │   └── task/ContentFanTrendAggregationTaskTest.java
+│   ├── user/                                          [14 文件, 102 测试]  ← Subagent 4 + P0 补测
+│   │   ├── controller/
+│   │   │   ├── ContentUserSupportControllerWebMvcTest.java          (13)
+│   │   │   ├── ContentFanAnalyticsControllerWebMvcTest.java         (5)  ← P0 补测
+│   │   │   ├── ContentInviteControllerWebMvcTest.java               (5)  ← P0 补测
+│   │   │   ├── ContentUserSupportAdminControllerWebMvcTest.java     (6)  ← P0 补测
+│   │   │   └── ContentUserSettingsControllerWebMvcTest.java         (8)  ← P0 补测
+│   │   ├── gateway/SystemUserAccountGatewayImplTest.java            (24)
+│   │   ├── growth/CircleGrowthSchedulerTest.java                    (6)
+│   │   ├── service/
+│   │   │   ├── ContentNotificationServiceTest.java                  (3)  ← P0 补测
+│   │   │   ├── ContentSocialSubscriptionDefaultsServiceTest.java    (3)  ← P0 补测
+│   │   │   ├── ContentUserLevelBenefitRecoveryServiceTest.java      (9)  ← P0 补测
+│   │   │   ├── ContentUserProfileAuditAdapterTest.java              (7)  ← P0 补测
+│   │   │   ├── ContentUserContactBindingAdapterTest.java            (3)  ← P0 补测
+│   │   │   └── ContentNoopThirdPartyTokenRevocationPortTest.java    (3)  ← P0 补测
+│   │   └── task/ContentFanTrendAggregationTaskTest.java             (6)
 │   └── userstatus/                                    [4 文件, 80 测试]   ← Subagent 5
 │       ├── controller/UserStatusControllerWebMvcTest.java
 │       ├── mapper/UserStatusAuditLogMapperTest.java
@@ -298,23 +326,25 @@ src/test/java/org/jeecg/modules/
 ### 9.3 最终状态
 
 - ✅ 业务代码 0 改动（补测阶段）+ 2 文件 +27/-3（修复阶段）
-- ✅ 全部 8 个原子 commit 已落库，未 push
+- ✅ 全部 9 个原子 commit 已落库（8 初始 + 1 user P0 补测），未 push
 - ✅ P0 业务 bug 0 个遗留
-- ⚠️ P0 补测遗留：content/user 38 个待补（**不阻塞当前上线**）
+- ✅ P0 补测：content/user 53 个已完成（feature/user-p0-batch 分支 commit `199a3ea7`）
+- ⚠️ P0 弱覆盖遗留：content/user 12 个方法仅部分 happy-path（**不阻塞当前上线**）
 - ⚠️ P1 补测遗留：content/user 51 个 Mapper Contract Test（**不阻塞当前上线**）
 
 ### 9.4 建议下一轮
 
-1. 补 user 子模块剩余 38 个 P0
+1. 补 user 子模块 P0 弱覆盖 12 项
 2. 51 个 user Mapper Contract Test
 3. Code quality 复审
-4. 模块全量 `mvn test`（当前仅 userstatus 子模块跑过 90 tests 全量）
+4. 模块全量 `mvn test`（当前仅 userstatus 子模块跑过 90 tests 全量 + user 子模块 53 tests 全量）
 
 ---
 
 > 补测完成时间：2026-06-02 23:35
 > P0 bug 修复 & 8 commits 时间：2026-06-02 23:55
-> 总 subagent 数：6（并行）+ 主 agent 1（TDD 修复）
-> 当前分支：`springboot3_content`（8 commits ahead of `80ae13c3`，未 push）
-> 总新增测试：~441
-> 状态：**🟢 100% 通过**（补测 441/441，P0 修复后 userstatus 子模块 90/90，无 `@Disabled`）
+> P0 user 子模块补测 & 1 commit 时间：2026-06-03 13:18
+> 总 subagent 数：6（并行）+ 主 agent 1（TDD 修复）+ subagent-driven-development（user P0 补测）
+> 当前分支：`springboot3_content`（8 commits）+ `feature/user-p0-batch`（1 commit `199a3ea7`），未 push
+> 总新增测试：~494（~441 初始 + 53 user P0 补测）
+> 状态：**🟢 100% 通过**（补测 494/494，P0 修复后 userstatus 子模块 90/90，user P0 补测 53/53，无 `@Disabled`）
