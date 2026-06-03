@@ -1,9 +1,10 @@
 # EPIC-02 个人资料与主页个性化 — 前端 PRD
 
 > **史诗ID**: EPIC-02
-> **变更ID**: complete-profile-management
 > **域**: user（用户域）
+> **变更ID**: user-02-profile-management-frontend
 > **版本**: 1.0
+> **前置依赖**: 无
 > **日期**: 2026-06-02
 
 ---

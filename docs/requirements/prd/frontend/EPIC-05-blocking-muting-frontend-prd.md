@@ -1,6 +1,11 @@
 # EPIC-05 前端 PRD：降噪与内容保护（拉黑 / 屏蔽）
 
-> **变更**: add-blocking-muting | **域**: user | **技术栈**: Vue 3 + TypeScript + Vite 6 + Ant Design Vue 4 + Pinia
+> **史诗ID**: EPIC-05
+> **域**: user（用户域）
+> **变更ID**: user-05-blocking-muting
+> **版本**: 1.0
+> **前置依赖**: 无
+> **日期**: 2026-06-02
 
 ---
 

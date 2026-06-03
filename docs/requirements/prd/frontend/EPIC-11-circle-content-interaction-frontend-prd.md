@@ -1,5 +1,14 @@
 # EPIC-11 圈子内容与互动 - 前端 PRD
 
+> **史诗ID**: EPIC-11
+> **域**: circle（圈子域）
+> **变更ID**: circle-11-content-interaction-frontend
+> **版本**: 1.0
+> **前置依赖**: EPIC-10
+> **日期**: 2026-06-02
+
+---
+
 ## 1. 概述
 
 ### 需求目标

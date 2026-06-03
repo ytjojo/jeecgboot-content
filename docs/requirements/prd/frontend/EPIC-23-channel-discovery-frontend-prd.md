@@ -1,6 +1,11 @@
 # EPIC-23 频道分类、推荐与发现 - 前端 PRD
 
-> 变更 ID: channel-discovery | EPIC-23 | 优先级: 中 | 预计周期: 4 周
+> **史诗ID**: EPIC-23
+> **域**: channel（频道域）
+> **变更ID**: channel-23-discovery-frontend
+> **版本**: 1.0
+> **前置依赖**: EPIC-20
+> **日期**: 2026-06-02
 
 ---
 

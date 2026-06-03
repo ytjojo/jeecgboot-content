@@ -1,10 +1,11 @@
 # EPIC-03 勋章、积分与成长体系 — 前端 PRD
 
-> **变更名称**: complete-badges-points-growth
-> **史诗编号**: EPIC-03（用户域）
+> **史诗ID**: EPIC-03
+> **域**: user（用户域）
+> **变更ID**: user-03-badges-points-growth-frontend
 > **版本**: 1.0
+> **前置依赖**: 无
 > **日期**: 2026-06-02
-> **状态**: 草稿
 
 ---
 

@@ -1,9 +1,10 @@
 # EPIC-01 用户认证与账号安全 — 前端 PRD
 
 > **史诗ID**: EPIC-01
-> **变更ID**: add-user-authentication
 > **域**: user（用户域）
+> **变更ID**: user-01-authentication-frontend
 > **版本**: 1.0
+> **前置依赖**: 无
 > **日期**: 2026-06-02
 
 ---

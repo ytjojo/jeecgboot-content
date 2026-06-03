@@ -1,5 +1,14 @@
 # EPIC-12 - 圈子数据与推荐 前端 PRD
 
+> **史诗ID**: EPIC-12
+> **域**: circle（圈子域）
+> **变更ID**: circle-12-analytics-discovery-frontend
+> **版本**: 1.0
+> **前置依赖**: EPIC-10, EPIC-11
+> **日期**: 2026-06-02
+
+---
+
 ## 1. 概述
 
 ### 1.1 背景

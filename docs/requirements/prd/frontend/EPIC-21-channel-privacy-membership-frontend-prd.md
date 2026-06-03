@@ -4,11 +4,18 @@ title: 频道隐私、订阅与成员管理 — 前端 PRD
 status: draft
 date: '2026-06-02'
 sourceEpic: docs/requirements/prd/decomposition/channel/EPIC-21-channel-privacy-membership.md
-sourceDesign: openspec/changes/channel-privacy-membership/design.md
-sourceProposal: openspec/changes/channel-privacy-membership/proposal.md
+sourceDesign: openspec/changes/channel-21-privacy-membership-frontend/design.md
+sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal.md
 ---
 
 # 频道隐私、订阅与成员管理 — 前端 PRD
+
+> **史诗ID**: EPIC-21
+> **域**: channel（频道域）
+> **变更ID**: channel-21-privacy-membership-frontend
+> **版本**: 1.0
+> **前置依赖**: EPIC-20
+> **日期**: 2026-06-02
 
 ## 1. 概述
 

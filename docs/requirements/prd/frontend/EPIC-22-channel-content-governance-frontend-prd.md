@@ -5,11 +5,18 @@ status: draft
 date: '2026-06-02'
 type: frontend-prd
 sourceEpic: docs/requirements/prd/decomposition/channel/EPIC-22-channel-content-governance.md
-sourceDesign: openspec/changes/channel-content-governance/design.md
-sourceProposal: openspec/changes/channel-content-governance/proposal.md
+sourceDesign: openspec/changes/channel-22-content-governance-frontend/design.md
+sourceProposal: openspec/changes/channel-22-content-governance-frontend/proposal.md
 ---
 
 # 频道内容发布与治理 - 前端 PRD
+
+> **史诗ID**: EPIC-22
+> **域**: channel（频道域）
+> **变更ID**: channel-22-content-governance-frontend
+> **版本**: 1.0
+> **前置依赖**: EPIC-20
+> **日期**: 2026-06-02
 
 ## 1. 概述
 

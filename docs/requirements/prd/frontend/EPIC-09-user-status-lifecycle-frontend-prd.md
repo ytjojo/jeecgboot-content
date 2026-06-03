@@ -1,11 +1,11 @@
 # EPIC-09 用户状态与生命周期治理 -- 前端 PRD
 
 > **史诗ID**: EPIC-09
-> **变更名称**: user-status-lifecycle
-> **所属域**: user
-> **优先级**: 高
-> **预计周期**: 6 周（分三期交付）
-> **技术栈**: Vue 3 + TypeScript + Vite 6 + Ant Design Vue 4 + Pinia
+> **域**: user（用户域）
+> **变更ID**: user-09-status-lifecycle-frontend
+> **版本**: 1.0
+> **前置依赖**: 无
+> **日期**: 2026-06-02
 
 ---
 
