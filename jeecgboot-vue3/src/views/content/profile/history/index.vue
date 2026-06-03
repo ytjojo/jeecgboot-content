@@ -32,21 +32,24 @@
             size="small"
             type="link"
             :loading="restoringId === item.historyId"
-            @click="onRestore(item.historyId)"
+            @click="onRestore(item)"
           >
             恢复
           </a-button>
         </a-list-item>
       </template>
     </a-list>
+
+    <p class="profile-history__footer">最多保留 20 条记录，保留期限 180 天</p>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 import { getHistoryList, restoreHistory } from '/@/api/content/profile';
 import type { ContentUserProfileHistoryVO, HistoryType } from '/@/api/content/profile/types';
+import { buildRestoreConfirmOptions } from '/@/views/content/profile/components/restoreConfirm';
 
 const activeTab = ref<HistoryType>('NICKNAME');
 const records = ref<ContentUserProfileHistoryVO[]>([]);
@@ -90,18 +93,24 @@ function formatTime(iso?: string): string {
   return d.toLocaleString('zh-CN', { hour12: false });
 }
 
-async function onRestore(historyId: string) {
+async function onRestore(item: ContentUserProfileHistoryVO) {
   if (!userId.value) return;
-  restoringId.value = historyId;
-  try {
-    await restoreHistory(userId.value, historyId);
-    message.success('已恢复');
-    await load();
-  } catch (e: any) {
-    message.error(e?.message || '恢复失败');
-  } finally {
-    restoringId.value = '';
-  }
+  const opts = buildRestoreConfirmOptions(activeTab.value);
+  Modal.confirm({
+    ...opts,
+    onOk: async () => {
+      restoringId.value = item.historyId;
+      try {
+        await restoreHistory(userId.value, item.historyId);
+        message.success('已恢复');
+        await load();
+      } catch (e: any) {
+        message.error(e?.message || '恢复失败');
+      } finally {
+        restoringId.value = '';
+      }
+    },
+  });
 }
 </script>
 
@@ -112,6 +121,13 @@ async function onRestore(historyId: string) {
 .profile-history__nickname {
   font-size: 16px;
   font-weight: 500;
+}
+.profile-history__footer {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  margin-top: 16px;
+  padding: 8px 0;
 }
 @media (max-width: 768px) {
   .profile-history :deep(.ant-list-item) {
