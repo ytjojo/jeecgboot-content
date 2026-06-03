@@ -59,6 +59,26 @@
 - worktree 必须合并回**其来源分支**，禁止跨分支合并
 - 示例：从 `springboot3_content` 创建的 worktree → 只能合并回 `springboot3_content`
 
+### Worktree 提交规则（禁止复制文件重新提交）
+- **在 worktree 内完成 commit**，然后通过 `git cherry-pick` 或 `git merge` 合并回主分支
+- **禁止**从 worktree 复制文件到主 worktree 后重新 commit — 这会丢失 commit 元数据（author、timestamp）且绕过 git 合并机制
+- 如需拆分大 commit 为多个逻辑提交：先在 worktree 内用 `git rebase -i` 或 `git reset` 拆分，再 cherry-pick 到主分支
+
+### Worktree 生命周期（创建 → 完成 → 清理）
+
+**硬规则：创建 worktree 的 agent 负责其完整生命周期，包括最终清理。**
+
+流程：
+1. **创建**：`EnterWorktree` 生成 worktree + 分支
+2. **开发**：在 worktree 内 commit 所有改动
+3. **合并**：回主分支执行 `git merge <feature-branch>`
+4. **验证**：在主分支跑模块全量测试，确认通过
+5. **清理**：`git worktree remove <path>` + `git worktree prune` + `git branch -d <feature-branch>`
+
+**禁止**：开发完成后遗留未清理的 worktree。合并回主分支后必须立即删除 worktree 和 feature 分支。
+
+**检查机制**：主 agent 在任务结束前执行 `git worktree list`，确认无残留 worktree。
+
 ## 代码实现 Workflow
 
 ### 默认实现方式
