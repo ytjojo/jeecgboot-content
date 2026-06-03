@@ -113,4 +113,13 @@ async function onRestore(historyId: string) {
   font-size: 16px;
   font-weight: 500;
 }
+@media (max-width: 768px) {
+  .profile-history :deep(.ant-list-item) {
+    flex-wrap: wrap;
+  }
+  .profile-history :deep(.ant-list-item-action) {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
 </style>

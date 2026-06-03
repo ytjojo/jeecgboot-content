@@ -208,4 +208,13 @@ function onRestoreDefaults() {
 .profile-homepage-settings__module {
   padding: 12px 0;
 }
+@media (max-width: 768px) {
+  .profile-homepage-settings :deep(.ant-col) {
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+  .profile-homepage-settings__module :deep(.ant-space) {
+    flex-wrap: wrap;
+  }
+}
 </style>

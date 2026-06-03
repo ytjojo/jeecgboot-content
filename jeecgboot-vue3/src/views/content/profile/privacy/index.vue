@@ -279,4 +279,10 @@ function onReset() {
 .profile-privacy__alert {
   margin-bottom: 16px;
 }
+@media (max-width: 768px) {
+  .profile-privacy :deep(.ant-col) {
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+}
 </style>

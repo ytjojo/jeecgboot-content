@@ -106,6 +106,7 @@ import { message } from 'ant-design-vue';
 import AvatarCropper from '/@/views/content/profile/components/AvatarCropper.vue';
 import { getProfileDetail, updateProfile } from '/@/api/content/profile';
 import type { ContentUserProfileUpdateReq, ContentUserProfileVO } from '/@/api/content/profile/types';
+import { validateProfileForm } from '/@/views/content/profile/validators/profileForm';
 
 function defaultForm(): ContentUserProfileUpdateReq {
   return {
@@ -165,16 +166,7 @@ onMounted(async () => {
 });
 
 function validate(): string | null {
-  if (!form.nickname?.trim()) return '昵称不能为空';
-  if (form.nickname.length > 30) return '昵称不能超过 30 字符';
-  if (!form.avatar) return '请上传头像';
-  if (form.personalLink && !/^https?:\/\/.*$/.test(form.personalLink)) {
-    return '个人链接必须以 http:// 或 https:// 开头';
-  }
-  if (form.themeColor && !/^#[0-9A-Fa-f]{6}$/.test(form.themeColor)) {
-    return '主题色必须为 #RRGGBB 格式';
-  }
-  return null;
+  return validateProfileForm(form);
 }
 
 async function onSave() {
@@ -217,5 +209,18 @@ function onReset() {
 }
 .profile-edit__alert {
   margin-bottom: 16px;
+}
+@media (max-width: 768px) {
+  .profile-edit :deep(.ant-col) {
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  .profile-edit :deep(.ant-col-lg-12),
+  .profile-edit :deep(.ant-col-md-12) {
+    max-width: 50%;
+    flex: 0 0 50%;
+  }
 }
 </style>
