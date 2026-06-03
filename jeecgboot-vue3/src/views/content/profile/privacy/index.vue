@@ -17,9 +17,12 @@
     <a-form v-else layout="vertical" :model="form">
       <a-card title="基础资料" :bordered="false" class="profile-privacy__card">
         <a-row :gutter="16">
-          <a-col v-for="f in baseFields" :key="f" :span="12">
+          <a-col v-for="f in baseFields" :key="f" :span="isMobile ? 24 : 12">
             <a-form-item :label="fieldLabels[f]">
-              <a-select v-model:value="form[f]" :options="options" />
+              <a-select v-if="!isMobile" v-model:value="form[f]" :options="options" />
+              <a-button v-else block @click="openActionSheet(f, options)">
+                {{ getOptionLabel(options, form[f]) }}
+              </a-button>
             </a-form-item>
           </a-col>
         </a-row>
@@ -27,9 +30,12 @@
 
       <a-card title="扩展资料" :bordered="false" class="profile-privacy__card">
         <a-row :gutter="16">
-          <a-col v-for="f in extensionFields" :key="f" :span="12">
+          <a-col v-for="f in extensionFields" :key="f" :span="isMobile ? 24 : 12">
             <a-form-item :label="fieldLabels[f]">
-              <a-select v-model:value="form[f]" :options="options" />
+              <a-select v-if="!isMobile" v-model:value="form[f]" :options="options" />
+              <a-button v-else block @click="openActionSheet(f, options)">
+                {{ getOptionLabel(options, form[f]) }}
+              </a-button>
             </a-form-item>
           </a-col>
         </a-row>
@@ -37,9 +43,12 @@
 
       <a-card title="主页" :bordered="false" class="profile-privacy__card">
         <a-row :gutter="16">
-          <a-col v-for="f in homepageFields" :key="f" :span="12">
+          <a-col v-for="f in homepageFields" :key="f" :span="isMobile ? 24 : 12">
             <a-form-item :label="fieldLabels[f]">
-              <a-select v-model:value="form[f]" :options="options" />
+              <a-select v-if="!isMobile" v-model:value="form[f]" :options="options" />
+              <a-button v-else block @click="openActionSheet(f, options)">
+                {{ getOptionLabel(options, form[f]) }}
+              </a-button>
             </a-form-item>
           </a-col>
         </a-row>
@@ -47,9 +56,12 @@
 
       <a-card title="认证" :bordered="false" class="profile-privacy__card">
         <a-row :gutter="16">
-          <a-col v-for="f in certificationFields" :key="f" :span="12">
+          <a-col v-for="f in certificationFields" :key="f" :span="isMobile ? 24 : 12">
             <a-form-item :label="fieldLabels[f]">
-              <a-select v-model:value="form[f]" :options="options" />
+              <a-select v-if="!isMobile" v-model:value="form[f]" :options="options" />
+              <a-button v-else block @click="openActionSheet(f, options)">
+                {{ getOptionLabel(options, form[f]) }}
+              </a-button>
             </a-form-item>
           </a-col>
         </a-row>
@@ -57,9 +69,12 @@
 
       <a-card title="活动" :bordered="false" class="profile-privacy__card">
         <a-row :gutter="16">
-          <a-col v-for="f in activityFields" :key="f" :span="12">
+          <a-col v-for="f in activityFields" :key="f" :span="isMobile ? 24 : 12">
             <a-form-item :label="fieldLabels[f]">
-              <a-select v-model:value="form[f]" :options="options" />
+              <a-select v-if="!isMobile" v-model:value="form[f]" :options="options" />
+              <a-button v-else block @click="openActionSheet(f, options)">
+                {{ getOptionLabel(options, form[f]) }}
+              </a-button>
             </a-form-item>
           </a-col>
         </a-row>
@@ -67,9 +82,38 @@
 
       <a-card title="在线状态" :bordered="false" class="profile-privacy__card">
         <a-form-item :label="fieldLabels.onlineStatusVisibility">
-          <a-select v-model:value="form.onlineStatusVisibility" :options="onlineStatusOptions" />
+          <a-select v-if="!isMobile" v-model:value="form.onlineStatusVisibility" :options="onlineStatusOptions" />
+          <a-button v-else block @click="openActionSheet('onlineStatusVisibility', onlineStatusOptions)">
+            {{ getOptionLabel(onlineStatusOptions, form.onlineStatusVisibility) }}
+          </a-button>
         </a-form-item>
       </a-card>
+
+      <!-- Mobile ActionSheet: bottom drawer -->
+      <a-drawer
+        v-model:open="actionSheetVisible"
+        placement="bottom"
+        :height="actionSheetHeight"
+        :closable="false"
+        class="profile-privacy__action-sheet"
+      >
+        <div class="profile-privacy__action-sheet-header">
+          <span>{{ actionSheetLabel }}</span>
+          <a-button type="link" @click="actionSheetVisible = false">取消</a-button>
+        </div>
+        <div class="profile-privacy__action-sheet-list">
+          <div
+            v-for="item in actionSheetItems"
+            :key="item.key"
+            class="profile-privacy__action-sheet-item"
+            :class="{ 'profile-privacy__action-sheet-item--active': actionSheetCurrentValue === item.value }"
+            @click="onActionSheetSelect(item.value)"
+          >
+            {{ item.label }}
+            <span v-if="actionSheetCurrentValue === item.value" class="profile-privacy__action-sheet-check">&#10003;</span>
+          </div>
+        </div>
+      </a-drawer>
 
       <a-card title="展示偏好" :bordered="false" class="profile-privacy__card">
         <a-form-item label="显示互关数">
@@ -89,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from 'vue';
+import { reactive, ref, computed, onMounted } from 'vue';
 import { message } from 'ant-design-vue';
 import {
   PRIVACY_VISIBILITY_OPTIONS,
@@ -102,6 +146,8 @@ import {
   updatePrivacy,
 } from '/@/api/content/profile';
 import type { ContentUserPrivacyUpdateReq, ContentUserProfileVO } from '/@/api/content/profile/types';
+import { useResponsiveSelect, mapOptionsToActionItems } from './useResponsiveSelect';
+import type { ActionSheetItem } from './useResponsiveSelect';
 
 const options = PRIVACY_VISIBILITY_OPTIONS;
 const onlineStatusOptions = ONLINE_STATUS_VISIBILITY_OPTIONS;
@@ -173,6 +219,8 @@ function defaultForm(): ContentUserPrivacyUpdateReq {
   };
 }
 
+const { isMobile } = useResponsiveSelect();
+
 const form = reactive<ContentUserPrivacyUpdateReq>(defaultForm());
 const initial = ref<string>(JSON.stringify(defaultForm()));
 const loading = ref(false);
@@ -180,6 +228,30 @@ const loadError = ref(false);
 const saving = ref(false);
 const viewerUserId = ref<string>('');
 const ownerUserId = ref<string>('');
+
+// ActionSheet state (mobile only)
+const actionSheetVisible = ref(false);
+const actionSheetField = ref<string>('');
+const actionSheetLabel = ref<string>('');
+const actionSheetItems = ref<ActionSheetItem[]>([]);
+const actionSheetCurrentValue = computed(() => (form as any)[actionSheetField.value] ?? '');
+const actionSheetHeight = computed(() => Math.min(actionSheetItems.value.length * 48 + 56, 400));
+
+function getOptionLabel(opts: { value: string; label: string }[], value: string): string {
+  return opts.find((o) => o.value === value)?.label ?? value;
+}
+
+function openActionSheet(field: string, opts: { value: string; label: string }[]) {
+  actionSheetField.value = field;
+  actionSheetLabel.value = fieldLabels[field] ?? field;
+  actionSheetItems.value = mapOptionsToActionItems(opts);
+  actionSheetVisible.value = true;
+}
+
+function onActionSheetSelect(value: string) {
+  (form as any)[actionSheetField.value] = value;
+  actionSheetVisible.value = false;
+}
 
 onMounted(async () => {
   loading.value = true;
@@ -284,5 +356,45 @@ function onReset() {
     max-width: 100%;
     flex: 0 0 100%;
   }
+}
+
+.profile-privacy__action-sheet :deep(.ant-drawer-body) {
+  padding: 0;
+}
+
+.profile-privacy__action-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 500;
+}
+
+.profile-privacy__action-sheet-list {
+  max-height: 344px;
+  overflow-y: auto;
+}
+
+.profile-privacy__action-sheet-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.profile-privacy__action-sheet-item:active {
+  background-color: #f5f5f5;
+}
+
+.profile-privacy__action-sheet-item--active {
+  color: #1677ff;
+  font-weight: 500;
+}
+
+.profile-privacy__action-sheet-check {
+  color: #1677ff;
 }
 </style>
