@@ -1,39 +1,47 @@
 ## Why
 
-内容社区当前缺少统一的个人资料管理入口，主页无法个性化定制，隐私控制粒度不足，认证标识与资料字段耦合。用户无法有效构建社区身份，资料完善率低，主页访问时长短。需要实现完整的个人资料管理与主页个性化功能，提升用户在社区中的身份认同感和活跃度。
+内容社区已有 `content_user_profile`、隐私设置和资料接口雏形，但还缺少 EPIC-02 要求的资料审核、主页个性化、认证标识、完整字段可见性、缓存失效和昵称/头像历史能力。
+现在需要在现有 `content/user` 用户域上补齐产品级资料管理，承接 EPIC-01 认证后的用户身份展示与隐私边界。
 
 ## What Changes
 
-- 新增编辑资料页面，支持昵称、头像、简介、性别、生日、地区、职业、个人链接等字段编辑
-- 新增头像上传裁剪弹窗组件，支持 JPG/PNG/WebP 格式校验和 1:1 裁剪
-- 新增资料审核状态展示，包括待审核、审核通过、审核不通过三种状态的 UI 反馈
-- 新增主页设置页面，支持背景图上传、主题色选择、实时预览
-- 新增主页模块配置功能，支持模块显隐开关和拖拽排序
-- 新增认证标识展示组件，支持 7 种认证类型（个人/企业/达人/官方/实名/手机/邮箱）的 Badge 展示和详情弹窗
-- 新增隐私设置页面，支持字段级可见性控制（公开/仅关注者/互关可见/仅自己）
-- 新增隐私设置批量操作（默认可见性设置、一键全部设为）
-- 新增昵称/头像历史记录页面，支持查看和恢复曾用值
-- 扩展 useUserStore，新增资料完善率、修改次数、审核状态等状态字段
+> **实施更新（2026-06-03）**: 本变更已通过 `ContentUserProfileController`（`/content/user/profile` 路径前缀）实现并完成单测覆盖。统一端点 `/profile/update` 承载基础资料 + 主页配置 + 模块排序 + 认证文案的合并提交；隐私接口覆盖 15 个 `*Visibility` 字段。
+
+- 补齐基础资料维护：昵称、头像、简介、性别、生日、地区、职业、个人链接等字段的保存、字段校验（`@NotBlank`/`@Size`/`@Pattern`）和审核状态。
+- 主页背景图与头像：本期 **仅持久化 CDN URL**（不提供独立上传端点），由前端 OSS 客户端直传后回填 URL；JPG/PNG/WebP、≤5MB 的素材约束由前端 + OSS 联合保证。
+- 补齐主页个性化：背景图、主题色、模块显隐、模块排序、恢复默认配置；`ContentUserHomepageUpdateReq` 与 `/profile/homepage/update` 端点支持单独更新主页配置。
+- 补齐认证标识展示：以 `content_user_verification_badge` 表为权威；`ContentUserProfileVO.verificationBadges` 内嵌聚合结果，`visualStyleKey` 字段映射前端图标/颜色。
+- 补齐资料字段可见性：15 个 `*Visibility` 字段，枚举为 `PUBLIC` / `FOLLOWERS_ONLY` / `MUTUAL_ONLY` / `PRIVATE`；`onlineStatusVisibility` 特殊枚举 `PUBLIC` / `HIDDEN` / `MUTUAL_ONLY`。
+- 补齐隐私缓存失效：资料详情查询统一由 `ContentUserProfileVO.from(...)` 在 viewer 视角下裁剪不可见字段，隐私设置变更后由后端清理用户公共缓存。
+- 补齐曾用昵称和头像历史：`/profile/history/list?historyType=NICKNAME|AVATAR` 统一端点返回 `ContentUserProfileHistoryVO`，保留 180 天（`expiresAt`）、每类最多 20 条、倒序查询、恢复历史值。
+- 不包含独立支付结算、企业组织通讯录、生物识别、两步验证和完整认证申请工作流的材料审批后台；`/profile/review/handle` 端点保留供后台管理系统调用。
 
 ## Capabilities
 
 ### New Capabilities
 
-- `profile-editing`: 基础资料编辑功能，包含表单页面、头像上传裁剪、资料审核状态展示、频率限制
-- `homepage-customization`: 主页个性化功能，包含背景图设置、主题色选择、模块配置与拖拽排序
-- `verification-badge`: 认证标识展示功能，包含 Badge 组件、认证详情弹窗、多认证折叠策略
-- `privacy-settings`: 隐私设置功能，包含字段可见性控制、批量操作、缓存生效策略
-- `profile-history`: 昵称/头像历史记录功能，包含历史列表展示和恢复操作
+- `profile-management`: 内容社区个人资料与主页个性化能力，覆盖基础资料、审核、主页配置、认证标识展示、字段可见性、缓存失效和昵称/头像历史。
 
 ### Modified Capabilities
 
-（无现有 capability 需要修改）
+- 无。
 
 ## Impact
 
-- **前端路由**: 新增 4 个页面路由（编辑资料、主页设置、隐私设置、历史记录）
-- **状态管理**: 扩展 useUserStore，新增 profileCompletionRate、dailyUpdateRemaining、reviewStatus 等字段
-- **API 对接**: 对接 16 个新接口，涵盖资料管理、主页设置、认证标识、隐私设置、历史记录
-- **组件依赖**: 复用 Ant Design Vue 4 组件（Form、Modal、Tabs、Select、Switch 等），新增 VerificationBadge 自定义组件、Cropper 裁剪组件
-- **第三方库**: 引入 vuedraggable 用于模块拖拽排序
-- **响应式适配**: 所有新增页面需适配 PC/平板/移动端三端布局
+- **新增端点**（`/content/user/profile` 前缀下 12 个接口）:
+  - `GET /detail` 资料详情（owner + viewer 视角裁剪）
+  - `POST /update` 统一资料更新
+  - `POST /review/handle` 审核处理
+  - `POST /privacy/update` 隐私配置更新
+  - `POST /homepage/update` 主页配置更新
+  - `POST /homepage/defaults/restore` 恢复主页默认
+  - `GET /homepage/modules` 主页模块列表
+  - `GET /badge/list` 认证标识列表
+  - `GET /badge/detail` 认证标识详情
+  - `GET /history/list` 历史记录列表（按 historyType 区分）
+  - `POST /history/restore` 恢复历史
+- **新增/扩展表**:`content_user_profile`、`content_user_privacy_setting`；扩展表 `content_user_profile_review`、`content_user_homepage_module`、`content_user_verification_badge`、`content_user_profile_history`。
+- **新增 Redis 键**: 资料公共缓存、隐私变更失效触发；具体 key 由实现定义，遵循"隐私正确性优先"原则（详见 design.md Decision 6）。
+- **新增 VO/Req**:`ContentUserProfileVO`、`ContentUserProfileUpdateReq`、`ContentUserProfileHistoryVO`、`ContentUserHomepageUpdateReq`、`ContentUserHomepageModuleReq`、`ContentUserPrivacyUpdateReq`、`ContentUserVerificationBadgeVO`、`ContentUserReviewHandleReq`（`req/profile/` 与 `vo/` 包下）。
+- **依赖 EPIC-01**: 账号主体、登录态、手机号/邮箱绑定状态；在 EPIC-01 尚未完成时通过现有 `userId` 参数保持兼容。
+- **外部依赖**: 头像/背景图 OSS 上传由前端负责（不引入内容社区模块的上传端点）；敏感词/AI 审核由适配器接口 `ContentUserProfileAuditAdapter` 接入。
