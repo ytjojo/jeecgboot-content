@@ -1,70 +1,78 @@
 ## ADDED Requirements
 
-### Requirement: Privacy settings page
-系统 SHALL 提供隐私设置页面，支持为每个资料字段设置可见性级别。入口为设置 → 隐私设置或个人中心 → 隐私设置。
+### Requirement: Privacy settings page covering 15 visibility fields
+系统 SHALL 提供隐私设置页面，覆盖 15 个 `*Visibility` 字段和 2 个 Boolean 字段，调用 `POST /content/user/profile/privacy/update?userId=X`。
 
 #### Scenario: Load privacy settings
 - **WHEN** 用户进入隐私设置页
-- **THEN** 页面显示骨架屏加载状态，加载完成后展示各字段当前可见性设置
+- **THEN** 页面调用 `GET /content/user/profile/detail?ownerUserId=X&viewerUserId=X` 读取当前隐私配置，按 7 个分组（基础资料/扩展/主页/认证/活动/在线状态/布尔开关）展示
 
 #### Scenario: Save privacy settings
-- **WHEN** 用户修改可见性后点击保存
-- **THEN** 系统调用 `/content/user/privacy/settings/update` 接口，成功后显示"隐私设置已更新"
+- **WHEN** 用户修改任一 visibility 字段后点击保存
+- **THEN** 系统调用 `POST /content/user/profile/privacy/update?userId=X` 提交 `ContentUserPrivacyUpdateReq`，成功后显示"隐私设置已更新"
 
 ### Requirement: Field visibility levels
-系统 SHALL 支持四种可见性级别：公开（所有人可见）、仅关注者（关注你的人可见）、互关可见（互相关注的人可见）、仅自己（仅自己可见）。
+系统 SHALL 支持 4 种 visibility 级别：`PUBLIC` / `FOLLOWERS_ONLY` / `MUTUAL_ONLY` / `PRIVATE`，通过 Select 组件选择。
 
 #### Scenario: Set field to followers only
-- **WHEN** 用户将"简介"字段的可见性设为"仅关注者"
-- **THEN** 保存后仅关注该用户的人可以看到其简介，其他用户看到的是隐藏状态
+- **WHEN** 用户将"简介"字段的可见性设为 `FOLLOWERS_ONLY`
+- **THEN** 保存后仅关注该用户的人可以看到其简介
 
-#### Scenario: Nickname and avatar always public
-- **WHEN** 用户查看隐私设置列表
-- **THEN** 昵称和头像默认公开且不可修改（置灰 + Tooltip"昵称和头像始终公开"）
+#### Scenario: Nickname and avatar visibility
+- **WHEN** 隐私设置不包含 nickname / avatar 的 visibility 字段
+- **THEN** 昵称和头像保持公开，不出现在隐私设置列表中
 
-### Requirement: Default visibility setting
-系统 SHALL 支持设置默认可见性级别，仅影响新添加的字段，不改变已有字段设置。
+### Requirement: Visibility field coverage (15 fields)
+隐私设置 SHALL 覆盖以下 15 个 `*Visibility` 字段（按 7 个分组）：
 
-#### Scenario: Set default visibility
-- **WHEN** 用户修改"默认可见性"下拉选择
-- **THEN** 该设置保存后仅影响后续新增的字段，已有字段的可见性不受影响
+- **基础资料 (5)**: `bioVisibility` / `genderVisibility` / `birthdayVisibility` / `regionVisibility` / `professionVisibility`
+- **扩展资料 (1)**: `personalLinkVisibility`
+- **主页 (3)**: `homepageBackgroundVisibility` / `themeColorVisibility` / `homepageModuleVisibility`
+- **认证 (2)**: `certificationVisibility` / `verificationBadgesVisibility`
+- **活动 (3)**: `profileCompletionVisibility` / `profileReviewStatusVisibility` / `recentActivityVisibility`
+- **在线状态 (1)**: `onlineStatusVisibility` ← 特殊枚举
+- **布尔开关 (2)**: `showMutualFollowersCount` / `showRecentActivityHighlight`
 
-### Requirement: Batch visibility operation
-系统 SHALL 支持"一键全部设为"快捷操作，批量设置所有可修改字段的可见性。
+#### Scenario: User configures all 15 visibility fields
+- **WHEN** 用户分别为每个字段设置 visibility
+- **THEN** 保存请求 `ContentUserPrivacyUpdateReq` 包含全部 15 个字段值
 
-#### Scenario: Batch set all fields
-- **WHEN** 用户选择"一键全部设为" → "仅自己"并确认
-- **THEN** 系统弹出确认框"确定将所有可修改字段设为仅自己吗？此操作会覆盖当前各字段的单独设置"，确认后批量更新，显示"已将 X 个字段设为仅自己"，变化字段高亮 2 秒
+### Requirement: Online status visibility has reduced enum
+系统 SHALL 为 `onlineStatusVisibility` 字段提供特殊枚举选项：`PUBLIC` / `HIDDEN` / `MUTUAL_ONLY`，不含 `PRIVATE`。
 
-#### Scenario: Undo batch operation
-- **WHEN** 用户完成批量操作后点击"撤销"按钮（5 秒内有效）
-- **THEN** 系统恢复批量操作前的状态，5 秒后撤销按钮自动消失
+#### Scenario: onlineStatusVisibility Select options
+- **WHEN** 用户点击 `onlineStatusVisibility` 字段的 Select
+- **THEN** 选项仅显示 `PUBLIC` / `HIDDEN` / `MUTUAL_ONLY`，不显示 `PRIVATE`
 
-### Requirement: Privacy update frequency limit
-系统 SHALL 限制用户每小时隐私修改次数为 10 次。
+#### Scenario: Backend rejects invalid onlineStatusVisibility
+- **WHEN** 用户提交 `onlineStatusVisibility=PRIVATE`
+- **THEN** 后端返回校验错误，前端显示"该字段不支持 PRIVATE 级别"
 
-#### Scenario: Frequency limit reached
-- **WHEN** 用户每小时修改超过 10 次后尝试保存
-- **THEN** 保存按钮禁用，显示黄色提示条"操作过于频繁，请稍后再试"
+### Requirement: Boolean switch fields
+系统 SHALL 为 `showMutualFollowersCount` 和 `showRecentActivityHighlight` 字段提供 Switch 开关组件。
+
+#### Scenario: Toggle boolean field
+- **WHEN** 用户切换 `showMutualFollowersCount` Switch
+- **THEN** 保存时 `ContentUserPrivacyUpdateReq` 中该字段为 `true` 或 `false`
 
 ### Requirement: Privacy cache immediate effect
-系统 SHALL 在隐私设置保存成功后立即刷新本地缓存的用户资料数据。
+系统 SHALL 在隐私设置保存成功后立即调用 `GET /content/user/profile/detail?ownerUserId=X&viewerUserId=X` 刷新本地缓存。
 
 #### Scenario: Refresh local cache after save
 - **WHEN** 用户保存隐私设置成功
-- **THEN** 前端主动调用 `/content/user/profile/current` 刷新本地缓存，提示"隐私设置已更新，新设置将立即对新访问者生效"
+- **THEN** 前端主动调用 detail 接口刷新本地缓存，提示"隐私设置已更新，新设置将立即对新访问者生效"
 
 #### Scenario: Silent cache inconsistency handling
-- **WHEN** 因缓存导致短暂数据不一致
+- **WHEN** 因网络问题导致刷新失败
 - **THEN** 系统不向用户展示技术细节，静默处理
 
 ### Requirement: Privacy settings responsive layout
-隐私设置页面 SHALL 适配 PC/移动端布局。PC 端列表最大宽度 640px 居中，移动端全宽单列。
+隐私设置页面 SHALL 适配 PC/移动端布局。
 
 #### Scenario: PC layout
 - **WHEN** 用户在 PC 端访问隐私设置
-- **THEN** 列表最大宽度 640px 居中，每行字段名 + 可见性选择左右排列
+- **THEN** 列表最大宽度 640px 居中，按 7 个分组折叠面板展示
 
 #### Scenario: Mobile layout
 - **WHEN** 用户在移动端访问隐私设置
-- **THEN** 全宽单列，字段名在上，可见性选择在下，Select 组件改为 ActionSheet 底部选择器
+- **THEN** 全宽单列，Select 组件改为 ActionSheet 底部选择器
