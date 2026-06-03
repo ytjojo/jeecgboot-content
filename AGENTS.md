@@ -77,7 +77,9 @@
 
 **禁止**：开发完成后遗留未清理的 worktree。合并回主分支后必须立即删除 worktree 和 feature 分支。
 
-**检查机制**：主 agent 在任务结束前执行 `git worktree list`，确认无残留 worktree。
+**权限边界**：每个 agent 只清理自己创建的 worktree，不得删除其他 agent 的 worktree。误删会导致其他 agent 丢失工作上下文。
+
+**检查机制**：主 agent 在任务结束前执行 `git worktree list`，仅确认自己创建的 worktree 已清理，忽略其他 worktree。
 
 ## 代码实现 Workflow
 
