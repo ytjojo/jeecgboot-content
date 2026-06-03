@@ -37,8 +37,8 @@ rules:
     #   - 后端 change 不加后缀，前端 change 必须加 _frontend 后缀
     #   - change 目录名必须与 openspec/changes/ 下的目录名一致
     #   - 创建新 change 前先查阅 change-prd-mapping.yaml 确认 EPIC 编号和名称
-    - 命名格式: {domain}-{epic_number}-{name}[_frontend]
-    - 后端 change 不加后缀，前端 change 必须以 _frontend 结尾
-    - 同一 EPIC 的后端和前端共享 domain、epic_number、name，仅后缀不同
-    - 创建前查阅 change-prd-mapping.yaml 确认 EPIC 编号
-    - 更新 change-prd-mapping.yaml 对应字段
+    #   - 命名格式: {domain}-{epic_number}-{name}[_frontend]
+    #   - 后端 change 不加后缀，前端 change 必须以 _frontend 结尾
+    #   - 同一 EPIC 的后端和前端共享 domain、epic_number、name，仅后缀不同
+    #   - 创建前查阅 change-prd-mapping.yaml 确认 EPIC 编号
+    #   - 更新 change-prd-mapping.yaml 对应字段
