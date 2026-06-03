@@ -1,6 +1,6 @@
 <template>
   <div class="profile-edit">
-    <a-page-header title="编辑资料" :back-icon="true" @back="$router.back()" />
+    <a-page-header title="编辑资料" :back-icon="true" @back="onBack" />
 
     <a-alert
       v-if="reviewStatus === 'REJECTED' && reviewReason"
@@ -17,7 +17,7 @@
       class="profile-edit__alert"
     />
 
-    <a-form v-if="!loading" layout="vertical" :model="form">
+    <a-form v-if="!loading" layout="vertical" :model="form" :disabled="isFormDisabled(reviewStatus)">
       <a-card title="头像" :bordered="false" class="profile-edit__card">
         <AvatarCropper v-model="form.avatar" :size="96" />
       </a-card>
@@ -45,7 +45,7 @@
           </a-col>
           <a-col :span="12">
             <a-form-item label="生日">
-              <a-date-picker v-model:value="form.birthday" value-format="YYYY-MM-DD" style="width:100%" />
+              <a-date-picker v-model:value="form.birthday" value-format="YYYY-MM-DD" style="width:100%" :disabled-date="(d: any) => d && d.isAfter(dayjs())" />
             </a-form-item>
           </a-col>
           <a-col :span="12">
@@ -92,7 +92,7 @@
       </a-card>
 
       <a-space class="profile-edit__actions">
-        <a-button type="primary" :loading="saving" @click="onSave">保存</a-button>
+        <a-button type="primary" :loading="saving" :disabled="isSaveDisabled(reviewStatus)" @click="onSave">保存</a-button>
         <a-button @click="onReset">重置</a-button>
       </a-space>
     </a-form>
@@ -102,11 +102,13 @@
 
 <script setup lang="ts">
 import { reactive, ref, onMounted } from 'vue';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
+import dayjs from 'dayjs';
 import AvatarCropper from '/@/views/content/profile/components/AvatarCropper.vue';
 import { getProfileDetail, updateProfile } from '/@/api/content/profile';
 import type { ContentUserProfileUpdateReq, ContentUserProfileVO } from '/@/api/content/profile/types';
 import { validateProfileForm } from '/@/views/content/profile/validators/profileForm';
+import { isFormDisabled, isSaveDisabled } from './pendingLock';
 
 function defaultForm(): ContentUserProfileUpdateReq {
   return {
@@ -194,6 +196,24 @@ async function onSave() {
 function onReset() {
   if (initial.value) {
     Object.assign(form, JSON.parse(initial.value));
+  }
+}
+
+function isDirty(): boolean {
+  return initial.value !== JSON.stringify(form);
+}
+
+function onBack() {
+  if (isDirty()) {
+    Modal.confirm({
+      title: '确认离开？',
+      content: '您有未保存的修改，确定离开吗？',
+      okText: '确定离开',
+      cancelText: '继续编辑',
+      onOk: () => window.history.back(),
+    });
+  } else {
+    window.history.back();
   }
 }
 </script>
