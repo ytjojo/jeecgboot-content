@@ -2,7 +2,30 @@
 # 用途：多 Agent 并行生成 PRD 时的精确上下文路由
 # 每个 agent 读取此配置，只加载自己负责的 change + 对应 PRD
 #
-# 命名规范：{domain}-{epic_number}-{name}[_frontend]
+# ═══════════════════════════════════════════════════════════
+# Change 命名规范
+# ═══════════════════════════════════════════════════════════
+# 格式: {domain}-{epic_number}-{name}[_frontend]
+#
+#   domain        — 业务域，取值: user | circle | channel
+#   epic_number   — 两位数字，与 EPIC 编号对应:
+#                     user: 01-09, circle: 10-13, channel: 20-24
+#   name          — 小写英文，短横线分隔，描述 change 核心功能
+#   _frontend     — 可选后缀。前端 change 必须添加，后端 change 不加
+#
+# 后端 vs 前端:
+#   - 后端 change: user-01-authentication       (无后缀)
+#   - 前端 change: user-01-authentication-frontend (带 _frontend)
+#   - 同一 EPIC 的后端和前端共享 domain + epic_number + name
+#
+# 新建 change 流程:
+#   1. 查阅本文件确认 EPIC 编号和名称
+#   2. 在 openspec/changes/ 下创建目录，严格遵循命名格式
+#   3. 同步更新本文件添加映射条目
+#   4. 后端 PRD 放入 docs/requirements/prd/decomposition/{domain}/
+#   5. 前端 PRD 放入 docs/requirements/prd/frontend/
+# ═══════════════════════════════════════════════════════════
+#
 # 字段说明：
 #   backend_change  — 后端 change 目录名（openspec/changes/ 下）
 #   prd             — 后端 PRD 路径（相对于 prd_dir）
