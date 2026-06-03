@@ -69,7 +69,7 @@
 **硬规则：创建 worktree 的 agent 负责其完整生命周期，包括最终清理。**
 
 流程：
-1. **创建**：`EnterWorktree` 生成 worktree + 分支
+1. **创建**：`/using-git-worktrees` or  `EnterWorktree` 生成 worktree + 分支
 2. **开发**：在 worktree 内 commit 所有改动
 3. **合并**：回主分支执行 `git merge <feature-branch>`
 4. **验证**：在主分支跑模块全量测试，确认通过
@@ -84,7 +84,8 @@
 ## 代码实现 Workflow
 
 ### 默认实现方式
-- 无特殊要求时，使用 subagent-driven-development
+- 无特殊要求时，使用 subagent-driven-development且新建worktree进行开发实现
+  `/using-git-worktrees`
   `/superpowers:subagent-driven-development`
 
 ### 多步任务 / apply 操作
@@ -96,7 +97,8 @@
 
 1. **实现** — 完成功能代码
 2. **Code Review** — 检查代码质量、命名、边界条件、安全性
-3. **单元测试** — 执行**模块级全量测试**（`mvn test -pl <module> -am`），确保 **100% 通过**，禁止带红测试提交
+3. **测试覆盖率** — 检查变更代码的行覆盖率，**必须 ≥ 90%**。不满足则补充测试代码，直至达标且全量测试通过
+4. **单元测试** — 执行**模块级全量测试**（`mvn test -pl <module> -am`），确保 **100% 通过**，禁止带红测试提交
    - 不能只跑修改的测试类，必须跑模块全量，发现 mock 泄漏和桩冲突
    - 测试写完必须立即执行验证，不能"写完就算完成"
 
