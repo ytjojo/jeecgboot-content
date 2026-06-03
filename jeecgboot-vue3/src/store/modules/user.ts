@@ -40,6 +40,11 @@ interface UserState {
   cancellationStatus?: import('/@/api/content/account/cancellation').CancellationApplication | null;
   coolingOffDays?: number;
   anomalyNotificationCount?: number;
+  // 内容社区 - 个人资料扩展字段（EPIC-02）
+  profileCompletionRate?: number;
+  profileReviewStatus?: import('/@/api/content/profile/types').ProfileReviewStatus;
+  profileReviewReason?: string;
+  profileLastUpdatedAt?: string;
 }
 
 export const useUserStore = defineStore({
@@ -76,6 +81,11 @@ export const useUserStore = defineStore({
     coolingOffDays: 0,
     // 异常登录通知未读数
     anomalyNotificationCount: 0,
+    // EPIC-02 个人资料扩展字段
+    profileCompletionRate: undefined,
+    profileReviewStatus: undefined,
+    profileReviewReason: undefined,
+    profileLastUpdatedAt: undefined,
   }),
   getters: {
     getUserInfo(): UserInfo {
@@ -126,6 +136,44 @@ export const useUserStore = defineStore({
     },
     setAnomalyNotificationCount(count: number) {
       this.anomalyNotificationCount = count;
+    },
+    // ===== EPIC-02 个人资料 =====
+    setProfileSnapshot(snapshot: {
+      profileCompletionRate?: number;
+      profileReviewStatus?: import('/@/api/content/profile/types').ProfileReviewStatus;
+      profileReviewReason?: string;
+      profileLastUpdatedAt?: string;
+    }) {
+      if (snapshot.profileCompletionRate !== undefined) {
+        this.profileCompletionRate = snapshot.profileCompletionRate;
+      }
+      if (snapshot.profileReviewStatus !== undefined) {
+        this.profileReviewStatus = snapshot.profileReviewStatus;
+      }
+      if (snapshot.profileReviewReason !== undefined) {
+        this.profileReviewReason = snapshot.profileReviewReason;
+      }
+      if (snapshot.profileLastUpdatedAt !== undefined) {
+        this.profileLastUpdatedAt = snapshot.profileLastUpdatedAt;
+      }
+    },
+    /**
+     * 刷新当前用户的资料详情快照。
+     * 用于隐私设置保存后即时刷新本地缓存（设计 D6）。
+     */
+    async refreshProfileSnapshot(userId: string): Promise<void> {
+      try {
+        const mod = await import('/@/api/content/profile');
+        const vo = await mod.getProfileDetail(userId, userId);
+        this.setProfileSnapshot({
+          profileCompletionRate: vo.profileCompletionRate,
+          profileReviewStatus: vo.profileReviewStatus,
+          profileReviewReason: vo.profileReviewReason,
+          profileLastUpdatedAt: vo.lastUpdatedAt,
+        });
+      } catch {
+        // 静默失败，避免阻塞主流程
+      }
     },
     async refreshAnomalyNotificationCount() {
       try {
