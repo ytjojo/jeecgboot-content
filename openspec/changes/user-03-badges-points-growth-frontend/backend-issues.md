@@ -4,7 +4,7 @@
 
 ---
 
-### Issue 1：ContentUserExchangeReq 缺少 requestId 字段
+### Issue 1：ContentUserExchangeReq 缺少 requestId 字段 ✅ 已解决
 
 **优先级**：高
 
@@ -15,6 +15,8 @@
 2. `ContentUserPointSpendServiceImpl.exchangeGoods()` 方法中基于 `requestId` 做幂等校验：相同 `requestId` 的重复请求返回已有结果而非重复扣积分
 
 **影响**：前端 D4 决策（积分兑换并发控制）中的幂等校验无法落地，当前仅能依赖前端防重。
+
+**已完成**：`fix/growth-backend-blockers` 分支已合并到 `springboot3_content`，包含 4 个文件修改和 2 个新增测试。
 
 ---
 
@@ -34,7 +36,7 @@
 
 ---
 
-### Issue 3：后端响应缺少 levelChanged 全局字段
+### Issue 3：后端响应缺少 levelChanged 全局字段 ✅ 已解决
 
 **优先级**：中
 
@@ -46,9 +48,11 @@
 
 **影响**：全局升级祝贺弹窗机制（defHttp 拦截器 + mitt 事件）无法触发。前端先完成代码实现，待后端就绪后联调。
 
+**已完成**：`ContentUserPointSpendResultVO` 增加 `levelChanged`（Boolean）和 `newLevel`（Integer）字段，按业务场景逐步扩展，避免全局 Result 改动。
+
 ---
 
-### Issue 4：缺少用户级衰减状态查询 API
+### Issue 4：缺少用户级衰减状态查询 API ✅ 已解决
 
 **优先级**：中
 
@@ -61,13 +65,15 @@
 
 **影响**：DecayWarning 组件无法展示用户当前衰减状态，只能展示全局规则。
 
+**已完成**：新增 `GET /content/user/growth/decay/status` 端点，返回 `ContentUserGrowthDecayStatusVO`，包含 status、inactiveDays、protectionUntil、currentLevel、currentGrowthValue、lastActiveTime、decayCount 字段。
+
 ---
 
 ## 后端修改优先级建议
 
-| 优先级 | Issue | 建议排期 |
-|--------|-------|---------|
-| P0 | Issue 1 - requestId 幂等 | 积分兑换功能开发前 |
-| P1 | Issue 3 - levelChanged 字段 | 升级弹窗联调前 |
-| P1 | Issue 4 - 用户级衰减状态 | 衰减警告组件开发前 |
-| P2 | Issue 2 - authorBadges | 帖子勋章展示功能开发前 |
+| 优先级 | Issue | 建议排期 | 状态 |
+|--------|-------|---------|------|
+| P0 | Issue 1 - requestId 幂等 | 积分兑换功能开发前 | ✅ 已完成 |
+| P1 | Issue 3 - levelChanged 字段 | 升级弹窗联调前 | ✅ 已完成 |
+| P1 | Issue 4 - 用户级衰减状态 | 衰减警告组件开发前 | ✅ 已完成 |
+| P2 | Issue 2 - authorBadges | 帖子勋章展示功能开发前 | ⏳ 待处理（需先创建 CircleContentVO） |

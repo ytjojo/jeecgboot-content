@@ -1,8 +1,8 @@
 ## 1. API 封装层
 
-- [ ] 1.1 创建 `src/api/content/badge.ts`：封装勋章相关 API（badgeCatalog、badgeDetail、wornBadges、saveWornBadges、recycleBadge）—— 实际端点均在 `/content/user/growth/badge/*`
-- [ ] 1.2 创建 `src/api/content/point.ts`：封装积分相关 API（growthSummary[含积分余额]、pointLedger、exchangeGoods、createExchange、unlockFeature、getFeatureUnlock、sendGift）—— 实际端点均在 `/content/user/growth/point/*`
-- [ ] 1.3 创建 `src/api/content/growth.ts`：封装等级相关 API（growthSummary[含等级信息]、levelConfig、levelBenefit、decayRule）—— 实际端点均在 `/content/user/growth/*`
+- [ ] 1.1 创建 `src/api/content/badge.ts`：封装勋章相关 API（getBadgeCatalog、getBadgeDetail、getWornBadges、saveWornBadges、recycleBadge）—— 实际端点：`GET /content/user/growth/badge/catalog`、`GET /content/user/growth/badge/detail`、`GET /content/user/growth/badge/worn`、`POST /content/user/growth/badge/wear`、`POST /content/user/growth/badge/recycle`
+- [ ] 1.2 创建 `src/api/content/point.ts`：封装积分相关 API（getPointLedger、getExchangeGoods、createExchange、unlockFeature、getFeatureUnlockStatus、sendGift）—— 实际端点：`GET /content/user/growth/point/ledger`、`GET /content/user/growth/point/exchange/goods`、`POST /content/user/growth/point/exchange`、`POST /content/user/growth/point/feature/unlock`、`GET /content/user/growth/point/feature/unlock`、`POST /content/user/growth/point/gift/send`
+- [ ] 1.3 创建 `src/api/content/growth.ts`：封装等级相关 API（getGrowthSummary、getLevelConfig、getLevelBenefit、getDecayRule）—— 实际端点：`GET /content/user/growth/summary`（含积分余额+等级信息，替代原 getPointBalance 和 getLevelInfo）、`GET /content/user/growth/level/config`、`GET /content/user/growth/level/benefit`、`GET /content/user/growth/decay/rule`
 
 ## 2. SVG 占位图标资源
 

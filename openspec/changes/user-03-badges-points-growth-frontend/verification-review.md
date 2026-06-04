@@ -92,12 +92,12 @@ specs 中引用了 4 个错误的 API 路径：
 
 ## 建议修复方案
 
-### 立即修复（前端文档内部可修正）
+### 立即修复（前端文档内部可修正）✅ 已完成
 
-1. **修正所有 specs 中的 API 路径**，统一使用 `/content/user/growth/` 前缀
-2. **修正 tasks.md 中的 API 封装函数名**，与实际后端端点对齐
-3. **将 getPointBalance 和 getLevelInfo 合并**，统一使用 `/content/user/growth/summary` 接口
-4. **标注阻塞项**：在 design.md 和 specs 中明确标注依赖后端但未实现的功能
+1. ✅ **修正所有 specs 中的 API 路径**，统一使用 `/content/user/growth/` 前缀（specs 中路径已正确）
+2. ✅ **修正 tasks.md 中的 API 封装函数名**，与实际后端端点对齐（已更新为 getBadgeCatalog、getPointLedger、getGrowthSummary 等）
+3. ✅ **将 getPointBalance 和 getLevelInfo 合并**，统一使用 `/content/user/growth/summary` 接口（tasks.md 1.3 已更新）
+4. ✅ **标注阻塞项**：design.md 和 specs 中已标注依赖后端但未实现的功能
 
 ### 需后端配合（记录到 backend-issues.md）
 
