@@ -58,6 +58,7 @@ export const useFollowStore = defineStore('social-follow', () => {
   const totalSpecialFollows = ref(0);
   const followListLoading = ref(false);
   const specialFollowLoading = ref(false);
+  const recommendationsLoading = ref(false);
   const currentPage = ref(1);
   const pageSize = ref(20);
   const hasMore = ref(true);
@@ -206,7 +207,7 @@ export const useFollowStore = defineStore('social-follow', () => {
     }
     if (!recommendationsHasMore.value && !reset) return;
 
-    followListLoading.value = true;
+    recommendationsLoading.value = true;
     try {
       const res = await getRecommendations({ page: recommendationsPage.value, size: pageSize.value });
       const { records = [], total = 0 } = res;
@@ -218,8 +219,12 @@ export const useFollowStore = defineStore('social-follow', () => {
       recommendationsHasMore.value = recommendations.value.length < total;
       recommendationsPage.value++;
     } finally {
-      followListLoading.value = false;
+      recommendationsLoading.value = false;
     }
+  }
+
+  function dismissRecommendation(userId: string) {
+    recommendations.value = recommendations.value.filter((r) => r.userId !== userId);
   }
 
   async function batchUnfollowUsers(userId: string, targetUserIds: string[]) {
@@ -243,6 +248,7 @@ export const useFollowStore = defineStore('social-follow', () => {
     loading,
     followListLoading,
     specialFollowLoading,
+    recommendationsLoading,
     currentPage,
     pageSize,
     hasMore,
@@ -270,6 +276,7 @@ export const useFollowStore = defineStore('social-follow', () => {
     moveToGroup,
     removeUserFromGroup,
     fetchRecommendations,
+    dismissRecommendation,
     batchUnfollowUsers,
     batchCancelSpecialUsers,
     setSearchKeyword,
