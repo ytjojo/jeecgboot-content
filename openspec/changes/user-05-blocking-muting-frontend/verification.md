@@ -1,6 +1,7 @@
 # Verification Report: user-05-blocking-muting-frontend
 
 **审核日期**: 2026-06-03
+**修复完成**: 2026-06-04
 **审核范围**: 前端 change 全部制品 + 后端 API 契约对比
 **审核重点**: 后端 API 部分
 
@@ -8,15 +9,15 @@
 
 | 维度 | 状态 |
 |------|------|
-| Completeness | 0/45 tasks 完成，13 个 requirement 待实现 |
-| Correctness | 6 个 CRITICAL 后端 API 契约问题，1 个已修复 |
-| Coherence | 设计文档与 specs 基本一致，后端依赖需补充 |
+| Completeness | 后端 CRITICAL 问题已全部修复，前端 0/45 tasks 待实现 |
+| Correctness | 6 个 CRITICAL 后端 API 契约问题，6 个已修复 ✅ |
+| Coherence | 设计文档与 specs 已对齐实际后端 API |
 
 ---
 
 ## CRITICAL Issues（必须修复）
 
-### 1. Filter Rule 缺少 HTTP Controller ✅ 已确认缺失
+### 1. Filter Rule 缺少 HTTP Controller ✅ 已修复
 
 **问题**: `IContentUserFilterRuleService` 存在完整方法但无 HTTP 端点暴露。
 
@@ -34,46 +35,46 @@
 - 任务 4.1-4.3: 不感兴趣反馈 → 屏蔽此类内容 / 屏蔽该话题
 - 任务 6.11-6.13: 屏蔽词设置页（添加/删除/列表）
 
-**建议**: 在 `ContentUserRelationController` 或新建 `ContentUserFilterRuleController` 中暴露以下端点:
+**已修复**: 新建 `ContentUserFilterRuleController`，暴露以下端点，9 个测试全部通过：
 
 ```
-POST   /content/user/filter-rule                    — 添加规则（body: ruleType + value）
-DELETE /content/user/filter-rule/{ruleId}            — 删除单条规则
-POST   /content/user/filter-rule/batch-delete        — 批量删除（body: ruleIds[]）
-GET    /content/user/filter-rule/list                — 查询规则列表（param: userId, ruleType?）
+POST   /content/user/filter-rule                    — 添加规则（@RequestParam: userId, ruleType, value, daysValid?）
+POST   /content/user/filter-rule/delete             — 删除单条规则（@RequestParam: userId, ruleId）
+POST   /content/user/filter-rule/batch-delete        — 批量删除（@RequestParam: userId, @RequestBody: ruleIds[]）
+GET    /content/user/filter-rule/list                — 查询规则列表（@RequestParam: userId, ruleType?, pageNo, pageSize）
 ```
 
 ---
 
-### 2. Not Interested 缺少 HTTP Controller ✅ 已确认缺失
+### 2. Not Interested 缺少 HTTP Controller ✅ 已修复
 
 **问题**: `IContentUserNotInterestedService.recordFeedback(userId, contentId, contentType)` 无 HTTP 端点。
 
 **前端依赖**:
 - 任务 4.1-4.3: 不感兴趣反馈气泡，点击后调用接口
 
-**建议**: 暴露端点:
+**已修复**: 新建 `ContentUserNotInterestedController`，暴露端点，测试通过：
 
 ```
-POST /content/user/not-interested — 记录不感兴趣反馈（param: userId, body: {contentId, contentType}）
+POST /content/user/not-interested — 记录不感兴趣反馈（@RequestParam: userId, contentId, contentType）
 ```
 
 ---
 
-### 3. Mute List 缺少分页查询端点 ✅ 已确认缺失
+### 3. Mute List 缺少分页查询端点 ✅ 已修复
 
 **问题**: `GET /content/user/relation/blacklist` 存在用于黑名单分页查询，但屏蔽列表无对应端点。
 
 **前端依赖**:
 - 任务 6.5-6.6: 屏蔽列表管理页 → 屏蔽用户 Tab
 
-**建议**: 新增端点:
+**已修复**: 在 `ContentUserRelationController` 新增端点，新建 `ContentUserMuteListPageVO` 和 `ContentUserMuteListItemVO`，2 个测试通过：
 
 ```
-GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（param: userId, pageNo, pageSize）
+GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（@RequestParam: userId, pageNo, pageSize）
 ```
 
-**返回 VO**: 复用或新建 `ContentUserMuteListPageVO`，包含 `mutedUserId`, `nickname`, `avatar`, `muteTime` 字段。
+**返回 VO**: `ContentUserMuteListPageVO`，包含 `records` (List<ContentUserMuteListItemVO>), `total`, `pageNo`, `pageSize`。每条记录包含 `mutedUserId`, `nickname`, `avatar`, `muteTime`。
 
 ---
 
@@ -143,9 +144,9 @@ GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（param:
 - `followed`: 是否关注
 - `mutualFollow`: 是否互关
 
-### 8. 屏蔽用户列表端点路径待确认
+### 8. 屏蔽用户列表端点路径已确认 ✅
 
-**说明**: 新增 `GET /content/user/relation/mute-list` 路径仅为建议，需与后端开发者确认最终路径。
+**说明**: `GET /content/user/relation/mute-list` 端点已实现，返回 `ContentUserMuteListPageVO`。
 
 ### 9. ContentBlockMuteHelpVO 已存在
 
@@ -208,27 +209,28 @@ GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（param:
 
 ## 待创建端点汇总
 
-| Method | Path | 说明 | 优先级 |
-|--------|------|------|--------|
-| POST | `/content/user/filter-rule` | 添加屏蔽规则 | CRITICAL |
-| POST | `/content/user/filter-rule/delete` | 删除屏蔽规则 | CRITICAL |
-| POST | `/content/user/filter-rule/batch-delete` | 批量删除屏蔽规则 | CRITICAL |
-| GET | `/content/user/filter-rule/list` | 查询屏蔽规则列表 | CRITICAL |
-| POST | `/content/user/not-interested` | 不感兴趣反馈 | CRITICAL |
-| GET | `/content/user/relation/mute-list` | 屏蔽用户列表 | WARNING |
+| Method | Path | 说明 | 优先级 | 状态 |
+|--------|------|------|--------|------|
+| POST | `/content/user/filter-rule` | 添加屏蔽规则 | CRITICAL | ✅ 已创建 |
+| POST | `/content/user/filter-rule/delete` | 删除屏蔽规则 | CRITICAL | ✅ 已创建 |
+| POST | `/content/user/filter-rule/batch-delete` | 批量删除屏蔽规则 | CRITICAL | ✅ 已创建 |
+| GET | `/content/user/filter-rule/list` | 查询屏蔽规则列表 | CRITICAL | ✅ 已创建 |
+| POST | `/content/user/not-interested` | 不感兴趣反馈 | CRITICAL | ✅ 已创建 |
+| GET | `/content/user/relation/mute-list` | 屏蔽用户列表 | WARNING | ✅ 已创建 |
 
 ---
 
 ## Final Assessment
 
-**5 个 CRITICAL 问题**（含 1 个已修复）需要在前端实现前解决:
-1. Filter Rule Controller 缺失 → 阻塞任务 1.3, 4.1-4.3, 6.11-6.13
-2. Not Interested Controller 缺失 → 阻塞任务 4.1-4.3
-3. Mute List 端点缺失 → 阻塞任务 6.5-6.6
-4. API 路径重命名 → ✅ 已修复
-5. 前端 specs API 路径需对齐 → 可在前端实现时同步修正
+**6 个 CRITICAL 问题已全部修复** ✅:
+1. Filter Rule Controller → ✅ 已创建 `ContentUserFilterRuleController`（9 个测试通过）
+2. Not Interested Controller → ✅ 已创建 `ContentUserNotInterestedController`（测试通过）
+3. Mute List 端点 → ✅ 已在 `ContentUserRelationController` 新增（2 个测试通过）
+4. API 路径重命名 → ✅ block/unblock 路径已修复（1770 测试通过）
+5. 前端 specs API 路径 → ✅ 已对齐实际后端端点
+6. HTTP 方法统一 → ✅ 前端 API 封装统一使用 POST
 
-**建议执行顺序**:
-1. 先补充缺失的后端 Controller 端点（CRITICAL #1-3）
-2. 更新前端 specs/tasks 中的 API 路径引用（CRITICAL #5）
-3. 再开始前端实现
+**后端模块全量测试**: 1780 tests, 0 failures, BUILD SUCCESS (2026-06-04)
+
+**下一步**: 前端实现（45 个 tasks 待执行）
+
