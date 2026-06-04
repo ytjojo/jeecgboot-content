@@ -38,11 +38,11 @@
 
 以下端点的返回类型在文档中有实质性错误：
 
-1. **`POST /profile/update`** — 文档称返回 `ContentUserProfileVO`，实际返回 `Result<String>`（"更新成功"）
-2. **`POST /privacy/update`** — 文档称返回 `ContentUserPrivacySettingVO`，实际返回 `Result<String>`（"更新成功"）
-3. **`POST /homepage/update`** — 文档称返回 `Result<ContentUserProfileVO>`，实际返回 `Result<String>`（"更新成功"）
-4. **`POST /homepage/defaults/restore`** — 文档称返回 `Result<ContentUserProfileVO>`，实际返回 `Result<String>`（"恢复成功"）
-5. **`POST /history/restore`** — 文档称返回 `Result<ContentUserProfileVO>`，实际返回 `Result<String>`（"恢复成功"）
+1. **`POST /profile/update`** — 文档称返回 `ContentUserProfileVO`，实际返回 `Result<String>`（"更新成功"）→ **需后端改造**
+2. **`POST /privacy/update`** — 文档称返回 `ContentUserPrivacySettingVO`，实际返回 `Result<String>`（"更新成功"）→ **已修正为 `Result<String>`**
+3. **`POST /homepage/update`** — 文档称返回 `Result<ContentUserProfileVO>`，实际返回 `Result<String>`（"更新成功"）→ **需后端改造**
+4. **`POST /homepage/defaults/restore`** — 文档称返回 `Result<ContentUserProfileVO>`，实际返回 `Result<String>`（"恢复成功"）→ **需后端改造**
+5. **`POST /history/restore`** — 文档称返回 `Result<ContentUserProfileVO>`，实际返回 `Result<String>`（"恢复成功"）→ **需后端改造**
 
 ### 不存在的类型
 
@@ -57,10 +57,10 @@
 
 ### CRITICAL (必须修复)
 
-| # | 文件 | 问题 | 建议修复 |
-|---|------|------|---------|
-| C1 | design.md | 5 个 POST 端点的返回类型与实际后端不一致 | 更新 API 对接矩阵，将返回类型改为 `Result<String>` |
-| C2 | design.md | 引用不存在的 `ContentUserPrivacySettingVO` 类型 | 删除该类型引用，改为 `Result<String>` |
+| # | 文件 | 问题 | 建议修复 | 状态 |
+|---|------|------|---------|------|
+| C1 | design.md | 5 个 POST 端点的返回类型与实际后端不一致 | 4 个端点改为返回 VO（需后端改造），`/privacy/update` 保持 `Result<String>` | ✅ 已修复 |
+| C2 | design.md | 引用不存在的 `ContentUserPrivacySettingVO` 类型 | 删除该类型引用，改为 `Result<String>` | ✅ 已修复 |
 | C3 | design.md | 声称"12 个端点"但实际仅 11 个 | 更正为"11 个端点（其中 1 个为后台审核，前端不对接）" |
 | C4 | tasks.md | 39 个任务未完成 (13.1-13.6 除外) | 这些是实施任务，非文档问题；需在实施阶段完成 |
 
@@ -85,9 +85,13 @@
 
 ### 优先级 P0 (阻塞前端开发)
 
-1. **修正 design.md API 对接矩阵**：将 5 个 POST 端点的出参从 VO 类型改为 `Result<String>`
-2. **修正前端数据刷新策略**：由于 POST 端点仅返回成功字符串，保存后需重新调用 `GET /detail` 获取最新数据（部分 specs 已隐含此逻辑，需显式说明）
-3. **删除 `ContentUserPrivacySettingVO` 引用**：该类型不存在，前端不应尝试解析此类型
+1. **✅ 已修复 - 修正 design.md API 对接矩阵**：4 个 POST 端点改为返回 VO（需后端改造），`/privacy/update` 保持返回 `Result<String>`
+2. **后端改造需求**：4 个端点需改造为"更新 → 查询 → 返回 VO"模式
+   - `POST /profile/update` → 返回 `Result<ContentUserProfileVO>`
+   - `POST /homepage/update` → 返回 `Result<ContentUserProfileVO>`
+   - `POST /homepage/defaults/restore` → 返回 `Result<ContentUserProfileVO>`
+   - `POST /history/restore` → 返回 `Result<ContentUserProfileVO>`
+3. **✅ 已修复 - 删除 `ContentUserPrivacySettingVO` 引用**：该类型不存在，已从文档中删除
 
 ### 优先级 P1 (影响开发准确性)
 
