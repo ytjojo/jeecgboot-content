@@ -16,6 +16,7 @@ import org.jeecg.modules.content.user.vo.ContentUserBadgeVO;
 import org.jeecg.modules.content.user.vo.ContentUserDistributionWeightVO;
 import org.jeecg.modules.content.user.vo.ContentUserFeatureUnlockVO;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayRuleVO;
+import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayStatusVO;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthVO;
 import org.jeecg.modules.content.user.vo.ContentUserLevelBenefitSummaryVO;
 import org.jeecg.modules.content.user.vo.ContentUserPointLedgerPageVO;
@@ -215,7 +216,7 @@ class ContentUserGrowthControllerWebMvcTest {
 
     @Test
     void shouldExchangeGoods() throws Exception {
-        when(pointSpendService.exchangeGoods("u1", "g1", 3))
+        when(pointSpendService.exchangeGoods("u1", "g1", 3, null))
             .thenReturn(new ContentUserPointSpendResultVO()
                 .setOrderId("o1")
                 .setOrderNo("ON1")
@@ -380,6 +381,22 @@ class ContentUserGrowthControllerWebMvcTest {
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.inactiveDays").value(30))
             .andExpect(jsonPath("$.result.ruleDescription").value("30天未活跃衰减10%，7天降级保护"));
+    }
+
+    @Test
+    void shouldReturnDecayStatus() throws Exception {
+        when(growthDecayStateService.getDecayStatus("u1"))
+            .thenReturn(new ContentUserGrowthDecayStatusVO()
+                .setStatus("NORMAL")
+                .setInactiveDays(0)
+                .setCurrentLevel(3)
+                .setCurrentGrowthValue(200));
+
+        mockMvc.perform(get("/content/user/growth/decay/status").param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.status").value("NORMAL"))
+            .andExpect(jsonPath("$.result.currentLevel").value(3));
     }
 
     @Test

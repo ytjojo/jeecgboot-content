@@ -28,6 +28,7 @@ import org.jeecg.modules.content.user.vo.ContentUserDistributionWeightVO;
 import org.jeecg.modules.content.user.vo.ContentUserExchangeGoodsVO;
 import org.jeecg.modules.content.user.vo.ContentUserFeatureUnlockVO;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayRuleVO;
+import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayStatusVO;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthVO;
 import org.jeecg.modules.content.user.vo.ContentUserLevelBenefitSummaryVO;
 import org.jeecg.modules.content.user.vo.ContentUserLevelConfigVO;
@@ -187,7 +188,7 @@ public class ContentUserGrowthController {
     @Operation(summary = "积分兑换商品")
     @PostMapping("/point/exchange")
     public Result<ContentUserPointSpendResultVO> exchangeGoods(@Valid @RequestBody ContentUserExchangeReq req) {
-        return Result.OK(pointSpendService.exchangeGoods(req.getUserId(), req.getGoodsId(), req.getQuantity()));
+        return Result.OK(pointSpendService.exchangeGoods(req.getUserId(), req.getGoodsId(), req.getQuantity(), req.getRequestId()));
     }
 
     /**
@@ -304,6 +305,19 @@ public class ContentUserGrowthController {
     @GetMapping("/decay/rule")
     public Result<ContentUserGrowthDecayRuleVO> decayRule() {
         return Result.OK(growthDecayStateService.getDecayRule());
+    }
+
+    /**
+     * 查询用户级衰减状态。
+     */
+    @Operation(summary = "查询用户衰减状态")
+    @GetMapping("/decay/status")
+    public Result<ContentUserGrowthDecayStatusVO> decayStatus(
+        @Parameter(description = "用户ID", required = true)
+        @NotBlank(message = "用户ID不能为空")
+        @Size(max = 64, message = "用户ID长度不能超过64位")
+        @RequestParam("userId") String userId) {
+        return Result.OK(growthDecayStateService.getDecayStatus(userId));
     }
 
     private ContentUserLevelConfigVO toLevelConfigVO(ContentUserLevelConfig config) {

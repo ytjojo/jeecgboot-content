@@ -18,6 +18,7 @@ import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.service.IContentUserGrowthDecayStateService;
 import org.jeecg.modules.content.user.service.IContentUserLevelConfigService;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayRuleVO;
+import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayStatusVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -168,6 +169,37 @@ public class ContentUserGrowthDecayStateServiceImpl
             state.setProtectionUntil(null);
         }
         baseMapper.updateById(state);
+    }
+
+    @Override
+    public ContentUserGrowthDecayStatusVO getDecayStatus(String userId) {
+        if (userId == null || userId.isBlank()) {
+            throw new JeecgBootException("用户ID不能为空");
+        }
+        ContentUserProfile profile = profileMapper.selectByUserId(userId);
+        if (profile == null) {
+            throw new JeecgBootException("用户不存在");
+        }
+
+        ContentUserGrowthDecayState state = selectState(userId);
+
+        Date lastActive = state != null ? state.getLastActiveTime() : null;
+        int inactiveDays = 0;
+        if (lastActive != null) {
+            long diffMs = System.currentTimeMillis() - lastActive.getTime();
+            inactiveDays = (int) (diffMs / (24L * 60 * 60 * 1000));
+        }
+
+        String status = state != null ? state.getStatus() : STATUS_NORMAL;
+
+        return new ContentUserGrowthDecayStatusVO()
+            .setStatus(status)
+            .setInactiveDays(inactiveDays)
+            .setProtectionUntil(state != null ? state.getProtectionUntil() : null)
+            .setCurrentLevel(profile.getLevel())
+            .setCurrentGrowthValue(profile.getGrowthValue())
+            .setLastActiveTime(lastActive)
+            .setDecayCount(state != null ? defaultZero(state.getDecayCount()) : 0);
     }
 
     private int applyDecay(ContentUserProfile profile, Date now, ContentUserGrowthDecayRuleVO rule) {

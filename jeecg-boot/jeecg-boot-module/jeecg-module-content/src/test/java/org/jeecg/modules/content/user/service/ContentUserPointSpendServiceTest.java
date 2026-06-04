@@ -89,11 +89,11 @@ class ContentUserPointSpendServiceTest {
         goodsList.add(goods("empty", "E", ContentUserPointSpendConstant.GOODS_TYPE_BENEFIT, 5, 0));
         goodsList.add(goods("expensive", "X", ContentUserPointSpendConstant.GOODS_TYPE_BENEFIT, 20, 1));
 
-        assertThatThrownBy(() -> service.exchangeGoods("u1", null, 1)).isInstanceOf(JeecgBootException.class);
-        assertThatThrownBy(() -> service.exchangeGoods("u1", "missing", 1)).isInstanceOf(JeecgBootException.class);
-        assertThatThrownBy(() -> service.exchangeGoods("u1", "disabled", 1)).isInstanceOf(JeecgBootException.class);
-        assertThatThrownBy(() -> service.exchangeGoods("u1", "empty", 1)).isInstanceOf(JeecgBootException.class);
-        assertThatThrownBy(() -> service.exchangeGoods("u1", "expensive", 1)).isInstanceOf(JeecgBootException.class);
+        assertThatThrownBy(() -> service.exchangeGoods("u1", null, 1, null)).isInstanceOf(JeecgBootException.class);
+        assertThatThrownBy(() -> service.exchangeGoods("u1", "missing", 1, null)).isInstanceOf(JeecgBootException.class);
+        assertThatThrownBy(() -> service.exchangeGoods("u1", "disabled", 1, null)).isInstanceOf(JeecgBootException.class);
+        assertThatThrownBy(() -> service.exchangeGoods("u1", "empty", 1, null)).isInstanceOf(JeecgBootException.class);
+        assertThatThrownBy(() -> service.exchangeGoods("u1", "expensive", 1, null)).isInstanceOf(JeecgBootException.class);
         assertThat(orders).isEmpty();
         assertThat(ledgers).isEmpty();
     }
@@ -103,7 +103,7 @@ class ContentUserPointSpendServiceTest {
         profiles.add(profile("u1", 100));
         goodsList.add(goods("g1", "VIP", ContentUserPointSpendConstant.GOODS_TYPE_BENEFIT, 20, 3));
 
-        ContentUserPointSpendResultVO result = service.exchangeGoods("u1", "g1", 2);
+        ContentUserPointSpendResultVO result = service.exchangeGoods("u1", "g1", 2, null);
 
         assertThat(result.getPointCost()).isEqualTo(40);
         assertThat(result.getBalanceAfter()).isEqualTo(60);
@@ -124,7 +124,7 @@ class ContentUserPointSpendServiceTest {
         profiles.add(profile);
         goodsList.add(goods("g1", "VIP", ContentUserPointSpendConstant.GOODS_TYPE_BENEFIT, 20, 3));
 
-        service.exchangeGoods("u1", "g1", 1);
+        service.exchangeGoods("u1", "g1", 1, null);
 
         assertThat(findProfile("u1").getPointBalance()).isEqualTo(80);
         assertThat(findProfile("u1").getGrowthValue()).isEqualTo(430);
@@ -140,7 +140,7 @@ class ContentUserPointSpendServiceTest {
         Callable<Boolean> task = () -> {
             barrier.await();
             try {
-                service.exchangeGoods("u1", "g1", 1);
+                service.exchangeGoods("u1", "g1", 1, null);
                 return true;
             } catch (JeecgBootException ex) {
                 return false;
@@ -249,6 +249,45 @@ class ContentUserPointSpendServiceTest {
     }
 
     @Test
+    void shouldSetLevelChangedWhenGrowthRecordTriggersLevelUp() {
+        // 积分兑换不改变成长值，所以 levelChanged 应为 null
+        profiles.add(profile("u1", 100));
+        goodsList.add(goods("g1", "VIP", ContentUserPointSpendConstant.GOODS_TYPE_BENEFIT, 20, 3));
+
+        ContentUserPointSpendResultVO result = service.exchangeGoods("u1", "g1", 1, null);
+
+        assertThat(result.getLevelChanged()).isNull();
+        assertThat(result.getNewLevel()).isNull();
+    }
+
+    @Test
+    void shouldReturnExistingOrderWhenRequestIdIsDuplicate() {
+        profiles.add(profile("u1", 100));
+        goodsList.add(goods("g1", "VIP", ContentUserPointSpendConstant.GOODS_TYPE_BENEFIT, 20, 3));
+
+        // 第一次兑换
+        ContentUserPointSpendResultVO first = service.exchangeGoods("u1", "g1", 1, "req-001");
+        assertThat(first.getPointCost()).isEqualTo(20);
+        assertThat(findProfile("u1").getPointBalance()).isEqualTo(80);
+
+        // 相同 requestId 的重复请求
+        ContentUserPointSpendResultVO second = service.exchangeGoods("u1", "g1", 1, "req-001");
+        assertThat(second.getOrderId()).isEqualTo(first.getOrderId());
+        assertThat(findProfile("u1").getPointBalance()).isEqualTo(80); // 不重复扣积分
+        assertThat(orders).hasSize(1); // 只创建了一个订单
+    }
+
+    @Test
+    void shouldAllowExchangeWithoutRequestId() {
+        profiles.add(profile("u1", 100));
+        goodsList.add(goods("g1", "VIP", ContentUserPointSpendConstant.GOODS_TYPE_BENEFIT, 20, 3));
+
+        ContentUserPointSpendResultVO result = service.exchangeGoods("u1", "g1", 1, null);
+        assertThat(result.getPointCost()).isEqualTo(20);
+        assertThat(orders).hasSize(1);
+    }
+
+    @Test
     void shouldRejectLedgerQueryWhenFiltersInvalid() {
         assertThatThrownBy(() -> service.queryPointLedger(new ContentUserPointLedgerQueryDTO()))
             .isInstanceOf(JeecgBootException.class);
@@ -289,13 +328,27 @@ class ContentUserPointSpendServiceTest {
             });
     }
 
+    private final java.util.Map<String, ContentUserExchangeOrder> ordersByRequestId = new java.util.HashMap<>();
+
     private ContentUserExchangeOrderMapper orderMapper() {
         return (ContentUserExchangeOrderMapper) Proxy.newProxyInstance(ContentUserExchangeOrderMapper.class.getClassLoader(),
             new Class<?>[]{ContentUserExchangeOrderMapper.class},
             (proxy, method, args) -> {
                 if ("insert".equals(method.getName())) {
-                    orders.add((ContentUserExchangeOrder) args[0]);
+                    ContentUserExchangeOrder order = (ContentUserExchangeOrder) args[0];
+                    orders.add(order);
+                    if (order.getRequestId() != null) {
+                        ordersByRequestId.put(order.getRequestId(), order);
+                    }
                     return 1;
+                }
+                if ("selectOne".equals(method.getName())) {
+                    // 幂等查询：遍历参数查找 requestId 条件值
+                    if (args != null && ordersByRequestId.size() == 1) {
+                        // 只有一个 requestId 索引时，直接返回（单 requestId 场景）
+                        return ordersByRequestId.values().iterator().next();
+                    }
+                    return null;
                 }
                 return defaultValue(method.getReturnType());
             });
