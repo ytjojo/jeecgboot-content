@@ -74,20 +74,20 @@ public class ContentUserRelationController {
      * Blacklists the target user and cuts off related interactions.
      */
     @Operation(summary = "拉黑用户")
-    @PostMapping("/blacklist")
-    public Result<String> blacklist(@RequestParam("userId") String userId,
-                                    @RequestParam("targetUserId") String targetUserId) {
+    @PostMapping("/block")
+    public Result<String> block(@RequestParam("userId") String userId,
+                                @RequestParam("targetUserId") String targetUserId) {
         relationService.blacklist(userId, targetUserId);
         return Result.OK("拉黑成功");
     }
 
     /**
-     * Removes the blacklist for the target user.
+     * Removes the block for the target user.
      */
     @Operation(summary = "解除拉黑")
-    @PostMapping("/blacklist/cancel")
-    public Result<String> unblacklist(@RequestParam("userId") String userId,
-                                      @RequestParam("targetUserId") String targetUserId) {
+    @PostMapping("/unblock")
+    public Result<String> unblock(@RequestParam("userId") String userId,
+                                  @RequestParam("targetUserId") String targetUserId) {
         relationService.unblacklist(userId, targetUserId);
         return Result.OK("解除拉黑成功");
     }

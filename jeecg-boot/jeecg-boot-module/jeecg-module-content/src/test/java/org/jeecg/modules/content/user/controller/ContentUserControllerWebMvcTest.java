@@ -407,7 +407,7 @@ class ContentUserControllerWebMvcTest {
 
     @Test
     void shouldCancelBlacklistSuccessfully() throws Exception {
-        mockMvc.perform(post("/content/user/relation/blacklist/cancel")
+        mockMvc.perform(post("/content/user/relation/unblock")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())

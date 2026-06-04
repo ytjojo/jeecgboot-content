@@ -68,7 +68,7 @@ class ContentUserRelationControllerWebMvcTest {
 
     @Test
     void shouldBlacklistUser() throws Exception {
-        mockMvc.perform(post("/content/user/relation/blacklist")
+        mockMvc.perform(post("/content/user/relation/block")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())
@@ -77,7 +77,7 @@ class ContentUserRelationControllerWebMvcTest {
 
     @Test
     void shouldUnblacklistUser() throws Exception {
-        mockMvc.perform(post("/content/user/relation/blacklist/cancel")
+        mockMvc.perform(post("/content/user/relation/unblock")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())
