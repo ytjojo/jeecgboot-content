@@ -88,7 +88,7 @@ public class ContentUserPointSpendServiceImpl implements IContentUserPointSpendS
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ContentUserPointSpendResultVO exchangeGoods(String userId, String goodsId, Integer quantity) {
+    public ContentUserPointSpendResultVO exchangeGoods(String userId, String goodsId, Integer quantity, String requestId) {
         validateUserId(userId);
         int safeQuantity = validateQuantity(quantity);
         ContentUserExchangeGoods goods = requireGoods(goodsId, safeQuantity);
@@ -98,8 +98,26 @@ public class ContentUserPointSpendServiceImpl implements IContentUserPointSpendS
         if (ContentUserPointSpendConstant.GOODS_TYPE_VIRTUAL_GIFT.equals(goods.getGoodsType())) {
             throw new JeecgBootException("虚拟礼物请使用赠礼入口");
         }
+        // 幂等校验
+        if (!isBlank(requestId)) {
+            ContentUserExchangeOrder existing = exchangeOrderMapper.selectOne(
+                Wrappers.<ContentUserExchangeOrder>lambdaQuery()
+                    .eq(ContentUserExchangeOrder::getRequestId, requestId)
+                    .last("LIMIT 1"));
+            if (existing != null) {
+                return new ContentUserPointSpendResultVO()
+                    .setOrderId(existing.getId())
+                    .setOrderNo(existing.getOrderNo())
+                    .setGoodsId(existing.getGoodsId())
+                    .setGoodsCode(existing.getGoodsCode())
+                    .setQuantity(existing.getQuantity())
+                    .setPointCost(existing.getPointCost())
+                    .setBalanceAfter(currentBalance(userId))
+                    .setBenefitStatus(existing.getBenefitStatus());
+            }
+        }
         int pointCost = calculatePointCost(goods, safeQuantity);
-        return spendAndCreateOrder(userId, goods, safeQuantity, pointCost, ContentUserPointSpendConstant.SOURCE_EXCHANGE, null);
+        return spendAndCreateOrder(userId, goods, safeQuantity, pointCost, ContentUserPointSpendConstant.SOURCE_EXCHANGE, null, requestId);
     }
 
     @Override
@@ -227,6 +245,11 @@ public class ContentUserPointSpendServiceImpl implements IContentUserPointSpendS
 
     private ContentUserPointSpendResultVO spendAndCreateOrder(String userId, ContentUserExchangeGoods goods, int quantity,
                                                               int pointCost, String sourceType, String bizRemark) {
+        return spendAndCreateOrder(userId, goods, quantity, pointCost, sourceType, bizRemark, null);
+    }
+
+    private ContentUserPointSpendResultVO spendAndCreateOrder(String userId, ContentUserExchangeGoods goods, int quantity,
+                                                              int pointCost, String sourceType, String bizRemark, String requestId) {
         deductStock(goods, quantity);
         int affectedRows = profileMapper.deductPointIfEnough(userId, pointCost);
         if (affectedRows <= 0) {
@@ -241,7 +264,8 @@ public class ContentUserPointSpendServiceImpl implements IContentUserPointSpendS
             .setQuantity(quantity)
             .setPointCost(pointCost)
             .setOrderStatus(ContentUserPointSpendConstant.ORDER_STATUS_SUCCESS)
-            .setBenefitStatus(ContentUserPointSpendConstant.BENEFIT_STATUS_GRANTED);
+            .setBenefitStatus(ContentUserPointSpendConstant.BENEFIT_STATUS_GRANTED)
+            .setRequestId(requestId);
         order.setId(uuid());
         exchangeOrderMapper.insert(order);
         pointLedgerMapper.insert(ContentUserPointLedger.of(userId, sourceType, order.getId(), -pointCost, "POINT_SPEND")

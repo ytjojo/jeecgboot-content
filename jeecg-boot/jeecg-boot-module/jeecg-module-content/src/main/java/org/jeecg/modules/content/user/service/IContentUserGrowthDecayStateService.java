@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.modules.content.user.entity.ContentUserGrowthDecayState;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayRuleVO;
+import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayStatusVO;
 
 import java.util.Date;
 import java.util.List;
@@ -47,4 +48,9 @@ public interface IContentUserGrowthDecayStateService extends IService<ContentUse
      * 记录用户活跃，并在成长值恢复阈值时清除降级保护。
      */
     void markUserActive(String userId, Date activeTime, Integer currentGrowthValue);
+
+    /**
+     * 查询指定用户的衰减状态。
+     */
+    ContentUserGrowthDecayStatusVO getDecayStatus(String userId);
 }

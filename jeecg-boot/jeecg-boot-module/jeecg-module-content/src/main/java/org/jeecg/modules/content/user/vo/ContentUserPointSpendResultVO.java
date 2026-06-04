@@ -38,4 +38,10 @@ public class ContentUserPointSpendResultVO {
 
     @Schema(description = "是否重复使用已有解锁")
     private Boolean reusedUnlock;
+
+    @Schema(description = "是否触发等级变更")
+    private Boolean levelChanged;
+
+    @Schema(description = "变更后的等级，仅 levelChanged=true 时有值")
+    private Integer newLevel;
 }

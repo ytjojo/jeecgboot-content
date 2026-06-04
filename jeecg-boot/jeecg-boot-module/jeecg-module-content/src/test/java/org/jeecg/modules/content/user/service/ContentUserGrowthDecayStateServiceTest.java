@@ -13,6 +13,7 @@ import org.jeecg.modules.content.user.mapper.ContentUserGrowthLedgerMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.service.impl.ContentUserGrowthDecayStateServiceImpl;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayRuleVO;
+import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayStatusVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -227,6 +228,53 @@ class ContentUserGrowthDecayStateServiceTest {
         assertThatThrownBy(() -> service.validateDecayRule(rule("0.10", true).setProtectionDays(-1)))
             .isInstanceOf(JeecgBootException.class);
         assertThatThrownBy(() -> service.validateDecayRule(rule("0.10", true).setRuleDescription("x".repeat(513))))
+            .isInstanceOf(JeecgBootException.class);
+    }
+
+    @Test
+    void shouldReturnDecayStatusForUserWithDecayState() {
+        ContentUserProfile profile = new ContentUserProfile()
+            .setUserId("u1")
+            .setLevel(3)
+            .setGrowthValue(200);
+        when(profileMapper.selectByUserId("u1")).thenReturn(profile);
+        ContentUserGrowthDecayState state = new ContentUserGrowthDecayState()
+            .setUserId("u1")
+            .setStatus("DECAYING")
+            .setLastActiveTime(time(2026, 4, 1, 0, 0))
+            .setDecayCount(2);
+        when(decayStateMapper.selectOne(any())).thenReturn(state);
+
+        ContentUserGrowthDecayStatusVO status = service.getDecayStatus("u1");
+
+        assertThat(status.getStatus()).isEqualTo("DECAYING");
+        assertThat(status.getCurrentLevel()).isEqualTo(3);
+        assertThat(status.getCurrentGrowthValue()).isEqualTo(200);
+        assertThat(status.getDecayCount()).isEqualTo(2);
+        assertThat(status.getInactiveDays()).isGreaterThan(0);
+    }
+
+    @Test
+    void shouldReturnNormalStatusForUserWithoutDecayState() {
+        ContentUserProfile profile = new ContentUserProfile()
+            .setUserId("u2")
+            .setLevel(1)
+            .setGrowthValue(50);
+        when(profileMapper.selectByUserId("u2")).thenReturn(profile);
+        when(decayStateMapper.selectOne(any())).thenReturn(null);
+
+        ContentUserGrowthDecayStatusVO status = service.getDecayStatus("u2");
+
+        assertThat(status.getStatus()).isEqualTo("NORMAL");
+        assertThat(status.getInactiveDays()).isZero();
+        assertThat(status.getDecayCount()).isZero();
+    }
+
+    @Test
+    void shouldRejectDecayStatusQueryWithBlankUserId() {
+        assertThatThrownBy(() -> service.getDecayStatus(""))
+            .isInstanceOf(JeecgBootException.class);
+        assertThatThrownBy(() -> service.getDecayStatus(null))
             .isInstanceOf(JeecgBootException.class);
     }
 

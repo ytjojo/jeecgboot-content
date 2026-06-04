@@ -21,7 +21,7 @@ public interface IContentUserPointSpendService {
     /**
      * 使用积分兑换商品。
      */
-    ContentUserPointSpendResultVO exchangeGoods(String userId, String goodsId, Integer quantity);
+    ContentUserPointSpendResultVO exchangeGoods(String userId, String goodsId, Integer quantity, String requestId);
 
     /**
      * 使用积分解锁功能；已解锁且仍有效时不重复扣费。

@@ -265,7 +265,7 @@ class ContentUserControllerWebMvcTest {
                 .setGoodsName("会员标识")
                 .setGoodsType("BENEFIT")
                 .setPointPrice(100)));
-        when(pointSpendService.exchangeGoods("u1", "goods-1", 2))
+        when(pointSpendService.exchangeGoods("u1", "goods-1", 2, null))
             .thenReturn(new ContentUserPointSpendResultVO()
                 .setOrderId("order-1")
                 .setGoodsId("goods-1")
