@@ -172,12 +172,13 @@
   - `GET /content/user/relation/detail` — 查询关系
   - `GET /content/user/relation/blacklist` — 黑名单分页
   - `GET /content/user/relation/mute-list` — 屏蔽列表分页
-  - `GET /content/user/relation/block-mute/help` — 帮助说明
-  - `POST /content/user/filter-rule` — 添加屏蔽规则
-  - `POST /content/user/filter-rule/delete` — 删除屏蔽规则
-  - `POST /content/user/filter-rule/batch-delete` — 批量删除屏蔽规则
-  - `GET /content/user/filter-rule/list` — 查询屏蔽规则列表
-  - `POST /content/user/not-interested` — 不感兴趣反馈
+  - `GET /content/user/relation/block-mute/help` — 帮助说明（无参数）
+  - `GET /content/user/relation/mute-list` — 屏蔽列表分页（@RequestParam: userId, pageNo, pageSize）
+  - `POST /content/user/filter-rule` — 添加屏蔽规则（@RequestParam: userId, ruleType, value, daysValid?）
+  - `POST /content/user/filter-rule/delete` — 删除屏蔽规则（@RequestParam: userId, ruleId）
+  - `POST /content/user/filter-rule/batch-delete` — 批量删除屏蔽规则（@RequestParam: userId, @RequestBody: ruleIds[]）
+  - `GET /content/user/filter-rule/list` — 查询屏蔽规则列表（@RequestParam: userId, ruleType?, pageNo, pageSize）
+  - `POST /content/user/not-interested` — 不感兴趣反馈（@RequestParam: userId, contentId, contentType）
 
 ### Requirement: 关系状态缓存
 系统 SHALL 使用 Pinia Store 缓存用户关系状态，减少重复请求。

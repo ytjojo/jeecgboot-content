@@ -106,6 +106,7 @@ PC 端和移动端的布局差异（表格 vs 卡片列表、弹窗 vs 底部抽
 
 ## Risks / Trade-offs
 
+- [mute-list 端点已补充] → `GET /content/user/relation/mute-list` 已在 `ContentUserRelationController` 中实现，返回 `ContentUserMuteListPageVO`。
 - [关系状态缓存不一致] → 拉黑/屏蔽操作成功后立即更新本地缓存，页面切换时通过 `checkRelation` 验证。用户登出时清空缓存。
 - [屏蔽词正则前端校验] → 前端仅做基础格式校验（`/` 开头结尾），复杂校验依赖后端。无效正则时前端提示格式错误。
 - [临时屏蔽倒计时精度] → 使用 Ant Design Vue `Statistic` 组件的 `countdown` 模式，精度到秒。到期后通过轮询或页面刷新更新列表。
