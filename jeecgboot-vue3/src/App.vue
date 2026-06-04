@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { watch, ref } from 'vue';
+  import { watch, ref, onUnmounted } from 'vue';
   import { theme } from 'ant-design-vue';
   import { ConfigProvider } from 'ant-design-vue';
   import { AppProvider } from '/@/components/Application';
@@ -17,6 +17,9 @@
   import { useRootSetting } from '/@/hooks/setting/useRootSetting';
   import { ThemeEnum } from '/@/enums/appEnum';
   import { changeTheme } from '/@/logics/theme/index';
+  import { Modal } from 'ant-design-vue';
+  import { growthEmitter } from '/@/store/modules/growth';
+  import type { LevelUpPayload } from '/@/store/modules/growth';
 
   const appStore = useAppStore();
   // 解决日期时间国际化问题
@@ -97,6 +100,27 @@
   setTimeout(() => {
     appStore.getProjectConfig?.themeColor && changeTheme(appStore.getProjectConfig.themeColor);
   }, 300);
+
+  // ---- 等级升级弹窗 ----
+  const LEVEL_UP_COOLDOWN_KEY = 'growth:level-up:last-shown';
+  const LEVEL_UP_COOLDOWN_DAYS = 7;
+
+  function handleLevelUp(payload: LevelUpPayload) {
+    const lastShown = Number(localStorage.getItem(LEVEL_UP_COOLDOWN_KEY) || 0);
+    const cooldownMs = LEVEL_UP_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+    if (Date.now() - lastShown < cooldownMs) {
+      return; // 冷却期内不弹窗
+    }
+    localStorage.setItem(LEVEL_UP_COOLDOWN_KEY, String(Date.now()));
+    Modal.success({
+      title: '恭喜升级',
+      content: `您的等级已从 Lv.${payload.oldLevel} 提升至 Lv.${payload.newLevel}${payload.levelName ? `（${payload.levelName}）` : ''}！`,
+    });
+  }
+  growthEmitter.on('growth:level-up', handleLevelUp);
+  onUnmounted(() => {
+    growthEmitter.off('growth:level-up', handleLevelUp);
+  });
 
 </script>
 <style lang="less">

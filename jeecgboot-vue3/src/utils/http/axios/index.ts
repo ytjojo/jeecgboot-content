@@ -19,6 +19,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 import { joinTimestamp, formatRequestDate } from './helper';
 import { useUserStoreWithOut } from '/@/store/modules/user';
 import { cloneDeep } from "lodash-es";
+import { growthEmitter } from '/@/store/modules/growth';
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix;
 const { createMessage, createErrorModal } = useMessage();
@@ -211,6 +212,15 @@ const transform: AxiosTransform = {
    * @description: 响应拦截器处理
    */
   responseInterceptors: (res: AxiosResponse<any>) => {
+    // 检测后端返回的升级事件
+    const levelChanged = res.data?.levelChanged;
+    if (levelChanged) {
+      growthEmitter.emit('growth:level-up', {
+        oldLevel: levelChanged.oldLevel,
+        newLevel: levelChanged.newLevel,
+        levelName: levelChanged.levelName,
+      });
+    }
     return res;
   },
 
