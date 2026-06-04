@@ -5,7 +5,7 @@
 
 #### Scenario: 版主置顶内容
 - **WHEN** 版主在内容卡片操作菜单中点击"置顶"
-- **THEN** 调用 `PUT /circle-content/{id}/pin` 接口，成功后内容移动到列表顶部，展示置顶标识，Toast 提示"已置顶"
+- **THEN** 调用 `PUT /circle-content/{id}/pin?circleId={circleId}` 接口，成功后内容移动到列表顶部，展示置顶标识，Toast 提示"已置顶"
 
 #### Scenario: 版主取消置顶
 - **WHEN** 版主在已置顶内容的操作菜单中点击"取消置顶"
@@ -20,7 +20,7 @@
 
 #### Scenario: 版主标记精华
 - **WHEN** 版主在内容卡片操作菜单中点击"精华"
-- **THEN** 调用 `PUT /circle-content/{id}/featured` 接口，成功后内容卡片左上角展示精华标识，Toast 提示"已标记精华"
+- **THEN** 调用 `PUT /circle-content/{id}/featured?circleId={circleId}` 接口，成功后内容卡片左上角展示精华标识，Toast 提示"已标记精华"
 
 #### Scenario: 版主取消精华
 - **WHEN** 版主在已精华内容的操作菜单中点击"取消精华"

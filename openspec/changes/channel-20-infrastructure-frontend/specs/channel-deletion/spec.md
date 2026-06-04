@@ -1,5 +1,12 @@
 ## ADDED Requirements
 
+> **API 路径**:
+> - 删除频道: `DELETE /api/v1/channels/{id}` (已存在)
+> - 撤销删除: `POST /api/v1/channels/{id}/cancel-delete` (已存在)
+> - 删除前置校验: `GET /api/v1/channels/{id}/delete-check` (待后端实现)
+> **Controller**: ChannelController
+> **前端封装**: `src/api/content/channel/index.ts` - `deleteChannel()`, `cancelDelete()`, `checkDeletePrecondition()`
+
 ### Requirement: 发起频道删除
 
 频道主 SHALL 能通过频道管理页 > 设置区域的红色危险按钮"删除频道"发起删除。点击后先调用接口校验前置条件，满足条件弹出二次确认弹窗，不满足条件弹窗显示阻塞原因列表。系统频道不显示"删除频道"按钮。

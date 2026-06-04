@@ -1,5 +1,12 @@
 ## ADDED Requirements
 
+> **API 路径**:
+> - 创建系统频道: `POST /api/v1/admin/channels/create-system` (已存在)
+> - 审核频道: `POST /api/v1/admin/channels/{id}/review` (已存在)
+> - 频道列表查询: 需后端提供管理端列表接口（待确认）
+> **Controller**: ChannelAdminController
+> **前端封装**: `src/api/content/channel/index.ts` - `createSystemChannel()`, `reviewChannel()`
+
 ### Requirement: 后台频道列表展示
 
 后台频道管理页 SHALL 使用 JVxeTable 表格展示所有频道，列包含：频道图标、频道名称、频道类型（Tag）、审核状态（Tag）、归属（用户/组织名）、分类、置顶权重（仅系统频道）、创建时间、操作。支持列排序（创建时间、置顶权重），分页默认每页 20 条。

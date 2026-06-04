@@ -38,7 +38,7 @@
 
 #### Scenario: 删除被举报内容
 - **WHEN** 管理员点击"删除内容"
-- **THEN** 确认框"确认删除该内容？删除后举报者将收到通知"，确认后调用 `PUT /circle-report/{id}/delete-content`，卡片状态更新，Toast 提示"已删除"
+- **THEN** 确认框"确认删除该内容？删除后举报者将收到通知"，确认后调用 `POST /circle-report/{id}/delete-content?circleId={circleId}`，卡片状态更新，Toast 提示"已删除"
 
 #### Scenario: 被举报内容已被删除
 - **WHEN** 被举报内容已被删除
@@ -49,14 +49,14 @@
 
 #### Scenario: 忽略举报
 - **WHEN** 管理员点击"忽略举报"
-- **THEN** 确认框"确认忽略该举报？举报者将收到通知"，确认后调用 `PUT /circle-report/{id}/ignore`，卡片状态更新，Toast 提示"已忽略"
+- **THEN** 确认框"确认忽略该举报？举报者将收到通知"，确认后调用 `POST /circle-report/{id}/ignore?circleId={circleId}`，卡片状态更新，Toast 提示"已忽略"
 
 ### Requirement: 创建者可禁言用户
 圈子创建者 SHALL 能够禁言被举报用户，禁言时长选项为：1小时/1天/7天/30天/永久。
 
 #### Scenario: 创建者禁言用户
 - **WHEN** 创建者点击"禁言用户"，选择禁言时长，确认
-- **THEN** 调用 `PUT /circle-report/{id}/mute-user`，卡片状态更新，Toast 提示"已禁言"
+- **THEN** 调用 `POST /circle-report/{id}/mute?circleId={circleId}`，卡片状态更新，Toast 提示"已禁言"。> **后端遗留**: 禁言时长参数（1小时/1天/7天/30天/永久）后端尚未实现，当前接口不接受时长参数
 
 #### Scenario: 版主无禁言权限
 - **WHEN** 版主查看举报处理页

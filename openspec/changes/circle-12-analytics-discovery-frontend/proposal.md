@@ -58,7 +58,7 @@
 ## Impact
 
 - **路由**: 新增 `/circle/:id/analytics` 路由，修改 `/circle` 路由对应页面
-- **API**: 对接 6 个新接口（统计数据查询/导出、推荐列表/曝光/点击、热门榜/新锐榜）
+- **API**: 对接 7 个接口（统计数据查询/导出、推荐列表/曝光/点击、热门榜/新锐榜），其中曝光上报接口需后端补充开发
 - **组件**: 新增 StatCard、TrendChart、RankCircleCard、RankList、DataAnalyticsPanel、RecommendationPanel、TimeRangeSelector 组件；复用 EPIC-10 的 CircleCard 和 JoinModal
 - **状态管理**: 新增 useCircleAnalyticsStore 和 useCircleRecommendStore 两个 Pinia store
 - **依赖**: 确认项目已有 ECharts 依赖，若无需在开发前引入

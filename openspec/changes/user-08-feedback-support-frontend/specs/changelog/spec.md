@@ -49,3 +49,15 @@
 #### Scenario: 移动端更新日志布局
 - **WHEN** 用户在移动端访问更新日志
 - **THEN** 时间线节点以卡片堆叠方式展示
+
+---
+
+## 后端依赖
+
+| API | 后端状态 | 说明 |
+|-----|---------|------|
+| `GET /content/user/support/changelog/list` | 服务层已实现 | `getChangelog(userId)` 已实现但未暴露 HTTP 端点 |
+
+**数据结构差异**:
+- 前端期望 `{ id, version, releaseDate, features[], improvements[], bugfixes[] }`
+- 后端 `ContentChangelogVO` 实际为 `{ version, releaseDate, additions[], improvements[], fixes[] }`（无 `id`，`features` 对应 `additions`，`bugfixes` 对应 `fixes`）

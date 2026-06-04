@@ -6,7 +6,7 @@
 
 #### Scenario: 加载待审区列表
 - **WHEN** 管理员进入待审区 Tab
-- **THEN** 调用 `/api/channel/review/list` 加载待审列表，展示标题、内容类型、提交者、提交时间、来源场景、命中规则，每行提供"通过"和"拒绝"按钮
+- **THEN** 调用 `GET /jeecg-boot/api/v1/content/channel/review/list` 加载待审列表，展示标题、内容类型、提交者、提交时间、来源场景、命中规则，每行提供"通过"和"拒绝"按钮
 
 #### Scenario: 筛选待审内容
 - **WHEN** 管理员使用筛选栏（内容类型、提交者、提交时间、审核状态、超时状态）
@@ -14,11 +14,11 @@
 
 #### Scenario: 单条审核通过
 - **WHEN** 管理员点击某条内容的"通过"按钮
-- **THEN** 直接调用 `/api/channel/review/approve`，成功后从列表移除，展示"审核完成"toast
+- **THEN** 调用 `POST /content/channel/review`（body: `{reviewId, action: "APPROVE"}`），成功后从列表移除，展示"审核完成"toast
 
 #### Scenario: 单条审核拒绝
 - **WHEN** 管理员点击某条内容的"拒绝"按钮
-- **THEN** 弹出 RejectReasonModal，管理员填写拒绝原因后调用 `/api/channel/review/reject`，成功后从列表移除
+- **THEN** 弹出 RejectReasonModal，管理员填写拒绝原因后调用 `POST /content/channel/review`（body: `{reviewId, action: "REJECT", rejectReason}`），成功后从列表移除
 
 #### Scenario: 批量审核通过
 - **WHEN** 管理员勾选多条内容后点击"批量通过"
@@ -66,7 +66,7 @@
 
 #### Scenario: 展示待审统计 badge
 - **WHEN** 管理员进入频道管理后台
-- **THEN** 待审区 Tab 展示 badge，显示待审总数；超时数由 `/api/channel/review/stats` 接口返回，前端每 60 秒刷新一次
+- **THEN** 待审区 Tab 展示 badge，显示待审总数；超时数由 `GET /content/channel/review/stats` 接口返回（**后端待实现**），前端每 60 秒刷新一次
 
 #### Scenario: 超时提醒通知
 - **WHEN** 待审内容超过 24 小时未处理

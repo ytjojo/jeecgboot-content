@@ -137,3 +137,14 @@
 #### Scenario: 空状态展示
 - **WHEN** 用户进入"我的举报"页面且无举报记录
 - **THEN** 页面显示空状态插图、"暂无举报记录"文案和"遇到违规内容？点击举报"按钮
+
+---
+
+## 后端依赖
+
+| API | 后端状态 | 说明 |
+|-----|---------|------|
+| `POST /content/user/support/report/create` | 已存在 | 路径为 `/report/create`，非 plan.md 中的 `/report` |
+| `GET /content/user/support/report/list` | 完全缺失 | 用户端举报列表不存在，仅有管理端 `/admin/report/list` |
+| `GET /content/user/support/report/{id}` | 完全缺失 | 用户端举报详情不存在，仅有管理端 `/admin/report/detail` 和 `/report/progress` |
+| `POST /content/user/support/report/{id}/withdraw` | 完全缺失 | 后端无撤回功能，服务层和控制器均未实现 |

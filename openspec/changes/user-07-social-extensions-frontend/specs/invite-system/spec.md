@@ -5,7 +5,7 @@ The system SHALL provide an invite share page at `/content/invite` that displays
 
 #### Scenario: First-time invite code generation
 - **WHEN** user visits the invite page for the first time
-- **THEN** the system SHALL auto-generate an invite code via `GET /content/invite/code` and display it prominently with a copyable link and QR code
+- **THEN** the system SHALL auto-generate an invite code via `POST /content/user/invite/generate` and display it prominently with a copyable link and QR code
 
 #### Scenario: Reuse existing invite code
 - **WHEN** user visits the invite page and already has an invite code
@@ -43,6 +43,7 @@ The system SHALL provide an invite landing page at `/invite/:inviteCode` for inv
 #### Scenario: Valid invite code landing page
 - **WHEN** a new user visits `/invite/:inviteCode` with a valid, non-expired invite code
 - **THEN** the system SHALL display the inviter's avatar and nickname, platform highlights, a "立即注册" button, and registration reward info
+- **NOTE**: 需后端补充邀请码校验接口，详见 backend-issues.md
 
 #### Scenario: Expired invite code
 - **WHEN** a user visits `/invite/:inviteCode` with an expired invite code
@@ -76,19 +77,20 @@ The system SHALL integrate invite APIs using `defHttp` encapsulation in `src/api
 
 #### Scenario: Fetch invite code
 - **WHEN** the invite page loads
-- **THEN** the system SHALL call `GET /content/invite/code` to get or generate the invite code
+- **THEN** the system SHALL call `POST /content/user/invite/generate` to get or generate the invite code
 
 #### Scenario: Fetch invite info for landing page
 - **WHEN** the landing page loads with an invite code
-- **THEN** the system SHALL call `GET /content/invite/info/:inviteCode` to get inviter info and code validity
+- **THEN** the system SHALL call the invite info API to get inviter info and code validity
+- **NOTE**: 后端需补充邀请码校验接口，详见 backend-issues.md
 
 #### Scenario: Fetch invite records
 - **WHEN** the invite page loads
-- **THEN** the system SHALL call `GET /content/invite/records` with pagination params
+- **THEN** the system SHALL call `GET /content/user/invite/records` with pagination params
 
 #### Scenario: Fetch invite statistics
 - **WHEN** the invite page loads
-- **THEN** the system SHALL call `GET /content/invite/stats` to get aggregate statistics
+- **THEN** the system SHALL call `GET /content/user/invite/stats` to get aggregate statistics
 
 ### Requirement: Invite store for caching
 The system SHALL create a Pinia store (`useInviteStore`) to cache invite code and statistics within the session.

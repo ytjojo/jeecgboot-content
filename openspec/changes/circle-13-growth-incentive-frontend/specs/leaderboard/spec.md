@@ -86,11 +86,11 @@
 
 ### Requirement: 排行榜 API 对接
 
-系统 SHALL 通过 GET `/content/circle/{circleId}/leaderboard` 接口获取排行榜数据，支持 dimension 和 period 查询参数。
+系统 SHALL 通过 GET `/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` 接口获取排行榜数据，支持 dimension 和 period 查询参数。
 
 #### Scenario: 接口请求成功
 - **WHEN** 排行榜页加载或切换维度/周期
-- **THEN** 调用排行榜接口传入 dimension 和 period 参数，解析 LeaderboardVO 响应数据并渲染
+- **THEN** 调用排行榜接口传入 circleId、dimension、period、currentUserId 参数，解析 LeaderboardEntryVO 列表并渲染
 
 #### Scenario: 接口请求失败
 - **WHEN** 排行榜接口请求失败

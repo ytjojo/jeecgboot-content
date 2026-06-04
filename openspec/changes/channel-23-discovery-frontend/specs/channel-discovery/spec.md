@@ -12,8 +12,8 @@
 - **THEN** 页面展示冷启动推荐结果（热门频道），其余模块与登录用户一致
 
 #### Scenario: 发现页数据加载失败
-- **WHEN** 聚合接口 `/content/channel/discovery/home` 请求失败
-- **THEN** 前端降级为并行调用推荐、排行榜、精选三个独立接口，任一模块加载失败时展示该模块的错误状态和重试按钮
+- **WHEN** 聚合接口 `GET /content/channel/discovery/home` 请求失败
+- **THEN** 前端降级为并行调用 `GET /content/channel/recommendation/list`、`GET /content/channel/ranking/hot`、`GET /content/channel/editorial-pick/list` 三个独立接口，任一模块加载失败时展示该模块的错误状态和重试按钮
 
 ### Requirement: 推荐频道卡片展示
 推荐频道区 SHALL 展示推荐频道卡片列表，包含频道图标、名称、类型标签、主分类、简介、订阅数、推荐理由和订阅操作。

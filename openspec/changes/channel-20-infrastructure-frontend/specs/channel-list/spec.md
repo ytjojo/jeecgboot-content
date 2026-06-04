@@ -1,5 +1,9 @@
 ## ADDED Requirements
 
+> **API 路径**: `GET /api/v1/channels/list` (待后端实现)
+> **Controller**: ChannelController
+> **前端封装**: `src/api/content/channel/index.ts` - `getChannelList()`
+
 ### Requirement: 我的频道列表展示
 
 用户 SHALL 能在"我的频道"页面查看自己创建的所有频道列表，使用 JVxeTable 表格展示，列包含：频道图标、频道名称、频道类型（Tag 标签）、审核状态（Tag 标签）、创建时间（支持排序）、操作。创建时间列默认倒序排列。

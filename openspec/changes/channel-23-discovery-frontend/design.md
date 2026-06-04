@@ -48,11 +48,16 @@ JeecgBoot_sass 内容社区模块已有频道基础功能（EPIC-20 创建、EPI
 
 ### 3. 发现页数据加载：并行请求 vs 聚合 API
 
-**选择**: 聚合 API `/content/channel/discovery/home` 一次性获取推荐+榜单+精选
+**选择**: 聚合 API `GET /content/channel/discovery/home` 一次性获取推荐+榜单+精选
 
 **理由**: 减少 HTTP 请求数，后端可做聚合优化，前端只需一次 loading 状态管理。聚合失败时降级为并行请求各子接口。
 
-**降级策略**: 聚合接口超时或失败时，前端 fallback 为并行调用推荐、排行榜、精选三个独立接口。
+**降级策略**: 聚合接口超时或失败时，前端 fallback 为并行调用以下独立接口：
+- `GET /content/channel/recommendation/list`（推荐频道）
+- `GET /content/channel/ranking/hot`（热门排行榜）
+- `GET /content/channel/editorial-pick/list`（编辑精选）
+
+**后端状态**: `ContentChannelDiscoveryBiz` 已实现聚合逻辑，但尚缺 Controller 端点暴露（见 backend-issues.md）。
 
 ### 4. 频道卡片组件：单一组件多模式 vs 多个独立组件
 

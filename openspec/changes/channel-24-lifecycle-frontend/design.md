@@ -206,3 +206,77 @@
 | 数据导出文件的下载有效期和历史导出记录保留期限是多少？ | 数据安全、存储、用户体验 | 默认假设 7 天，需产品确认 |
 | 频道合并后历史统计是否合并到目标频道？ | 数据看板、运营复盘 | 需产品/数据确认统计口径 |
 | 永久关闭是否存在法务或平台管理员特权恢复流程？ | 合规治理、申诉 | 需产品/法务/运营确认例外恢复权限 |
+
+## API 实现状态
+
+> **注意**: 以下 API 接口状态基于 2026-06-04 的代码库验证。
+
+### 统计看板 API (ChannelStatsController)
+
+**基础路径**: `/jeecg-boot/api/v1/content/channel/stats`
+
+| API | 功能 | 状态 | 备注 |
+|-----|------|------|------|
+| `GET /core` | 核心指标 | ✅ 已实现 | - |
+| `GET /trend` | 趋势数据 | ✅ 已实现 | - |
+| `GET /hot-content` | 热门内容 | ✅ 已实现 | - |
+| `GET /user-analysis` | 用户分析 | ✅ 已实现 | - |
+| `GET /interaction` | 互动数据 | ❌ **待实现** | 点赞、评论、收藏、分享、有效访问 |
+
+### 数据导出 API (ChannelExportController)
+
+**基础路径**: `/jeecg-boot/api/v1/content/channel/export`
+
+| API | 功能 | 状态 | 备注 |
+|-----|------|------|------|
+| `POST /create` | 创建导出任务 | ✅ 已实现 | - |
+| `GET /status` | 查询任务状态 | ✅ 已实现 | - |
+| `GET /download` | 下载文件 | ✅ 已实现 | - |
+| `GET /history` | 导出历史列表 | ❌ **待实现** | 返回历史导出记录 |
+
+### 审核管理 API (ChannelReviewController)
+
+**基础路径**: `/jeecg-boot/api/v1/content/channel/review`
+
+| API | 功能 | 状态 | 备注 |
+|-----|------|------|------|
+| `GET /list` | 审核列表 | ✅ 已实现 | - |
+| `POST /action` | 审核操作 | ✅ 已实现 | 通过/拒绝/退回 |
+| `GET /detail/{id}` | 审核详情 | ❌ **待实现** | 返回审核申请详情 |
+
+### 生命周期管理 API (ChannelLifecycleController)
+
+**基础路径**: `/jeecg-boot/api/v1/content/channel/lifecycle`
+
+| API | 功能 | 状态 | 备注 |
+|-----|------|------|------|
+| `POST /freeze` | 冻结 | ✅ 已实现 | - |
+| `POST /unfreeze` | 解冻 | ✅ 已实现 | - |
+| `POST /hide` | 强制隐藏 | ✅ 已实现 | - |
+| `POST /close` | 永久关闭 | ✅ 已实现 | - |
+| `POST /archive` | 归档 | ✅ 已实现 | - |
+| `POST /restrict-recommend` | 限制推荐 | ✅ 已实现 | - |
+| `POST /restore-visibility` | 恢复可见 | ❌ **待实现** | Hidden → Active |
+| `GET /logs` | 审计日志 | ✅ 已实现 | - |
+
+### 申诉管理 API (ChannelLifecycleController)
+
+**基础路径**: `/jeecg-boot/api/v1/content/channel/lifecycle/appeal`
+
+| API | 功能 | 状态 | 备注 |
+|-----|------|------|------|
+| `POST /submit` | 提交申诉 | ✅ 已实现 | - |
+| `POST /handle` | 处理申诉 | ✅ 已实现 | - |
+| `GET /list` | 申诉列表 | ✅ 已实现 | - |
+| `GET /detail/{id}` | 申诉详情 | ❌ **待实现** | 返回申诉详情 |
+
+### 待实现 API 汇总
+
+| # | API | 所属模块 | 优先级 |
+|---|-----|----------|--------|
+| 1 | `GET /stats/interaction` | 统计看板 | P0 |
+| 2 | `GET /export/history` | 数据导出 | P0 |
+| 3 | `GET /review/detail/{id}` | 审核管理 | P0 |
+| 4 | `POST /lifecycle/restore-visibility` | 生命周期 | P0 |
+| 5 | `GET /lifecycle/logs?channelId=xxx` | 审计日志 | P0 |
+| 6 | `GET /appeal/detail/{id}` | 申诉管理 | P0 |

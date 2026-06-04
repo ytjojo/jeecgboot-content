@@ -20,7 +20,7 @@
 
 #### Scenario: 批准单条申请
 - **WHEN** 管理员点击"批准"
-- **THEN** 弹出确认框"确认批准该用户的加入申请？"，确认后调用 `PUT /circle-join-request/{id}/approve`，卡片从列表移除，Toast 提示"已批准"
+- **THEN** 弹出确认框"确认批准该用户的加入申请？"，确认后调用 `POST /circle-join-review/approve?circleId={circleId}`（body: `{ requestId }`），卡片从列表移除，Toast 提示"已批准"
 
 #### Scenario: 批量批准
 - **WHEN** 管理员勾选多条申请后点击"批量批准"
@@ -31,7 +31,7 @@
 
 #### Scenario: 拒绝单条申请
 - **WHEN** 管理员点击"拒绝"
-- **THEN** 弹出输入框要求填写拒绝原因（必填），确认后调用 `PUT /circle-join-request/{id}/reject`，卡片从列表移除，Toast 提示"已拒绝"
+- **THEN** 弹出输入框要求填写拒绝原因（必填），确认后调用 `POST /circle-join-review/reject?circleId={circleId}`（body: `{ requestId, rejectReason }`），卡片从列表移除，Toast 提示"已拒绝"
 
 #### Scenario: 拒绝原因为空提交
 - **WHEN** 管理员未填写拒绝原因直接确认
@@ -46,7 +46,7 @@
 
 #### Scenario: 管理入口角标
 - **WHEN** 有待处理的加入申请
-- **THEN** 圈子管理入口展示红点/角标，数字来源于 `pendingJoinRequestCount`
+- **THEN** 圈子管理入口展示红点/角标，数字来源于 `pendingJoinRequestCount`。> **后端遗留**: 此查询接口后端尚未实现
 
 ### Requirement: 加入申请列表响应式设计
 加入申请列表 SHALL 在移动端展示为卡片列表。

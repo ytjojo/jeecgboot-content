@@ -39,7 +39,7 @@
 
 #### Scenario: User saves wear configuration
 - **WHEN** 用户点击"保存"按钮
-- **THEN** 调用 POST `/content/user/badge/wear` API，成功后提示"佩戴设置已更新"并退出编辑模式
+- **THEN** 调用 POST `/content/user/growth/badge/wear` API，成功后提示"佩戴设置已更新"并退出编辑模式
 
 #### Scenario: User cancels wear edit
 - **WHEN** 用户点击"取消"按钮
@@ -72,7 +72,7 @@
 
 #### Scenario: Admin confirms badge recycling
 - **WHEN** 管理员输入回收原因并点击"确认回收"
-- **THEN** 二次确认"确认回收该勋章？此操作不可撤销"，确认后调用 POST `/content/admin/badge/recycle` API
+- **THEN** 二次确认"确认回收该勋章？此操作不可撤销"，确认后调用 POST `/content/user/growth/badge/recycle` API
 
 #### Scenario: Admin badge management page
 - **WHEN** 管理员访问 `/content/badge-manage`

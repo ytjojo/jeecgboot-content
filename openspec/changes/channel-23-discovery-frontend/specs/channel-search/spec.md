@@ -5,7 +5,7 @@
 
 #### Scenario: 执行关键词搜索
 - **WHEN** 用户在搜索框输入关键词并按回车或点击搜索按钮
-- **THEN** 调用 `/content/channel/search` 接口，展示搜索结果列表，结果统计区显示"共找到 N 个频道"
+- **THEN** 调用 `GET /content/channel/search/query` 接口，展示搜索结果列表，结果统计区显示"共找到 N 个频道"
 
 #### Scenario: 搜索输入防抖
 - **WHEN** 用户连续输入关键词
@@ -48,7 +48,8 @@
 
 #### Scenario: 用户反馈结果有帮助
 - **WHEN** 用户点击"结果有帮助"按钮
-- **THEN** 记录反馈，按钮变为已反馈状态
+- **THEN** 调用 `POST /content/channel/search/feedback` 接口记录反馈，按钮变为已反馈状态
+- **NOTE**: 该后端接口尚待实现（见 backend-issues.md）
 
 ### Requirement: 搜索历史管理
 搜索 SHALL 支持搜索历史记录，持久化到 localStorage。

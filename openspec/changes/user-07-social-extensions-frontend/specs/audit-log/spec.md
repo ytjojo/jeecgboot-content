@@ -42,4 +42,5 @@ The system SHALL integrate the audit log API using `defHttp` encapsulation.
 
 #### Scenario: Fetch audit log list
 - **WHEN** the audit log page loads or user applies filters
-- **THEN** the system SHALL call `GET /content/user-governance/audit-log` with filter params and pagination
+- **THEN** the system SHALL call the audit log query API with filter params and pagination
+- **NOTE**: 后端需补充治理操作审计日志查询接口，详见 backend-issues.md

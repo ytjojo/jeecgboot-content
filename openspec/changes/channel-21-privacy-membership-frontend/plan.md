@@ -23,16 +23,17 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  subscribe = '/api/channel/subscription/subscribe',
-  unsubscribe = '/api/channel/subscription/unsubscribe',
-  status = '/api/channel/subscription/status',
-  list = '/api/channel/subscription/list',
-  groupCreate = '/api/channel/subscription/group/create',
-  groupUpdate = '/api/channel/subscription/group/update',
-  groupDelete = '/api/channel/subscription/group/delete',
-  groupList = '/api/channel/subscription/group/list',
-  reminder = '/api/channel/subscription/reminder',
-  moveGroup = '/api/channel/subscription/move-group',
+  subscribe = '/channel/subscription/subscribe',
+  unsubscribe = '/channel/subscription/unsubscribe',
+  status = '/channel/subscription/status',  // TODO: 后端需添加此端点
+  list = '/channel/subscription/list',
+  groupCreate = '/channel/subscription/group/create',
+  groupRename = '/channel/subscription/group/rename',  // 注意：后端使用 POST /group/rename
+  groupDelete = '/channel/subscription/group/delete',
+  groupList = '/channel/subscription/group/list',
+  // P2 功能，后续迭代实现
+  // reminder = '/channel/subscription/reminder',
+  // moveGroup = '/channel/subscription/move-group',
 }
 
 /** 订阅频道 */
@@ -55,9 +56,9 @@ export const getSubscriptionList = (params?: any) =>
 export const createSubscriptionGroup = (data: { name: string }) =>
   defHttp.post({ url: Api.groupCreate, data });
 
-/** 更新分组 */
-export const updateSubscriptionGroup = (data: { groupId: string; name: string }) =>
-  defHttp.put({ url: Api.groupUpdate, data });
+/** 重命名分组 */
+export const renameSubscriptionGroup = (groupId: string, newName: string) =>
+  defHttp.post({ url: Api.groupRename, params: { groupId, newName } });
 
 /** 删除分组 */
 export const deleteSubscriptionGroup = (groupId: string) =>
@@ -67,13 +68,14 @@ export const deleteSubscriptionGroup = (groupId: string) =>
 export const getSubscriptionGroupList = () =>
   defHttp.get({ url: Api.groupList });
 
-/** 更新提醒设置 */
-export const updateSubscriptionReminder = (data: { channelId: string; enabled: boolean }) =>
-  defHttp.put({ url: Api.reminder, data });
+// P2 功能，后续迭代实现
+// /** 更新提醒设置 */
+// export const updateSubscriptionReminder = (data: { channelId: string; enabled: boolean }) =>
+//   defHttp.put({ url: Api.reminder, data });
 
-/** 移动频道到分组 */
-export const moveChannelToGroup = (data: { channelId: string; groupId: string }) =>
-  defHttp.put({ url: Api.moveGroup, data });
+// /** 移动频道到分组 */
+// export const moveChannelToGroup = (data: { channelId: string; groupId: string }) =>
+//   defHttp.put({ url: Api.moveGroup, data });
 ```
 
 - [ ] **Step 2: 验证文件创建成功**
@@ -102,16 +104,18 @@ git commit -m "feat(channel): add subscription API layer"
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  apply = '/api/channel/member/apply',
-  applicationStatus = '/api/channel/member/application/status',
-  applicationPending = '/api/channel/member/application/pending',
-  applicationApprove = '/api/channel/member/application/approve',
-  applicationReject = '/api/channel/member/application/reject',
-  list = '/api/channel/member/list',
-  updateRole = '/api/channel/member/role',
-  remove = '/api/channel/member/remove',
-  mute = '/api/channel/member/mute',
-  unmute = '/api/channel/member/unmute',
+  joinApply = '/channel/member/join/apply',
+  // applicationStatus = '/channel/member/application/status',  // TODO: 后端需添加此端点
+  applicationPending = '/channel/member/applications/pending',
+  applicationApprove = '/channel/member/applications/approve',
+  applicationReject = '/channel/member/applications/reject',
+  list = '/channel/member/list',
+  search = '/channel/member/search',
+  assignRole = '/channel/member/assign-role',
+  // 治理相关 API 在 ChannelGovernanceController
+  governanceRemove = '/channel/governance/remove',
+  governanceMute = '/channel/governance/mute',
+  governanceUnmute = '/channel/governance/unmute',
 }
 
 /** 提交加入申请 */

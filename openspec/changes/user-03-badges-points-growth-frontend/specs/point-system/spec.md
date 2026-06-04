@@ -60,7 +60,7 @@
 - **WHEN** 用户快速连续点击"确认兑换"
 - **THEN** 仅触发一次 API 请求，按钮在请求期间完全禁用（disabled + loading）
 
-#### Scenario: Idempotent exchange request
+#### Scenario: Idempotent exchange request **[阻塞: 后端 ContentUserExchangeReq 缺少 requestId 字段]**
 - **WHEN** 前端发起兑换请求
 - **THEN** 请求携带唯一 requestId（前端生成 UUID），后端基于 requestId 做幂等校验
 
@@ -73,14 +73,14 @@
 
 #### Scenario: User unlocks a feature
 - **WHEN** 用户触发功能解锁操作
-- **THEN** 调用 POST `/content/user/feature/unlock` API，成功后扣除积分并解锁功能
+- **THEN** 调用 POST `/content/user/growth/point/feature/unlock` API，成功后扣除积分并解锁功能
 
 ### Requirement: Virtual gift sending
 系统 SHALL 支持使用积分赠送虚拟礼物。
 
 #### Scenario: User sends a gift
 - **WHEN** 用户在虚拟礼物赠送弹窗选择礼物并确认赠送
-- **THEN** 调用 POST `/content/user/gift/send` API，原子性扣积分+发记录+发通知
+- **THEN** 调用 POST `/content/user/growth/point/gift/send` API，原子性扣积分+发记录+发通知
 
 ### Requirement: Point empty state
 系统 SHALL 在无积分记录时展示空状态引导。

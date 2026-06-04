@@ -25,10 +25,10 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  create = '/content/user/support/report',
-  withdraw = '/content/user/support/report/{id}/withdraw',
-  list = '/content/user/support/report/list',
-  detail = '/content/user/support/report/{id}',
+  create = '/content/user/support/report/create', // 后端实际路径含 /create
+  withdraw = '/content/user/support/report/{id}/withdraw', // 待后端实现
+  list = '/content/user/support/report/list', // 待后端实现（用户端）
+  detail = '/content/user/support/report/{id}', // 待后端实现（用户端）
 }
 
 export interface ReportCreateParams {
@@ -106,10 +106,10 @@ git commit -m "feat(support): add report API layer"
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  create = '/content/user/support/appeal',
-  withdraw = '/content/user/support/appeal/{id}/withdraw',
-  list = '/content/user/support/appeal/list',
-  detail = '/content/user/support/appeal/{id}',
+  create = '/content/user/support/appeal/create', // 后端实际路径含 /create
+  withdraw = '/content/user/support/appeal/{id}/withdraw', // 待后端实现
+  list = '/content/user/support/appeal/list', // 后端已存在
+  detail = '/content/user/support/appeal/{id}', // 待后端实现（仅有 /appeal/progress）
 }
 
 export interface AppealCreateParams {
@@ -268,13 +268,15 @@ export interface ChangelogQueryParams {
   pageSize?: number;
 }
 
+// 注意：后端 ContentChangelogVO 字段名为 additions/improvements/fixes，无 id 字段
+// 前端使用 features/bugfixes 作为别名，需在 API 层做字段映射
 export interface ChangelogVersion {
-  id: string;
+  id?: string; // 后端无此字段，前端可从 version 生成
   version: string;
   releaseDate: string;
-  features: string[]; // 新增功能
-  improvements: string[]; // 优化内容
-  bugfixes: string[]; // 修复问题
+  features: string[]; // 对应后端 additions[]
+  improvements: string[]; // 对应后端 improvements[]
+  bugfixes: string[]; // 对应后端 fixes[]
 }
 
 /** 获取更新日志列表 */
@@ -312,13 +314,20 @@ enum Api {
   sessionDetail = '/content/user/support/customer-service/session/{id}',
 }
 
+// 注意：后端 ContentServiceSessionVO 字段为 sessionType/status/rating/ratingComment/startTime/endTime/expired
+// 前端使用 type/agentName/queuePosition/estimatedWaitTime 作为业务层字段
 export interface ServiceSession {
   id: string;
-  type: string; // 'bot' | 'human'
+  type: string; // 'bot' | 'human'（后端字段为 sessionType）
   status: string; // 'bot' | 'queuing' | 'human' | 'closed'
-  agentName: string;
-  queuePosition: number | null;
-  estimatedWaitTime: number | null; // 秒
+  agentName: string; // 后端无此字段，需后端补充或前端从其他来源获取
+  queuePosition: number | null; // 后端无此字段，需后端补充
+  estimatedWaitTime: number | null; // 秒，后端无此字段，需后端补充
+  rating?: number; // 后端已有
+  ratingComment?: string; // 后端已有
+  startTime?: string; // 后端已有
+  endTime?: string; // 后端已有
+  expired?: boolean; // 后端已有
   createTime: string;
 }
 

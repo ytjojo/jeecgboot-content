@@ -32,6 +32,8 @@ JeecgBoot 内容社区前端基于 Vue 3 + TypeScript + Vite 6 + Ant Design Vue 
 
 **理由**: 状态转换规则可能随业务变化，后端统一管理避免前后端规则不一致。前端仅做二次校验。
 
+**后端依赖**: 此 API 当前未实现，需要后端补充。后端已有 `UserStatusTransition.getAllowedTransitions()` 方法，只需在 Controller 层暴露端点。
+
 **替代方案**: 前端硬编码转换矩阵 — 优点是无额外请求，缺点是维护成本高、前后端可能不一致。
 
 ### D2: 登录拦截方案 — 不签发 token
@@ -124,3 +126,24 @@ N/A — 本变更为纯前端新增功能，不涉及部署变更。登录接口
 - 登录接口响应结构变更的具体字段名和格式，需与后端对齐
 - EPIC-08 申诉系统的跳转路由和参数格式
 - 后台管理菜单配置方式（是否需要新增菜单数据脚本）
+
+## 后端 API 依赖清单
+
+以下 API 在后端尚未实现，需要后端开发完成后前端才能完整联调：
+
+### 高优先级（阻塞核心功能）
+| API | 路径 | 用途 | 后端基础 |
+|-----|------|------|----------|
+| getTransitions | GET /transitions/{currentStatus} | 获取可转换状态列表 | UserStatusTransition 已实现 |
+| getStatusList | GET /list | 管理员分页查询用户状态 | 需新增 |
+| verifySecurity | POST /verify-security | 安全核验解冻 | 需新增 |
+| sendVerifyCode | POST /send-verify-code | 发送手机验证码 | 需新增 |
+
+### 中优先级（影响完整功能）
+| API | 路径 | 用途 | 后端基础 |
+|-----|------|------|----------|
+| getAuditLogList | GET /audit-logs | 审计日志分页查询 | UserStatusAuditLogService 需扩展 |
+| getAuditLogDetail | GET /audit-logs/{logId} | 审计日志详情 | UserStatusAuditLogService 需扩展 |
+| batchReleaseUsers | POST /batch-release | 批量解禁 | UserStatusBizManageService 已有 batchChangeStatus |
+| exportAuditLogs | GET /audit-logs/export | 导出审计日志 | 需新增 |
+| getUserAuditLogs | GET /users/{userId}/audit-logs | 用户审计日志 | UserStatusAuditLogService 需扩展 |

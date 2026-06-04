@@ -113,3 +113,14 @@
 #### Scenario: 申诉驳回通知
 - **WHEN** 申诉审核驳回
 - **THEN** 用户收到站内通知"申诉未通过，原因：XXX"
+
+---
+
+## 后端依赖
+
+| API | 后端状态 | 说明 |
+|-----|---------|------|
+| `POST /content/user/support/appeal/create` | 已存在 | 路径为 `/appeal/create`，非 plan.md 中的 `/appeal` |
+| `GET /content/user/support/appeal/list` | 已存在 | 路径一致，但参数需调整（后端用 `userId` 参数） |
+| `GET /content/user/support/appeal/{id}` | 完全缺失 | 申诉详情不存在，仅有 `/appeal/progress`（返回进度信息） |
+| `POST /content/user/support/appeal/{id}/withdraw` | 完全缺失 | 后端无撤回功能，服务层和控制器均未实现 |

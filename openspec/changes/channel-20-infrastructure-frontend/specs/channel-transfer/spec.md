@@ -1,5 +1,14 @@
 ## ADDED Requirements
 
+> **API 路径**:
+> - 发起转让: `POST /api/v1/channels/{id}/transfer` (已存在)
+> - 确认转让: `POST /api/v1/channels/transfer/{transferId}/confirm` (已存在)
+> - 拒绝转让: `POST /api/v1/channels/transfer/{transferId}/reject` (已存在)
+> - 转让历史查询: `GET /api/v1/channels/{id}/transfers` (待后端实现)
+> - 待确认转让查询: `GET /api/v1/channels/{id}/transfer/pending` (待后端实现)
+> **Controller**: ChannelController
+> **前端封装**: `src/api/content/channel/index.ts` - `transferChannel()`, `confirmTransfer()`, `rejectTransfer()`, `getTransferHistory()`
+
 ### Requirement: 发起频道转让
 
 频道主 SHALL 能通过频道管理页 > 设置区域的"转让频道"按钮打开 Modal 弹窗，搜索并选择目标用户，确认转让信息后发起转让请求。系统频道不显示"转让频道"按钮。

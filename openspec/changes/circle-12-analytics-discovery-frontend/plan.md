@@ -58,48 +58,55 @@ jeecgboot-vue3/src/
 ```typescript
 // src/api/circle/types.ts
 
-/** 趋势数据点 */
-export interface TrendDataPoint {
-  date: string;   // YYYY-MM-DD
-  value: number;
+/** 趋势数据点 — 对应后端 CircleDataStatisticsVO.DailyTrend */
+export interface DailyTrend {
+  date: string;           // YYYY-MM-DD
+  newMemberCount: number;
+  newPostCount: number;
+  activeCount: number;
 }
 
-/** 圈子统计数据响应 */
+/** 圈子统计数据响应 — 对应后端 CircleDataStatisticsVO */
 export interface CircleAnalyticsVO {
-  memberTotal: number;
-  memberNew: number;
-  memberChange: number;
-  postTotal: number;
-  postNew: number;
-  postChange: number;
-  activeUserCount: number;
-  activeUserChange: number;
-  memberTrend: TrendDataPoint[];
-  postTrend: TrendDataPoint[];
-  activeTrend: TrendDataPoint[];
+  memberCount: number;     // 成员总数
+  newMemberCount: number;  // 新增成员数
+  postCount: number;       // 帖子总数
+  newPostCount: number;    // 新增帖子数
+  activeCount: number;     // 活跃用户数
+  dailyTrends: DailyTrend[]; // 每日趋势数据
 }
 
-/** 推荐圈子 */
-export interface CircleRecommendVO {
-  id: string;
-  name: string;
+/** 推荐圈子项 — 对应后端 CircleRecommendVO.CircleRecommendItem */
+export interface CircleRecommendItem {
+  circleId: string;
+  circleName: string;
   description: string;
-  iconUrl: string;
   memberCount: number;
   category: string;
-  privacyType: 'PUBLIC' | 'PRIVATE' | 'PASSWORD';
-  recommendSource: string;
+  privacyType: string;     // 'PUBLIC' | 'PRIVATE' | 'PASSWORD'
+  sourceId: string;        // 推荐来源追踪ID
 }
 
-/** 榜单圈子 */
-export interface CircleRankVO {
-  id: string;
-  name: string;
-  iconUrl: string;
+/** 推荐圈子响应 — 对应后端 CircleRecommendVO */
+export interface CircleRecommendVO {
+  items: CircleRecommendItem[];
+}
+
+/** 榜单圈子项 — 对应后端 CircleRankingVO.CircleRankingItem */
+export interface CircleRankItem {
+  rank: number;
+  circleId: string;
+  circleName: string;
+  description: string;
   memberCount: number;
-  activeScore: number;
   category: string;
   createTime: string;
+}
+
+/** 榜单响应 — 对应后端 CircleRankingVO */
+export interface CircleRankingVO {
+  type: string;            // 'HOT' | 'NEW'
+  items: CircleRankItem[];
 }
 
 /** 推荐曝光上报请求 */
@@ -108,10 +115,9 @@ export interface RecommendExposureReq {
   source: string;
 }
 
-/** 推荐点击上报请求 */
+/** 推荐点击上报请求 — 对应后端 recordClick(sourceId) */
 export interface RecommendClickReq {
-  circleId: string;
-  source: string;
+  sourceId: string;        // 后端参数名为 sourceId
 }
 
 /** 时间范围 */
@@ -145,17 +151,24 @@ import { defHttp } from '/@/utils/http/axios';
 import type { CircleAnalyticsVO, DateRange } from './types';
 
 enum Api {
-  analytics = '/content/circle/analytics',
-  exportCsv = '/content/circle/analytics/export',
+  statistics = '/api/circle',  // 后端基础路径
+  exportCsv = '/api/circle',
 }
 
-/** 获取圈子统计数据 */
+/** 获取圈子统计数据 — 对应后端 GET /api/circle/{circleId}/data/statistics */
 export const getCircleAnalytics = (circleId: string, params: DateRange) =>
-  defHttp.get<CircleAnalyticsVO>({ url: `${Api.analytics}/${circleId}`, params });
+  defHttp.get<CircleAnalyticsVO>({
+    url: `${Api.statistics}/${circleId}/data/statistics`,
+    params,
+  });
 
-/** 导出统计数据 CSV */
+/** 导出统计数据 CSV — 对应后端 GET /api/circle/{circleId}/data/export */
 export const exportCircleAnalyticsCsv = (circleId: string, params: DateRange) =>
-  defHttp.get({ url: `${Api.exportCsv}/${circleId}`, params, responseType: 'blob' });
+  defHttp.get({
+    url: `${Api.exportCsv}/${circleId}/data/export`,
+    params,
+    responseType: 'blob',
+  });
 ```
 
 - [ ] **Step 2: 创建推荐 API**
@@ -166,22 +179,26 @@ import { defHttp } from '/@/utils/http/axios';
 import type { CircleRecommendVO, RecommendExposureReq, RecommendClickReq } from './types';
 
 enum Api {
-  recommend = '/content/circle/recommend',
-  exposure = '/content/circle/recommend/exposure',
-  click = '/content/circle/recommend/click',
+  recommend = '/api/circle/recommend',
+  exposure = '/api/circle/recommend/exposure',  // 后端待开发
+  click = '/api/circle/recommend/click',
 }
 
-/** 获取推荐圈子列表 */
+/** 获取推荐圈子列表 — 对应后端 GET /api/circle/recommend
+ *  注意: 后端返回 CircleRecommendVO { items: [...] }，非直接数组
+ */
 export const getRecommendList = (params?: { limit?: number }) =>
-  defHttp.get<CircleRecommendVO[]>({ url: Api.recommend, params });
+  defHttp.get<CircleRecommendVO>({ url: Api.recommend, params });
 
-/** 上报推荐曝光 */
+/** 上报推荐曝光 — 后端待开发，需确认接口是否已就绪 */
 export const reportRecommendExposure = (data: RecommendExposureReq) =>
   defHttp.post({ url: Api.exposure, data });
 
-/** 上报推荐点击 */
-export const reportRecommendClick = (data: RecommendClickReq) =>
-  defHttp.post({ url: Api.click, data });
+/** 上报推荐点击 — 对应后端 POST /api/circle/recommend/click
+ *  注意: 后端参数为 sourceId (RequestParam)，非 JSON body
+ */
+export const reportRecommendClick = (sourceId: string) =>
+  defHttp.post({ url: Api.click, params: { sourceId } });
 ```
 
 - [ ] **Step 3: 创建榜单 API**
@@ -189,20 +206,20 @@ export const reportRecommendClick = (data: RecommendClickReq) =>
 ```typescript
 // src/api/circle/ranking.ts
 import { defHttp } from '/@/utils/http/axios';
-import type { CircleRankVO } from './types';
+import type { CircleRankingVO } from './types';
 
 enum Api {
-  hotRank = '/content/circle/ranking/hot',
-  newRank = '/content/circle/ranking/new',
+  hotRank = '/api/circle/ranking/hot',
+  newRank = '/api/circle/ranking/new',
 }
 
-/** 获取热门榜单 */
+/** 获取热门榜单 — 对应后端 GET /api/circle/ranking/hot */
 export const getHotRankList = (params?: { limit?: number }) =>
-  defHttp.get<CircleRankVO[]>({ url: Api.hotRank, params });
+  defHttp.get<CircleRankingVO>({ url: Api.hotRank, params });
 
-/** 获取新锐榜单 */
+/** 获取新锐榜单 — 对应后端 GET /api/circle/ranking/new */
 export const getNewRankList = (params?: { limit?: number }) =>
-  defHttp.get<CircleRankVO[]>({ url: Api.newRank, params });
+  defHttp.get<CircleRankingVO>({ url: Api.newRank, params });
 ```
 
 - [ ] **Step 4: Commit**
@@ -250,17 +267,12 @@ describe('useCircleAnalyticsStore', () => {
 
   it('should fetch analytics data successfully', async () => {
     const mockData = {
-      memberTotal: 100,
-      memberNew: 10,
-      memberChange: 10,
-      postTotal: 50,
-      postNew: 5,
-      postChange: 10,
-      activeUserCount: 30,
-      activeUserChange: 5,
-      memberTrend: [],
-      postTrend: [],
-      activeTrend: [],
+      memberCount: 100,
+      newMemberCount: 10,
+      postCount: 50,
+      newPostCount: 5,
+      activeCount: 30,
+      dailyTrends: [],
     };
     (getCircleAnalytics as jest.Mock).mockResolvedValue(mockData);
 

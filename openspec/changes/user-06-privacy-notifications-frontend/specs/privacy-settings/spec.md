@@ -59,6 +59,8 @@
 ### Requirement: 页面数据加载
 系统 SHALL 在页面加载时调用 `GET /content/user/settings/privacy` 获取当前隐私设置。
 
+> **后端状态**: 该 GET 端点尚未实现（`ContentUserSettingsController` 中仅有 `POST /privacy/update`）。需后端补充，或前端临时改为从 `GET /content/user/profile/detail` 提取隐私字段。详见 `backend-issues.md`。
+
 #### Scenario: 加载中显示骨架屏
 - **WHEN** 用户进入隐私设置页
 - **THEN** 数据加载完成前显示骨架屏（a-skeleton），加载完成后替换为实际内容

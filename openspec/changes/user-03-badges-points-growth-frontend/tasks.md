@@ -1,8 +1,8 @@
 ## 1. API 封装层
 
-- [ ] 1.1 创建 `src/api/content/badge.ts`：封装勋章相关 API（getBadgeList、getBadgeDetail、getWornBadges、saveWearConfig、getWornBadgesByUserId、recycleBadge）
-- [ ] 1.2 创建 `src/api/content/point.ts`：封装积分相关 API（getPointBalance、getPointLedger、getExchangeGoods、createExchange、unlockFeature、sendGift）
-- [ ] 1.3 创建 `src/api/content/growth.ts`：封装等级相关 API（getLevelInfo、getLevelConfig、getDecayRule）
+- [ ] 1.1 创建 `src/api/content/badge.ts`：封装勋章相关 API（badgeCatalog、badgeDetail、wornBadges、saveWornBadges、recycleBadge）—— 实际端点均在 `/content/user/growth/badge/*`
+- [ ] 1.2 创建 `src/api/content/point.ts`：封装积分相关 API（growthSummary[含积分余额]、pointLedger、exchangeGoods、createExchange、unlockFeature、getFeatureUnlock、sendGift）—— 实际端点均在 `/content/user/growth/point/*`
+- [ ] 1.3 创建 `src/api/content/growth.ts`：封装等级相关 API（growthSummary[含等级信息]、levelConfig、levelBenefit、decayRule）—— 实际端点均在 `/content/user/growth/*`
 
 ## 2. SVG 占位图标资源
 
@@ -16,7 +16,7 @@
 
 ## 4. 全局升级事件机制
 
-- [ ] 4.1 修改 `src/utils/http/axios/index.ts`：在 defHttp 响应拦截器中增加 `levelChanged` 字段检测，检测到时通过 mitt 广播 `growth:level-up` 事件
+- [ ] 4.1 修改 `src/utils/http/axios/index.ts`：在 defHttp 响应拦截器中增加 `levelChanged` 字段检测，检测到时通过 mitt 广播 `growth:level-up` 事件 **[阻塞] 后端尚未在响应中携带 levelChanged 字段，前端先完成代码实现**
 - [ ] 4.2 修改 `src/App.vue`：监听 `growth:level-up` 事件，实现 7 天冷却期逻辑，弹出全局祝贺弹窗（LevelUpCongratsModal）
 
 ## 5. 勋章系统组件

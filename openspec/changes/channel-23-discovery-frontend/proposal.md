@@ -38,6 +38,7 @@
 - **前端路由**: 新增 6 个页面路由（发现页、分类浏览、搜索结果、排行榜、分类管理、精选管理）
 - **组件层**: 新增 6 个业务组件，复用现有 Page/Tree/Table/Modal/Form/Description 等基础组件
 - **状态管理**: 新增 3 个 Pinia Store，复用 useUserStore/usePermissionStore/useAppStore
-- **API 层**: 新增 19 个 API 接口调用，使用 defHttp 封装
+- **API 层**: 新增 19 个 API 接口调用，使用 defHttp 封装。推荐接口和搜索接口需要 `userId` 参数，前端从 useUserStore 自动注入
 - **依赖**: 依赖后端频道可见性服务（ChannelVisibilityService）已完成过滤，前端无需额外过滤
+- **后端遗留**: 聚合接口 Controller、分类启用、标签编辑、搜索反馈 4 个端点尚待后端补充（见 backend-issues.md）
 - **性能**: 搜索 P99 <= 200ms，推荐 P95 <= 500ms，需实现 5 分钟缓存策略和防抖/骨架屏/懒加载等优化

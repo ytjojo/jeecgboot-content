@@ -25,7 +25,7 @@
 ### Requirement: Badge display on post cards
 系统 SHALL 在帖子卡片和帖子详情中展示作者佩戴的勋章。
 
-#### Scenario: Post list shows author badges
+#### Scenario: Post list shows author badges **[阻塞: 后端帖子接口未增加 authorBadges 字段]**
 - **WHEN** 帖子列表 API 响应包含 `authorBadges` 字段
 - **THEN** 帖子卡片直接使用 `authorBadges` 数据通过 prop 传入 BadgeDisplay
 

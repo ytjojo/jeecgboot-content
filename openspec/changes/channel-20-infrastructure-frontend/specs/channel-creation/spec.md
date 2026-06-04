@@ -1,5 +1,12 @@
 ## ADDED Requirements
 
+> **API 路径**:
+> - 用户端创建频道: `POST /api/v1/channels/create` (已存在)
+> - 后台创建系统频道: `POST /api/v1/admin/channels/create-system` (已存在)
+> - 名称唯一性校验: `GET /api/v1/channels/check-name` (待后端实现)
+> **Controller**: ChannelController, ChannelAdminController
+> **前端封装**: `src/api/content/channel/index.ts` - `createChannel()`, `createSystemChannel()`, `checkNameUnique()`
+
 ### Requirement: 系统频道创建（后台端）
 
 后台管理员 SHALL 能通过频道管理页面的"创建系统频道"按钮打开 Modal 弹窗，填写表单后直接创建系统频道，频道状态为 Active。表单字段包括：频道名称（必填，最大 50 字符）、频道简介（必填，最大 200 字符）、频道图标（必填，图片上传支持裁剪）、频道封面（选填，图片上传）、所属官方分类（必填，下拉选择）、置顶权重（选填，0-9999 整数）。系统频道名称不参与用户频道唯一性校验。

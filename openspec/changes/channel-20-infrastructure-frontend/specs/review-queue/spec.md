@@ -1,5 +1,11 @@
 ## ADDED Requirements
 
+> **API 路径**:
+> - 审核队列列表: `GET /jeecg-boot/api/v1/content/channel/review/list` (已存在)
+> - 审核操作: `POST /jeecg-boot/api/v1/content/channel/review/action` (已存在)
+> **Controller**: ChannelReviewController
+> **前端封装**: `src/api/content/channel/index.ts` - `getReviewList()`, `reviewAction()`
+
 ### Requirement: 审核队列列表展示
 
 审核队列页 SHALL 使用 Table 组件展示所有 PendingReview 状态的频道，列包含：频道名称、频道类型、提交人、提交时间、等待时长（超过 24h 标红）、操作。顶部显示待审核数量统计（如"待审核频道：12 个"）。超过 24 小时未处理的记录行背景色高亮。

@@ -13,7 +13,7 @@ The system SHALL provide a "删除评论" (delete comment) action in the comment
 
 #### Scenario: Successful comment deletion
 - **WHEN** moderator submits the deletion form with a valid reason
-- **THEN** the system SHALL call `POST /content/user-governance/delete-comment` with commentId and reason, display success message, and refresh the comment list
+- **THEN** the system SHALL call `POST /content/user/governance/moderator/comment/delete` with commentId and reason, display success message, and refresh the comment list
 
 #### Scenario: Delete comment failure
 - **WHEN** the delete comment API returns an error
@@ -32,7 +32,7 @@ The system SHALL provide a "警告用户" (warn user) action in the comment oper
 
 #### Scenario: Successful user warning
 - **WHEN** moderator submits the warning form with a valid reason
-- **THEN** the system SHALL call `POST /content/user-governance/warn-user` with userId and reason, and display success message
+- **THEN** the system SHALL call `POST /content/user/governance/moderator/user/warn` with userId and reason, and display success message
 
 ### Requirement: Admin quick link to user management
 The system SHALL provide a "前往用户管理" (go to user management) action for admin users that links to the EPIC-09 user governance page.
@@ -76,8 +76,8 @@ The system SHALL integrate governance APIs using `defHttp` encapsulation in `src
 
 #### Scenario: Call delete comment API
 - **WHEN** moderator confirms comment deletion
-- **THEN** the system SHALL call `POST /content/user-governance/delete-comment` with `{ commentId, reason }`
+- **THEN** the system SHALL call `POST /content/user/governance/moderator/comment/delete` with `{ commentId, reason }`
 
 #### Scenario: Call warn user API
 - **WHEN** moderator confirms user warning
-- **THEN** the system SHALL call `POST /content/user-governance/warn-user` with `{ userId, reason }`
+- **THEN** the system SHALL call `POST /content/user/governance/moderator/user/warn` with `{ userId, reason }`

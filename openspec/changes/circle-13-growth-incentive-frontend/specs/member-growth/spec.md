@@ -30,7 +30,7 @@
 
 #### Scenario: 展示连续参与进度
 - **WHEN** 用户进入个人成长信息页
-- **THEN** 展示 7 天时间轴，已完成天数用实心圆标记，当日未完成用空心圆，并展示「已连续参与 X 天」文案
+- **THEN** 展示 7 天时间轴，已完成天数用实心圆标记，当日未完成用空心圆，并展示「已连续参与 X 天」文案。连续参与天数可从 `MemberGrowthVO.participationDays` 字段获取，也可通过 `GET /content/user/growth/participation` 接口单独查询。
 
 #### Scenario: 近 7 天有参与行为
 - **WHEN** 近 7 天内至少 3 天完成有效参与行为
@@ -70,7 +70,7 @@
 
 ### Requirement: 成员成长信息 API 对接
 
-系统 SHALL 通过 GET `/content/circle/{circleId}/growth/me` 接口获取成员成长信息。
+系统 SHALL 通过 GET `/content/user/growth/info?circleId={circleId}&userId={userId}` 接口获取成员成长信息。
 
 #### Scenario: 接口请求成功
 - **WHEN** 个人成长信息页加载

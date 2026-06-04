@@ -6,7 +6,7 @@
 
 #### Scenario: 加载可发布频道列表
 - **WHEN** 用户打开 ChannelSelector
-- **THEN** 调用 `/api/channel/publish/available` 获取频道列表，按"推荐频道"、"我管理的频道"、"我加入的频道"三组展示，每个频道卡片展示频道名称、类型标签、用户角色标签和发布结果预期
+- **THEN** 调用 `GET /content/channel/publish/available` 获取频道列表（**后端待实现**），按"推荐频道"、"我管理的频道"、"我加入的频道"三组展示，每个频道卡片展示频道名称、类型标签、用户角色标签和发布结果预期
 
 #### Scenario: 搜索频道
 - **WHEN** 用户在搜索框输入频道名称
@@ -66,7 +66,7 @@
 
 #### Scenario: 编辑定时发布时间
 - **WHEN** 用户点击"编辑时间"
-- **THEN** 展示时间选择器，用户选择新时间后调用 `/api/channel/publish/scheduled/{id}` PUT 接口更新
+- **THEN** 展示时间选择器，用户选择新时间后调用 `PUT /content/channel/publish/scheduled/{id}` 接口更新（**后端待实现**）
 
 #### Scenario: 取消定时发布
 - **WHEN** 用户点击"取消发布"
@@ -106,7 +106,7 @@
 
 #### Scenario: 发布前预校验限额
 - **WHEN** 用户提交发布前
-- **THEN** 调用 `/api/channel/publish/limit/check` 预校验，超限时展示具体限制信息并阻止发布
+- **THEN** 调用 `GET /content/channel/publish/limit/check` 预校验（**后端待实现**），超限时展示具体限制信息并阻止发布
 
 ---
 

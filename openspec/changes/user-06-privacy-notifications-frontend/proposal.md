@@ -28,7 +28,7 @@
 ## Impact
 
 - **前端代码**: 新增 4 个页面组件 + 1 个 API 模块 + 路由配置变更，位于 `jeecgboot-vue3/src/views/content/` 下新增 `settings/` 目录
-- **API 依赖**: 依赖后端 9 个接口（通知设置 3 个、隐私设置 2 个、安全设置 1 个、第三方授权 3 个），接口路径前缀 `/content/user/`
+- **API 依赖**: 依赖后端 9 个接口（通知设置 3 个、隐私设置 2 个、安全设置 1 个、第三方授权 3 个），接口路径前缀 `/content/user/`。其中隐私设置 GET 端点和安全设置更新端点尚未实现，需后端补充（详见 `backend-issues.md`）
 - **组件依赖**: 使用 Ant Design Vue 基础组件（Switch / Checkbox / TimePicker / Select / Radio / Table / Modal）+ 项目已有 Page / Form / Table / Modal 封装组件
 - **路由变更**: 需要在内容社区模块的路由配置中新增 4 个子路由
 - **无破坏性变更**: 纯新增功能，不影响已有页面和接口

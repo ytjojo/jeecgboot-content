@@ -18,6 +18,8 @@
 ### Requirement: 通知渠道配置
 系统 SHALL 为每类通知提供四个渠道选项（App内 / 推送 / 短信 / 邮件），使用 Checkbox 组件，支持多选。渠道配置存储在 `channelConfig` 对象中，各类型对应 `likeChannels`、`commentChannels` 等字段。
 
+> **后端状态**: `ContentNotificationChannelConfigVO` 目前仅包含 6 个渠道字段（like/comment/follow/favorite/mention/privateMessage），缺少 `subscriptionChannels`。后端需补充该字段以支持第 7 类通知（订阅更新）的渠道配置。
+
 #### Scenario: 主开关关闭时渠道置灰
 - **WHEN** 用户关闭某通知类型的主开关
 - **THEN** 该行的渠道 Checkbox 组整体置灰（disabled），但保留上次选择状态

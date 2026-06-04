@@ -70,11 +70,11 @@
 
 ### Requirement: 徽章列表 API 对接
 
-系统 SHALL 通过 GET `/content/circle/{circleId}/badges` 接口获取徽章列表数据。
+系统 SHALL 通过 GET `/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` 接口获取成就徽章列表数据。
 
 #### Scenario: 接口请求成功
 - **WHEN** 徽章墙页加载
-- **THEN** 调用徽章列表接口，解析 BadgeVO 数组并渲染到页面
+- **THEN** 调用成就徽章列表接口 `GET /content/user/growth/achievement/list`，解析 AchievementVO 数组并渲染到页面
 
 #### Scenario: 接口请求失败
 - **WHEN** 徽章列表接口请求失败

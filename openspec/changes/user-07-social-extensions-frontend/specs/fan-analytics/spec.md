@@ -39,11 +39,11 @@ The system SHALL integrate fan analytics APIs using `defHttp` encapsulation in `
 
 #### Scenario: Fetch fan list
 - **WHEN** the fan list tab loads or user searches/paginates
-- **THEN** the system SHALL call `GET /content/fan-analytics/list` with pagination and search params
+- **THEN** the system SHALL call `GET /content/user/fan/list` with pagination and search params
 
 #### Scenario: Fetch fan trend data
 - **WHEN** user switches to the trend tab or changes dimension
-- **THEN** the system SHALL call `GET /content/fan-analytics/trend` with dimension (day/week/month) and optional date range params
+- **THEN** the system SHALL call `GET /content/user/fan/trend` with dimension (day/week/month) and optional date range params
 
 ### Requirement: ECharts lazy loading
 The system SHALL use `echarts/core` with on-demand chart type registration to minimize bundle size.

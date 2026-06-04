@@ -172,6 +172,96 @@
 
 **影响**: 接口返回数据结构更复杂，但前端逻辑更简单
 
+## API Endpoints
+
+### 用户关注相关 API
+
+**Controller**: `ContentUserRelationController`
+**Base Path**: `/content/user/relation`
+
+| 端点 | 方法 | 说明 | 对应 Spec |
+|------|------|------|-----------|
+| `/follow` | POST | 关注用户 | user-follow-system Req 1 |
+| `/unfollow` | POST | 取消关注 | user-follow-system Req 1 |
+| `/special-follow` | POST | 特别关注用户 | user-follow-system Req 2 |
+| `/special-follow/cancel` | POST | 取消特别关注 | user-follow-system Req 2 |
+| `/groups` | GET | 查询关注分组 | user-follow-system Req 3 |
+| `/group/create` | POST | 创建关注分组 | user-follow-system Req 3 |
+| `/group/rename` | POST | 重命名关注分组 | user-follow-system Req 3 |
+| `/group/delete` | POST | 删除关注分组 | user-follow-system Req 3 |
+| `/group/move` | POST | 移动关注对象到分组 | user-follow-system Req 3 |
+| `/group/remove` | POST | 移出关注分组 | user-follow-system Req 3 |
+| `/follow-list` | GET | 分页查询关注列表 | user-follow-system Req 4 |
+| `/special-follow-list` | GET | 分页查询特别关注列表 | user-follow-system Req 5 |
+| `/recommendations` | GET | 分页查询关注推荐 | user-follow-system Req 6 |
+| `/batch/unfollow` | POST | 批量取消关注 | user-follow-system Req 7 |
+| `/batch/special-follow/cancel` | POST | 批量取消特别关注 | user-follow-system Req 7 |
+| `/feed` | GET | 分页查询关注流 | social-feed Req 1 |
+| `/mutual-follow-list` | GET | 分页查询互关好友列表 | - |
+| `/detail` | GET | 查询关系 | - |
+| `/block` | POST | 拉黑用户 | - |
+| `/unblock` | POST | 解除拉黑 | - |
+| `/mute` | POST | 屏蔽用户 | - |
+| `/mute/cancel` | POST | 解除屏蔽 | - |
+| `/blacklist` | GET | 分页查询黑名单 | - |
+| `/block-mute/help` | GET | 获取拉黑/屏蔽帮助说明 | - |
+
+### 内容订阅相关 API
+
+**Controller**: `ContentUserSubscriptionController`
+**Base Path**: `/content/user/subscription`
+
+| 端点 | 方法 | 说明 | 对应 Spec |
+|------|------|------|-----------|
+| `/subscribe` | POST | 订阅内容源 | content-subscription Req 1 |
+| `/cancel` | POST | 取消订阅 | content-subscription Req 1 |
+| `/pause` | POST | 暂停订阅 | content-subscription Req 2 |
+| `/resume` | POST | 恢复订阅 | content-subscription Req 2 |
+| `/list` | GET | 查询订阅列表 | content-subscription Req 5 |
+| `/feed` | GET | 查询订阅流 | social-feed Req 2 |
+| `/plaza` | GET | 查询订阅广场 | content-subscription Req 4 |
+| `/source/detail` | GET | 查询订阅源详情 | content-subscription Req 4 |
+| `/source/subscribe` | POST | 从订阅广场订阅内容源 | content-subscription Req 4 |
+| `/source/save` | POST | 写入订阅源目录 | - |
+| `/batch/pause` | POST | 批量暂停订阅 | content-subscription Req 5 |
+| `/batch/resume` | POST | 批量恢复订阅 | content-subscription Req 5 |
+| `/batch/cancel` | POST | 批量取消订阅 | content-subscription Req 5 |
+| `/notification/preference` | POST | 保存订阅级通知偏好 | content-subscription Req 3 |
+| `/notification/preference` | GET | 查询订阅级有效通知偏好 | content-subscription Req 3 |
+| `/notification/decision` | GET | 计算订阅源更新通知决策 | - |
+
+### API 请求/响应格式
+
+**请求格式**:
+- 所有 POST 请求使用 `application/json` 格式
+- 请求参数通过 `@RequestBody` 传递
+- 用户 ID 通过 `@RequestParam("userId")` 传递
+
+**响应格式**:
+- 所有响应使用 `Result<T>` 包装
+- 成功响应: `Result.OK(data)`
+- 失败响应: `Result.error(message)`
+
+**示例**:
+```typescript
+// 关注用户请求
+POST /content/user/relation/follow?userId=current_user_id
+Content-Type: application/json
+
+{
+  "targetUserId": "target_user_id",
+  "relationGroupId": "group_id"  // 可选
+}
+
+// 成功响应
+{
+  "success": true,
+  "message": "关注成功",
+  "code": 200,
+  "result": "关注成功"
+}
+```
+
 ## File Structure
 
 ```

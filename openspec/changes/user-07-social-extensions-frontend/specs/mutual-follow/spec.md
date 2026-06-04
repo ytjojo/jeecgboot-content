@@ -54,8 +54,9 @@ The system SHALL provide API endpoints for mutual follow list and mutual status 
 
 #### Scenario: Fetch mutual follow list
 - **WHEN** the mutual follow list page loads
-- **THEN** the system SHALL call `GET /content/user-relation/mutual-follow-list` with pagination params (page, pageSize, keyword)
+- **THEN** the system SHALL call `GET /content/user/relation/mutual-follow-list` with pagination params (page, pageSize, keyword)
 
 #### Scenario: Batch query mutual status
 - **WHEN** incremental comment loading requires mutual status for a list of userIds
-- **THEN** the system SHALL call `GET /content/user-relation/mutual-status` with userId list and cache results
+- **THEN** the system SHALL call the mutual status batch query API with userId list and cache results in `useMutualFollowStore`
+- **NOTE**: 后端需补充 `GET /content/user/relation/mutual-status` 端点，详见 backend-issues.md

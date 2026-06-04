@@ -20,7 +20,8 @@ UserStatusStore MUST 提供以下 actions：fetchCurrentStatus、fetchUserStatus
 
 #### Scenario: fetchCurrentStatus
 - **WHEN** 调用 fetchCurrentStatus()
-- **THEN** 请求 GET /api/content/user-status/current，更新 currentStatus 和 statusDetail
+- **THEN** 请求 GET /api/content/user-status/current?userId={userId}，更新 currentStatus 和 statusDetail
+- **NOTE**: 后端 API 需要 userId 参数，前端从 useUserStore 获取当前登录用户 ID
 
 #### Scenario: changeStatus
 - **WHEN** 调用 changeStatus(userId, payload)

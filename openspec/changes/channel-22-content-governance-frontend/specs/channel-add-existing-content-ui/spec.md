@@ -6,7 +6,7 @@
 
 #### Scenario: 搜索可添加的已发布内容
 - **WHEN** 用户打开 AddContentDialog
-- **THEN** 展示内容搜索框，调用 `/api/channel/content/add/search` 搜索可添加的已发布内容，展示搜索结果列表
+- **THEN** 展示内容搜索框，调用 `GET /content/channel/publish/add-existing/search` 搜索可添加的已发布内容（**后端待实现**），展示搜索结果列表
 
 #### Scenario: 选择内容并预览
 - **WHEN** 用户选择一条已发布内容
@@ -34,7 +34,7 @@
 
 #### Scenario: 提交后展示结果
 - **WHEN** 用户点击"添加到频道"
-- **THEN** 调用 `/api/channel/content/add` API，提交后逐频道展示结果反馈
+- **THEN** 调用 `POST /content/channel/publish/add-existing` API，提交后逐频道展示结果反馈
 
 #### Scenario: 三种场景入口
 - **WHEN** 用户从不同入口触发添加
