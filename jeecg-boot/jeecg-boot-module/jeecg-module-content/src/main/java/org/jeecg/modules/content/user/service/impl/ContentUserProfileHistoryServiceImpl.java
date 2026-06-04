@@ -10,6 +10,7 @@ import org.jeecg.modules.content.user.req.profile.ContentUserProfileUpdateReq;
 import org.jeecg.modules.content.user.service.IContentUserProfileHistoryService;
 import org.jeecg.modules.content.user.service.IContentUserProfileService;
 import org.jeecg.modules.content.user.vo.ContentUserProfileHistoryVO;
+import org.jeecg.modules.content.user.vo.ContentUserProfileVO;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +63,7 @@ public class ContentUserProfileHistoryServiceImpl implements IContentUserProfile
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void restoreHistory(String userId, String historyId) {
+    public ContentUserProfileVO restoreHistory(String userId, String historyId) {
         if (historyId == null || historyId.trim().isEmpty()) {
             throw new JeecgBootException("历史ID不能为空");
         }
@@ -79,7 +80,7 @@ public class ContentUserProfileHistoryServiceImpl implements IContentUserProfile
         } else {
             throw new JeecgBootException("历史类型不支持恢复");
         }
-        profileService.updateProfile(userId, req);
+        return profileService.updateProfile(userId, req);
     }
 
     @Override

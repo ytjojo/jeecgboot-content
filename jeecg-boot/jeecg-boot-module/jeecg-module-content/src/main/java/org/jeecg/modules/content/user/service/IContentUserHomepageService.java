@@ -2,6 +2,7 @@ package org.jeecg.modules.content.user.service;
 
 import org.jeecg.modules.content.user.req.profile.ContentUserHomepageUpdateReq;
 import org.jeecg.modules.content.user.vo.ContentUserHomepageModuleVO;
+import org.jeecg.modules.content.user.vo.ContentUserProfileVO;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface IContentUserHomepageService {
 
     List<ContentUserHomepageModuleVO> listModules(String userId);
 
-    void updateHomepage(String userId, ContentUserHomepageUpdateReq req);
+    ContentUserProfileVO updateHomepage(String userId, ContentUserHomepageUpdateReq req);
 
-    void restoreDefaults(String userId);
+    ContentUserProfileVO restoreDefaults(String userId);
 }

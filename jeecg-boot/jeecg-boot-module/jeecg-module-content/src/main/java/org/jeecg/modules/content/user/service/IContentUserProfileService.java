@@ -12,7 +12,7 @@ public interface IContentUserProfileService {
 
     ContentUserProfileVO getProfile(String ownerUserId, String viewerUserId);
 
-    void updateProfile(String userId, ContentUserProfileUpdateReq req);
+    ContentUserProfileVO updateProfile(String userId, ContentUserProfileUpdateReq req);
 
     void updatePrivacy(String userId, ContentUserPrivacyUpdateReq req);
 

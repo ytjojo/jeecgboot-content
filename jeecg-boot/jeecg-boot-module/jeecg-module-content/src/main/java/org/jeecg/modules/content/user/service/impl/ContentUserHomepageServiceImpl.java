@@ -11,7 +11,10 @@ import org.jeecg.modules.content.user.req.profile.ContentUserHomepageModuleReq;
 import org.jeecg.modules.content.user.req.profile.ContentUserHomepageUpdateReq;
 import org.jeecg.modules.content.user.service.IContentUserHomepageService;
 import org.jeecg.modules.content.user.service.IContentUserMediaAdapter;
+import org.jeecg.modules.content.user.service.IContentUserProfileService;
 import org.jeecg.modules.content.user.vo.ContentUserHomepageModuleVO;
+import org.jeecg.modules.content.user.vo.ContentUserProfileVO;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +41,10 @@ public class ContentUserHomepageServiceImpl implements IContentUserHomepageServi
     @Resource
     private IContentUserMediaAdapter mediaAdapter;
 
+    @Lazy
+    @Resource
+    private IContentUserProfileService profileService;
+
     @Override
     public List<ContentUserHomepageModuleVO> listModules(String userId) {
         return homepageModuleMapper.selectByUserId(userId).stream().map(ContentUserHomepageModuleVO::from).toList();
@@ -45,7 +52,7 @@ public class ContentUserHomepageServiceImpl implements IContentUserHomepageServi
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateHomepage(String userId, ContentUserHomepageUpdateReq req) {
+    public ContentUserProfileVO updateHomepage(String userId, ContentUserHomepageUpdateReq req) {
         ContentUserProfile profile = profileMapper.selectByUserId(userId);
         if (profile == null) {
             throw new JeecgBootException("用户资料不存在");
@@ -57,11 +64,12 @@ public class ContentUserHomepageServiceImpl implements IContentUserHomepageServi
         if (req.getModules() != null) {
             saveModules(userId, req.getModules());
         }
+        return profileService.getProfile(userId, userId);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void restoreDefaults(String userId) {
+    public ContentUserProfileVO restoreDefaults(String userId) {
         ContentUserProfile profile = profileMapper.selectByUserId(userId);
         if (profile != null) {
             profile.setHomepageBackground(null);
@@ -70,6 +78,7 @@ public class ContentUserHomepageServiceImpl implements IContentUserHomepageServi
         }
         homepageModuleMapper.delete(Wrappers.<ContentUserHomepageModule>lambdaQuery()
             .eq(ContentUserHomepageModule::getUserId, userId));
+        return profileService.getProfile(userId, userId);
     }
 
     private void saveModules(String userId, List<ContentUserHomepageModuleReq> modules) {

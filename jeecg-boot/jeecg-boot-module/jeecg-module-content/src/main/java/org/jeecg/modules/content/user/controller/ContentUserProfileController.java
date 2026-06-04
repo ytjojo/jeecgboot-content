@@ -56,10 +56,9 @@ public class ContentUserProfileController {
      */
     @Operation(summary = "更新用户资料")
     @PostMapping("/update")
-    public Result<String> updateProfile(@RequestParam("userId") String userId,
-                                        @Valid @RequestBody ContentUserProfileUpdateReq req) {
-        profileService.updateProfile(userId, req);
-        return Result.OK("更新成功");
+    public Result<ContentUserProfileVO> updateProfile(@RequestParam("userId") String userId,
+                                                       @Valid @RequestBody ContentUserProfileUpdateReq req) {
+        return Result.OK(profileService.updateProfile(userId, req));
     }
 
     /**
@@ -88,10 +87,9 @@ public class ContentUserProfileController {
      */
     @Operation(summary = "更新主页个性化")
     @PostMapping("/homepage/update")
-    public Result<String> updateHomepage(@RequestParam("userId") String userId,
-                                         @Valid @RequestBody ContentUserHomepageUpdateReq req) {
-        homepageService.updateHomepage(userId, req);
-        return Result.OK("更新成功");
+    public Result<ContentUserProfileVO> updateHomepage(@RequestParam("userId") String userId,
+                                                        @Valid @RequestBody ContentUserHomepageUpdateReq req) {
+        return Result.OK(homepageService.updateHomepage(userId, req));
     }
 
     /**
@@ -99,9 +97,8 @@ public class ContentUserProfileController {
      */
     @Operation(summary = "恢复主页默认配置")
     @PostMapping("/homepage/defaults/restore")
-    public Result<String> restoreHomepageDefaults(@RequestParam("userId") String userId) {
-        homepageService.restoreDefaults(userId);
-        return Result.OK("恢复成功");
+    public Result<ContentUserProfileVO> restoreHomepageDefaults(@RequestParam("userId") String userId) {
+        return Result.OK(homepageService.restoreDefaults(userId));
     }
 
     /**
@@ -146,9 +143,8 @@ public class ContentUserProfileController {
      */
     @Operation(summary = "恢复资料历史")
     @PostMapping("/history/restore")
-    public Result<String> restoreHistory(@RequestParam("userId") String userId,
-                                         @RequestParam("historyId") String historyId) {
-        profileHistoryService.restoreHistory(userId, historyId);
-        return Result.OK("恢复成功");
+    public Result<ContentUserProfileVO> restoreHistory(@RequestParam("userId") String userId,
+                                                        @RequestParam("historyId") String historyId) {
+        return Result.OK(profileHistoryService.restoreHistory(userId, historyId));
     }
 }

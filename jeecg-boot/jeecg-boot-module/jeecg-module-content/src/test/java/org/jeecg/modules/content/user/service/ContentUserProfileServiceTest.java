@@ -133,6 +133,10 @@ class ContentUserProfileServiceTest {
         when(valueOperations.increment(anyString())).thenReturn(1L);
         when(profileAuditAdapter.review(any(ContentUserProfileUpdateReq.class)))
             .thenReturn(new IContentUserProfileAuditAdapter.AuditResult(true, "资料命中风险规则"));
+        when(privacyMapper.selectByUserId("u1")).thenReturn(new ContentUserPrivacySetting().setUserId("u1"));
+        when(visibilityPolicyService.canViewField(anyString(), anyString(), anyString())).thenReturn(true);
+        when(verificationBadgeService.listVisibleBadges("u1")).thenReturn(List.of());
+        when(homepageModuleMapper.selectByUserId("u1")).thenReturn(List.of());
 
         profileService.updateProfile("u1", req);
 
@@ -175,6 +179,10 @@ class ContentUserProfileServiceTest {
         when(valueOperations.increment(anyString())).thenReturn(5L, 6L);
         when(profileAuditAdapter.review(any(ContentUserProfileUpdateReq.class)))
             .thenReturn(new IContentUserProfileAuditAdapter.AuditResult(false, null));
+        when(privacyMapper.selectByUserId("u1")).thenReturn(new ContentUserPrivacySetting().setUserId("u1"));
+        when(visibilityPolicyService.canViewField(anyString(), anyString(), anyString())).thenReturn(true);
+        when(verificationBadgeService.listVisibleBadges("u1")).thenReturn(List.of());
+        when(homepageModuleMapper.selectByUserId("u1")).thenReturn(List.of());
 
         profileService.updateProfile("u1", req);
 
@@ -197,6 +205,10 @@ class ContentUserProfileServiceTest {
         when(valueOperations.increment(anyString())).thenReturn(1L);
         when(profileAuditAdapter.review(any(ContentUserProfileUpdateReq.class)))
             .thenReturn(new IContentUserProfileAuditAdapter.AuditResult(false, null));
+        when(privacyMapper.selectByUserId("u1")).thenReturn(new ContentUserPrivacySetting().setUserId("u1"));
+        when(visibilityPolicyService.canViewField(anyString(), anyString(), anyString())).thenReturn(true);
+        when(verificationBadgeService.listVisibleBadges("u1")).thenReturn(List.of());
+        when(homepageModuleMapper.selectByUserId("u1")).thenReturn(List.of());
 
         profileService.updateProfile("u1", req);
 

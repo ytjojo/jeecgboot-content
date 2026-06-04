@@ -7,6 +7,7 @@ import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.req.profile.ContentUserHomepageModuleReq;
 import org.jeecg.modules.content.user.req.profile.ContentUserHomepageUpdateReq;
 import org.jeecg.modules.content.user.service.impl.ContentUserHomepageServiceImpl;
+import org.jeecg.modules.content.user.vo.ContentUserProfileVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -36,6 +38,9 @@ class ContentUserHomepageServiceTest {
     @Mock
     private IContentUserMediaAdapter mediaAdapter;
 
+    @Mock
+    private IContentUserProfileService profileService;
+
     @InjectMocks
     private ContentUserHomepageServiceImpl homepageService;
 
@@ -43,6 +48,7 @@ class ContentUserHomepageServiceTest {
     void shouldSaveThemeColorBackgroundAndModules() {
         ContentUserProfile profile = new ContentUserProfile().setUserId("u1");
         when(profileMapper.selectByUserId("u1")).thenReturn(profile);
+        when(profileService.getProfile(eq("u1"), eq("u1"))).thenReturn(new ContentUserProfileVO().setUserId("u1"));
 
         homepageService.updateHomepage("u1", new ContentUserHomepageUpdateReq()
             .setHomepageBackground("https://cdn.example.com/bg.webp?size=1024&width=1200&height=800")
@@ -83,6 +89,7 @@ class ContentUserHomepageServiceTest {
             .setHomepageBackground("https://cdn.example.com/bg.png")
             .setThemeColor("#000000");
         when(profileMapper.selectByUserId("u1")).thenReturn(profile);
+        when(profileService.getProfile(eq("u1"), eq("u1"))).thenReturn(new ContentUserProfileVO().setUserId("u1").setThemeColor("#1677ff"));
 
         homepageService.restoreDefaults("u1");
 

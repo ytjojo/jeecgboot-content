@@ -1,6 +1,7 @@
 package org.jeecg.modules.content.user.service;
 
 import org.jeecg.modules.content.user.vo.ContentUserProfileHistoryVO;
+import org.jeecg.modules.content.user.vo.ContentUserProfileVO;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface IContentUserProfileHistoryService {
 
     List<ContentUserProfileHistoryVO> listHistory(String userId, String historyType);
 
-    void restoreHistory(String userId, String historyId);
+    ContentUserProfileVO restoreHistory(String userId, String historyId);
 
     int cleanupExpiredHistory();
 }

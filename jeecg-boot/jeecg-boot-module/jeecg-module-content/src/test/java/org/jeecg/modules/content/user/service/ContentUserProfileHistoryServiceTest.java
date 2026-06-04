@@ -2,7 +2,9 @@ package org.jeecg.modules.content.user.service;
 
 import org.jeecg.modules.content.user.entity.ContentUserProfileHistory;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileHistoryMapper;
+import org.jeecg.modules.content.user.req.profile.ContentUserProfileUpdateReq;
 import org.jeecg.modules.content.user.service.impl.ContentUserProfileHistoryServiceImpl;
+import org.jeecg.modules.content.user.vo.ContentUserProfileVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,6 +17,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,10 +75,12 @@ class ContentUserProfileHistoryServiceTest {
     void shouldRestoreNicknameOrRejectUnavailableHistory() {
         ContentUserProfileHistory nickname = history("h1").setHistoryType("NICKNAME").setHistoryValue("旧昵称");
         when(historyMapper.selectById("h1")).thenReturn(nickname);
+        when(profileService.updateProfile(eq("u1"), any(ContentUserProfileUpdateReq.class)))
+            .thenReturn(new ContentUserProfileVO().setUserId("u1").setNickname("旧昵称"));
 
         historyService.restoreHistory("u1", "h1");
 
-        verify(profileService).updateProfile(org.mockito.ArgumentMatchers.eq("u1"), org.mockito.ArgumentMatchers.argThat(req -> "旧昵称".equals(req.getNickname())));
+        verify(profileService).updateProfile(eq("u1"), org.mockito.ArgumentMatchers.argThat(req -> "旧昵称".equals(req.getNickname())));
         assertThatThrownBy(() -> historyService.restoreHistory("u1", ""))
             .hasMessageContaining("历史ID不能为空");
         when(historyMapper.selectById("missing")).thenReturn(null);

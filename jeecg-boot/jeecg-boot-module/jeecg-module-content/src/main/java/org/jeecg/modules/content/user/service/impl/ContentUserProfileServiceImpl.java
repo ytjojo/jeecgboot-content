@@ -154,7 +154,7 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateProfile(String userId, ContentUserProfileUpdateReq req) {
+    public ContentUserProfileVO updateProfile(String userId, ContentUserProfileUpdateReq req) {
         ContentUserProfile profile = requireProfile(userId);
         ContentUserProfileUpdateReq normalizedReq = mergeAndNormalize(profile, req);
         validateProfileReq(normalizedReq);
@@ -167,10 +167,11 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
         IContentUserProfileAuditAdapter.AuditResult auditResult = profileAuditAdapter.review(normalizedReq);
         if (auditResult.suspicious()) {
             createPendingReview(userId, profile, normalizedReq, auditResult.reason());
-            return;
+            return getProfile(userId, userId);
         }
         applyProfileUpdate(profile, normalizedReq, null);
         evictProfileCache(userId);
+        return getProfile(userId, userId);
     }
 
     /**
