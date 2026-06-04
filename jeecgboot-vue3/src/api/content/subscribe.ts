@@ -41,7 +41,7 @@ export const getSubscribeFeed = (params: { page?: number; size?: number; sourceT
   defHttp.get({ url: Api.feed, params });
 
 /** 获取订阅广场 */
-export const getSubscribePlaza = (params?: { keyword?: string; category?: string; page?: number; size?: number }) =>
+export const getSubscribePlaza = (params?: { keyword?: string; category?: string; page?: number; size?: number; sort?: string }) =>
   defHttp.get({ url: Api.plaza, params });
 
 /** 获取订阅源详情 */

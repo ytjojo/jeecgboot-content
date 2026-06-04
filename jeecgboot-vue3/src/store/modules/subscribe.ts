@@ -131,7 +131,7 @@ export const useSubscribeStore = defineStore('social-subscribe', () => {
     selectedSourceType.value = sourceType;
   }
 
-  async function fetchPlaza(params?: { keyword?: string; category?: string; page?: number; size?: number }) {
+  async function fetchPlaza(params?: { keyword?: string; category?: string; page?: number; size?: number; sort?: string }) {
     loading.value = true;
     try {
       const res = await getSubscribePlaza(params);
