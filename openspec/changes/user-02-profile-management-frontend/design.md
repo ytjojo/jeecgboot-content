@@ -2,7 +2,7 @@
 
 内容社区模块（jeecg-module-content）基于 JeecgBoot Vue3 前端框架，使用 Vue 3 + TypeScript + Ant Design Vue 4 + Vben Admin 架构。本次变更对接后端 `ContentUserProfileController`（`/content/user/profile/*` 前缀，11 个端点，其中 `review/handle` 为后台审核端点前端不对接），实现前端资料管理与主页个性化能力。
 
-> **实施更新（2026-06-04）**: 本次更新以"前端对齐后端实际契约"为目标。原 design 假设的独立上传端点、update-count 接口、5/10 次频控等**不**在当前后端实现中，已剔除相关假设；头像/背景图改由前端 OSS 直传。后端 Controller 实际提供 11 个端点。**后端改造需求**：4 个 POST 端点（`/update`、`/homepage/update`、`/homepage/defaults/restore`、`/history/restore`）需改造为返回更新后的 VO，`/privacy/update` 保持返回 `Result<String>`。
+> **实施更新（2026-06-04）**: 本次更新以"前端对齐后端实际契约"为目标。原 design 假设的独立上传端点、update-count 接口、5/10 次频控等**不**在当前后端实现中，已剔除相关假设；头像/背景图改由前端 OSS 直传。后端 Controller 实际提供 11 个端点。**后端改造已完成**：4 个 POST 端点（`/update`、`/homepage/update`、`/homepage/defaults/restore`、`/history/restore`）已改造为返回 `Result<ContentUserProfileVO>`，`/privacy/update` 保持返回 `Result<String>`。
 
 现有基础设施：
 - 路由系统：基于 vue-router，路由配置在 `src/router/` 下

@@ -21,28 +21,28 @@
 | # | HTTP 方法 | 路径 | 实际返回类型 | 文档声称返回类型 | 是否一致 |
 |---|-----------|------|-------------|----------------|---------|
 | 1 | GET | `/content/user/profile/detail` | `Result<ContentUserProfileVO>` | `ContentUserProfileVO` | 部分一致(1) |
-| 2 | POST | `/content/user/profile/update` | `Result<String>` | `ContentUserProfileVO` | **不一致** |
+| 2 | POST | `/content/user/profile/update` | `Result<ContentUserProfileVO>` | `ContentUserProfileVO` | ✅ 已改造 |
 | 3 | POST | `/content/user/profile/review/handle` | `Result<String>` | `Result<?>` | 一致 |
-| 4 | POST | `/content/user/profile/privacy/update` | `Result<String>` | `ContentUserPrivacySettingVO` | **不一致** |
-| 5 | POST | `/content/user/profile/homepage/update` | `Result<String>` | `Result<ContentUserProfileVO>` | **不一致** |
-| 6 | POST | `/content/user/profile/homepage/defaults/restore` | `Result<String>` | `Result<ContentUserProfileVO>` | **不一致** |
+| 4 | POST | `/content/user/profile/privacy/update` | `Result<String>` | `Result<String>` | ✅ 已修正 |
+| 5 | POST | `/content/user/profile/homepage/update` | `Result<ContentUserProfileVO>` | `Result<ContentUserProfileVO>` | ✅ 已改造 |
+| 6 | POST | `/content/user/profile/homepage/defaults/restore` | `Result<ContentUserProfileVO>` | `Result<ContentUserProfileVO>` | ✅ 已改造 |
 | 7 | GET | `/content/user/profile/homepage/modules` | `Result<List<ContentUserHomepageModuleVO>>` | `List<ContentUserHomepageModuleVO>` | 部分一致(1) |
 | 8 | GET | `/content/user/profile/badge/list` | `Result<List<ContentUserVerificationBadgeVO>>` | `List<ContentUserVerificationBadgeVO>` | 部分一致(1) |
 | 9 | GET | `/content/user/profile/badge/detail` | `Result<ContentUserVerificationBadgeVO>` | `ContentUserVerificationBadgeVO` | 部分一致(1) |
 | 10 | GET | `/content/user/profile/history/list` | `Result<List<ContentUserProfileHistoryVO>>` | `List<ContentUserProfileHistoryVO>` | 部分一致(1) |
-| 11 | POST | `/content/user/profile/history/restore` | `Result<String>` | `Result<ContentUserProfileVO>` | **不一致** |
+| 11 | POST | `/content/user/profile/history/restore` | `Result<ContentUserProfileVO>` | `Result<ContentUserProfileVO>` | ✅ 已改造 |
 
 > (1) 实际返回 `Result<T>` 包装，文档省略了 `Result` 包装层。这是 JeecgBoot 惯例，前端 defHttp 已自动解包，属于文档简化，非实质错误。
 
-### 严重不一致的端点 (5 个)
+### 严重不一致的端点 (已全部修复)
 
-以下端点的返回类型在文档中有实质性错误：
+4 个 POST 端点已改造为返回 `Result<ContentUserProfileVO>`（"更新→查询→返回VO"模式）：
 
-1. **`POST /profile/update`** — 文档称返回 `ContentUserProfileVO`，实际返回 `Result<String>`（"更新成功"）→ **需后端改造**
-2. **`POST /privacy/update`** — 文档称返回 `ContentUserPrivacySettingVO`，实际返回 `Result<String>`（"更新成功"）→ **已修正为 `Result<String>`**
-3. **`POST /homepage/update`** — 文档称返回 `Result<ContentUserProfileVO>`，实际返回 `Result<String>`（"更新成功"）→ **需后端改造**
-4. **`POST /homepage/defaults/restore`** — 文档称返回 `Result<ContentUserProfileVO>`，实际返回 `Result<String>`（"恢复成功"）→ **需后端改造**
-5. **`POST /history/restore`** — 文档称返回 `Result<ContentUserProfileVO>`，实际返回 `Result<String>`（"恢复成功"）→ **需后端改造**
+1. **`POST /profile/update`** — ✅ 已改造为返回 `Result<ContentUserProfileVO>`
+2. **`POST /privacy/update`** — ✅ 保持返回 `Result<String>`（已修正文档）
+3. **`POST /homepage/update`** — ✅ 已改造为返回 `Result<ContentUserProfileVO>`
+4. **`POST /homepage/defaults/restore`** — ✅ 已改造为返回 `Result<ContentUserProfileVO>`
+5. **`POST /history/restore`** — ✅ 已改造为返回 `Result<ContentUserProfileVO>`
 
 ### 不存在的类型
 
@@ -83,10 +83,10 @@
 
 ## 建议修复方案
 
-### 优先级 P0 (阻塞前端开发)
+### 优先级 P0 (阻塞前端开发) — 全部完成
 
-1. **✅ 已修复 - 修正 design.md API 对接矩阵**：4 个 POST 端点改为返回 VO（需后端改造），`/privacy/update` 保持返回 `Result<String>`
-2. **后端改造需求**：4 个端点需改造为"更新 → 查询 → 返回 VO"模式
+1. **✅ 已修复 - 修正 design.md API 对接矩阵**：4 个 POST 端点改为返回 VO，`/privacy/update` 保持返回 `Result<String>`
+2. **✅ 已完成 - 后端改造**：4 个端点已改造为"更新 → 查询 → 返回 VO"模式
    - `POST /profile/update` → 返回 `Result<ContentUserProfileVO>`
    - `POST /homepage/update` → 返回 `Result<ContentUserProfileVO>`
    - `POST /homepage/defaults/restore` → 返回 `Result<ContentUserProfileVO>`
