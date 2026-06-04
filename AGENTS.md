@@ -83,10 +83,12 @@
 
 ## 代码实现 Workflow
 
-### 默认实现方式
-- 无特殊要求时，使用 subagent-driven-development且新建worktree进行开发实现
+### 硬规则：必须使用 worktree
+- **所有代码开发任务必须在 worktree 中进行**，禁止直接在主分支上修改代码
+- 使用 subagent-driven-development 且新建 worktree 进行开发实现
   `/using-git-worktrees`
   `/superpowers:subagent-driven-development`
+- **启动前检查**：开始编码前必须执行 `git worktree list` 确认当前是否在 worktree 中，不在则立即创建
 
 ### 多步任务 / apply 操作
 - 执行 `/opsx:apply` `/openspec-apply-change` 或多步多task代码任务时，强制使用测试驱动开发
