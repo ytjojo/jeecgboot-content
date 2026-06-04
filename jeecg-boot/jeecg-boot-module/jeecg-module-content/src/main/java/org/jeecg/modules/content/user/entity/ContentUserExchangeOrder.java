@@ -43,4 +43,7 @@ public class ContentUserExchangeOrder extends JeecgEntity {
 
     @Schema(description = "失败原因")
     private String failureReason;
+
+    @Schema(description = "请求幂等ID")
+    private String requestId;
 }

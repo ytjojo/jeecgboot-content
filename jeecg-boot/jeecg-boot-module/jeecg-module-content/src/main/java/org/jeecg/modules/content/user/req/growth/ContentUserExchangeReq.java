@@ -32,4 +32,8 @@ public class ContentUserExchangeReq {
     @Max(value = 999, message = "兑换数量不能超过999")
     @Schema(description = "兑换数量", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private Integer quantity;
+
+    @Size(max = 64, message = "requestId长度不能超过64位")
+    @Schema(description = "请求幂等ID，相同ID的重复请求返回已有结果")
+    private String requestId;
 }
