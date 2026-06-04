@@ -12,6 +12,11 @@ import {
   unfollowUser,
   setSpecialFollow,
   cancelSpecialFollow,
+  moveFollowGroup,
+  removeFromGroup,
+  getRecommendations,
+  batchUnfollow,
+  batchCancelSpecial,
 } from '/@/api/content/relation';
 
 export interface FollowItem {
@@ -24,6 +29,7 @@ export interface FollowItem {
   groupId: string;
   isSpecial: boolean;
   lastActiveTime: string;
+  latestActivityHint?: string;
 }
 
 export interface FollowGroup {
@@ -34,6 +40,15 @@ export interface FollowGroup {
   isDefault: boolean;
 }
 
+export interface RecommendationItem {
+  userId: string;
+  nickname: string;
+  avatar: string;
+  bio?: string;
+  reason?: string;
+  mutualFollowCount?: number;
+}
+
 export const useFollowStore = defineStore('social-follow', () => {
   // ===== State =====
   const followList = ref<FollowItem[]>([]);
@@ -41,14 +56,21 @@ export const useFollowStore = defineStore('social-follow', () => {
   const followGroups = ref<FollowGroup[]>([]);
   const totalFollows = ref(0);
   const totalSpecialFollows = ref(0);
-  const loading = ref(false);
+  const followListLoading = ref(false);
+  const specialFollowLoading = ref(false);
   const currentPage = ref(1);
   const pageSize = ref(20);
   const hasMore = ref(true);
+  const specialCurrentPage = ref(1);
+  const specialHasMore = ref(true);
+  const recommendations = ref<RecommendationItem[]>([]);
+  const recommendationsPage = ref(1);
+  const recommendationsHasMore = ref(true);
   const searchKeyword = ref('');
   const selectedGroupId = ref('');
 
   // ===== Computed =====
+  const loading = computed(() => followListLoading.value || specialFollowLoading.value);
   const defaultGroup = computed(() => followGroups.value.find((g) => g.isDefault));
   const customGroups = computed(() => followGroups.value.filter((g) => !g.isDefault));
 
@@ -61,7 +83,7 @@ export const useFollowStore = defineStore('social-follow', () => {
     }
     if (!hasMore.value && !reset) return;
 
-    loading.value = true;
+    followListLoading.value = true;
     try {
       const res = await getFollowList(userId, {
         keyword: searchKeyword.value || undefined,
@@ -79,22 +101,22 @@ export const useFollowStore = defineStore('social-follow', () => {
       hasMore.value = followList.value.length < total;
       currentPage.value++;
     } finally {
-      loading.value = false;
+      followListLoading.value = false;
     }
   }
 
   async function fetchSpecialFollowList(userId: string, reset = false) {
     if (reset) {
-      currentPage.value = 1;
+      specialCurrentPage.value = 1;
       specialFollowList.value = [];
-      hasMore.value = true;
+      specialHasMore.value = true;
     }
-    if (!hasMore.value && !reset) return;
+    if (!specialHasMore.value && !reset) return;
 
-    loading.value = true;
+    specialFollowLoading.value = true;
     try {
       const res = await getSpecialFollowList(userId, {
-        pageNo: currentPage.value,
+        pageNo: specialCurrentPage.value,
         pageSize: pageSize.value,
       });
       const { records = [], total = 0 } = res;
@@ -104,16 +126,21 @@ export const useFollowStore = defineStore('social-follow', () => {
         specialFollowList.value.push(...records);
       }
       totalSpecialFollows.value = total;
-      hasMore.value = specialFollowList.value.length < total;
-      currentPage.value++;
+      specialHasMore.value = specialFollowList.value.length < total;
+      specialCurrentPage.value++;
     } finally {
-      loading.value = false;
+      specialFollowLoading.value = false;
     }
   }
 
   async function fetchFollowGroups(userId: string) {
-    const res = await getFollowGroupList(userId);
-    followGroups.value = res || [];
+    try {
+      const res = await getFollowGroupList(userId);
+      followGroups.value = res || [];
+    } catch (error) {
+      console.error('[FollowStore] fetchFollowGroups failed:', error);
+      throw error;
+    }
   }
 
   async function createGroup(userId: string, name: string, sortOrder?: number) {
@@ -161,6 +188,51 @@ export const useFollowStore = defineStore('social-follow', () => {
     selectedGroupId.value = groupId;
   }
 
+  async function moveToGroup(userId: string, targetUserId: string, groupId: string) {
+    await moveFollowGroup(userId, { targetUserId, groupId });
+    await fetchFollowList(userId, true);
+  }
+
+  async function removeUserFromGroup(userId: string, targetUserId: string, groupId: string) {
+    await removeFromGroup(userId, { targetUserId, groupId });
+    await fetchFollowList(userId, true);
+  }
+
+  async function fetchRecommendations(reset = false) {
+    if (reset) {
+      recommendationsPage.value = 1;
+      recommendations.value = [];
+      recommendationsHasMore.value = true;
+    }
+    if (!recommendationsHasMore.value && !reset) return;
+
+    followListLoading.value = true;
+    try {
+      const res = await getRecommendations({ page: recommendationsPage.value, size: pageSize.value });
+      const { records = [], total = 0 } = res;
+      if (reset) {
+        recommendations.value = records;
+      } else {
+        recommendations.value.push(...records);
+      }
+      recommendationsHasMore.value = recommendations.value.length < total;
+      recommendationsPage.value++;
+    } finally {
+      followListLoading.value = false;
+    }
+  }
+
+  async function batchUnfollowUsers(userId: string, targetUserIds: string[]) {
+    await batchUnfollow(userId, { targetUserIds });
+    await fetchFollowList(userId, true);
+  }
+
+  async function batchCancelSpecialUsers(userId: string, targetUserIds: string[]) {
+    await batchCancelSpecial(userId, { targetUserIds });
+    await fetchFollowList(userId, true);
+    await fetchSpecialFollowList(userId, true);
+  }
+
   return {
     // State
     followList,
@@ -169,9 +241,16 @@ export const useFollowStore = defineStore('social-follow', () => {
     totalFollows,
     totalSpecialFollows,
     loading,
+    followListLoading,
+    specialFollowLoading,
     currentPage,
     pageSize,
     hasMore,
+    specialCurrentPage,
+    specialHasMore,
+    recommendations,
+    recommendationsPage,
+    recommendationsHasMore,
     searchKeyword,
     selectedGroupId,
     // Computed
@@ -188,6 +267,11 @@ export const useFollowStore = defineStore('social-follow', () => {
     unfollow,
     setSpecial,
     cancelSpecial,
+    moveToGroup,
+    removeUserFromGroup,
+    fetchRecommendations,
+    batchUnfollowUsers,
+    batchCancelSpecialUsers,
     setSearchKeyword,
     setSelectedGroupId,
   };

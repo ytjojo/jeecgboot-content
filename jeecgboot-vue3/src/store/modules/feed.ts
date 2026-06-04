@@ -44,6 +44,7 @@ export const useFeedStore = defineStore('social-feed', () => {
   }
 
   async function fetchFollowingFeed(reset = false) {
+    if (isCacheValid('following') && !reset) return;
     if (reset) {
       followingPage.value = 1;
       followingFeed.value = [];
@@ -74,6 +75,7 @@ export const useFeedStore = defineStore('social-feed', () => {
   }
 
   async function fetchSubscribeFeed(reset = false) {
+    if (isCacheValid('subscribe') && !reset) return;
     if (reset) {
       subscribePage.value = 1;
       subscribeFeed.value = [];

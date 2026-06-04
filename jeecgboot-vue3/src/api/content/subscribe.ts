@@ -69,5 +69,8 @@ export const getNotificationPreference = (userId: string, sourceId: string) =>
   defHttp.get({ url: Api.notificationPreference, params: { userId, sourceId } });
 
 /** 保存通知偏好 */
-export const saveNotificationPreference = (userId: string, sourceId: string, data: any) =>
-  defHttp.post({ url: Api.notificationPreference, params: { userId, sourceId }, data });
+export const saveNotificationPreference = (
+  userId: string,
+  sourceId: string,
+  data: { channelInApp?: boolean; channelPush?: boolean; channelEmail?: boolean; frequency?: string; quietStart?: string; quietEnd?: string },
+) => defHttp.post({ url: Api.notificationPreference, params: { userId, sourceId }, data });

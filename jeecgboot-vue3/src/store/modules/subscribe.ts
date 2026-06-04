@@ -9,6 +9,12 @@ import {
   resumeSubscription,
   getNotificationPreference,
   saveNotificationPreference,
+  getSubscribePlaza,
+  getSubscribeSourceDetail,
+  subscribeFromPlaza,
+  batchPauseSubscribe,
+  batchResumeSubscribe,
+  batchCancelSubscribe,
 } from '/@/api/content/subscribe';
 
 export interface SubscribeItem {
@@ -25,13 +31,15 @@ export interface SubscribeItem {
 }
 
 export interface NotificationConfig {
-  channelInsite: boolean;
+  channelInApp: boolean;
   channelPush: boolean;
   channelEmail: boolean;
   frequency: 'realtime' | 'daily';
   quietStart?: string;
   quietEnd?: string;
 }
+
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export const useSubscribeStore = defineStore('social-subscribe', () => {
   // ===== State =====
@@ -45,6 +53,7 @@ export const useSubscribeStore = defineStore('social-subscribe', () => {
   const selectedSourceType = ref('');
   const currentNotificationConfig = ref<NotificationConfig | null>(null);
   const globalNotificationDefault = ref<NotificationConfig | null>(null);
+  const globalDefaultLastFetch = ref(0);
 
   // ===== Methods =====
   async function fetchSubscribeList(userId: string, reset = false) {
@@ -107,10 +116,11 @@ export const useSubscribeStore = defineStore('social-subscribe', () => {
     currentNotificationConfig.value = config;
   }
 
-  async function fetchGlobalNotificationDefault() {
-    if (globalNotificationDefault.value) return;
+  async function fetchGlobalNotificationDefault(forceRefresh = false) {
+    if (!forceRefresh && globalNotificationDefault.value && Date.now() - globalDefaultLastFetch.value < CACHE_TTL) return;
     const res = await getNotificationPreference('global', 'default');
     globalNotificationDefault.value = res || null;
+    globalDefaultLastFetch.value = Date.now();
   }
 
   function setSearchKeyword(keyword: string) {
@@ -119,6 +129,40 @@ export const useSubscribeStore = defineStore('social-subscribe', () => {
 
   function setSelectedSourceType(sourceType: string) {
     selectedSourceType.value = sourceType;
+  }
+
+  async function fetchPlaza(params?: { keyword?: string; category?: string; page?: number; size?: number }) {
+    loading.value = true;
+    try {
+      const res = await getSubscribePlaza(params);
+      return res;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function fetchSourceDetail(sourceId: string) {
+    return await getSubscribeSourceDetail(sourceId);
+  }
+
+  async function subscribeFromPlazaAction(userId: string, sourceId: string, sourceType: string) {
+    await subscribeFromPlaza(userId, { sourceId, sourceType });
+    await fetchSubscribeList(userId, true);
+  }
+
+  async function batchPause(userId: string, sourceIds: string[]) {
+    await batchPauseSubscribe(userId, { sourceIds });
+    await fetchSubscribeList(userId, true);
+  }
+
+  async function batchResume(userId: string, sourceIds: string[]) {
+    await batchResumeSubscribe(userId, { sourceIds });
+    await fetchSubscribeList(userId, true);
+  }
+
+  async function batchCancel(userId: string, sourceIds: string[]) {
+    await batchCancelSubscribe(userId, { sourceIds });
+    await fetchSubscribeList(userId, true);
   }
 
   return {
@@ -144,6 +188,12 @@ export const useSubscribeStore = defineStore('social-subscribe', () => {
     fetchGlobalNotificationDefault,
     setSearchKeyword,
     setSelectedSourceType,
+    fetchPlaza,
+    fetchSourceDetail,
+    subscribeFromPlaza: subscribeFromPlazaAction,
+    batchPause,
+    batchResume,
+    batchCancel,
   };
 });
 
