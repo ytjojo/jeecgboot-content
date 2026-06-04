@@ -19,66 +19,56 @@ export interface FeedItem {
   isPriority: boolean;
 }
 
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
 export const useFeedStore = defineStore('social-feed', () => {
   // ===== State =====
-  const followingFeed = ref<FeedItem[]>([]);
-  const subscribeFeed = ref<FeedItem[]>([]);
-  const followingLoading = ref(false);
+  const followFeedList = ref<FeedItem[]>([]);
+  const subscribeFeedList = ref<FeedItem[]>([]);
+  const priorityItems = ref<FeedItem[]>([]);
+  const followLoading = ref(false);
   const subscribeLoading = ref(false);
-  const followingHasMore = ref(true);
-  const subscribeHasMore = ref(true);
-  const followingPage = ref(1);
+  const followPage = ref(1);
+  const followHasMore = ref(true);
   const subscribePage = ref(1);
-  const pageSize = ref(20);
-  const feedTypes = ref<string[]>(['post', 'like', 'favorite']);
+  const subscribeHasMore = ref(true);
+  const followTypes = ref<string[]>(['post', 'like', 'favorite']);
   const subscribeSourceType = ref('');
-  const followingLastFetch = ref(0);
-  const subscribeLastFetch = ref(0);
+  const pageSize = ref(20);
 
   // ===== Methods =====
-  function isCacheValid(type: 'following' | 'subscribe'): boolean {
-    const lastFetch = type === 'following' ? followingLastFetch.value : subscribeLastFetch.value;
-    return Date.now() - lastFetch < CACHE_TTL;
-  }
-
-  async function fetchFollowingFeed(reset = false) {
-    if (isCacheValid('following') && !reset) return;
+  async function fetchFollowFeed(reset = false) {
     if (reset) {
-      followingPage.value = 1;
-      followingFeed.value = [];
-      followingHasMore.value = true;
+      followPage.value = 1;
+      followFeedList.value = [];
+      priorityItems.value = [];
+      followHasMore.value = true;
     }
-    if (!followingHasMore.value && !reset) return;
+    if (!followHasMore.value && !reset) return;
 
-    followingLoading.value = true;
+    followLoading.value = true;
     try {
       const res = await getFollowingFeed({
-        page: followingPage.value,
+        page: followPage.value,
         size: pageSize.value,
-        types: feedTypes.value.join(','),
+        types: followTypes.value.join(','),
       });
-      const { priorityItems = [], items = [], total = 0 } = res;
-      const allItems: FeedItem[] = [...(priorityItems || []), ...(items || [])];
+      const { priorityItems: pItems = [], items = [], total = 0 } = res;
       if (reset) {
-        followingFeed.value = allItems;
+        priorityItems.value = pItems || [];
+        followFeedList.value = items || [];
       } else {
-        followingFeed.value.push(...allItems);
+        followFeedList.value.push(...(items || []));
       }
-      followingHasMore.value = followingFeed.value.length < total;
-      followingPage.value++;
-      followingLastFetch.value = Date.now();
+      followHasMore.value = followFeedList.value.length < total;
+      followPage.value++;
     } finally {
-      followingLoading.value = false;
+      followLoading.value = false;
     }
   }
 
   async function fetchSubscribeFeed(reset = false) {
-    if (isCacheValid('subscribe') && !reset) return;
     if (reset) {
       subscribePage.value = 1;
-      subscribeFeed.value = [];
+      subscribeFeedList.value = [];
       subscribeHasMore.value = true;
     }
     if (!subscribeHasMore.value && !reset) return;
@@ -92,52 +82,75 @@ export const useFeedStore = defineStore('social-feed', () => {
       });
       const { records = [], total = 0 } = res;
       if (reset) {
-        subscribeFeed.value = records;
+        subscribeFeedList.value = records;
       } else {
-        subscribeFeed.value.push(...records);
+        subscribeFeedList.value.push(...records);
       }
-      subscribeHasMore.value = subscribeFeed.value.length < total;
+      subscribeHasMore.value = subscribeFeedList.value.length < total;
       subscribePage.value++;
-      subscribeLastFetch.value = Date.now();
     } finally {
       subscribeLoading.value = false;
     }
   }
 
-  function setFeedTypes(types: string[]) {
-    feedTypes.value = types;
+  function setFollowTypes(types: string[]) {
+    const prev = followTypes.value;
+    if (types.length === 0) {
+      followTypes.value = prev;
+      return;
+    }
+    followTypes.value = types;
+    fetchFollowFeed(true).catch(console.error);
   }
 
-  function setSubscribeSourceType(sourceType: string) {
-    subscribeSourceType.value = sourceType;
+  function setSubscribeSourceType(type: string) {
+    subscribeSourceType.value = type;
+    fetchSubscribeFeed(true).catch(console.error);
   }
 
-  function removeUserFeed(userId: string) {
-    followingFeed.value = followingFeed.value.filter((item) => item.userId !== userId);
+  function removeUserFeeds(userId: string): { items: FeedItem[]; indices: number[] } {
+    const removed: { items: FeedItem[]; indices: number[] } = { items: [], indices: [] };
+    followFeedList.value = followFeedList.value.filter((item, index) => {
+      if (item.userId === userId) {
+        removed.items.push(item);
+        removed.indices.push(index);
+        return false;
+      }
+      return true;
+    });
+    return removed;
+  }
+
+  function restoreUserFeeds(data: { items: FeedItem[]; indices: number[] }) {
+    const list = [...followFeedList.value];
+    data.items.forEach((item, i) => {
+      const insertAt = Math.min(data.indices[i], list.length);
+      list.splice(insertAt, 0, item);
+    });
+    followFeedList.value = list;
   }
 
   return {
     // State
-    followingFeed,
-    subscribeFeed,
-    followingLoading,
+    followFeedList,
+    subscribeFeedList,
+    priorityItems,
+    followLoading,
     subscribeLoading,
-    followingHasMore,
-    subscribeHasMore,
-    followingPage,
+    followPage,
+    followHasMore,
     subscribePage,
-    pageSize,
-    feedTypes,
+    subscribeHasMore,
+    followTypes,
     subscribeSourceType,
-    followingLastFetch,
-    subscribeLastFetch,
+    pageSize,
     // Methods
-    fetchFollowingFeed,
+    fetchFollowFeed,
     fetchSubscribeFeed,
-    setFeedTypes,
+    setFollowTypes,
     setSubscribeSourceType,
-    removeUserFeed,
-    isCacheValid,
+    removeUserFeeds,
+    restoreUserFeeds,
   };
 });
 
