@@ -67,7 +67,7 @@ const getCategoryIcon = (icon: string) => iconMap[icon] || QuestionCircleOutline
 const handleSearch = async (keyword: string) => {
   searching.value = true;
   try {
-    const res = await searchHelpArticles(keyword);
+    const res = await searchHelpArticles({ keyword });
     searchResults.value = res.result || [];
   } finally {
     searching.value = false;

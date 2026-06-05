@@ -25,7 +25,7 @@ const queuePosition = computed(() => feedbackStore.queuePosition || 0);
 const hasActiveSession = computed(() => feedbackStore.currentSession !== null);
 
 const handleClick = () => {
-  router.push('/customer-service');
+  router.push('/support/customer-service');
 };
 </script>
 

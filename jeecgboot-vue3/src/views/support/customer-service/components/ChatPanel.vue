@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { Modal, message } from 'ant-design-vue';
 import ChatMessage from './ChatMessage.vue';
 import type { ChatMessageData } from './ChatMessage.vue';
@@ -126,14 +126,20 @@ function scrollToBottom() {
 // 自动滚动
 watch(() => store.chatMessages.length, scrollToBottom);
 
+let isUnmounted = false;
 onMounted(async () => {
   try {
     const res = await createServiceSession();
+    if (isUnmounted) return;
     store.currentSession = res;
     store.wsConnected = true;
   } catch {
-    message.error('创建会话失败');
+    if (!isUnmounted) message.error('创建会话失败');
   }
+});
+
+onUnmounted(() => {
+  isUnmounted = true;
 });
 
 async function handleSend(text: string) {

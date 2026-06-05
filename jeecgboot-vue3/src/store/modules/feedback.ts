@@ -1,66 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { store } from '/@/store';
-
-interface ReportItem {
-  id: string;
-  reportNo: string;
-  targetType: string;
-  targetId: string;
-  targetSummary: string;
-  reportType: string;
-  reportTypeLabel: string;
-  description: string;
-  evidenceUrls: string[];
-  status: string;
-  statusLabel: string;
-  result: string;
-  createTime: string;
-}
-
-interface AppealItem {
-  id: string;
-  appealNo: string;
-  appealType: string;
-  appealTypeLabel: string;
-  relatedId: string;
-  relatedSummary: string;
-  reason: string;
-  attachmentUrls: string[];
-  status: string;
-  statusLabel: string;
-  auditResult: string;
-  auditTime: string;
-  appealCount: number;
-  maxAppealCount: number;
-  estimatedTime: string;
-  createTime: string;
-}
-
-interface ServiceSession {
-  id: string;
-  type: string;
-  status: string;
-  agentName: string;
-  queuePosition: number | null;
-  estimatedWaitTime: number | null;
-  rating?: number;
-  ratingComment?: string;
-  startTime?: string;
-  endTime?: string;
-  expired?: boolean;
-  createTime: string;
-}
-
-interface ChatMessage {
-  id: string;
-  sessionId: string;
-  senderType: string;
-  content: string;
-  messageType: string;
-  status: string;
-  createTime: string;
-}
+import type { ReportItem } from '/@/api/support/report';
+import type { AppealItem } from '/@/api/support/appeal';
+import type { ServiceSession, ChatMessage } from '/@/api/support/customer-service';
 
 export const useFeedbackStore = defineStore('feedback', () => {
   // ===== Report State =====

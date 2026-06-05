@@ -16,9 +16,9 @@ export interface ChangelogVersion {
   id?: string; // 后端无此字段，前端可从 version 生成
   version: string;
   releaseDate: string;
-  features: string[]; // 对应后端 additions[]
-  improvements: string[]; // 对应后端 improvements[]
-  bugfixes: string[]; // 对应后端 fixes[]
+  additions: string[];
+  improvements: string[];
+  fixes: string[];
 }
 
 /** 获取更新日志列表 */

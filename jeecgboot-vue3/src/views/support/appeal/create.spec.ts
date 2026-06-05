@@ -113,16 +113,17 @@ describe('AppealCreate', () => {
     expect(Modal.confirm).toHaveBeenCalled();
   });
 
-  it('should emit success after successful submission', async () => {
+  it('should call createAppeal API on valid submission', async () => {
+    const { createAppeal } = await import('/@/api/support/appeal');
     const wrapper = mount(AppealCreate, { global: { stubs: globalStubs } });
     (wrapper.vm as any).formData.appealType = 'content_delete';
     (wrapper.vm as any).formData.reason = '详细申诉理由';
     await nextTick();
     await (wrapper.vm as any).handleSubmit();
     await flushPromises();
-    // After successful submit, router.push is called
-    // We verify by checking no error was thrown
-    expect(true).toBe(true);
+    expect(createAppeal).toHaveBeenCalledWith(
+      expect.objectContaining({ appealType: 'content_delete', reason: '详细申诉理由' })
+    );
   });
 
   it('should have cancel button that triggers router.back', async () => {
