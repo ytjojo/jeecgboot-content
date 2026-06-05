@@ -26,6 +26,8 @@ export const contentProfileRoutes: AppRouteRecordRaw[] = (modules as Recordable)
 
 export const contentGrowthRoutes: AppRouteRecordRaw[] = (modules as Recordable)['./modules/contentGrowth.ts']?.default || [];
 
+export const contentPrivacyRoutes: AppRouteRecordRaw[] = (modules as Recordable)['./modules/contentPrivacy.ts']?.default || [];
+
 export const RootRoute: AppRouteRecordRaw = {
   path: '/',
   name: 'Root',
@@ -71,4 +73,4 @@ export const TokenLoginRoute: AppRouteRecordRaw = {
   },
 };
 // Basic routing without permission
-export const basicRoutes = [LoginRoute, RootRoute, ...mainOutRoutes, REDIRECT_ROUTE, PAGE_NOT_FOUND_ROUTE, TokenLoginRoute, Oauth2LoginRoute, ...contentAuthRoutes, ...contentProfileRoutes, ...contentGrowthRoutes];
+export const basicRoutes = [LoginRoute, RootRoute, ...mainOutRoutes, REDIRECT_ROUTE, PAGE_NOT_FOUND_ROUTE, TokenLoginRoute, Oauth2LoginRoute, ...contentAuthRoutes, ...contentProfileRoutes, ...contentGrowthRoutes, ...contentPrivacyRoutes];
