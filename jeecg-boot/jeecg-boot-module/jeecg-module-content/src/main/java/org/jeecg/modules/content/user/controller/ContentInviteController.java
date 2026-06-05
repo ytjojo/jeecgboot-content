@@ -6,6 +6,7 @@ import jakarta.annotation.Resource;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.service.IContentInviteService;
 import org.jeecg.modules.content.user.vo.ContentInviteCodeVO;
+import org.jeecg.modules.content.user.vo.ContentInviteInfoVO;
 import org.jeecg.modules.content.user.vo.ContentInviteRecordPageVO;
 import org.jeecg.modules.content.user.vo.ContentInviteStatsVO;
 import org.springframework.web.bind.annotation.*;
@@ -60,5 +61,14 @@ public class ContentInviteController {
     @GetMapping("/stats")
     public Result<ContentInviteStatsVO> getInviteStats(@RequestParam("userId") String userId) {
         return Result.OK(inviteService.getInviteStats(userId));
+    }
+
+    /**
+     * 查询邀请码信息（用于落地页校验）。
+     */
+    @Operation(summary = "查询邀请码信息")
+    @GetMapping("/info/{inviteCode}")
+    public Result<ContentInviteInfoVO> getInviteInfo(@PathVariable("inviteCode") String inviteCode) {
+        return Result.OK(inviteService.getInviteInfo(inviteCode));
     }
 }

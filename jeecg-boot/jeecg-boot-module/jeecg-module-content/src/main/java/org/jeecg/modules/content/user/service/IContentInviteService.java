@@ -1,6 +1,7 @@
 package org.jeecg.modules.content.user.service;
 
 import org.jeecg.modules.content.user.vo.ContentInviteCodeVO;
+import org.jeecg.modules.content.user.vo.ContentInviteInfoVO;
 import org.jeecg.modules.content.user.vo.ContentInviteRecordPageVO;
 import org.jeecg.modules.content.user.vo.ContentInviteStatsVO;
 
@@ -28,4 +29,9 @@ public interface IContentInviteService {
      * 查询邀请统计。
      */
     ContentInviteStatsVO getInviteStats(String userId);
+
+    /**
+     * 查询邀请码信息（用于落地页校验）。
+     */
+    ContentInviteInfoVO getInviteInfo(String inviteCode);
 }

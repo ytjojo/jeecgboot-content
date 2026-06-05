@@ -14,6 +14,7 @@ import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.service.IContentInviteService;
 import org.jeecg.modules.content.user.service.IContentUserRewardRuleService;
 import org.jeecg.modules.content.user.vo.ContentInviteCodeVO;
+import org.jeecg.modules.content.user.vo.ContentInviteInfoVO;
 import org.jeecg.modules.content.user.vo.ContentInviteRecordPageVO;
 import org.jeecg.modules.content.user.vo.ContentInviteStatsVO;
 import org.springframework.stereotype.Service;
@@ -230,5 +231,54 @@ public class ContentInviteServiceImpl implements IContentInviteService {
         int newBalance = (profile.getPointBalance() != null ? profile.getPointBalance() : 0) + points;
         profile.setPointBalance(newBalance);
         profileMapper.updateById(profile);
+    }
+
+    @Override
+    public ContentInviteInfoVO getInviteInfo(String inviteCode) {
+        if (inviteCode == null || inviteCode.isBlank()) {
+            return new ContentInviteInfoVO()
+                .setValid(false)
+                .setExpired(false)
+                .setMaxReached(false);
+        }
+        ContentInviteCode inviteCodeEntity = inviteCodeMapper.selectOne(
+            Wrappers.<ContentInviteCode>lambdaQuery()
+                .eq(ContentInviteCode::getInviteCode, inviteCode)
+        );
+        if (inviteCodeEntity == null) {
+            return new ContentInviteInfoVO()
+                .setValid(false)
+                .setExpired(false)
+                .setMaxReached(false);
+        }
+        // 查询邀请人信息
+        ContentUserProfile inviterProfile = profileMapper.selectByUserId(inviteCodeEntity.getUserId());
+        String inviterNickname = inviterProfile != null ? inviterProfile.getNickname() : "未知用户";
+        String inviterAvatar = inviterProfile != null ? inviterProfile.getAvatar() : null;
+        // 查询邀请统计
+        Long totalInvites = inviteRecordMapper.selectCount(
+            Wrappers.<ContentInviteRecord>lambdaQuery()
+                .eq(ContentInviteRecord::getInviterUserId, inviteCodeEntity.getUserId())
+        );
+        // 假设最大邀请数为 100（可配置）
+        int maxInviteCount = 100;
+        boolean maxReached = totalInvites >= maxInviteCount;
+        // 查询奖励规则
+        Optional<ContentUserRewardRule> ruleOpt = rewardRuleService.getEnabledRule(INVITE_RULE_CODE);
+        String rewardInfo = "邀请好友注册可获得积分奖励";
+        if (ruleOpt.isPresent()) {
+            ContentUserRewardRule rule = ruleOpt.get();
+            int pointAmount = rule.getPointAmount() != null ? rule.getPointAmount() : 0;
+            if (pointAmount > 0) {
+                rewardInfo = "邀请好友注册可获得 " + pointAmount + " 积分奖励";
+            }
+        }
+        return new ContentInviteInfoVO()
+            .setValid(true)
+            .setExpired(false)
+            .setMaxReached(maxReached)
+            .setInviterNickname(inviterNickname)
+            .setInviterAvatar(inviterAvatar)
+            .setRewardInfo(rewardInfo);
     }
 }
