@@ -30,7 +30,7 @@ vi.mock('ant-design-vue', async (importOriginal) => {
       error: vi.fn(),
     },
     Modal: {
-      confirm: vi.fn(),
+      confirm: vi.fn(({ onOk }) => { onOk?.(); }),
     },
   };
 });
@@ -46,18 +46,19 @@ describe('AppealCreate', () => {
     'a-breadcrumb': { template: '<div><slot /></div>' },
     'a-breadcrumb-item': { template: '<span><slot /></span>' },
     'a-form': { template: '<form><slot /></form>', props: ['model', 'layout'] },
-    'a-form-item': { template: '<div><slot /></div>', props: ['label', 'required'] },
+    'a-form-item': { template: '<div>{{ label }}<slot /></div>', props: ['label', 'required'] },
     'a-select': { template: '<select><slot /></select>', props: ['value', 'placeholder'] },
     'a-select-option': { template: '<option><slot /></option>', props: ['value'] },
     'a-input': { template: '<input />', props: ['value', 'disabled'] },
     'a-textarea': { template: '<textarea />', props: ['value', 'maxlength', 'rows', 'showCount', 'placeholder'] },
     'a-upload': { template: '<div><slot /><slot name="tip" /></div>', props: ['fileList', 'accept', 'listType', 'beforeUpload'] },
     'a-button': {
-      template: '<button :disabled="disabled"><slot /></button>',
-      props: ['type', 'loading', 'disabled', 'data-testid'],
+      template: '<button :disabled="disabled" :data-testid="$attrs[\'data-testid\']"><slot /></button>',
+      props: ['type', 'loading', 'disabled'],
+      inheritAttrs: false,
     },
     'a-space': { template: '<div><slot /></div>' },
-    'a-alert': { template: '<div><slot /></div>', props: ['message', 'type', 'showIcon'] },
+    'a-alert': { template: '<div>{{ message }}<slot /></div>', props: ['message', 'type', 'showIcon'] },
   };
 
   it('should render appeal form with title', () => {
