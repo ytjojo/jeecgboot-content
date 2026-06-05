@@ -9,7 +9,7 @@
       <a-input-search
         v-model:value="searchValue"
         placeholder="搜索订阅源"
-        style="width: 300px"
+        :style="{ width: isMobile ? '100%' : '300px' }"
         allow-clear
         @search="handleSearch"
         @change="handleSearchChange"
@@ -101,12 +101,15 @@ import { useRouter } from 'vue-router';
 import { useSubscribeStore } from '/@/store/modules/subscribe';
 import { useUserStore } from '/@/store/modules/user';
 import { useMessage } from '/@/hooks/web/useMessage';
+import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 import SubscriptionCard from '/@/components/social/SubscriptionCard.vue';
 
 const router = useRouter();
 const subscribeStore = useSubscribeStore();
 const userStore = useUserStore();
 const { createMessage } = useMessage();
+const { screenRef } = useBreakpoint();
+const isMobile = computed(() => screenRef.value === 'XS' || screenRef.value === 'SM');
 
 const currentUserId = computed(() => userStore.getUserInfo?.userId ?? '');
 const searchValue = ref('');
@@ -323,6 +326,25 @@ onUnmounted(() => {
   &__batch-actions {
     display: flex;
     gap: 8px;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 12px;
+
+    &__toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__batch-bar {
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 16px;
+    }
+
+    &__batch-actions {
+      flex-wrap: wrap;
+    }
   }
 }
 </style>

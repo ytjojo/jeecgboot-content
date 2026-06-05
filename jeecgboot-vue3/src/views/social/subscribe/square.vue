@@ -5,7 +5,7 @@
       <a-input-search
         v-model:value="searchKeyword"
         placeholder="搜索订阅源"
-        style="width: 300px"
+        :style="{ width: isMobile ? '100%' : '300px' }"
         allow-clear
         @search="handleSearch"
         @change="handleSearchChange"
@@ -81,6 +81,7 @@ import { useRouter } from 'vue-router';
 import { AppstoreOutlined, UserOutlined } from '@ant-design/icons-vue';
 import { useSubscribeStore } from '/@/store/modules/subscribe';
 import { useUserStore } from '/@/store/modules/user';
+import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 import SubscribeButton from '/@/components/social/SubscribeButton.vue';
 
 interface PlazaItem {
@@ -97,6 +98,8 @@ interface PlazaItem {
 const router = useRouter();
 const subscribeStore = useSubscribeStore();
 const userStore = useUserStore();
+const { screenRef } = useBreakpoint();
+const isMobile = computed(() => screenRef.value === 'XS' || screenRef.value === 'SM');
 
 const currentUserId = computed(() => userStore.getUserInfo?.userId ?? '');
 const searchKeyword = ref('');
@@ -335,6 +338,26 @@ onUnmounted(() => {
   &__load-more {
     text-align: center;
     padding: 16px 0;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 12px;
+
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    &__card {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    &__card-action {
+      align-self: flex-end;
+      margin-left: 0;
+    }
   }
 }
 </style>

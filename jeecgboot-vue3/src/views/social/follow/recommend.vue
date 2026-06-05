@@ -19,7 +19,6 @@
             </div>
           </div>
           <div class="recommend-page__actions">
-            <!-- 推荐列表只包含未关注用户 -->
             <FollowButton
               :user-id="currentUserId"
               :target-user-id="item.userId"
@@ -43,10 +42,13 @@
 import { computed, onMounted } from 'vue';
 import { useFollowStore } from '/@/store/modules/follow';
 import { useUserStore } from '/@/store/modules/user';
+import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 import FollowButton from '/@/components/social/FollowButton.vue';
 
 const followStore = useFollowStore();
 const userStore = useUserStore();
+const { screenRef } = useBreakpoint();
+const isMobile = computed(() => screenRef.value === 'XS' || screenRef.value === 'SM');
 
 const currentUserId = computed(() => userStore.getUserInfo?.userId ?? '');
 
@@ -154,6 +156,20 @@ onMounted(() => {
   &__load-more {
     text-align: center;
     padding: 16px 0;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 12px;
+
+    &__item {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    &__actions {
+      align-self: flex-end;
+      margin-left: 0;
+    }
   }
 }
 </style>

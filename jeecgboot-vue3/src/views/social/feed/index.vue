@@ -20,6 +20,7 @@
           v-for="feed in feedStore.followFeedList"
           :key="feed.id"
           :feed="feed"
+          :is-mobile="isMobile"
           @click="handleFeedClick"
         />
         <div v-if="feedStore.followLoading" class="feed-page__loading">
@@ -32,13 +33,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
 import { useFeedStore, FeedItem } from '/@/store/modules/feed';
+import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 import FeedCard from '/@/components/social/FeedCard.vue';
 import FeedFilter from '/@/components/social/FeedFilter.vue';
 import SpecialFeed from '/@/components/social/SpecialFeed.vue';
 
 const feedStore = useFeedStore();
+const { screenRef } = useBreakpoint();
+const isMobile = computed(() => screenRef.value === 'XS' || screenRef.value === 'SM');
 
 let scrollTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -113,6 +117,16 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     padding: 24px 0;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 12px;
+
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
   }
 }
 </style>

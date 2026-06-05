@@ -15,6 +15,7 @@
           v-for="feed in feedStore.subscribeFeedList"
           :key="feed.id"
           :feed="feed"
+          :is-mobile="isMobile"
           @click="handleFeedClick"
         />
         <div v-if="feedStore.subscribeLoading" class="subscribe-feed-page__loading">
@@ -29,13 +30,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useFeedStore, FeedItem } from '/@/store/modules/feed';
+import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 import FeedCard from '/@/components/social/FeedCard.vue';
 
 const router = useRouter();
 const feedStore = useFeedStore();
+const { screenRef } = useBreakpoint();
+const isMobile = computed(() => screenRef.value === 'XS' || screenRef.value === 'SM');
 
 const sourceTypeTabs = [
   { value: '', label: '全部' },
@@ -122,6 +126,16 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     padding: 24px 0;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 12px;
+
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
   }
 }
 </style>

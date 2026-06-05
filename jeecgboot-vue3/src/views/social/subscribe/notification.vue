@@ -18,8 +18,8 @@
 
     <a-spin :spinning="fetchLoading">
       <a-form
-        :label-col="{ span: 6 }"
-        :wrapper-col="{ span: 16 }"
+        :label-col="isMobile ? { span: 8 } : { span: 6 }"
+        :wrapper-col="isMobile ? { span: 16 } : { span: 16 }"
         class="notification-config-page__form"
       >
         <a-form-item label="站内通知">
@@ -72,6 +72,7 @@ import { useRoute } from 'vue-router';
 import { useSubscribeStore } from '/@/store/modules/subscribe';
 import { useUserStore } from '/@/store/modules/user';
 import { useMessage } from '/@/hooks/web/useMessage';
+import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 import type { NotificationConfig } from '/@/store/modules/subscribe';
 import type { Dayjs } from 'dayjs';
 
@@ -79,6 +80,8 @@ const route = useRoute();
 const subscribeStore = useSubscribeStore();
 const userStore = useUserStore();
 const { createMessage } = useMessage();
+const { screenRef } = useBreakpoint();
+const isMobile = computed(() => screenRef.value === 'XS' || screenRef.value === 'SM');
 
 const currentUserId = computed(() => userStore.getUserInfo?.userId ?? '');
 const sourceId = computed(() => (route.query.sourceId as string) || '');
@@ -202,6 +205,19 @@ onMounted(async () => {
 
   &__quiet-sep {
     color: #999;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 12px;
+
+    &__form {
+      padding: 16px 12px;
+    }
+
+    &__quiet-time {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 }
 </style>

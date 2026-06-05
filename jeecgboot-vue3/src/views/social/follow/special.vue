@@ -19,6 +19,7 @@
               isSpecial: item.isSpecial,
               lastActiveTime: item.lastActiveTime,
             }"
+            :is-mobile="isMobile"
             @unfollow="handleUnfollow"
             @special-change="handleSpecialChange"
           />
@@ -44,11 +45,14 @@ import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useFollowStore } from '/@/store/modules/follow';
 import { useUserStore } from '/@/store/modules/user';
+import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 import UserCard from '/@/components/social/UserCard.vue';
 
 const router = useRouter();
 const followStore = useFollowStore();
 const userStore = useUserStore();
+const { screenRef } = useBreakpoint();
+const isMobile = computed(() => screenRef.value === 'XS' || screenRef.value === 'SM');
 
 const currentUserId = computed(() => userStore.getUserInfo?.userId ?? '');
 
@@ -125,6 +129,14 @@ onMounted(() => {
   &__load-more {
     text-align: center;
     padding: 16px 0;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 12px;
+
+    &__activity-hint {
+      padding: 4px 12px 8px 12px;
+    }
   }
 }
 </style>

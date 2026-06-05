@@ -31,7 +31,7 @@
     </a-spin>
 
     <!-- 创建分组弹窗 -->
-    <a-modal v-model:open="showCreateModal" title="新建分组" @ok="handleCreateGroup" @cancel="resetCreateForm">
+    <a-modal v-model:open="showCreateModal" title="新建分组" :width="isMobile ? '95vw' : 520" @ok="handleCreateGroup" @cancel="resetCreateForm">
       <a-form :label-col="{ span: 4 }">
         <a-form-item label="名称">
           <a-input v-model:value="newGroupName" placeholder="请输入分组名称" :maxlength="20" />
@@ -40,7 +40,7 @@
     </a-modal>
 
     <!-- 重命名弹窗 -->
-    <a-modal v-model:open="showRenameModal" title="重命名分组" @ok="handleRenameGroup" @cancel="resetRenameForm">
+    <a-modal v-model:open="showRenameModal" title="重命名分组" :width="isMobile ? '95vw' : 520" @ok="handleRenameGroup" @cancel="resetRenameForm">
       <a-form :label-col="{ span: 4 }">
         <a-form-item label="名称">
           <a-input v-model:value="renameValue" placeholder="请输入新名称" :maxlength="20" />
@@ -55,10 +55,13 @@ import { ref, computed, onMounted } from 'vue';
 import { message } from 'ant-design-vue';
 import { useFollowStore } from '/@/store/modules/follow';
 import { useUserStore } from '/@/store/modules/user';
+import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 import type { FollowGroup } from '/@/store/modules/follow';
 
 const followStore = useFollowStore();
 const userStore = useUserStore();
+const { screenRef } = useBreakpoint();
+const isMobile = computed(() => screenRef.value === 'XS' || screenRef.value === 'SM');
 
 const currentUserId = computed(() => userStore.getUserInfo?.userId ?? '');
 const loading = ref(false);
@@ -198,6 +201,25 @@ onMounted(async () => {
   &__item-actions {
     display: flex;
     gap: 4px;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 12px;
+
+    &__header {
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    &__item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    &__item-actions {
+      align-self: flex-end;
+    }
   }
 }
 </style>

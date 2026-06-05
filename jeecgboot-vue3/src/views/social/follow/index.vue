@@ -9,7 +9,7 @@
         <a-input-search
           v-model:value="searchValue"
           placeholder="搜索关注的人"
-          style="width: 300px"
+          :style="{ width: isMobile ? '100%' : '300px' }"
           allow-clear
           @search="handleSearch"
           @change="handleSearchChange"
@@ -43,6 +43,7 @@
             groupName: getGroupName(item.groupId),
             isSpecial: item.isSpecial,
           }"
+          :is-mobile="isMobile"
           @unfollow="handleUnfollow"
           @special-change="handleSpecialChange"
         />
@@ -63,11 +64,14 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useFollowStore } from '/@/store/modules/follow';
 import { useUserStore } from '/@/store/modules/user';
+import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 import UserCard from '/@/components/social/UserCard.vue';
 
 const router = useRouter();
 const followStore = useFollowStore();
 const userStore = useUserStore();
+const { screenRef } = useBreakpoint();
+const isMobile = computed(() => screenRef.value === 'XS' || screenRef.value === 'SM');
 
 const currentUserId = computed(() => userStore.getUserInfo?.userId ?? '');
 const searchValue = ref('');
@@ -194,6 +198,24 @@ onUnmounted(() => {
   &__load-more {
     text-align: center;
     padding: 16px 0;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 12px;
+
+    &__toolbar {
+      flex-direction: column;
+      align-items: stretch;
+
+      :deep(.ant-radio-group) {
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+    }
+
+    &__actions {
+      flex-wrap: wrap;
+    }
   }
 }
 </style>

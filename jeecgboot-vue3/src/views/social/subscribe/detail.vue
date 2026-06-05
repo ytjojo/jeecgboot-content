@@ -71,6 +71,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { AppstoreOutlined, UserOutlined } from '@ant-design/icons-vue';
 import { useSubscribeStore } from '/@/store/modules/subscribe';
 import { useUserStore } from '/@/store/modules/user';
+import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 import SubscribeButton from '/@/components/social/SubscribeButton.vue';
 
 interface ContentItem {
@@ -96,6 +97,8 @@ const route = useRoute();
 const router = useRouter();
 const subscribeStore = useSubscribeStore();
 const userStore = useUserStore();
+const { screenRef } = useBreakpoint();
+const isMobile = computed(() => screenRef.value === 'XS' || screenRef.value === 'SM');
 
 const currentUserId = computed(() => userStore.getUserInfo?.userId ?? '');
 const sourceId = computed(() => (route.query.sourceId as string) || (route.params.sourceId as string) || '');
@@ -290,6 +293,33 @@ onMounted(async () => {
     display: flex;
     justify-content: center;
     padding: 16px 0 0;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 12px;
+
+    &__info {
+      padding: 16px;
+    }
+
+    &__info-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    &__icon {
+      margin-right: 0;
+      margin-bottom: 12px;
+    }
+
+    &__meta {
+      justify-content: center;
+    }
+
+    &__actions {
+      justify-content: center;
+    }
   }
 }
 </style>
