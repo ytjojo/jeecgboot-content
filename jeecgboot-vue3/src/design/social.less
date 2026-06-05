@@ -1,0 +1,177 @@
+// =================================
+// ========== 社交订阅模块样式 ==========
+// =================================
+
+@import './var/breakpoint.less';
+
+// ---------- 响应式工具类 ----------
+
+// display
+.social-hidden {
+  display: none !important;
+}
+
+@media (max-width: @screen-xs-max) {
+  .social-hidden-xs {
+    display: none !important;
+  }
+}
+
+@media (min-width: @screen-sm) and (max-width: @screen-sm-max) {
+  .social-hidden-sm {
+    display: none !important;
+  }
+}
+
+@media (min-width: @screen-md) and (max-width: @screen-md-max) {
+  .social-hidden-md {
+    display: none !important;
+  }
+}
+
+@media (min-width: @screen-lg) {
+  .social-hidden-lg {
+    display: none !important;
+  }
+}
+
+// ---------- 网格布局 ----------
+
+.social-grid {
+  display: grid;
+  gap: 16px;
+
+  &--2col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  &--3col {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  &--4col {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: @screen-xs-max) {
+  .social-grid {
+    &--2col,
+    &--3col,
+    &--4col {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@media (min-width: @screen-sm) and (max-width: @screen-md-max) {
+  .social-grid {
+    &--3col,
+    &--4col {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+// ---------- 间距工具类 ----------
+
+.social-mb-sm { margin-bottom: 8px; }
+.social-mb-md { margin-bottom: 16px; }
+.social-mb-lg { margin-bottom: 24px; }
+.social-mt-sm { margin-top: 8px; }
+.social-mt-md { margin-top: 16px; }
+.social-mt-lg { margin-top: 24px; }
+.social-p-sm { padding: 8px; }
+.social-p-md { padding: 16px; }
+.social-p-lg { padding: 24px; }
+
+// ---------- 组件基础样式 ----------
+
+// 骨架屏加载
+.social-skeleton {
+  &__item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+
+    &-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #f0f0f0;
+      flex-shrink: 0;
+    }
+
+    &-content {
+      flex: 1;
+      margin-left: 12px;
+
+      &-line {
+        height: 14px;
+        background: #f0f0f0;
+        border-radius: 4px;
+        margin-bottom: 8px;
+
+        &:last-child {
+          width: 60%;
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+// 空状态
+.social-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: #999;
+
+  &__icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+
+  &__text {
+    font-size: 14px;
+    text-align: center;
+  }
+
+  &__action {
+    margin-top: 16px;
+  }
+}
+
+// 批量操作栏
+.social-batch-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: #fff;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+
+  &__info {
+    font-size: 14px;
+    color: #666;
+
+    &-count {
+      color: #1890ff;
+      font-weight: 500;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+  }
+}

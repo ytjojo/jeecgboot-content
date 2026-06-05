@@ -15,6 +15,10 @@ export default {
     '<rootDir>/tests/__mocks__/',
     '/node_modules/',
   ],
+  modulePathIgnorePatterns: [
+    '<rootDir>/.*/Library/Application Support/',
+    '/Users/.*/.bun/install/cache/',
+  ],
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
     '^.+\\.vue$': '<rootDir>/build/jest/sfcTransformer.mjs',
