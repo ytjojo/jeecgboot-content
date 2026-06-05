@@ -43,6 +43,12 @@
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'status'">
             <a-tag :color="statusColor(record.status)">
+              <template #icon>
+                <clock-circle-outlined v-if="record.status === 'pending'" />
+                <sync-outlined v-if="record.status === 'processing'" spin />
+                <check-circle-outlined v-if="record.status === 'processed'" />
+                <undo-outlined v-if="record.status === 'withdrawn'" />
+              </template>
               {{ record.statusLabel }}
             </a-tag>
           </template>
@@ -79,6 +85,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { message } from 'ant-design-vue';
+import { ClockCircleOutlined, SyncOutlined, CheckCircleOutlined, UndoOutlined } from '@ant-design/icons-vue';
 import { getReportList, withdrawReport, type ReportItem, type ReportQueryParams } from '/@/api/support/report';
 import ReportDetailDrawer from './components/ReportDetailDrawer.vue';
 
@@ -86,7 +93,7 @@ const columns = [
   { title: '举报编号', dataIndex: 'reportNo', width: 160 },
   { title: '举报对象', dataIndex: 'targetSummary', ellipsis: true },
   { title: '举报类型', dataIndex: 'reportTypeLabel', width: 100 },
-  { title: '提交时间', dataIndex: 'createTime', width: 180 },
+  { title: '提交时间', dataIndex: 'createTime', width: 180, sorter: true, defaultSortOrder: 'descend' },
   { title: '状态', dataIndex: 'status', width: 100 },
   { title: '操作', dataIndex: 'action', width: 150, fixed: 'right' as const },
 ];
