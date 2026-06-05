@@ -1,7 +1,10 @@
 package org.jeecg.modules.content.channel.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.modules.content.channel.entity.Channel;
+import org.jeecg.modules.content.channel.req.ChannelListQuery;
 
 public interface ChannelService extends IService<Channel> {
 
@@ -12,4 +15,13 @@ public interface ChannelService extends IService<Channel> {
      * @return true=唯一, false=已存在
      */
     boolean checkNameUnique(String name, String excludeId);
+
+    /**
+     * 查询用户的频道列表
+     * @param page 分页参数
+     * @param userId 用户ID
+     * @param query 查询条件
+     * @return 分页结果
+     */
+    IPage<Channel> listMyChannels(Page<Channel> page, String userId, ChannelListQuery query);
 }

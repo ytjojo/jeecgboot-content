@@ -1,5 +1,7 @@
 package org.jeecg.modules.content.channel.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -9,14 +11,21 @@ import org.jeecg.modules.content.channel.biz.ChannelBizManageService;
 import org.jeecg.modules.content.channel.dto.CreateChannelDTO;
 import org.jeecg.modules.content.channel.dto.UpdateChannelDTO;
 import org.jeecg.modules.content.channel.entity.Channel;
+import org.jeecg.modules.content.channel.entity.ChannelTransfer;
 import org.jeecg.modules.content.channel.enums.ChannelType;
+import org.jeecg.modules.content.channel.req.ChannelListQuery;
 import org.jeecg.modules.content.channel.service.ChannelService;
 import org.jeecg.modules.content.channel.util.ChannelConvertUtil;
+import org.jeecg.modules.content.channel.service.ChannelTransferService;
+import org.jeecg.modules.content.channel.vo.ChannelTransferVO;
 import org.jeecg.modules.content.channel.vo.ChannelVO;
+import org.jeecg.modules.content.channel.vo.DeleteCheckResultVO;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/channels")
@@ -29,6 +38,9 @@ public class ChannelController {
 
     @Resource
     private ChannelService channelService;
+
+    @Resource
+    private ChannelTransferService channelTransferService;
 
     @PostMapping("/create")
     @Operation(summary = "创建频道")
@@ -43,6 +55,65 @@ public class ChannelController {
             return Result.error("用户端不可创建系统频道");
         }
         return Result.OK(ChannelConvertUtil.toVO(channel));
+    }
+
+    @GetMapping("/list")
+    @Operation(summary = "查询我的频道列表")
+    public Result<IPage<ChannelVO>> listMyChannels(
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "10") Integer size,
+            ChannelListQuery query) {
+        String userId = SecureUtil.currentUser().getId();
+        Page<Channel> page = new Page<>(current, size);
+        IPage<Channel> result = channelService.listMyChannels(page, userId, query);
+        return Result.OK(result.convert(ChannelConvertUtil::toVO));
+    }
+
+    @GetMapping("/{id}/delete-check")
+    @Operation(summary = "删除前置条件校验")
+    public Result<DeleteCheckResultVO> checkDeletePrecondition(@PathVariable String id) {
+        String userId = SecureUtil.currentUser().getId();
+        DeleteCheckResultVO result = channelBizManageService.checkDeletePrecondition(id, userId);
+        return Result.OK(result);
+    }
+
+    @GetMapping("/{id}/transfers")
+    @Operation(summary = "查询转让历史")
+    public Result<List<ChannelTransferVO>> getTransferHistory(@PathVariable String id) {
+        String userId = SecureUtil.currentUser().getId();
+        Channel channel = channelService.getById(id);
+        if (channel == null || !channel.getOwnerId().equals(userId)) {
+            return Result.error("无权访问");
+        }
+        List<ChannelTransfer> transfers = channelTransferService.getTransferHistory(id);
+        List<ChannelTransferVO> voList = transfers.stream()
+            .map(this::convertToTransferVO)
+            .collect(Collectors.toList());
+        return Result.OK(voList);
+    }
+
+    @GetMapping("/check-name")
+    @Operation(summary = "校验频道名称唯一性")
+    public Result<Boolean> checkNameUnique(
+            @RequestParam String name,
+            @RequestParam(required = false) String excludeId) {
+        boolean available = channelService.checkNameUnique(name, excludeId);
+        return Result.OK(available);
+    }
+
+    @GetMapping("/{id}/transfer/pending")
+    @Operation(summary = "查询待确认的转让请求")
+    public Result<ChannelTransferVO> getPendingTransfer(@PathVariable String id) {
+        String userId = SecureUtil.currentUser().getId();
+        Channel channel = channelService.getById(id);
+        if (channel == null || !channel.getOwnerId().equals(userId)) {
+            return Result.error("无权访问");
+        }
+        ChannelTransfer transfer = channelTransferService.getPendingTransfer(id);
+        if (transfer == null) {
+            return Result.OK(null);
+        }
+        return Result.OK(convertToTransferVO(transfer));
     }
 
     @GetMapping("/{id}")
@@ -101,5 +172,16 @@ public class ChannelController {
         String userId = SecureUtil.currentUser().getId();
         channelBizManageService.cancelDelete(id, userId);
         return Result.OK();
+    }
+
+    private ChannelTransferVO convertToTransferVO(ChannelTransfer transfer) {
+        ChannelTransferVO vo = new ChannelTransferVO();
+        vo.setTransferId(transfer.getId());
+        vo.setChannelId(transfer.getChannelId());
+        vo.setFromUserId(transfer.getFromUserId());
+        vo.setToUserId(transfer.getToUserId());
+        vo.setStatus(transfer.getStatus().name());
+        vo.setCreatedTime(transfer.getCreateTime());
+        return vo;
     }
 }

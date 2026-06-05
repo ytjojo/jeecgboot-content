@@ -7,20 +7,29 @@ import org.jeecg.modules.content.channel.constant.ChannelConstants;
 import org.jeecg.modules.content.channel.dto.CreateChannelDTO;
 import org.jeecg.modules.content.channel.dto.UpdateChannelDTO;
 import org.jeecg.modules.content.channel.entity.Channel;
+import org.jeecg.modules.content.channel.entity.ChannelContentPublish;
+import org.jeecg.modules.content.channel.entity.ChannelReview;
 import org.jeecg.modules.content.channel.entity.ChannelTransfer;
 import org.jeecg.modules.content.channel.enums.ChannelStatus;
 import org.jeecg.modules.content.channel.enums.ChannelType;
+import org.jeecg.modules.content.channel.enums.PublishStatusEnum;
 import org.jeecg.modules.content.channel.enums.ReviewResult;
+import org.jeecg.modules.content.channel.enums.ChannelReviewStatus;
+import org.jeecg.modules.content.channel.enums.TransferStatus;
+import org.jeecg.modules.content.channel.mapper.ChannelContentPublishMapper;
 import org.jeecg.modules.content.channel.service.IChannelReviewService;
 import org.jeecg.modules.content.channel.service.ChannelService;
 import org.jeecg.modules.content.channel.service.ChannelTransferService;
+import org.jeecg.modules.content.channel.vo.DeleteCheckResultVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -34,6 +43,9 @@ public class ChannelBizManageService {
 
     @Resource
     private ChannelTransferService channelTransferService;
+
+    @Resource
+    private ChannelContentPublishMapper channelContentPublishMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public Channel createSystemChannel(CreateChannelDTO dto, String operatorId) {
@@ -166,6 +178,9 @@ public class ChannelBizManageService {
             throw new JeecgBootException("转让确认失败，请求可能已过期或无效");
         }
         Channel channel = channelService.getById(transfer.getChannelId());
+        if (channel == null) {
+            throw new JeecgBootException("频道不存在，可能已被删除");
+        }
         channel.setOwnerId(transfer.getToUserId());
         channelService.updateById(channel);
         log.info("频道转让完成: channelId={}, newOwner={}", channel.getId(), transfer.getToUserId());
@@ -217,6 +232,56 @@ public class ChannelBizManageService {
         channel.setDeleteCoolingEndTime(null);
         channelService.updateById(channel);
         log.info("频道删除已撤销: channelId={}", channelId);
+    }
+
+    public DeleteCheckResultVO checkDeletePrecondition(String channelId, String userId) {
+        Channel channel = channelService.getById(channelId);
+        if (channel == null) {
+            throw new JeecgBootException("频道不存在");
+        }
+        if (!channel.getOwnerId().equals(userId)) {
+            throw new JeecgBootException("仅频道主可检查删除条件");
+        }
+
+        DeleteCheckResultVO result = new DeleteCheckResultVO();
+        List<String> blockReasons = new ArrayList<>();
+
+        // 检查是否有未清理的内容
+        Long contentCount = channelContentPublishMapper.selectCount(
+            new LambdaQueryWrapper<ChannelContentPublish>()
+                .eq(ChannelContentPublish::getChannelId, channelId)
+                .eq(ChannelContentPublish::getPublishStatus, PublishStatusEnum.PUBLISHED.getCode()));
+        if (contentCount > 0) {
+            blockReasons.add("频道中仍有 " + contentCount + " 条已发布内容，请先清理");
+        }
+
+        // 检查是否有待处理的转让请求
+        List<ChannelTransfer> pendingTransfers = channelTransferService.list(
+            new LambdaQueryWrapper<ChannelTransfer>()
+                .eq(ChannelTransfer::getChannelId, channelId)
+                .eq(ChannelTransfer::getStatus, TransferStatus.PENDING));
+        if (!pendingTransfers.isEmpty()) {
+            blockReasons.add("存在待确认的转让请求，请先处理");
+        }
+
+        // 检查是否有待审核的修改
+        List<ChannelReview> reviews = channelReviewService.listReviewsByChannelId(channelId);
+        boolean hasPendingReview = reviews.stream()
+            .anyMatch(review -> ChannelReviewStatus.PENDING.getCode().equals(review.getStatus()));
+        if (hasPendingReview) {
+            blockReasons.add("存在待审核的修改，请等待审核完成");
+        }
+
+        // 检查是否是组织频道
+        boolean needOrgAdminConfirm = channel.getChannelType() == ChannelType.ORGANIZATION;
+
+        result.setCanDelete(blockReasons.isEmpty());
+        result.setBlockReasons(blockReasons);
+        result.setNeedOrgAdminConfirm(needOrgAdminConfirm);
+
+        log.info("删除前置条件检查: channelId={}, canDelete={}, blockReasons={}",
+            channelId, result.isCanDelete(), blockReasons.size());
+        return result;
     }
 
     @Transactional(rollbackFor = Exception.class)

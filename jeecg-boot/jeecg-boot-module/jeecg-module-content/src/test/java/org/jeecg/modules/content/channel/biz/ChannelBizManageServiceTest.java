@@ -6,13 +6,17 @@ import org.jeecg.modules.content.channel.constant.ChannelConstants;
 import org.jeecg.modules.content.channel.dto.CreateChannelDTO;
 import org.jeecg.modules.content.channel.dto.UpdateChannelDTO;
 import org.jeecg.modules.content.channel.entity.Channel;
+import org.jeecg.modules.content.channel.entity.ChannelReview;
 import org.jeecg.modules.content.channel.entity.ChannelTransfer;
 import org.jeecg.modules.content.channel.enums.ChannelStatus;
 import org.jeecg.modules.content.channel.enums.ChannelType;
 import org.jeecg.modules.content.channel.enums.ReviewResult;
+import org.jeecg.modules.content.channel.enums.TransferStatus;
+import org.jeecg.modules.content.channel.mapper.ChannelContentPublishMapper;
 import org.jeecg.modules.content.channel.service.ChannelService;
 import org.jeecg.modules.content.channel.service.ChannelTransferService;
 import org.jeecg.modules.content.channel.service.IChannelReviewService;
+import org.jeecg.modules.content.channel.vo.DeleteCheckResultVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -20,7 +24,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -41,6 +47,8 @@ class ChannelBizManageServiceTest {
     private IChannelReviewService channelReviewService;
     @Mock
     private ChannelTransferService channelTransferService;
+    @Mock
+    private ChannelContentPublishMapper channelContentPublishMapper;
 
     @InjectMocks
     private ChannelBizManageService bizService;
@@ -450,5 +458,120 @@ class ChannelBizManageServiceTest {
         bizService.reviewChannel("ch1", "rv1", ReviewResult.RETURN_FOR_EDIT, "fix");
 
         assertThat(ch.getStatus()).isEqualTo(ChannelStatus.DRAFT);
+    }
+
+    // ===== checkDeletePrecondition =====
+
+    @Test
+    void should_error_when_delete_check_channel_not_exist() {
+        when(channelService.getById("nope")).thenReturn(null);
+
+        assertThatThrownBy(() -> bizService.checkDeletePrecondition("nope", "u1"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessageContaining("频道不存在");
+    }
+
+    @Test
+    void should_error_when_delete_check_not_owner() {
+        Channel ch = new Channel();
+        ch.setId("ch1");
+        ch.setOwnerId("owner1");
+        when(channelService.getById("ch1")).thenReturn(ch);
+
+        assertThatThrownBy(() -> bizService.checkDeletePrecondition("ch1", "stranger"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessageContaining("仅频道主可检查删除条件");
+    }
+
+    @Test
+    void should_block_delete_when_has_published_content() {
+        Channel ch = new Channel();
+        ch.setId("ch1");
+        ch.setOwnerId("u1");
+        ch.setChannelType(ChannelType.PERSONAL);
+        when(channelService.getById("ch1")).thenReturn(ch);
+        when(channelContentPublishMapper.selectCount(any())).thenReturn(5L);
+        when(channelTransferService.list(any(LambdaQueryWrapper.class))).thenReturn(Collections.emptyList());
+        when(channelReviewService.listReviewsByChannelId("ch1")).thenReturn(Collections.emptyList());
+
+        DeleteCheckResultVO result = bizService.checkDeletePrecondition("ch1", "u1");
+
+        assertThat(result.isCanDelete()).isFalse();
+        assertThat(result.getBlockReasons()).hasSize(1);
+        assertThat(result.getBlockReasons().get(0)).contains("已发布内容");
+    }
+
+    @Test
+    void should_block_delete_when_has_pending_transfer() {
+        Channel ch = new Channel();
+        ch.setId("ch1");
+        ch.setOwnerId("u1");
+        ch.setChannelType(ChannelType.PERSONAL);
+        when(channelService.getById("ch1")).thenReturn(ch);
+        when(channelContentPublishMapper.selectCount(any())).thenReturn(0L);
+        ChannelTransfer pendingTransfer = new ChannelTransfer();
+        pendingTransfer.setStatus(TransferStatus.PENDING);
+        when(channelTransferService.list(any(LambdaQueryWrapper.class))).thenReturn(List.of(pendingTransfer));
+        when(channelReviewService.listReviewsByChannelId("ch1")).thenReturn(Collections.emptyList());
+
+        DeleteCheckResultVO result = bizService.checkDeletePrecondition("ch1", "u1");
+
+        assertThat(result.isCanDelete()).isFalse();
+        assertThat(result.getBlockReasons()).hasSize(1);
+        assertThat(result.getBlockReasons().get(0)).contains("转让请求");
+    }
+
+    @Test
+    void should_block_delete_when_has_pending_review() {
+        Channel ch = new Channel();
+        ch.setId("ch1");
+        ch.setOwnerId("u1");
+        ch.setChannelType(ChannelType.PERSONAL);
+        when(channelService.getById("ch1")).thenReturn(ch);
+        when(channelContentPublishMapper.selectCount(any())).thenReturn(0L);
+        when(channelTransferService.list(any(LambdaQueryWrapper.class))).thenReturn(Collections.emptyList());
+        ChannelReview review = new ChannelReview();
+        review.setStatus("pending");
+        when(channelReviewService.listReviewsByChannelId("ch1")).thenReturn(List.of(review));
+
+        DeleteCheckResultVO result = bizService.checkDeletePrecondition("ch1", "u1");
+
+        assertThat(result.isCanDelete()).isFalse();
+        assertThat(result.getBlockReasons()).hasSize(1);
+        assertThat(result.getBlockReasons().get(0)).contains("待审核");
+    }
+
+    @Test
+    void should_allow_delete_when_no_blockers() {
+        Channel ch = new Channel();
+        ch.setId("ch1");
+        ch.setOwnerId("u1");
+        ch.setChannelType(ChannelType.PERSONAL);
+        when(channelService.getById("ch1")).thenReturn(ch);
+        when(channelContentPublishMapper.selectCount(any())).thenReturn(0L);
+        when(channelTransferService.list(any(LambdaQueryWrapper.class))).thenReturn(Collections.emptyList());
+        when(channelReviewService.listReviewsByChannelId("ch1")).thenReturn(Collections.emptyList());
+
+        DeleteCheckResultVO result = bizService.checkDeletePrecondition("ch1", "u1");
+
+        assertThat(result.isCanDelete()).isTrue();
+        assertThat(result.getBlockReasons()).isEmpty();
+        assertThat(result.isNeedOrgAdminConfirm()).isFalse();
+    }
+
+    @Test
+    void should_flag_org_channel_for_admin_confirm() {
+        Channel ch = new Channel();
+        ch.setId("ch1");
+        ch.setOwnerId("u1");
+        ch.setChannelType(ChannelType.ORGANIZATION);
+        when(channelService.getById("ch1")).thenReturn(ch);
+        when(channelContentPublishMapper.selectCount(any())).thenReturn(0L);
+        when(channelTransferService.list(any(LambdaQueryWrapper.class))).thenReturn(Collections.emptyList());
+        when(channelReviewService.listReviewsByChannelId("ch1")).thenReturn(Collections.emptyList());
+
+        DeleteCheckResultVO result = bizService.checkDeletePrecondition("ch1", "u1");
+
+        assertThat(result.isNeedOrgAdminConfirm()).isTrue();
     }
 }

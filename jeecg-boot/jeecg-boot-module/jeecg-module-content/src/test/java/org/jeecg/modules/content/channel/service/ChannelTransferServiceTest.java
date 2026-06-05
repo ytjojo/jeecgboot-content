@@ -14,8 +14,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -128,5 +130,57 @@ class ChannelTransferServiceTest {
 
         assertThat(transferService.rejectTransfer("tr1", "u2")).isTrue();
         assertThat(transfer.getStatus()).isEqualTo(TransferStatus.REJECTED);
+    }
+
+    // ===== getTransferHistory =====
+
+    @Test
+    void should_return_transfer_history_ordered_by_create_time() {
+        ChannelTransfer t1 = new ChannelTransfer();
+        t1.setId("tr1");
+        t1.setChannelId("ch1");
+        ChannelTransfer t2 = new ChannelTransfer();
+        t2.setId("tr2");
+        t2.setChannelId("ch1");
+        when(transferMapper.selectList(any())).thenReturn(List.of(t2, t1));
+
+        List<ChannelTransfer> result = transferService.getTransferHistory("ch1");
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getId()).isEqualTo("tr2");
+    }
+
+    @Test
+    void should_return_empty_list_when_no_transfer_history() {
+        when(transferMapper.selectList(any())).thenReturn(List.of());
+
+        List<ChannelTransfer> result = transferService.getTransferHistory("ch1");
+
+        assertThat(result).isEmpty();
+    }
+
+    // ===== getPendingTransfer =====
+
+    @Test
+    void should_return_pending_transfer() {
+        ChannelTransfer transfer = new ChannelTransfer();
+        transfer.setId("tr1");
+        transfer.setChannelId("ch1");
+        transfer.setStatus(TransferStatus.PENDING);
+        when(transferMapper.selectOne(any())).thenReturn(transfer);
+
+        ChannelTransfer result = transferService.getPendingTransfer("ch1");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo("tr1");
+    }
+
+    @Test
+    void should_return_null_when_no_pending_transfer() {
+        when(transferMapper.selectOne(any())).thenReturn(null);
+
+        ChannelTransfer result = transferService.getPendingTransfer("ch1");
+
+        assertThat(result).isNull();
     }
 }

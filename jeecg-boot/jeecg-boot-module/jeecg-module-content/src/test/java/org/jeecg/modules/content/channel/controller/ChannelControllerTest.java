@@ -6,9 +6,15 @@ import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.channel.dto.CreateChannelDTO;
 import org.jeecg.modules.content.channel.dto.UpdateChannelDTO;
 import org.jeecg.modules.content.channel.entity.Channel;
+import org.jeecg.modules.content.channel.entity.ChannelTransfer;
 import org.jeecg.modules.content.channel.enums.ChannelType;
+import org.jeecg.modules.content.channel.enums.TransferStatus;
+import org.jeecg.modules.content.channel.req.ChannelListQuery;
 import org.jeecg.modules.content.channel.service.ChannelService;
+import org.jeecg.modules.content.channel.service.ChannelTransferService;
 import org.jeecg.modules.content.channel.biz.ChannelBizManageService;
+import org.jeecg.modules.content.channel.vo.ChannelTransferVO;
+import org.jeecg.modules.content.channel.vo.DeleteCheckResultVO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -34,6 +43,8 @@ class ChannelControllerTest {
     private ChannelBizManageService channelBizManageService;
     @Mock
     private ChannelService channelService;
+    @Mock
+    private ChannelTransferService channelTransferService;
 
     @InjectMocks
     private ChannelController controller;
@@ -165,5 +176,107 @@ class ChannelControllerTest {
 
         assertThat(result.isSuccess()).isTrue();
         verify(channelBizManageService).cancelDelete("ch1", "user1");
+    }
+
+    // ===== listMyChannels =====
+
+    @Test
+    void should_list_my_channels() {
+        ChannelListQuery query = new ChannelListQuery();
+        com.baomidou.mybatisplus.core.metadata.IPage<Channel> page =
+            new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 10);
+        page.setRecords(Collections.emptyList());
+        page.setTotal(0);
+        when(channelService.listMyChannels(any(), eq("user1"), any())).thenReturn(page);
+
+        Result<?> result = controller.listMyChannels(1, 10, query);
+
+        assertThat(result.isSuccess()).isTrue();
+        verify(channelService).listMyChannels(any(), eq("user1"), any());
+    }
+
+    // ===== checkDeletePrecondition =====
+
+    @Test
+    void should_check_delete_precondition() {
+        DeleteCheckResultVO vo = new DeleteCheckResultVO();
+        vo.setCanDelete(true);
+        when(channelBizManageService.checkDeletePrecondition("ch1", "user1")).thenReturn(vo);
+
+        Result<DeleteCheckResultVO> result = controller.checkDeletePrecondition("ch1");
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getResult().isCanDelete()).isTrue();
+    }
+
+    // ===== getTransferHistory =====
+
+    @Test
+    void should_get_transfer_history() {
+        Channel ch = new Channel();
+        ch.setId("ch1");
+        ch.setOwnerId("user1");
+        when(channelService.getById("ch1")).thenReturn(ch);
+        ChannelTransfer transfer = new ChannelTransfer();
+        transfer.setId("tr1");
+        transfer.setChannelId("ch1");
+        transfer.setFromUserId("u1");
+        transfer.setToUserId("u2");
+        transfer.setStatus(TransferStatus.PENDING);
+        when(channelTransferService.getTransferHistory("ch1")).thenReturn(List.of(transfer));
+
+        Result<List<ChannelTransferVO>> result = controller.getTransferHistory("ch1");
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getResult()).hasSize(1);
+        assertThat(result.getResult().get(0).getTransferId()).isEqualTo("tr1");
+    }
+
+    // ===== checkNameUnique =====
+
+    @Test
+    void should_check_name_unique() {
+        when(channelService.checkNameUnique("myname", null)).thenReturn(true);
+
+        Result<Boolean> result = controller.checkNameUnique("myname", null);
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getResult()).isTrue();
+    }
+
+    // ===== getPendingTransfer =====
+
+    @Test
+    void should_get_pending_transfer() {
+        Channel ch = new Channel();
+        ch.setId("ch1");
+        ch.setOwnerId("user1");
+        when(channelService.getById("ch1")).thenReturn(ch);
+        ChannelTransfer transfer = new ChannelTransfer();
+        transfer.setId("tr1");
+        transfer.setChannelId("ch1");
+        transfer.setFromUserId("u1");
+        transfer.setToUserId("u2");
+        transfer.setStatus(TransferStatus.PENDING);
+        when(channelTransferService.getPendingTransfer("ch1")).thenReturn(transfer);
+
+        Result<ChannelTransferVO> result = controller.getPendingTransfer("ch1");
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getResult().getTransferId()).isEqualTo("tr1");
+    }
+
+    @Test
+    void should_return_null_when_no_pending_transfer() {
+        Channel ch = new Channel();
+        ch.setId("ch1");
+        ch.setOwnerId("user1");
+        when(channelService.getById("ch1")).thenReturn(ch);
+        when(channelTransferService.getPendingTransfer("ch1")).thenReturn(null);
+
+        Result<ChannelTransferVO> result = controller.getPendingTransfer("ch1");
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getResult()).isNull();
     }
 }

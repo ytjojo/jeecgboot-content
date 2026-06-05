@@ -1,5 +1,6 @@
 package org.jeecg.modules.content.channel.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.jeecg.common.system.base.service.impl.JeecgServiceImpl;
 import org.jeecg.modules.content.channel.constant.ChannelConstants;
 import org.jeecg.modules.content.channel.entity.ChannelTransfer;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class ChannelTransferServiceImpl extends JeecgServiceImpl<ChannelTransferMapper, ChannelTransfer>
@@ -60,5 +62,22 @@ public class ChannelTransferServiceImpl extends JeecgServiceImpl<ChannelTransfer
         transfer.setStatus(TransferStatus.REJECTED);
         baseMapper.updateById(transfer);
         return true;
+    }
+
+    @Override
+    public List<ChannelTransfer> getTransferHistory(String channelId) {
+        return baseMapper.selectList(
+            new LambdaQueryWrapper<ChannelTransfer>()
+                .eq(ChannelTransfer::getChannelId, channelId)
+                .orderByDesc(ChannelTransfer::getCreateTime));
+    }
+
+    @Override
+    public ChannelTransfer getPendingTransfer(String channelId) {
+        return baseMapper.selectOne(
+            new LambdaQueryWrapper<ChannelTransfer>()
+                .eq(ChannelTransfer::getChannelId, channelId)
+                .eq(ChannelTransfer::getStatus, TransferStatus.PENDING)
+                .last("LIMIT 1"));
     }
 }
