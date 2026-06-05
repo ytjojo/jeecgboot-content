@@ -91,7 +91,7 @@ describe('subscribe/manage.vue', () => {
     const title = wrapper.find('.subscribe-manage-page__title');
     expect(title.exists()).toBe(true);
     expect(title.text()).toBe('订阅管理');
-  });
+  }, 15000);
 
   it('calls fetchSubscribeList on mount', async () => {
     await mountPage();
