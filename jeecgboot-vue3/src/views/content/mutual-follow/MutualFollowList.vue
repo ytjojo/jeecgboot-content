@@ -27,22 +27,35 @@
                 <MutualFollowBadge :mutual-follow="true" />
               </template>
             </a-list-item-meta>
+            <template #actions>
+              <a-popconfirm
+                title="确定取消互关？取消后将移除互关关系"
+                ok-text="确定"
+                cancel-text="取消"
+                @confirm="handleUnfollow(item)"
+              >
+                <a-button type="link" danger size="small">取消互关</a-button>
+              </a-popconfirm>
+            </template>
           </a-list-item>
         </template>
       </a-list>
 
-      <a-empty v-if="!loading && list.length === 0" description="暂无互关好友" />
+      <a-empty v-if="!loading && list.length === 0" :description="keyword ? '未找到匹配的互关好友' : '暂无互关好友'" />
     </a-spin>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
-import { getMutualFollowList } from '/@/api/content/relation';
+import { ref, reactive, onMounted, watch } from 'vue';
+import { getMutualFollowList, unfollowUser } from '/@/api/content/relation';
 import { useUserStore } from '/@/store/modules/user';
+import { useMessage } from '/@/hooks/web/useMessage';
 import MutualFollowBadge from '../components/MutualFollowBadge.vue';
+import { SOCIAL_EVENTS, trackSocialEvent } from '/@/utils/social/analytics';
 
 const userStore = useUserStore();
+const { createMessage } = useMessage();
 const keyword = ref('');
 const loading = ref(false);
 const list = ref<any[]>([]);
@@ -54,6 +67,16 @@ const pagination = reactive({
 });
 
 const userId = String(userStore.getUserInfo.userId || '');
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+watch(keyword, () => {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    pagination.current = 1;
+    fetchData();
+  }, 300);
+});
 
 const fetchData = async () => {
   loading.value = true;
@@ -73,6 +96,18 @@ const fetchData = async () => {
 const handleSearch = () => {
   pagination.current = 1;
   fetchData();
+};
+
+const handleUnfollow = async (item: any) => {
+  try {
+    await unfollowUser(userId, item.id);
+    list.value = list.value.filter((r) => r.id !== item.id);
+    pagination.total--;
+    trackSocialEvent(SOCIAL_EVENTS.MUTUAL_FOLLOW_CANCEL, { targetUserId: item.id });
+    createMessage.success('已取消互关');
+  } catch {
+    createMessage.error('取消互关失败');
+  }
 };
 
 const handlePageChange = (page: any) => {
