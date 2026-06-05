@@ -20,6 +20,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import * as echarts from 'echarts';
 import { getFanTrend } from '/@/api/content/fan-analytics';
+import { SOCIAL_EVENTS, trackSocialEvent } from '/@/utils/social/analytics';
 
 const props = defineProps({
   userId: {
@@ -72,6 +73,13 @@ const renderChart = (dates: string[], counts: number[]) => {
     ],
     grid: { left: 50, right: 20, bottom: 30, top: 30 },
   });
+  chart.on('click', (params: any) => {
+    trackSocialEvent(SOCIAL_EVENTS.FAN_TREND_POINT_CLICK, {
+      date: params.name,
+      value: params.value,
+      period: range.value,
+    });
+  });
 };
 
 const handleRangeChange = () => {
@@ -83,6 +91,7 @@ const handleResize = () => {
 };
 
 onMounted(() => {
+  trackSocialEvent(SOCIAL_EVENTS.FAN_TREND_VIEW, { period: range.value });
   fetchData();
   window.addEventListener('resize', handleResize);
 });

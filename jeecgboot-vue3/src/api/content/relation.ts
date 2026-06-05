@@ -1,6 +1,7 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
+  mutualStatus = '/content/user/relation/mutual-status',
   mutualFollowList = '/content/user/relation/mutual-follow-list',
   detail = '/content/user/relation/detail',
   follow = '/content/user/relation/follow',
@@ -24,6 +25,10 @@ enum Api {
 /** 查询互关好友列表 */
 export const getMutualFollowList = (userId: string, params?: { keyword?: string; pageNo?: number; pageSize?: number }) =>
   defHttp.get({ url: Api.mutualFollowList, params: { userId, ...params } });
+
+/** 批量查询互关状态 */
+export const getMutualStatus = (userIds: string[]) =>
+  defHttp.get<Record<string, boolean>>({ url: Api.mutualStatus, params: { userIds: userIds.join(',') } });
 
 /** 查询与目标用户的关系详情 */
 export const getRelationDetail = (userId: string, targetUserId: string) =>

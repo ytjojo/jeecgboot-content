@@ -31,13 +31,19 @@
       <!-- Stats Card -->
       <a-row :gutter="16" style="margin-bottom: 16px">
         <a-col :span="8">
-          <a-statistic title="邀请人数" :value="stats.totalInvited || 0" />
+          <a-card size="small">
+            <a-statistic title="邀请人数" :value="stats.totalInvited || 0" />
+          </a-card>
         </a-col>
         <a-col :span="8">
-          <a-statistic title="获得积分" :value="stats.totalReward || 0" />
+          <a-card size="small">
+            <a-statistic title="获得积分" :value="stats.totalReward || 0" />
+          </a-card>
         </a-col>
         <a-col :span="8">
-          <a-statistic title="待发放积分" :value="stats.pendingReward || 0" />
+          <a-card size="small">
+            <a-statistic title="待发放积分" :value="stats.pendingReward || 0" />
+          </a-card>
         </a-col>
       </a-row>
 
@@ -76,6 +82,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { generateInviteCode, listInviteRecords, getInviteStats } from '/@/api/content/invite';
 import { useUserStore } from '/@/store/modules/user';
 import { useMessage } from '/@/hooks/web/useMessage';
+import { SOCIAL_EVENTS, trackSocialEvent } from '/@/utils/social/analytics';
 
 const userStore = useUserStore();
 const { createMessage } = useMessage();
@@ -125,17 +132,48 @@ const handleGenerate = async () => {
   }
 };
 
+function fallbackCopy(text: string): boolean {
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+async function copyText(text: string, successMsg: string) {
+  try {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+    } else if (!fallbackCopy(text)) {
+      throw new Error('fallback failed');
+    }
+    createMessage.success(successMsg);
+  } catch {
+    if (fallbackCopy(text)) {
+      createMessage.success(successMsg);
+    } else {
+      createMessage.error('复制失败，请手动复制');
+    }
+  }
+}
+
 const handleCopyCode = () => {
-  navigator.clipboard.writeText(inviteCode.value).then(() => {
-    createMessage.success('邀请码已复制');
-  });
+  trackSocialEvent(SOCIAL_EVENTS.INVITE_CODE_COPY, { type: 'code' });
+  copyText(inviteCode.value, '邀请码已复制');
 };
 
 const handleCopyLink = () => {
+  trackSocialEvent(SOCIAL_EVENTS.INVITE_CODE_COPY, { type: 'link' });
   const link = `${window.location.origin}/register?inviteCode=${inviteCode.value}`;
-  navigator.clipboard.writeText(link).then(() => {
-    createMessage.success('邀请链接已复制');
-  });
+  copyText(link, '邀请链接已复制');
 };
 
 const handlePageChange = (page: any) => {

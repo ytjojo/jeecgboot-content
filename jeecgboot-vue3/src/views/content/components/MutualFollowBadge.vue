@@ -1,5 +1,13 @@
 <template>
-  <a-tag v-if="mutualFollow" color="blue" class="mutual-follow-badge">
+  <a-tag
+    v-if="mutualFollow"
+    color="blue"
+    class="mutual-follow-badge"
+    :class="{
+      'mutual-follow-badge--small': size === 'small',
+      'mutual-follow-badge--inline': inline,
+    }"
+  >
     <template #icon><swap-outlined /></template>
     互关
   </a-tag>
@@ -8,12 +16,18 @@
 <script setup lang="ts">
 import { SwapOutlined } from '@ant-design/icons-vue';
 
-defineProps({
-  mutualFollow: {
-    type: Boolean,
-    default: false,
+withDefaults(
+  defineProps<{
+    mutualFollow?: boolean;
+    size?: 'default' | 'small';
+    inline?: boolean;
+  }>(),
+  {
+    mutualFollow: false,
+    size: 'default',
+    inline: false,
   },
-});
+);
 </script>
 
 <style scoped>
@@ -22,5 +36,12 @@ defineProps({
   align-items: center;
   gap: 2px;
   font-size: 12px;
+}
+.mutual-follow-badge--small {
+  font-size: 10px;
+  padding: 0 4px;
+}
+.mutual-follow-badge--inline {
+  display: inline;
 }
 </style>

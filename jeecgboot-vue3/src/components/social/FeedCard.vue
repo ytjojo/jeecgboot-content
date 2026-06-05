@@ -16,6 +16,9 @@
           </Tag>
         </div>
       </div>
+      <span v-if="feed.visibility === 'MUTUAL_FOLLOW'" class="feed-card__private-badge">
+        <eye-invisible-outlined /> 仅互关可见
+      </span>
       <span class="feed-card__time">{{ feed.createTime }}</span>
     </div>
     <div class="feed-card__content">
@@ -29,6 +32,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { EyeInvisibleOutlined } from '@ant-design/icons-vue';
 
 interface FeedProp {
   id: string;
@@ -43,6 +47,7 @@ interface FeedProp {
   sourceName?: string;
   createTime: string;
   isPriority: boolean;
+  visibility?: 'PUBLIC' | 'MUTUAL_FOLLOW';
 }
 
 const props = defineProps<{
@@ -124,6 +129,16 @@ function handleClick() {
     font-size: 12px;
     line-height: 18px;
     padding: 0 4px;
+  }
+
+  &__private-badge {
+    font-size: 12px;
+    color: #faad14;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   &__time {
