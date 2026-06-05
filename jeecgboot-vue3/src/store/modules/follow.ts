@@ -149,7 +149,7 @@ export const useFollowStore = defineStore('social-follow', () => {
     await fetchFollowGroups(userId);
   }
 
-  async function updateGroup(userId: string, groupId: string, name: string, sortOrder?: number) {
+  async function updateGroup(userId: string, groupId: string, name: string, _sortOrder?: number) {
     await renameFollowGroup(userId, { groupId, name });
     await fetchFollowGroups(userId);
   }

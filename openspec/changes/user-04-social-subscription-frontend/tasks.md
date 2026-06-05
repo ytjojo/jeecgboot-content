@@ -96,15 +96,15 @@
 
 ## 11. 单元测试
 
-- [ ] 11.1 编写FollowButton组件测试（状态切换、禁止自关注、防抖、乐观更新）
-- [ ] 11.2 编写SpecialFollowButton组件测试（未关注禁用、星标切换、二次确认）
-- [ ] 11.3 编写SubscribeButton组件测试（订阅/取消订阅、暂停/恢复）
-- [ ] 11.4 编写BatchOperationBar组件测试（多选、全选、操作禁用、结果展示）
-- [ ] 11.5 编写UserCard组件测试（信息展示、操作按钮）
-- [ ] 11.6 编写FeedCard组件测试（动态展示、点击跳转）
-- [ ] 11.7 编写follow store测试（状态管理、分页、搜索）
-- [ ] 11.8 编写subscribe store测试（订阅状态、通知配置）
-- [ ] 11.9 编写feed store测试（信息流状态、缓存管理）
+- [x] 11.1 编写FollowButton组件测试（状态切换、禁止自关注、防抖、乐观更新）
+- [x] 11.2 编写SpecialFollowButton组件测试（未关注禁用、星标切换、二次确认）
+- [x] 11.3 编写SubscribeButton组件测试（订阅/取消订阅、暂停/恢复）
+- [x] 11.4 编写BatchOperationBar组件测试（多选、全选、操作禁用、结果展示）
+- [x] 11.5 编写UserCard组件测试（信息展示、操作按钮）
+- [x] 11.6 编写FeedCard组件测试（动态展示、点击跳转）
+- [x] 11.7 编写follow store测试（状态管理、分页、搜索）
+- [x] 11.8 编写subscribe store测试（订阅状态、通知配置）
+- [x] 11.9 编写feed store测试（信息流状态、缓存管理）
 
 ## 12. 集成测试
 
