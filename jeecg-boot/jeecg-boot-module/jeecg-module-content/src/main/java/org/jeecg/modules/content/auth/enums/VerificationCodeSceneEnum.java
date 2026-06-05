@@ -19,7 +19,8 @@ public enum VerificationCodeSceneEnum {
     BIND_EMAIL("BIND_EMAIL", "绑定邮箱"),
     RESET_PASSWORD("RESET_PASSWORD", "重置密码"),
     UNBIND_MOBILE("UNBIND_MOBILE", "解绑手机号"),
-    UNBIND_EMAIL("UNBIND_EMAIL", "解绑邮箱");
+    UNBIND_EMAIL("UNBIND_EMAIL", "解绑邮箱"),
+    SECURITY_VERIFY("SECURITY_VERIFY", "安全核验");
 
     private final String code;
     private final String description;
