@@ -3,6 +3,7 @@ import { defHttp } from '/@/utils/http/axios';
 enum Api {
   generate = '/content/user/invite/generate',
   bind = '/content/user/invite/bind',
+  validate = '/content/user/invite/validate',
   records = '/content/user/invite/records',
   stats = '/content/user/invite/stats',
 }
@@ -10,6 +11,10 @@ enum Api {
 /** 生成或获取邀请码 */
 export const generateInviteCode = (userId: string) =>
   defHttp.post({ url: Api.generate, params: { userId } });
+
+/** 验证邀请码有效性 */
+export const validateInviteCode = (inviteCode: string) =>
+  defHttp.get({ url: Api.validate, params: { inviteCode } });
 
 /** 绑定邀请关系（注册时调用） */
 export const bindInviteRelation = (inviteCode: string, inviteeUserId: string) =>
