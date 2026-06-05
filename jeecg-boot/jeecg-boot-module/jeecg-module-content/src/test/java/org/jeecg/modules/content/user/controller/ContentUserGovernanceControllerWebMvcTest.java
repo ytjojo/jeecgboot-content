@@ -5,6 +5,8 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.entity.ContentUserDeviceSession;
 import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
 import org.jeecg.modules.content.user.service.IContentUserGovernanceService;
+import org.jeecg.modules.content.user.vo.ContentUserAuditLogItemVO;
+import org.jeecg.modules.content.user.vo.ContentUserAuditLogPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryItemVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusVO;
@@ -17,6 +19,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -238,5 +241,47 @@ class ContentUserGovernanceControllerWebMvcTest {
             .andExpect(jsonPath("$.message").value("警告发送成功"));
 
         verify(governanceService).warnUser(any(), eq("u2"), eq("首次警告"));
+    }
+
+    @Test
+    void shouldListAuditLog() throws Exception {
+        ContentUserAuditLogItemVO item = new ContentUserAuditLogItemVO()
+            .setId("log-1")
+            .setUserId("u1")
+            .setEventType("USER_STATUS_CHANGE")
+            .setOperatorUserId("admin-1")
+            .setEventContent("NORMAL -> MUTED")
+            .setEventTime(new Date(1735689600000L));
+        ContentUserAuditLogPageVO page = new ContentUserAuditLogPageVO()
+            .setRecords(List.of(item))
+            .setTotal(1L)
+            .setPageNo(1L)
+            .setPageSize(10L);
+        when(governanceService.listAuditLog(any(), any(), any(), any(), any(), any())).thenReturn(page);
+
+        mockMvc.perform(get("/content/user/governance/audit-log")
+                .param("pageNo", "1")
+                .param("pageSize", "10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.total").value(1))
+            .andExpect(jsonPath("$.result.records[0].id").value("log-1"))
+            .andExpect(jsonPath("$.result.records[0].eventType").value("USER_STATUS_CHANGE"));
+    }
+
+    @Test
+    void shouldListAuditLogWithDefaultPagination() throws Exception {
+        ContentUserAuditLogPageVO page = new ContentUserAuditLogPageVO()
+            .setRecords(List.of())
+            .setTotal(0L)
+            .setPageNo(1L)
+            .setPageSize(10L);
+        when(governanceService.listAuditLog(any(), any(), any(), any(), any(), any())).thenReturn(page);
+
+        mockMvc.perform(get("/content/user/governance/audit-log"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.pageNo").value(1))
+            .andExpect(jsonPath("$.result.pageSize").value(10));
     }
 }

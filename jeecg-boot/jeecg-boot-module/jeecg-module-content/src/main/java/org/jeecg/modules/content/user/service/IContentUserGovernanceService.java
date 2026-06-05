@@ -2,6 +2,7 @@ package org.jeecg.modules.content.user.service;
 
 import org.jeecg.modules.content.user.entity.ContentUserDeviceSession;
 import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
+import org.jeecg.modules.content.user.vo.ContentUserAuditLogPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusVO;
 
@@ -44,4 +45,19 @@ public interface IContentUserGovernanceService {
      * @param reason         the reason for the warning
      */
     void warnUser(String operatorUserId, String targetUserId, String reason);
+
+    /**
+     * 分页查询审计日志。
+     *
+     * @param pageNo         页码
+     * @param pageSize       每页条数
+     * @param operatorUserId 操作人ID（可选）
+     * @param eventType      事件类型（可选）
+     * @param startTime      开始时间（可选）
+     * @param endTime        结束时间（可选）
+     * @return 分页结果
+     */
+    ContentUserAuditLogPageVO listAuditLog(Long pageNo, Long pageSize,
+                                           String operatorUserId, String eventType,
+                                           Date startTime, Date endTime);
 }

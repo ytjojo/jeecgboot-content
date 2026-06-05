@@ -9,8 +9,10 @@ import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.user.entity.ContentUserDeviceSession;
 import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
 import org.jeecg.modules.content.user.service.IContentUserGovernanceService;
+import org.jeecg.modules.content.user.vo.ContentUserAuditLogPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusVO;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -113,6 +116,21 @@ public class ContentUserGovernanceController {
         String operatorUserId = resolveUserId(null);
         governanceService.warnUser(operatorUserId, targetUserId, reason);
         return Result.OK("警告发送成功");
+    }
+
+    /**
+     * 分页查询审计日志。
+     */
+    @Operation(summary = "分页查询审计日志")
+    @GetMapping("/audit-log")
+    public Result<ContentUserAuditLogPageVO> listAuditLog(
+            @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
+            @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize,
+            @RequestParam(value = "operatorUserId", required = false) String operatorUserId,
+            @RequestParam(value = "eventType", required = false) String eventType,
+            @RequestParam(value = "startTime", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date startTime,
+            @RequestParam(value = "endTime", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date endTime) {
+        return Result.OK(governanceService.listAuditLog(pageNo, pageSize, operatorUserId, eventType, startTime, endTime));
     }
 
     private String resolveUserId(String userId) {

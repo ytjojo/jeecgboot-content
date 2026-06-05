@@ -1,5 +1,6 @@
 package org.jeecg.modules.content.user.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -19,6 +20,8 @@ import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
 import org.jeecg.modules.content.user.service.IContentUserGrowthPenaltyRecordService;
 import org.jeecg.modules.content.user.service.IContentUserGrowthPenaltyRecoveryService;
 import org.jeecg.modules.content.user.service.IContentUserGovernanceService;
+import org.jeecg.modules.content.user.vo.ContentUserAuditLogItemVO;
+import org.jeecg.modules.content.user.vo.ContentUserAuditLogPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryItemVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusVO;
@@ -260,6 +263,41 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
             targetUserId, operatorUserId, "WARN_USER", null, reason));
     }
 
+    /**
+     * 分页查询审计日志。
+     */
+    @Override
+    public ContentUserAuditLogPageVO listAuditLog(Long pageNo, Long pageSize,
+                                                  String operatorUserId, String eventType,
+                                                  Date startTime, Date endTime) {
+        long currentPage = pageNo == null || pageNo < 1L ? 1L : pageNo;
+        long currentSize = pageSize == null || pageSize < 1L ? 10L : pageSize;
+        LambdaQueryWrapper<ContentUserAuditLog> wrapper = Wrappers.<ContentUserAuditLog>lambdaQuery();
+        if (operatorUserId != null && !operatorUserId.isBlank()) {
+            wrapper.eq(ContentUserAuditLog::getOperatorUserId, operatorUserId);
+        }
+        if (eventType != null && !eventType.isBlank()) {
+            wrapper.eq(ContentUserAuditLog::getEventType, eventType);
+        }
+        if (startTime != null) {
+            wrapper.ge(ContentUserAuditLog::getEventTime, startTime);
+        }
+        if (endTime != null) {
+            wrapper.le(ContentUserAuditLog::getEventTime, endTime);
+        }
+        wrapper.orderByDesc(ContentUserAuditLog::getEventTime);
+        IPage<ContentUserAuditLog> page = auditLogMapper.selectPage(
+            new Page<>(currentPage, currentSize), wrapper);
+        List<ContentUserAuditLogItemVO> items = page.getRecords().stream()
+            .map(this::toAuditLogItem)
+            .toList();
+        return new ContentUserAuditLogPageVO()
+            .setRecords(items)
+            .setTotal(page.getTotal())
+            .setPageNo(page.getCurrent())
+            .setPageSize(page.getSize());
+    }
+
     private void requireModeratorOrAdmin(String operatorUserId) {
         ContentUserProfile profile = profileMapper.selectByUserId(operatorUserId);
         String role = (profile != null && profile.getCommunityRole() != null) ? profile.getCommunityRole() : "NORMAL";
@@ -392,6 +430,20 @@ public class ContentUserGovernanceServiceImpl implements IContentUserGovernanceS
         restoreRecord.setRecoverable(Boolean.FALSE);
         statusRecordMapper.insert(restoreRecord);
         return restoredStatus;
+    }
+
+    private ContentUserAuditLogItemVO toAuditLogItem(ContentUserAuditLog log) {
+        return new ContentUserAuditLogItemVO()
+            .setId(log.getId())
+            .setUserId(log.getUserId())
+            .setEventType(log.getEventType())
+            .setOperatorUserId(log.getOperatorUserId())
+            .setEventContent(log.getEventContent())
+            .setExtraDataJson(log.getExtraDataJson())
+            .setEventTime(log.getEventTime())
+            .setIpAddress(log.getIpAddress())
+            .setDeviceInfo(log.getDeviceInfo())
+            .setCreateTime(log.getCreateTime());
     }
 
     private ContentUserAuditLog buildAutoRecoverAuditLog(ContentUserStatusRecord expiredRecord, String restoredStatus) {

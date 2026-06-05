@@ -10,6 +10,7 @@ import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserStatusRecordMapper;
 import org.jeecg.modules.content.user.req.governance.ContentUserStatusChangeReq;
 import org.jeecg.modules.content.user.service.impl.ContentUserGovernanceServiceImpl;
+import org.jeecg.modules.content.user.vo.ContentUserAuditLogPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserStatusHistoryPageVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -207,6 +208,106 @@ class ContentUserGovernanceServiceTest {
             argThat(it -> currentTime.equals(it)),
             argThat(it -> "处罚到期自动恢复".equals(it))
         );
+    }
+
+    @Test
+    void shouldPageAuditLogWithNoFilters() {
+        ContentUserAuditLog auditLog = buildAuditLog("log-1", "u1", "USER_STATUS_CHANGE",
+            "admin-1", "NORMAL -> MUTED", new Date(1735689600000L));
+        when(auditLogMapper.selectPage(any(), any())).thenAnswer(invocation -> {
+            IPage<ContentUserAuditLog> page = invocation.getArgument(0);
+            page.setRecords(List.of(auditLog));
+            page.setTotal(5L);
+            return page;
+        });
+
+        ContentUserAuditLogPageVO result = governanceService.listAuditLog(
+            1L, 10L, null, null, null, null);
+
+        assertThat(result.getTotal()).isEqualTo(5L);
+        assertThat(result.getPageNo()).isEqualTo(1L);
+        assertThat(result.getPageSize()).isEqualTo(10L);
+        assertThat(result.getRecords()).hasSize(1);
+        assertThat(result.getRecords().get(0).getId()).isEqualTo("log-1");
+        assertThat(result.getRecords().get(0).getEventType()).isEqualTo("USER_STATUS_CHANGE");
+        verify(auditLogMapper).selectPage(
+            argThat(page -> page.getCurrent() == 1L && page.getSize() == 10L),
+            argThat(wrapper -> wrapper != null));
+    }
+
+    @Test
+    void shouldPageAuditLogWithOperatorFilter() {
+        when(auditLogMapper.selectPage(any(), any())).thenAnswer(invocation -> {
+            IPage<ContentUserAuditLog> page = invocation.getArgument(0);
+            page.setRecords(List.of());
+            page.setTotal(0L);
+            return page;
+        });
+
+        governanceService.listAuditLog(1L, 10L, "admin-1", null, null, null);
+
+        verify(auditLogMapper).selectPage(any(), argThat(wrapper -> wrapper != null));
+    }
+
+    @Test
+    void shouldPageAuditLogWithEventTypeFilter() {
+        when(auditLogMapper.selectPage(any(), any())).thenAnswer(invocation -> {
+            IPage<ContentUserAuditLog> page = invocation.getArgument(0);
+            page.setRecords(List.of());
+            page.setTotal(0L);
+            return page;
+        });
+
+        governanceService.listAuditLog(1L, 10L, null, "MODERATOR_ACTION", null, null);
+
+        verify(auditLogMapper).selectPage(any(), argThat(wrapper -> wrapper != null));
+    }
+
+    @Test
+    void shouldPageAuditLogWithTimeRangeFilter() {
+        Date startTime = new Date(1735689600000L);
+        Date endTime = new Date(1735693200000L);
+        when(auditLogMapper.selectPage(any(), any())).thenAnswer(invocation -> {
+            IPage<ContentUserAuditLog> page = invocation.getArgument(0);
+            page.setRecords(List.of());
+            page.setTotal(0L);
+            return page;
+        });
+
+        governanceService.listAuditLog(1L, 10L, null, null, startTime, endTime);
+
+        verify(auditLogMapper).selectPage(any(), argThat(wrapper -> wrapper != null));
+    }
+
+    @Test
+    void shouldUseDefaultPaginationWhenNull() {
+        when(auditLogMapper.selectPage(any(), any())).thenAnswer(invocation -> {
+            IPage<ContentUserAuditLog> page = invocation.getArgument(0);
+            page.setRecords(List.of());
+            page.setTotal(0L);
+            return page;
+        });
+
+        ContentUserAuditLogPageVO result = governanceService.listAuditLog(null, null, null, null, null, null);
+
+        assertThat(result.getPageNo()).isEqualTo(1L);
+        assertThat(result.getPageSize()).isEqualTo(10L);
+        verify(auditLogMapper).selectPage(
+            argThat(page -> page.getCurrent() == 1L && page.getSize() == 10L),
+            any());
+    }
+
+    private ContentUserAuditLog buildAuditLog(String id, String userId, String eventType,
+                                               String operatorUserId, String eventContent, Date eventTime) {
+        ContentUserAuditLog log = new ContentUserAuditLog()
+            .setUserId(userId)
+            .setEventType(eventType)
+            .setOperatorUserId(operatorUserId)
+            .setEventContent(eventContent)
+            .setEventTime(eventTime);
+        log.setId(id);
+        log.setCreateTime(eventTime);
+        return log;
     }
 
     private ContentUserStatusChangeReq changeReq(String userId, String targetStatus) {
