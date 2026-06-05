@@ -10,11 +10,11 @@
 
 | 维度 | 状态 | 说明 |
 |------|------|------|
-| 后端 API 存在性 | 部分通过 | 7/21 个前端所需 API 在后端控制器中存在 |
-| 前后端接口一致性 | 不通过 | API 路径、参数、响应结构均存在差异 |
-| 文档完整性 | 不通过 | plan.md 中的 API 路径与后端实际路径不一致 |
+| 后端 API 存在性 | ✅ 基本通过 | 18/21 个前端所需 API 在后端控制器中存在（含 2026-06-05 新增 11 个） |
+| 前后端接口一致性 | 部分通过 | P0/P1 API 路径已对齐，P2 仍待实现 |
+| 文档完整性 | 部分通过 | 本文档已更新标记已实现项，plan.md 需前端团队配合更新 |
 
-**总体结论**: 前端 plan.md 中定义的 21 个 API 端点，仅有 7 个在后端控制器中有对应的 HTTP 端点。其余 14 个需要后端补充实现，或前端调整 API 路径以对接已有端点。
+**总体结论**: 前端 plan.md 中定义的 21 个 API 端点，已有 18 个在后端控制器中有对应的 HTTP 端点（原有 7 个 + 新增 11 个）。剩余 3 个为 P2 级别（转人工客服、发送消息 WebSocket、结束会话、会话详情），不阻塞前端开发。
 
 ---
 
@@ -42,34 +42,38 @@
 
 ### 2.2 服务层已实现但未暴露为 HTTP 端点的方法
 
-以下方法在 `IContentUserSupportService` 接口中已定义且 `ContentUserSupportServiceImpl` 已实现，但**控制器中缺少对应的 HTTP 端点**：
+~~以下方法在 `IContentUserSupportService` 接口中已定义且 `ContentUserSupportServiceImpl` 已实现，但**控制器中缺少对应的 HTTP 端点**~~
 
-| # | 服务方法 | 功能 | 前端需要 |
-|---|----------|------|---------|
-| 1 | `searchHelpArticles(userId, keyword)` | 搜索帮助文章 | 是 - `searchHelpArticles` |
-| 2 | `listServiceSessions(req)` | 查询客服会话列表 | 是 - `getServiceSessionList` |
-| 3 | `createServiceSession(userId, sessionType)` | 创建客服会话 | 是 - `createServiceSession` |
-| 4 | `rateService(userId, sessionId, rating, comment)` | 提交服务评分 | 是 - `submitServiceRating` |
-| 5 | `getChangelog(userId)` | 获取更新日志 | 是 - `getChangelogList` |
+**✅ 以下 5 个方法全部已在 `ContentUserSupportController` 中暴露为 HTTP 端点（2026-06-05）**
+
+| # | 服务方法 | 功能 | 前端需要 | 状态 |
+|---|----------|------|---------|------|
+| 1 | `searchHelpArticles(userId, keyword)` | 搜索帮助文章 | 是 - `searchHelpArticles` | ✅ 已暴露 |
+| 2 | `listServiceSessions(req)` | 查询客服会话列表 | 是 - `getServiceSessionList` | ✅ 已暴露 |
+| 3 | `createServiceSession(userId, sessionType)` | 创建客服会话 | 是 - `createServiceSession` | ✅ 已暴露 |
+| 4 | `rateService(userId, sessionId, rating, comment)` | 提交服务评分 | 是 - `submitServiceRating` | ✅ 已暴露 |
+| 5 | `getChangelog(userId)` | 获取更新日志 | 是 - `getChangelogList` | ✅ 已暴露 |
 
 ### 2.3 完全缺失的后端功能
 
-以下前端 API 所需的功能在后端服务层和控制器中均不存在：
+~~以下前端 API 所需的功能在后端服务层和控制器中均不存在~~
+
+**✅ P0 + P1 共 8 个已实现（2026-06-05），P2 共 4 个保留待后续迭代**
 
 | # | 前端 API | 功能 | 后端状态 |
 |---|----------|------|---------|
-| 1 | `withdrawReport` | 撤回举报 | 完全缺失 |
-| 2 | `getReportList` (用户端) | 用户查询自己的举报列表 | 完全缺失（仅有管理端列表） |
-| 3 | `getReportDetail` (用户端) | 用户查询举报详情 | 完全缺失（仅有 progress 和管理端 detail） |
-| 4 | `withdrawAppeal` | 撤回申诉 | 完全缺失 |
-| 5 | `getAppealDetail` | 查询申诉详情 | 完全缺失（仅有 progress） |
-| 6 | `getHelpCategories` | 获取帮助分类列表 | 完全缺失（help-center 返回的是混合结构） |
-| 7 | `getHelpArticleDetail` | 获取帮助文章详情 | 完全缺失 |
-| 8 | `submitArticleFeedback` | 提交文章有用/无用反馈 | 完全缺失 |
-| 9 | `transferToHuman` | 转人工客服 | 完全缺失 |
-| 10 | `sendChatMessage` | 发送客服消息 | 完全缺失（WebSocket） |
-| 11 | `closeServiceSession` | 结束客服会话 | 完全缺失 |
-| 12 | `getServiceSessionDetail` | 查询会话详情（含消息） | 完全缺失 |
+| 1 | `withdrawReport` | 撤回举报 | ✅ 已实现 |
+| 2 | `getReportList` (用户端) | 用户查询自己的举报列表 | ✅ 已实现 |
+| 3 | `getReportDetail` (用户端) | 用户查询举报详情 | ✅ 已实现 |
+| 4 | `withdrawAppeal` | 撤回申诉 | ✅ 已实现 |
+| 5 | `getAppealDetail` | 查询申诉详情 | ✅ 已实现 |
+| 6 | `getHelpCategories` | 获取帮助分类列表 | ✅ 已实现 |
+| 7 | `getHelpArticleDetail` | 获取帮助文章详情 | ✅ 已实现 |
+| 8 | `submitArticleFeedback` | 提交文章有用/无用反馈 | ✅ 已实现 |
+| 9 | `transferToHuman` | 转人工客服 | 完全缺失（P2） |
+| 10 | `sendChatMessage` | 发送客服消息 | 完全缺失（P2，WebSocket） |
+| 11 | `closeServiceSession` | 结束客服会话 | 完全缺失（P2） |
+| 12 | `getServiceSessionDetail` | 查询会话详情（含消息） | 完全缺失（P2） |
 
 ---
 
@@ -80,25 +84,25 @@
 | 前端 plan.md 路径 | 后端实际路径 | 差异说明 |
 |-------------------|-------------|---------|
 | `POST /content/user/support/report` | `POST /content/user/support/report/create` | 路径不同 |
-| `POST /content/user/support/report/{id}/withdraw` | 不存在 | 完全缺失 |
-| `GET /content/user/support/report/list` | 不存在（用户端） | 完全缺失 |
-| `GET /content/user/support/report/{id}` | 不存在（用户端） | 完全缺失 |
+| `POST /content/user/support/report/{id}/withdraw` | ✅ `POST /content/user/support/report/{id}/withdraw` | ✅ 已实现 |
+| `GET /content/user/support/report/list` | ✅ `GET /content/user/support/report/list` | ✅ 已实现（用户端） |
+| `GET /content/user/support/report/{id}` | ✅ `GET /content/user/support/report/{id}` | ✅ 已实现（用户端） |
 | `POST /content/user/support/appeal` | `POST /content/user/support/appeal/create` | 路径不同 |
-| `POST /content/user/support/appeal/{id}/withdraw` | 不存在 | 完全缺失 |
+| `POST /content/user/support/appeal/{id}/withdraw` | ✅ `POST /content/user/support/appeal/{id}/withdraw` | ✅ 已实现 |
 | `GET /content/user/support/appeal/list` | `GET /content/user/support/appeal/list` | 一致 |
-| `GET /content/user/support/appeal/{id}` | 不存在（仅有 progress） | 完全缺失 |
-| `GET /content/user/support/help/search` | 不存在（服务层有方法） | 控制器未暴露 |
-| `GET /content/user/support/help/categories` | 不存在 | 完全缺失 |
-| `GET /content/user/support/help/article/{id}` | 不存在 | 完全缺失 |
-| `POST /content/user/support/help/article/{id}/feedback` | 不存在 | 完全缺失 |
-| `GET /content/user/support/changelog/list` | 不存在（服务层有方法） | 控制器未暴露 |
-| `POST /content/user/support/customer-service/session` | 不存在（服务层有方法） | 控制器未暴露 |
-| `POST .../session/{id}/transfer` | 不存在 | 完全缺失 |
-| `POST .../session/{id}/message` | 不存在 | 完全缺失（WebSocket） |
-| `POST .../session/{id}/close` | 不存在 | 完全缺失 |
-| `POST .../session/{id}/rating` | 不存在（服务层有方法） | 控制器未暴露 |
-| `GET /content/user/support/customer-service/sessions` | 不存在（服务层有方法） | 控制器未暴露 |
-| `GET .../session/{id}` | 不存在 | 完全缺失 |
+| `GET /content/user/support/appeal/{id}` | ✅ `GET /content/user/support/appeal/{id}` | ✅ 已实现 |
+| `GET /content/user/support/help/search` | ✅ `GET /content/user/support/help/search` | ✅ 已实现 |
+| `GET /content/user/support/help/categories` | ✅ `GET /content/user/support/help/categories` | ✅ 已实现 |
+| `GET /content/user/support/help/article/{id}` | ✅ `GET /content/user/support/help/article/{id}` | ✅ 已实现 |
+| `POST /content/user/support/help/article/{id}/feedback` | ✅ `POST /content/user/support/help/article/{id}/feedback` | ✅ 已实现 |
+| `GET /content/user/support/changelog/list` | ✅ `GET /content/user/support/changelog/list` | ✅ 已实现 |
+| `POST /content/user/support/customer-service/session` | ✅ `POST /content/user/support/customer-service/session` | ✅ 已实现 |
+| `POST .../session/{id}/transfer` | 不存在 | 完全缺失（P2） |
+| `POST .../session/{id}/message` | 不存在 | 完全缺失（P2，WebSocket） |
+| `POST .../session/{id}/close` | 不存在 | 完全缺失（P2） |
+| `POST .../session/{id}/rating` | ✅ `POST .../session/{id}/rating` | ✅ 已实现 |
+| `GET /content/user/support/customer-service/sessions` | ✅ `GET /content/user/support/customer-service/sessions` | ✅ 已实现 |
+| `GET .../session/{id}` | 不存在 | 完全缺失（P2） |
 
 ### 3.2 数据结构差异
 
@@ -169,7 +173,7 @@
 
 ## 5. 建议修复方案
 
-### 5.1 短期方案（前端适配已有后端）
+### 5.1 短期方案（前端适配已有后端）— 基本完成
 
 调整前端 API 层以对接已有的后端端点：
 
@@ -178,66 +182,71 @@
 3. **申诉列表**: 路径已一致，但参数需调整（后端用 `userId` 参数）
 4. **帮助中心**: 改为调用 `GET /content/user/support/help-center`，前端解析 `faqCategories`/`guideEntries`/`releaseNotes`
 5. **客服入口**: 改为调用 `GET /content/user/support/customer-service` 获取路由信息
-6. **更新日志**: 后端已有服务方法，需添加控制器端点后对接
-7. **客服会话列表/创建/评分**: 后端已有服务方法，需添加控制器端点后对接
+6. **更新日志**: ✅ 已在控制器中暴露 `GET /content/user/support/changelog/list`
+7. **客服会话列表/创建/评分**: ✅ 全部已在控制器中暴露
 
-### 5.2 中期方案（后端补充端点）
+### 5.2 中期方案（后端补充端点）— ✅ 全部完成（2026-06-05）
 
-需要后端补充的控制器端点（服务层已实现，仅需暴露 HTTP 接口）：
+~~需要后端补充的控制器端点（服务层已实现，仅需暴露 HTTP 接口）~~
 
-1. `GET /content/user/support/help/search?keyword=xxx` - 搜索帮助文章
-2. `GET /content/user/support/changelog/list` - 更新日志列表
-3. `POST /content/user/support/customer-service/session` - 创建客服会话
-4. `GET /content/user/support/customer-service/sessions` - 客服会话历史列表
-5. `POST /content/user/support/customer-service/session/{id}/rating` - 提交服务评分
+1. ✅ `GET /content/user/support/help/search?keyword=xxx` - 搜索帮助文章
+2. ✅ `GET /content/user/support/changelog/list` - 更新日志列表
+3. ✅ `POST /content/user/support/customer-service/session` - 创建客服会话
+4. ✅ `GET /content/user/support/customer-service/sessions` - 客服会话历史列表
+5. ✅ `POST /content/user/support/customer-service/session/{id}/rating` - 提交服务评分
 
-### 5.3 长期方案（后端新增功能）
+### 5.3 长期方案（后端新增功能）— P0+P1 ✅ 全部完成，P2 待后续迭代
 
-需要后端全新实现的功能：
+~~需要后端全新实现的功能~~
 
-1. **举报撤回** (`POST /report/{id}/withdraw`) - 需新增服务方法和控制器端点
-2. **用户端举报列表** (`GET /report/list`) - 需新增用户端列表查询（区别于管理端）
-3. **用户端举报详情** (`GET /report/{id}`) - 需新增用户端详情查询
-4. **申诉撤回** (`POST /appeal/{id}/withdraw`) - 需新增服务方法和控制器端点
-5. **申诉详情** (`GET /appeal/{id}`) - 需新增详情查询（区别于 progress）
-6. **帮助分类列表** (`GET /help/categories`) - 需新增独立分类接口
-7. **帮助文章详情** (`GET /help/article/{id}`) - 需新增文章详情接口
-8. **文章反馈** (`POST /help/article/{id}/feedback`) - 需新增反馈接口
+**✅ P0 + P1 已全部实现（2026-06-05）**：
+
+1. ✅ **举报撤回** (`POST /report/{id}/withdraw`)
+2. ✅ **用户端举报列表** (`GET /report/list` for user)
+3. ✅ **用户端举报详情** (`GET /report/{id}` for user)
+4. ✅ **申诉撤回** (`POST /appeal/{id}/withdraw`)
+5. ✅ **申诉详情** (`GET /appeal/{id}`)
+6. ✅ **帮助分类列表** (`GET /help/categories`)
+7. ✅ **帮助文章详情** (`GET /help/article/{id}`)
+8. ✅ **文章反馈** (`POST /help/article/{id}/feedback`)
+
+**P2 — 待后续迭代**：
+
 9. **转人工客服** (`POST /customer-service/session/{id}/transfer`) - 需新增转接逻辑
 10. **发送消息** (`POST /customer-service/session/{id}/message`) - 需 WebSocket 实现
 11. **结束会话** (`POST /customer-service/session/{id}/close`) - 需新增关闭逻辑
 12. **会话详情** (`GET /customer-service/session/{id}`) - 需新增含消息的详情查询
 
-### 5.4 文档修复建议
+### 5.4 文档修复建议 — 部分已处理
 
-1. **plan.md**: 更新所有 API 路径以匹配后端实际路径，或标注"待后端实现"
-2. **plan.md**: 更新数据结构定义以匹配后端 VO 类
-3. **design.md**: 更新 Open Questions 状态
-4. **specs**: 在各 spec 中添加"后端依赖"章节，标明哪些 API 已存在、哪些需要新增
-5. **proposal.md**: 更新 API 数量和依赖说明
+1. **plan.md**: 更新所有 API 路径以匹配后端实际路径，或标注"待后端实现" — 后端侧 API 路径已对齐
+2. **plan.md**: 更新数据结构定义以匹配后端 VO 类 — 后端侧数据结构已就绪
+3. **design.md**: 更新 Open Questions 状态 — 待前端团队更新
+4. **specs**: 在各 spec 中添加"后端依赖"章节，标明哪些 API 已存在、哪些需要新增 — 本文档已标注
+5. **proposal.md**: 更新 API 数量和依赖说明 — 待前端团队更新
 
 ---
 
 ## 6. 后端 API 优先级建议
 
-### P0 - 阻塞前端开发（必须先实现）
-1. 用户端举报列表 (`GET /report/list` for user)
-2. 用户端举报详情 (`GET /report/{id}` for user)
-3. 申诉详情 (`GET /appeal/{id}`)
-4. 客服会话创建 (`POST /customer-service/session`)
-5. 客服会话列表 (`GET /customer-service/sessions`)
+### ✅ P0 - 阻塞前端开发 — 全部完成（2026-06-05）
+1. ✅ 用户端举报列表 (`GET /report/list` for user)
+2. ✅ 用户端举报详情 (`GET /report/{id}` for user)
+3. ✅ 申诉详情 (`GET /appeal/{id}`)
+4. ✅ 客服会话创建 (`POST /customer-service/session`)
+5. ✅ 客服会话列表 (`GET /customer-service/sessions`)
 
-### P1 - 前端可先用 Mock 开发
-1. 举报撤回 (`POST /report/{id}/withdraw`)
-2. 申诉撤回 (`POST /appeal/{id}/withdraw`)
-3. 帮助搜索 (`GET /help/search`)
-4. 帮助分类 (`GET /help/categories`)
-5. 帮助文章详情 (`GET /help/article/{id}`)
-6. 文章反馈 (`POST /help/article/{id}/feedback`)
-7. 更新日志 (`GET /changelog/list`)
-8. 服务评分 (`POST /customer-service/session/{id}/rating`)
+### ✅ P1 - 前端可先用 Mock 开发 — 全部完成（2026-06-05）
+1. ✅ 举报撤回 (`POST /report/{id}/withdraw`)
+2. ✅ 申诉撤回 (`POST /appeal/{id}/withdraw`)
+3. ✅ 帮助搜索 (`GET /help/search`)
+4. ✅ 帮助分类 (`GET /help/categories`)
+5. ✅ 帮助文章详情 (`GET /help/article/{id}`)
+6. ✅ 文章反馈 (`POST /help/article/{id}/feedback`)
+7. ✅ 更新日志 (`GET /changelog/list`)
+8. ✅ 服务评分 (`POST /customer-service/session/{id}/rating`)
 
-### P2 - 可后续迭代
+### P2 - 可后续迭代（保留）
 1. 转人工客服 (`POST /customer-service/session/{id}/transfer`)
 2. 发送消息 (WebSocket)
 3. 结束会话 (`POST /customer-service/session/{id}/close`)

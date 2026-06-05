@@ -145,6 +145,6 @@
 | API | 后端状态 | 说明 |
 |-----|---------|------|
 | `POST /content/user/support/report/create` | 已存在 | 路径为 `/report/create`，非 plan.md 中的 `/report` |
-| `GET /content/user/support/report/list` | 完全缺失 | 用户端举报列表不存在，仅有管理端 `/admin/report/list` |
-| `GET /content/user/support/report/{id}` | 完全缺失 | 用户端举报详情不存在，仅有管理端 `/admin/report/detail` 和 `/report/progress` |
-| `POST /content/user/support/report/{id}/withdraw` | 完全缺失 | 后端无撤回功能，服务层和控制器均未实现 |
+| `GET /content/user/support/report/list` | ✅ 已实现（2026-06-05） | 用户端举报列表，支持分页、状态筛选、类型筛选 |
+| `GET /content/user/support/report/{id}` | ✅ 已实现（2026-06-05） | 用户端举报详情，含处理结果 |
+| `POST /content/user/support/report/{id}/withdraw` | ✅ 已实现（2026-06-05） | 撤回待处理状态的举报 |

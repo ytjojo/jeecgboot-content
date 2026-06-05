@@ -56,8 +56,8 @@
 
 | API | 后端状态 | 说明 |
 |-----|---------|------|
-| `GET /content/user/support/changelog/list` | 服务层已实现 | `getChangelog(userId)` 已实现但未暴露 HTTP 端点 |
+| `GET /content/user/support/changelog/list` | ✅ 已暴露（2026-06-05） | `getChangelog(userId)` 已在控制器中暴露为 HTTP 端点 |
 
 **数据结构差异**:
 - 前端期望 `{ id, version, releaseDate, features[], improvements[], bugfixes[] }`
-- 后端 `ContentChangelogVO` 实际为 `{ version, releaseDate, additions[], improvements[], fixes[] }`（无 `id`，`features` 对应 `additions`，`bugfixes` 对应 `fixes`）
+- 后端 `ContentChangelogVO` 实际为 `{ version, releaseDate, additions[], improvements[], fixes[] }`（无 `id`，`features` 对应 `additions`，`bugfixes` 对应 `fixes`）— 前端需做字段映射

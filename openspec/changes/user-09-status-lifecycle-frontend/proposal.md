@@ -63,3 +63,22 @@
 - **路由变更**: 新增 5 条路由，需在后台管理菜单中添加菜单项
 - **依赖**: EPIC-09 后端 API、EPIC-08 申诉系统、现有 JVxeTable/Form/Modal/Drawer 组件
 - **登录流程变更**: 登录接口响应结构变更，冻结/封禁用户不签发 token
+
+### API 接口依赖清单
+
+| # | API 名称 | HTTP 方法 | 路径 | 后端状态 | 优先级 |
+|---|---------|-----------|------|---------|--------|
+| 1 | getCurrentStatus | GET | /api/content/user-status/current | ✅ 已实现 | - |
+| 2 | getUserStatus | GET | /api/content/user-status/{userId} | ✅ 已实现 | - |
+| 3 | changeUserStatus | POST | /api/content/user-status/{userId}/change | ✅ 已实现 | - |
+| 4 | getStatusHistory | GET | /api/content/user-status/{userId}/history | ✅ 已实现 | - |
+| 5 | releaseUser | POST | /api/content/user-status/{userId}/release | ✅ 已实现 | - |
+| 6 | getTransitions | GET | /api/content/user-status/transitions/{currentStatus} | ❌ 未实现 | P0 |
+| 7 | getStatusList | GET | /api/content/user-status/list | ❌ 未实现 | P0 |
+| 8 | verifySecurity | POST | /api/content/user-status/verify-security | ❌ 未实现 | P0 |
+| 9 | sendVerifyCode | POST | /api/content/user-status/send-verify-code | ❌ 未实现 | P0 |
+| 10 | getAuditLogList | GET | /api/content/user-status/audit-logs | ❌ 未实现 | P1 |
+| 11 | getAuditLogDetail | GET | /api/content/user-status/audit-logs/{logId} | ❌ 未实现 | P1 |
+| 12 | batchReleaseUsers | POST | /api/content/user-status/batch-release | ❌ 未实现 | P1 |
+| 13 | exportAuditLogs | GET | /api/content/user-status/audit-logs/export | ❌ 未实现 | P1 |
+| 14 | getUserAuditLogs | GET | /api/content/user-status/users/{userId}/audit-logs | ❌ 未实现 | P1 |

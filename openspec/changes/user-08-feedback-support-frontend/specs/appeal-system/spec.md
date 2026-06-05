@@ -122,5 +122,5 @@
 |-----|---------|------|
 | `POST /content/user/support/appeal/create` | 已存在 | 路径为 `/appeal/create`，非 plan.md 中的 `/appeal` |
 | `GET /content/user/support/appeal/list` | 已存在 | 路径一致，但参数需调整（后端用 `userId` 参数） |
-| `GET /content/user/support/appeal/{id}` | 完全缺失 | 申诉详情不存在，仅有 `/appeal/progress`（返回进度信息） |
-| `POST /content/user/support/appeal/{id}/withdraw` | 完全缺失 | 后端无撤回功能，服务层和控制器均未实现 |
+| `GET /content/user/support/appeal/{id}` | ✅ 已实现（2026-06-05） | 申诉详情，含审核结果和审核时间 |
+| `POST /content/user/support/appeal/{id}/withdraw` | ✅ 已实现（2026-06-05） | 撤回审核中状态的申诉 |

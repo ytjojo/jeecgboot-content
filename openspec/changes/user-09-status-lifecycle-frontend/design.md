@@ -75,6 +75,49 @@ JeecgBoot 内容社区前端基于 Vue 3 + TypeScript + Vite 6 + Ant Design Vue 
 - **[风险] 倒计时精度偏差** — 页面后台挂起时 setInterval 不准确。缓解：监听 visibilitychange 事件修正。
 - **[权衡] 状态查询额外请求** — 每次页面刷新需调用 fetchCurrentStatus()。权衡：缓存到 Pinia Store，单次会话内有效。
 
+## 错误码定义
+
+前端需处理以下错误码，统一在 HTTP 响应拦截器中处理：
+
+| 错误码 | HTTP 状态 | 含义 | 前端处理 |
+|--------|-----------|------|----------|
+| USER_STATUS_FROZEN | 403 | 用户已冻结 | 刷新 Store，重定向到 /login/verify |
+| USER_STATUS_BANNED | 403 | 用户已封禁 | 刷新 Store，重定向到 /login/blocked |
+| USER_STATUS_MUTED | 403 | 用户已禁言 | 刷新 Store，弹出禁言提示 |
+| USER_STATUS_NOT_FOUND | 404 | 用户资料不存在 | 提示"用户不存在" |
+| STATUS_TRANSITION_INVALID | 400 | 非法状态转换 | 提示"当前状态不允许执行此操作" |
+| OPTIMISTIC_LOCK_CONFLICT | 409 | 乐观锁冲突 | 提示"状态已变更，请刷新后重试" |
+| VERIFY_CODE_EXPIRED | 400 | 验证码已过期 | 提示"验证码已过期，请重新获取" |
+| VERIFY_CODE_INVALID | 400 | 验证码错误 | 提示"验证码错误，请重新输入" |
+| VERIFY_CODE_RATE_LIMIT | 429 | 验证码发送过于频繁 | 提示"请稍后再试"，按钮显示倒计时 |
+
+## 分页参数约定
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| page | 1 | 页码，从 1 开始 |
+| pageSize | 10 | 每页条数 |
+| pageSize 选项 | [10, 20, 50, 100] | 前端下拉选项 |
+
+## 权限标注
+
+| API | 权限要求 | 说明 |
+|-----|---------|------|
+| GET /current | 登录用户 | 查询自身状态 |
+| GET /{userId} | admin:user-status:query | 管理员查询指定用户 |
+| POST /{userId}/change | admin:user-status:manage | 管理员变更状态 |
+| GET /{userId}/history | admin:user-status:query | 管理员查看历史 |
+| POST /{userId}/release | admin:user-status:manage | 管理员解禁 |
+| GET /transitions/{status} | admin:user-status:query | 获取可转换状态 |
+| GET /list | admin:user-status:query | 分页查询列表 |
+| POST /batch-release | admin:user-status:manage | 批量解禁 |
+| GET /audit-logs | admin:audit-log:query | 审计日志查询 |
+| GET /audit-logs/{id} | admin:audit-log:query | 审计日志详情 |
+| GET /audit-logs/export | admin:audit-log:export | 导出审计日志 |
+| GET /users/{id}/audit-logs | admin:audit-log:query | 用户审计日志 |
+| POST /send-verify-code | 登录用户 | 发送验证码 |
+| POST /verify-security | 登录用户 | 安全核验 |
+
 ## File Structure
 
 ```
