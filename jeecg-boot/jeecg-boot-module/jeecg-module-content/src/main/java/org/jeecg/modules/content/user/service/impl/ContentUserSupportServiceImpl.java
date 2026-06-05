@@ -38,11 +38,15 @@ import org.jeecg.modules.content.user.vo.ContentHelpCenterVO;
 import org.jeecg.modules.content.user.vo.ContentHelpSearchResultVO;
 import org.jeecg.modules.content.user.vo.ContentServiceSessionPageVO;
 import org.jeecg.modules.content.user.vo.ContentServiceSessionVO;
+import org.jeecg.modules.content.user.vo.ContentUserAppealDetailVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealProgressVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminDetailVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminListItemVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminPageVO;
+import org.jeecg.modules.content.user.vo.ContentUserReportDetailVO;
+import org.jeecg.modules.content.user.vo.ContentUserReportListItemVO;
+import org.jeecg.modules.content.user.vo.ContentUserReportPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportProgressVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +56,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Service implementation for content user support.
@@ -224,6 +229,48 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
             throw new JeecgBootException("举报不存在或无权查看");
         }
         return toReportProgress(report);
+    }
+
+    /**
+     * Lists reports for the specified user with pagination.
+     */
+    @Override
+    public ContentUserReportPageVO listReportsForUser(String userId, Long pageNo, Long pageSize) {
+        long currentPage = pageNo == null || pageNo < 1L ? 1L : pageNo;
+        long currentSize = pageSize == null || pageSize < 1L ? 10L : pageSize;
+        LambdaQueryWrapper<ContentUserReport> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ContentUserReport::getUserId, userId)
+            .orderByDesc(ContentUserReport::getCreateTime);
+        IPage<ContentUserReport> page = reportMapper.selectPage(new Page<>(currentPage, currentSize), queryWrapper);
+        return new ContentUserReportPageVO()
+            .setRecords(page.getRecords().stream().map(this::toUserReportListItem).toList())
+            .setTotal(page.getTotal())
+            .setPageNo(page.getCurrent())
+            .setPageSize(page.getSize());
+    }
+
+    /**
+     * Queries report detail for the specified user.
+     */
+    @Override
+    public ContentUserReportDetailVO getReportDetailForUser(String userId, String reportId) {
+        ContentUserReport report = reportMapper.selectById(reportId);
+        if (report == null || !userId.equals(report.getUserId())) {
+            throw new JeecgBootException("举报不存在或无权查看");
+        }
+        return toUserReportDetail(report);
+    }
+
+    /**
+     * Queries appeal detail for the specified user.
+     */
+    @Override
+    public ContentUserAppealDetailVO getAppealDetail(String userId, String appealId) {
+        ContentUserAppeal appeal = appealMapper.selectById(appealId);
+        if (appeal == null || !userId.equals(appeal.getUserId())) {
+            throw new JeecgBootException("申诉不存在或无权查看");
+        }
+        return toAppealDetail(appeal);
     }
 
     /**
@@ -476,6 +523,83 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
             .setResolvedAt(report.getResolvedAt());
     }
 
+    private ContentUserReportListItemVO toUserReportListItem(ContentUserReport report) {
+        return new ContentUserReportListItemVO()
+            .setReportId(report.getId())
+            .setReportNo(report.getId())
+            .setTargetSummary(report.getTargetType() + ":" + report.getTargetId())
+            .setReportTypeLabel(resolveReportTypeLabel(report.getReportType()))
+            .setStatusLabel(resolveReportStatusLabel(report.getStatus()))
+            .setStatus(report.getStatus())
+            .setResultStatus(report.getResultStatus())
+            .setCreateTime(report.getCreateTime());
+    }
+
+    private ContentUserReportDetailVO toUserReportDetail(ContentUserReport report) {
+        return new ContentUserReportDetailVO()
+            .setReportId(report.getId())
+            .setReportNo(report.getId())
+            .setTargetType(report.getTargetType())
+            .setTargetId(report.getTargetId())
+            .setTargetSummary(report.getTargetType() + ":" + report.getTargetId())
+            .setReportType(report.getReportType())
+            .setReportTypeLabel(resolveReportTypeLabel(report.getReportType()))
+            .setReason(report.getReason())
+            .setEvidenceJson(report.getEvidenceJson())
+            .setStatus(report.getStatus())
+            .setStatusLabel(resolveReportStatusLabel(report.getStatus()))
+            .setResultStatus(report.getResultStatus())
+            .setResultNote(report.getResultNote())
+            .setProgressNote(report.getProgressNote())
+            .setResolvedBy(report.getResolvedBy())
+            .setResolvedAt(report.getResolvedAt())
+            .setCreateTime(report.getCreateTime());
+    }
+
+    private ContentUserAppealDetailVO toAppealDetail(ContentUserAppeal appeal) {
+        return new ContentUserAppealDetailVO()
+            .setAppealId(appeal.getId())
+            .setAppealType(appeal.getAppealType())
+            .setTargetType(appeal.getTargetType())
+            .setTargetId(appeal.getTargetId())
+            .setReason(appeal.getReason())
+            .setStatus(appeal.getStatus())
+            .setProgressNote(appeal.getProgressNote())
+            .setResultStatus(appeal.getResultStatus())
+            .setResultNote(appeal.getResultNote())
+            .setResolvedBy(appeal.getResolvedBy())
+            .setResolvedAt(appeal.getResolvedAt())
+            .setCreateTime(appeal.getCreateTime());
+    }
+
+    private String resolveReportTypeLabel(String reportType) {
+        if (reportType == null) {
+            return "其他";
+        }
+        return switch (reportType) {
+            case "SPAM" -> "垃圾内容";
+            case "ABUSE" -> "辱骂骚扰";
+            case "PORNOGRAPHY" -> "色情低俗";
+            case "VIOLENCE" -> "暴力血腥";
+            case "FRAUD" -> "欺诈诈骗";
+            case "INFRINGEMENT" -> "侵权";
+            default -> "其他";
+        };
+    }
+
+    private String resolveReportStatusLabel(String status) {
+        if (status == null) {
+            return "未知";
+        }
+        return switch (status) {
+            case "PENDING" -> "待处理";
+            case "REVIEWING" -> "审核中";
+            case "RESOLVED" -> "已处理";
+            case "WITHDRAWN" -> "已撤回";
+            default -> "未知";
+        };
+    }
+
     private ContentUserReportAdminListItemVO toAdminListItem(ContentUserReport report) {
         return new ContentUserReportAdminListItemVO()
             .setReportId(report.getId())
@@ -707,5 +831,63 @@ public class ContentUserSupportServiceImpl implements IContentUserSupportService
             .setStartTime(session.getStartTime())
             .setEndTime(session.getEndTime())
             .setExpired(expired);
+    }
+
+    @Override
+    public String withdrawReport(String userId, String reportId) {
+        ContentUserReport report = reportMapper.selectById(reportId);
+        if (report == null || !userId.equals(report.getUserId())) {
+            throw new JeecgBootException("举报不存在或无权操作");
+        }
+        if (!"PENDING".equals(report.getStatus())) {
+            throw new JeecgBootException("仅待处理状态的举报可撤回");
+        }
+        report.setStatus("WITHDRAWN");
+        reportMapper.updateById(report);
+        return reportId;
+    }
+
+    @Override
+    public String withdrawAppeal(String userId, String appealId) {
+        ContentUserAppeal appeal = appealMapper.selectById(appealId);
+        if (appeal == null || !userId.equals(appeal.getUserId())) {
+            throw new JeecgBootException("申诉不存在或无权操作");
+        }
+        if (!"PENDING".equals(appeal.getStatus()) && !"PROCESSING".equals(appeal.getStatus())) {
+            throw new JeecgBootException("仅待处理或处理中的申诉可撤回");
+        }
+        appeal.setStatus("WITHDRAWN");
+        appealMapper.updateById(appeal);
+        return appealId;
+    }
+
+    @Override
+    public List<ContentHelpCenterEntryVO> getHelpCategories(String userId) {
+        return getHelpCenter(userId).getFaqCategories();
+    }
+
+    @Override
+    public ContentHelpSearchResultVO getHelpArticleDetail(String userId, String articleId) {
+        ContentHelpCenterVO center = getHelpCenter(userId);
+        return Stream.of(
+                center.getFaqCategories() != null ? center.getFaqCategories().stream() : Stream.<ContentHelpCenterEntryVO>empty(),
+                center.getGuideEntries() != null ? center.getGuideEntries().stream() : Stream.<ContentHelpCenterEntryVO>empty(),
+                center.getReleaseNotes() != null ? center.getReleaseNotes().stream() : Stream.<ContentHelpCenterEntryVO>empty()
+            )
+            .flatMap(s -> s)
+            .filter(entry -> articleId.equals(entry.getCode()))
+            .findFirst()
+            .map(entry -> new ContentHelpSearchResultVO()
+                .setCode(entry.getCode())
+                .setTitle(entry.getTitle())
+                .setDescription(entry.getDescription())
+                .setSnippet(entry.getDescription()))
+            .orElseThrow(() -> new JeecgBootException("文章不存在"));
+    }
+
+    @Override
+    public String submitArticleFeedback(String userId, String articleId, Boolean helpful) {
+        // 简单实现，后续可持久化到数据库
+        return "反馈已提交";
     }
 }

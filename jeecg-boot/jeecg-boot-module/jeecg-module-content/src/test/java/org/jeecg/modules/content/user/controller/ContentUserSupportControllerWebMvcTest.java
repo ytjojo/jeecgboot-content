@@ -11,8 +11,15 @@ import org.jeecg.modules.content.user.vo.ContentHelpCenterEntryVO;
 import org.jeecg.modules.content.user.vo.ContentHelpCenterVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealProgressVO;
+import org.jeecg.modules.content.user.vo.ContentChangelogVO;
+import org.jeecg.modules.content.user.vo.ContentHelpSearchResultVO;
+import org.jeecg.modules.content.user.vo.ContentServiceSessionPageVO;
+import org.jeecg.modules.content.user.vo.ContentUserAppealDetailVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminDetailVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminPageVO;
+import org.jeecg.modules.content.user.vo.ContentUserReportDetailVO;
+import org.jeecg.modules.content.user.vo.ContentUserReportListItemVO;
+import org.jeecg.modules.content.user.vo.ContentUserReportPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportProgressVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -250,5 +258,226 @@ class ContentUserSupportControllerWebMvcTest {
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.reportId").value("r1"))
             .andExpect(jsonPath("$.result.status").value("PENDING"));
+    }
+
+    @Test
+    void shouldListReportsForUser() throws Exception {
+        when(supportService.listReportsForUser("u1", 1L, 10L))
+            .thenReturn(new ContentUserReportPageVO()
+                .setTotal(1L)
+                .setPageNo(1L)
+                .setPageSize(10L)
+                .setRecords(List.of(
+                    new ContentUserReportListItemVO()
+                        .setReportId("r1")
+                        .setReportNo("RPT-001")
+                        .setTargetSummary("垃圾内容")
+                        .setReportTypeLabel("垃圾内容")
+                        .setStatusLabel("待处理")
+                        .setStatus("PENDING")
+                        .setCreateTime(new Date())
+                )));
+
+        mockMvc.perform(get("/content/user/support/report/list")
+                .param("userId", "u1")
+                .param("pageNo", "1")
+                .param("pageSize", "10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.total").value(1))
+            .andExpect(jsonPath("$.result.records[0].reportId").value("r1"))
+            .andExpect(jsonPath("$.result.records[0].statusLabel").value("待处理"));
+    }
+
+    @Test
+    void shouldReturnReportDetailForUser() throws Exception {
+        when(supportService.getReportDetailForUser("u1", "r1"))
+            .thenReturn(new ContentUserReportDetailVO()
+                .setReportId("r1")
+                .setReportNo("RPT-001")
+                .setTargetType("CONTENT")
+                .setTargetId("c1")
+                .setReportType("SPAM")
+                .setReportTypeLabel("垃圾内容")
+                .setReason("重复发布广告")
+                .setStatus("PENDING")
+                .setStatusLabel("待处理")
+                .setCreateTime(new Date()));
+
+        mockMvc.perform(get("/content/user/support/report/r1")
+                .param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.reportId").value("r1"))
+            .andExpect(jsonPath("$.result.reportTypeLabel").value("垃圾内容"))
+            .andExpect(jsonPath("$.result.status").value("PENDING"));
+    }
+
+    @Test
+    void shouldReturnAppealDetail() throws Exception {
+        when(supportService.getAppealDetail("u1", "a1"))
+            .thenReturn(new ContentUserAppealDetailVO()
+                .setAppealId("a1")
+                .setAppealType("BAN")
+                .setTargetType("STATUS_RECORD")
+                .setTargetId("rec1")
+                .setReason("误判申诉")
+                .setStatus("PENDING")
+                .setCreateTime(new Date()));
+
+        mockMvc.perform(get("/content/user/support/appeal/a1")
+                .param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.appealId").value("a1"))
+            .andExpect(jsonPath("$.result.status").value("PENDING"));
+    }
+
+    @Test
+    void shouldCreateServiceSession() throws Exception {
+        when(supportService.createServiceSession("u1", "ONLINE")).thenReturn("session-1");
+
+        mockMvc.perform(post("/content/user/support/customer-service/session")
+                .param("userId", "u1")
+                .param("sessionType", "ONLINE"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("session-1"));
+    }
+
+    @Test
+    void shouldListServiceSessions() throws Exception {
+        when(supportService.listServiceSessions(any()))
+            .thenReturn(new ContentServiceSessionPageVO()
+                .setTotal(0L)
+                .setPageNo(1L)
+                .setPageSize(10L)
+                .setRecords(List.of()));
+
+        mockMvc.perform(get("/content/user/support/customer-service/sessions")
+                .param("userId", "u1")
+                .param("pageNo", "1")
+                .param("pageSize", "10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.total").value(0));
+    }
+
+    @Test
+    void shouldSearchHelpArticles() throws Exception {
+        when(supportService.searchHelpArticles("u1", "密码"))
+            .thenReturn(List.of(
+                new ContentHelpSearchResultVO()
+                    .setCode("RESET_PWD")
+                    .setTitle("如何重置密码")
+                    .setDescription("密码重置流程")
+                    .setSnippet("在登录页面点击忘记密码...")
+            ));
+
+        mockMvc.perform(get("/content/user/support/help/search")
+                .param("userId", "u1")
+                .param("keyword", "密码"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result[0].code").value("RESET_PWD"))
+            .andExpect(jsonPath("$.result[0].title").value("如何重置密码"));
+    }
+
+    @Test
+    void shouldRateService() throws Exception {
+        when(supportService.rateService("u1", "session-1", 5, "很好")).thenReturn("评分成功");
+
+        mockMvc.perform(post("/content/user/support/customer-service/session/session-1/rating")
+                .param("userId", "u1")
+                .param("rating", "5")
+                .param("comment", "很好"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("评分成功"));
+    }
+
+    @Test
+    void shouldReturnChangelog() throws Exception {
+        when(supportService.getChangelog("u1"))
+            .thenReturn(List.of(
+                new ContentChangelogVO()
+                    .setVersion("3.2.0")
+                    .setReleaseDate(new Date())
+                    .setAdditions(List.of("新增举报功能"))
+                    .setImprovements(List.of("优化搜索"))
+                    .setFixes(List.of("修复登录问题"))
+            ));
+
+        mockMvc.perform(get("/content/user/support/changelog/list")
+                .param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result[0].version").value("3.2.0"));
+    }
+
+    @Test
+    void shouldWithdrawReport() throws Exception {
+        when(supportService.withdrawReport("u1", "r1")).thenReturn("r1");
+
+        mockMvc.perform(post("/content/user/support/report/r1/withdraw")
+                .param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("r1"));
+    }
+
+    @Test
+    void shouldWithdrawAppeal() throws Exception {
+        when(supportService.withdrawAppeal("u1", "a1")).thenReturn("a1");
+
+        mockMvc.perform(post("/content/user/support/appeal/a1/withdraw")
+                .param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("a1"));
+    }
+
+    @Test
+    void shouldReturnHelpCategories() throws Exception {
+        when(supportService.getHelpCategories("u1"))
+            .thenReturn(List.of(
+                new ContentHelpCenterEntryVO().setCode("ACCOUNT_SECURITY").setTitle("账号安全").setDescription("账号登录")
+            ));
+
+        mockMvc.perform(get("/content/user/support/help/categories")
+                .param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result[0].code").value("ACCOUNT_SECURITY"))
+            .andExpect(jsonPath("$.result[0].title").value("账号安全"));
+    }
+
+    @Test
+    void shouldReturnHelpArticleDetail() throws Exception {
+        when(supportService.getHelpArticleDetail("u1", "ACCOUNT_SECURITY"))
+            .thenReturn(new ContentHelpSearchResultVO()
+                .setCode("ACCOUNT_SECURITY")
+                .setTitle("账号安全")
+                .setDescription("账号登录、密码与设备安全相关问题")
+                .setSnippet("账号登录、密码与设备安全相关问题"));
+
+        mockMvc.perform(get("/content/user/support/help/article/ACCOUNT_SECURITY")
+                .param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.code").value("ACCOUNT_SECURITY"))
+            .andExpect(jsonPath("$.result.title").value("账号安全"));
+    }
+
+    @Test
+    void shouldSubmitArticleFeedback() throws Exception {
+        when(supportService.submitArticleFeedback("u1", "ACCOUNT_SECURITY", true)).thenReturn("反馈已提交");
+
+        mockMvc.perform(post("/content/user/support/help/article/ACCOUNT_SECURITY/feedback")
+                .param("userId", "u1")
+                .param("helpful", "true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result").value("反馈已提交"));
     }
 }

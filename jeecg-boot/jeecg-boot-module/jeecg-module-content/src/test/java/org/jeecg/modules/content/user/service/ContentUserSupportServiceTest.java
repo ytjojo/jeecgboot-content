@@ -27,6 +27,7 @@ import org.jeecg.modules.content.user.vo.ContentHelpCenterEntryVO;
 import org.jeecg.modules.content.user.vo.ContentChangelogVO;
 import org.jeecg.modules.content.user.vo.ContentHelpSearchResultVO;
 import org.jeecg.modules.content.user.vo.ContentServiceSessionPageVO;
+import org.jeecg.modules.content.user.vo.ContentHelpCenterEntryVO;
 import org.jeecg.modules.content.user.vo.ContentServiceSessionVO;
 import org.jeecg.modules.content.user.vo.ContentUserAppealPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserReportAdminPageVO;
@@ -974,6 +975,260 @@ class ContentUserSupportServiceTest {
             .setResultStatus("CONFIRMED")
             .setResultNote("违规成立")
             .setProgressNote("已处理完成");
+    }
+
+    @Test
+    void shouldListReportsForUserWithPagination() {
+        ContentUserReport report = new ContentUserReport()
+            .setUserId("u1")
+            .setTargetType("CONTENT")
+            .setTargetId("c1")
+            .setReportType("SPAM")
+            .setReason("垃圾内容")
+            .setStatus("PENDING");
+        report.setId("r1");
+        report.setCreateTime(new Date());
+
+        IPage<ContentUserReport> page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 10);
+        page.setRecords(List.of(report));
+        page.setTotal(1);
+        when(reportMapper.selectPage(any(), any())).thenReturn(page);
+
+        var result = supportService.listReportsForUser("u1", 1L, 10L);
+
+        assertThat(result.getTotal()).isEqualTo(1);
+        assertThat(result.getRecords()).hasSize(1);
+        assertThat(result.getRecords().get(0).getReportId()).isEqualTo("r1");
+        assertThat(result.getRecords().get(0).getStatusLabel()).isEqualTo("待处理");
+    }
+
+    @Test
+    void shouldReturnEmptyPageWhenNoReportsForUser() {
+        IPage<ContentUserReport> page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 10);
+        page.setRecords(List.of());
+        page.setTotal(0);
+        when(reportMapper.selectPage(any(), any())).thenReturn(page);
+
+        var result = supportService.listReportsForUser("u1", 1L, 10L);
+
+        assertThat(result.getTotal()).isEqualTo(0);
+        assertThat(result.getRecords()).isEmpty();
+    }
+
+    @Test
+    void shouldGetReportDetailForUser() {
+        ContentUserReport report = new ContentUserReport()
+            .setUserId("u1")
+            .setTargetType("CONTENT")
+            .setTargetId("c1")
+            .setReportType("SPAM")
+            .setReason("垃圾内容")
+            .setStatus("PENDING");
+        report.setId("r1");
+        report.setCreateTime(new Date());
+        when(reportMapper.selectById("r1")).thenReturn(report);
+
+        var result = supportService.getReportDetailForUser("u1", "r1");
+
+        assertThat(result.getReportId()).isEqualTo("r1");
+        assertThat(result.getReportTypeLabel()).isEqualTo("垃圾内容");
+        assertThat(result.getStatusLabel()).isEqualTo("待处理");
+    }
+
+    @Test
+    void shouldRejectReportDetailQueryWhenUserDoesNotOwnReport() {
+        ContentUserReport report = new ContentUserReport()
+            .setUserId("other-user")
+            .setTargetType("CONTENT")
+            .setTargetId("c1")
+            .setReportType("SPAM")
+            .setReason("垃圾内容")
+            .setStatus("PENDING");
+        report.setId("r1");
+        report.setCreateTime(new Date());
+        when(reportMapper.selectById("r1")).thenReturn(report);
+
+        assertThatThrownBy(() -> supportService.getReportDetailForUser("u1", "r1"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("举报不存在或无权查看");
+    }
+
+    @Test
+    void shouldGetAppealDetail() {
+        ContentUserAppeal appeal = new ContentUserAppeal()
+            .setUserId("u1")
+            .setAppealType("BAN")
+            .setTargetType("STATUS_RECORD")
+            .setTargetId("rec1")
+            .setReason("误判申诉")
+            .setStatus("PENDING");
+        appeal.setId("a1");
+        appeal.setCreateTime(new Date());
+        when(appealMapper.selectById("a1")).thenReturn(appeal);
+
+        var result = supportService.getAppealDetail("u1", "a1");
+
+        assertThat(result.getAppealId()).isEqualTo("a1");
+        assertThat(result.getAppealType()).isEqualTo("BAN");
+        assertThat(result.getStatus()).isEqualTo("PENDING");
+    }
+
+    @Test
+    void shouldRejectAppealDetailQueryWhenUserDoesNotOwnAppeal() {
+        ContentUserAppeal appeal = new ContentUserAppeal()
+            .setUserId("other-user")
+            .setAppealType("BAN")
+            .setTargetType("STATUS_RECORD")
+            .setTargetId("rec1")
+            .setReason("误判申诉")
+            .setStatus("PENDING");
+        appeal.setId("a1");
+        appeal.setCreateTime(new Date());
+        when(appealMapper.selectById("a1")).thenReturn(appeal);
+
+        assertThatThrownBy(() -> supportService.getAppealDetail("u1", "a1"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("申诉不存在或无权查看");
+    }
+
+    @Test
+    void shouldWithdrawPendingReport() {
+        ContentUserReport report = new ContentUserReport()
+            .setUserId("u1")
+            .setStatus("PENDING")
+            .setReportType("SPAM");
+        report.setId("r1");
+        when(reportMapper.selectById("r1")).thenReturn(report);
+
+        String result = supportService.withdrawReport("u1", "r1");
+
+        assertThat(result).isEqualTo("r1");
+        verify(reportMapper).updateById(argThat((ContentUserReport it) -> "WITHDRAWN".equals(it.getStatus())));
+    }
+
+    @Test
+    void shouldRejectWithdrawReportWhenNotOwner() {
+        ContentUserReport report = new ContentUserReport()
+            .setUserId("other-user")
+            .setStatus("PENDING")
+            .setReportType("SPAM");
+        report.setId("r1");
+        when(reportMapper.selectById("r1")).thenReturn(report);
+
+        assertThatThrownBy(() -> supportService.withdrawReport("u1", "r1"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("举报不存在或无权操作");
+    }
+
+    @Test
+    void shouldRejectWithdrawReportWhenNotPending() {
+        ContentUserReport report = new ContentUserReport()
+            .setUserId("u1")
+            .setStatus("RESOLVED")
+            .setReportType("SPAM");
+        report.setId("r1");
+        when(reportMapper.selectById("r1")).thenReturn(report);
+
+        assertThatThrownBy(() -> supportService.withdrawReport("u1", "r1"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("仅待处理状态的举报可撤回");
+    }
+
+    @Test
+    void shouldWithdrawPendingAppeal() {
+        ContentUserAppeal appeal = new ContentUserAppeal()
+            .setUserId("u1")
+            .setStatus("PENDING")
+            .setAppealType("BAN");
+        appeal.setId("a1");
+        when(appealMapper.selectById("a1")).thenReturn(appeal);
+
+        String result = supportService.withdrawAppeal("u1", "a1");
+
+        assertThat(result).isEqualTo("a1");
+        verify(appealMapper).updateById(argThat((ContentUserAppeal it) -> "WITHDRAWN".equals(it.getStatus())));
+    }
+
+    @Test
+    void shouldWithdrawProcessingAppeal() {
+        ContentUserAppeal appeal = new ContentUserAppeal()
+            .setUserId("u1")
+            .setStatus("PROCESSING")
+            .setAppealType("BAN");
+        appeal.setId("a1");
+        when(appealMapper.selectById("a1")).thenReturn(appeal);
+
+        String result = supportService.withdrawAppeal("u1", "a1");
+
+        assertThat(result).isEqualTo("a1");
+        verify(appealMapper).updateById(argThat((ContentUserAppeal it) -> "WITHDRAWN".equals(it.getStatus())));
+    }
+
+    @Test
+    void shouldRejectWithdrawAppealWhenNotOwner() {
+        ContentUserAppeal appeal = new ContentUserAppeal()
+            .setUserId("other-user")
+            .setStatus("PENDING")
+            .setAppealType("BAN");
+        appeal.setId("a1");
+        when(appealMapper.selectById("a1")).thenReturn(appeal);
+
+        assertThatThrownBy(() -> supportService.withdrawAppeal("u1", "a1"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("申诉不存在或无权操作");
+    }
+
+    @Test
+    void shouldRejectWithdrawAppealWhenResolved() {
+        ContentUserAppeal appeal = new ContentUserAppeal()
+            .setUserId("u1")
+            .setStatus("RESOLVED")
+            .setAppealType("BAN");
+        appeal.setId("a1");
+        when(appealMapper.selectById("a1")).thenReturn(appeal);
+
+        assertThatThrownBy(() -> supportService.withdrawAppeal("u1", "a1"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("仅待处理或处理中的申诉可撤回");
+    }
+
+    @Test
+    void shouldReturnHelpCategories() {
+        when(profileMapper.selectByUserId("u1")).thenReturn(null);
+
+        List<ContentHelpCenterEntryVO> result = supportService.getHelpCategories("u1");
+
+        assertThat(result).isNotEmpty();
+        assertThat(result).anyMatch(e -> "ACCOUNT_SECURITY".equals(e.getCode()));
+        assertThat(result).anyMatch(e -> "REPORT_APPEAL".equals(e.getCode()));
+        assertThat(result).anyMatch(e -> "PRIVACY_SETTINGS".equals(e.getCode()));
+    }
+
+    @Test
+    void shouldGetHelpArticleDetailByCode() {
+        when(profileMapper.selectByUserId("u1")).thenReturn(null);
+
+        ContentHelpSearchResultVO result = supportService.getHelpArticleDetail("u1", "ACCOUNT_SECURITY");
+
+        assertThat(result.getCode()).isEqualTo("ACCOUNT_SECURITY");
+        assertThat(result.getTitle()).isEqualTo("账号安全");
+        assertThat(result.getDescription()).isEqualTo("账号登录、密码与设备安全相关问题");
+    }
+
+    @Test
+    void shouldRejectArticleDetailWhenCodeNotFound() {
+        when(profileMapper.selectByUserId("u1")).thenReturn(null);
+
+        assertThatThrownBy(() -> supportService.getHelpArticleDetail("u1", "NONEXISTENT"))
+            .isInstanceOf(JeecgBootException.class)
+            .hasMessage("文章不存在");
+    }
+
+    @Test
+    void shouldSubmitArticleFeedback() {
+        String result = supportService.submitArticleFeedback("u1", "ACCOUNT_SECURITY", true);
+
+        assertThat(result).isEqualTo("反馈已提交");
     }
 
     @Test
