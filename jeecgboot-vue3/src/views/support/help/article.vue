@@ -17,7 +17,7 @@
           <span>浏览 {{ article.viewCount }}</span>
           <span>有帮助 {{ article.helpfulCount }}</span>
         </div>
-        <div class="article-content" v-html="article.content" />
+        <div class="article-content" v-html="safeContent" />
 
         <a-divider />
         <ArticleFeedback :article-id="articleId" @feedback="handleFeedback" />
@@ -27,16 +27,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getHelpArticleDetail, type HelpArticle } from '/@/api/support/help';
 import ArticleFeedback from './components/ArticleFeedback.vue';
+import xss from 'xss';
 
 const router = useRouter();
 const route = useRoute();
 const articleId = route.params.id as string;
 const article = ref<HelpArticle | null>(null);
 const loading = ref(true);
+const safeContent = computed(() => (article.value ? xss(article.value.content) : ''));
 
 const handleFeedback = (helpful: boolean) => {
   if (article.value) {

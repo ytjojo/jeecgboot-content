@@ -26,10 +26,16 @@
 
   onMounted(() => {
     window.addEventListener('resize', handleResize);
-    const unwatch = feedbackStore.$onAction(({ name }) => {
+    const unwatch = feedbackStore.$onAction(({ name, before, after }) => {
       if (name === 'clearSession') {
-        closedSessionId.value = feedbackStore.currentSession?.id || '';
-        showRating.value = true;
+        let sid = '';
+        before(() => {
+          sid = feedbackStore.currentSession?.id || '';
+        });
+        after(() => {
+          closedSessionId.value = sid;
+          showRating.value = true;
+        });
       }
     });
     onUnmounted(() => {

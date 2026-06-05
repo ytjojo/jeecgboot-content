@@ -45,10 +45,15 @@ const props = defineProps<{
   searchKeyword?: string;
 }>();
 
+const escapeRegExp = (s: string) => s.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
+const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 const highlightKeyword = (text: string) => {
-  if (!props.searchKeyword) return text;
-  const regex = new RegExp(`(${props.searchKeyword})`, 'gi');
-  return text.replace(regex, '<span style="color: #1890ff; font-weight: bold">$1</span>');
+  if (!props.searchKeyword) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const keyword = escapeHtml(props.searchKeyword);
+  const regex = new RegExp(`(${escapeRegExp(keyword)})`, 'gi');
+  return escaped.replace(regex, '<span style="color: #1890ff; font-weight: bold">$1</span>');
 };
 </script>
 

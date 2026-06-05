@@ -19,7 +19,7 @@
             <a-image :src="message.content" :width="200" />
           </div>
           <div v-else-if="message.type === 'link'" class="link-content">
-            <a :href="message.content" target="_blank">{{ message.content }}</a>
+            <a :href="safeHref" target="_blank">{{ message.content }}</a>
           </div>
         </div>
         <div class="message-meta">
@@ -41,6 +41,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { LoadingOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
 
 export interface ChatMessageData {
@@ -52,9 +53,15 @@ export interface ChatMessageData {
   timestamp: string;
 }
 
-defineProps<{
+const props = defineProps<{
   message: ChatMessageData;
 }>();
+
+const safeHref = computed(() => {
+  const url = props.message.content;
+  if (/^https?:\/\//i.test(url)) return url;
+  return '#';
+});
 
 defineEmits<{
   (e: 'retry'): void;
