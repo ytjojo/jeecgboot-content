@@ -175,6 +175,14 @@ public class ContentUserProfileServiceImpl implements IContentUserProfileService
     }
 
     /**
+     * 查询用户隐私设置，null 字段填充默认值。
+     */
+    @Override
+    public ContentUserPrivacySetting getPrivacySetting(String userId) {
+        return defaultPrivacy(privacyMapper.selectByUserId(userId), userId);
+    }
+
+    /**
      * 更新隐私设置，并删除公共资料缓存。
      */
     @Override

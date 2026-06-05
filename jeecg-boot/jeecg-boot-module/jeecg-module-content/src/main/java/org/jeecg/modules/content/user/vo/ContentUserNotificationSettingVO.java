@@ -34,6 +34,9 @@ public class ContentUserNotificationSettingVO {
     @Schema(description = "私信通知开关")
     private Boolean privateMessageNoticeEnabled;
 
+    @Schema(description = "订阅更新通知开关")
+    private Boolean subscriptionNoticeEnabled;
+
     @Schema(description = "渠道配置")
     private ContentNotificationChannelConfigVO channelConfig;
 
@@ -54,6 +57,7 @@ public class ContentUserNotificationSettingVO {
             .setFavoriteNoticeEnabled(setting.getFavoriteNoticeEnabled())
             .setMentionNoticeEnabled(setting.getMentionNoticeEnabled())
             .setPrivateMessageNoticeEnabled(setting.getPrivateMessageNoticeEnabled())
+            .setSubscriptionNoticeEnabled(setting.getSubscriptionNoticeEnabled())
             .setChannelConfig(channelConfig)
             .setDndRule(dndRule);
     }

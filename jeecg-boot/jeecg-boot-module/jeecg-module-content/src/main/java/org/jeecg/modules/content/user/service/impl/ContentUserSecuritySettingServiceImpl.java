@@ -1,6 +1,7 @@
 package org.jeecg.modules.content.user.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jeecg.modules.content.user.req.settings.ContentUserSecurityUpdateReq;
 import org.jeecg.modules.content.user.service.IContentUserSecuritySettingService;
 import org.jeecg.modules.content.user.vo.ContentUserSecuritySettingVO;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,16 @@ public class ContentUserSecuritySettingServiceImpl implements IContentUserSecuri
         } catch (Exception e) {
             log.warn("查询登录提醒设置异常，使用默认值: userId={}", userId, e);
             vo.setLoginAlertEnabled(true);
+        }
+        return vo;
+    }
+
+    @Override
+    public ContentUserSecuritySettingVO updateSecuritySetting(String userId, ContentUserSecurityUpdateReq req) {
+        // 当前阶段为 stub 实现，后续 EPIC-01 中接入真实服务持久化
+        ContentUserSecuritySettingVO vo = getSecuritySetting(userId);
+        if (req.getLoginAlertEnabled() != null) {
+            vo.setLoginAlertEnabled(req.getLoginAlertEnabled());
         }
         return vo;
     }

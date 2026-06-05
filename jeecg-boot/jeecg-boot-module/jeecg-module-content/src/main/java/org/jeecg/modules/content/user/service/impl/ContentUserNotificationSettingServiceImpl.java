@@ -39,6 +39,7 @@ public class ContentUserNotificationSettingServiceImpl implements IContentUserNo
     private static final String NOTICE_TYPE_FAVORITE = "FAVORITE";
     private static final String NOTICE_TYPE_MENTION = "MENTION";
     private static final String NOTICE_TYPE_PRIVATE_MESSAGE = "PRIVATE_MESSAGE";
+    private static final String NOTICE_TYPE_SUBSCRIPTION = "SUBSCRIPTION";
     private static final String NOTICE_TYPE_SECURITY = "SECURITY";
     private static final List<String> DEFAULT_CHANNELS = List.of("IN_APP", "PUSH");
 
@@ -162,6 +163,9 @@ public class ContentUserNotificationSettingServiceImpl implements IContentUserNo
         if (req.getPrivateMessageNoticeEnabled() != null) {
             setting.setPrivateMessageNoticeEnabled(req.getPrivateMessageNoticeEnabled());
         }
+        if (req.getSubscriptionNoticeEnabled() != null) {
+            setting.setSubscriptionNoticeEnabled(req.getSubscriptionNoticeEnabled());
+        }
     }
 
     private boolean isNoticeTypeEnabled(ContentUserNotificationSetting setting, String noticeType) {
@@ -172,6 +176,7 @@ public class ContentUserNotificationSettingServiceImpl implements IContentUserNo
             case NOTICE_TYPE_FAVORITE -> Boolean.TRUE.equals(setting.getFavoriteNoticeEnabled());
             case NOTICE_TYPE_MENTION -> Boolean.TRUE.equals(setting.getMentionNoticeEnabled());
             case NOTICE_TYPE_PRIVATE_MESSAGE -> Boolean.TRUE.equals(setting.getPrivateMessageNoticeEnabled());
+            case NOTICE_TYPE_SUBSCRIPTION -> Boolean.TRUE.equals(setting.getSubscriptionNoticeEnabled());
             default -> throw new JeecgBootException("通知类型不合法");
         };
     }
@@ -184,6 +189,7 @@ public class ContentUserNotificationSettingServiceImpl implements IContentUserNo
             case NOTICE_TYPE_FAVORITE -> defaultIfEmpty(channelConfig.getFavoriteChannels());
             case NOTICE_TYPE_MENTION -> defaultIfEmpty(channelConfig.getMentionChannels());
             case NOTICE_TYPE_PRIVATE_MESSAGE -> defaultIfEmpty(channelConfig.getPrivateMessageChannels());
+            case NOTICE_TYPE_SUBSCRIPTION -> defaultIfEmpty(channelConfig.getSubscriptionChannels());
             default -> throw new JeecgBootException("通知类型不合法");
         };
     }
@@ -320,7 +326,8 @@ public class ContentUserNotificationSettingServiceImpl implements IContentUserNo
             .setFollowChannels(req.getFollowChannels())
             .setFavoriteChannels(req.getFavoriteChannels())
             .setMentionChannels(req.getMentionChannels())
-            .setPrivateMessageChannels(req.getPrivateMessageChannels()));
+            .setPrivateMessageChannels(req.getPrivateMessageChannels())
+            .setSubscriptionChannels(req.getSubscriptionChannels()));
     }
 
     /**
@@ -375,7 +382,8 @@ public class ContentUserNotificationSettingServiceImpl implements IContentUserNo
             .setFollowChannels(defaultIfEmpty(config.getFollowChannels()))
             .setFavoriteChannels(defaultIfEmpty(config.getFavoriteChannels()))
             .setMentionChannels(defaultIfEmpty(config.getMentionChannels()))
-            .setPrivateMessageChannels(defaultIfEmpty(config.getPrivateMessageChannels()));
+            .setPrivateMessageChannels(defaultIfEmpty(config.getPrivateMessageChannels()))
+            .setSubscriptionChannels(defaultIfEmpty(config.getSubscriptionChannels()));
     }
 
     private ContentNotificationChannelConfigVO defaultChannelConfig() {
@@ -385,7 +393,8 @@ public class ContentUserNotificationSettingServiceImpl implements IContentUserNo
             .setFollowChannels(DEFAULT_CHANNELS)
             .setFavoriteChannels(DEFAULT_CHANNELS)
             .setMentionChannels(DEFAULT_CHANNELS)
-            .setPrivateMessageChannels(DEFAULT_CHANNELS);
+            .setPrivateMessageChannels(DEFAULT_CHANNELS)
+            .setSubscriptionChannels(DEFAULT_CHANNELS);
     }
 
     private ContentNotificationDndRuleVO defaultDndRule() {
@@ -430,6 +439,9 @@ public class ContentUserNotificationSettingServiceImpl implements IContentUserNo
         }
         if (setting.getPrivateMessageNoticeEnabled() == null) {
             setting.setPrivateMessageNoticeEnabled(Boolean.TRUE);
+        }
+        if (setting.getSubscriptionNoticeEnabled() == null) {
+            setting.setSubscriptionNoticeEnabled(Boolean.TRUE);
         }
     }
 }

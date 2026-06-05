@@ -31,6 +31,9 @@ public class ContentUserNotificationUpdateReq {
     @Schema(description = "私信通知开关", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Boolean privateMessageNoticeEnabled;
 
+    @Schema(description = "订阅更新通知开关", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private Boolean subscriptionNoticeEnabled;
+
     @Valid
     @Schema(description = "渠道配置", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private ContentNotificationChannelConfigReq channelConfig;

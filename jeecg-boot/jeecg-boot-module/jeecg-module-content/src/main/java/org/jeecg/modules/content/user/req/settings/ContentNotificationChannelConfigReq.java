@@ -32,4 +32,7 @@ public class ContentNotificationChannelConfigReq {
 
     @Schema(description = "私信通知渠道", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private List<@Pattern(regexp = "^(IN_APP|PUSH|EMAIL|SMS)$", message = "私信通知渠道取值不合法") String> privateMessageChannels;
+
+    @Schema(description = "订阅更新通知渠道", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
+    private List<@Pattern(regexp = "^(IN_APP|PUSH|EMAIL|SMS)$", message = "订阅更新通知渠道取值不合法") String> subscriptionChannels;
 }

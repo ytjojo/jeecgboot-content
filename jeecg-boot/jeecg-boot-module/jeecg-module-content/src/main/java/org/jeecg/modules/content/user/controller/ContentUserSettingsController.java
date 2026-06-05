@@ -5,10 +5,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.modules.content.user.entity.ContentUserPrivacySetting;
 import org.jeecg.modules.content.user.req.profile.ContentUserPrivacyUpdateReq;
 import org.jeecg.modules.content.user.req.settings.ContentFeedSettingUpdateReq;
 import org.jeecg.modules.content.user.req.settings.ContentNotificationDndRuleReq;
 import org.jeecg.modules.content.user.req.settings.ContentUserNotificationUpdateReq;
+import org.jeecg.modules.content.user.req.settings.ContentUserSecurityUpdateReq;
 import org.jeecg.modules.content.user.service.IContentUserFeedSettingService;
 import org.jeecg.modules.content.user.service.IContentUserNotificationSettingService;
 import org.jeecg.modules.content.user.service.IContentUserProfileService;
@@ -42,6 +44,15 @@ public class ContentUserSettingsController {
 
     @Resource
     private IContentUserSecuritySettingService securitySettingService;
+
+    /**
+     * 查询用户隐私设置。
+     */
+    @Operation(summary = "查询隐私设置")
+    @GetMapping("/privacy")
+    public Result<ContentUserPrivacySetting> getPrivacy(@RequestParam("userId") String userId) {
+        return Result.OK(profileService.getPrivacySetting(userId));
+    }
 
     /**
      * 更新用户隐私、可见性与发现设置。
@@ -119,5 +130,15 @@ public class ContentUserSettingsController {
     @GetMapping("/security")
     public Result<ContentUserSecuritySettingVO> getSecuritySetting(@RequestParam("userId") String userId) {
         return Result.OK(securitySettingService.getSecuritySetting(userId));
+    }
+
+    /**
+     * 更新用户账号安全设置。
+     */
+    @Operation(summary = "更新账号安全设置")
+    @PostMapping("/security/update")
+    public Result<ContentUserSecuritySettingVO> updateSecuritySetting(@RequestParam("userId") String userId,
+                                                                      @Valid @RequestBody ContentUserSecurityUpdateReq req) {
+        return Result.OK(securitySettingService.updateSecuritySetting(userId, req));
     }
 }

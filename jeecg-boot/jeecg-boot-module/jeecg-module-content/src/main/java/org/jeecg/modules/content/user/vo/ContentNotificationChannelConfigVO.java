@@ -31,4 +31,7 @@ public class ContentNotificationChannelConfigVO {
 
     @Schema(description = "私信通知渠道")
     private List<String> privateMessageChannels;
+
+    @Schema(description = "订阅更新通知渠道")
+    private List<String> subscriptionChannels;
 }
