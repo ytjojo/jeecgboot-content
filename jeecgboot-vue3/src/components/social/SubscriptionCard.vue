@@ -2,7 +2,7 @@
   <div :class="['subscription-card', { 'is-mobile': isMobile }]">
     <div class="subscription-card__header">
       <div class="subscription-card__icon">
-        <img v-if="source.sourceIcon" :src="source.sourceIcon" :alt="source.sourceName" />
+        <img v-if="source.sourceIcon" :src="source.sourceIcon" :alt="source.sourceName" loading="lazy" />
         <AppstoreOutlined v-else />
       </div>
       <div class="subscription-card__info">

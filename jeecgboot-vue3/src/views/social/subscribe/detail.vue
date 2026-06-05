@@ -5,7 +5,7 @@
         <div class="subscribe-detail-page__info">
           <div class="subscribe-detail-page__info-header">
             <div class="subscribe-detail-page__icon">
-              <img v-if="detail.sourceIcon" :src="detail.sourceIcon" :alt="detail.sourceName" />
+              <img v-if="detail.sourceIcon" :src="detail.sourceIcon" :alt="detail.sourceName" loading="lazy" />
               <AppstoreOutlined v-else />
             </div>
             <div class="subscribe-detail-page__info-body">

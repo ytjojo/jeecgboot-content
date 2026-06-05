@@ -34,7 +34,7 @@
         >
           <div class="subscribe-square-page__card-info">
             <div class="subscribe-square-page__card-icon">
-              <img v-if="item.sourceIcon" :src="item.sourceIcon" :alt="item.sourceName" />
+              <img v-if="item.sourceIcon" :src="item.sourceIcon" :alt="item.sourceName" loading="lazy" />
               <AppstoreOutlined v-else />
             </div>
             <div class="subscribe-square-page__card-body">
