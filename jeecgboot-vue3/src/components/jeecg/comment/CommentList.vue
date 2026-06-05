@@ -11,6 +11,13 @@
             <template #author>
               <div class="comment-author">
                 <span>{{ item.fromUserId_dictText }}</span>
+                <CommunityRoleBadge
+                  v-if="item.communityRole && item.communityRole !== 'NORMAL'"
+                  :role="item.communityRole"
+                  :verified="item.roleVerified"
+                  size="small"
+                  inline
+                />
 
                 <template v-if="item.toUserId">
                   <span>回复</span>
@@ -39,6 +46,13 @@
               <Popconfirm title="确定删除吗？" @confirm="deleteComment(item)">
                 <span>删除</span>
               </Popconfirm>
+
+              <CommentActions
+                v-if="item.communityRole"
+                :comment="item"
+                @delete-comment="handleModDeleteComment"
+                @warn-user="handleModWarnUser"
+              />
             </template>
 
             <template #content>
@@ -68,6 +82,14 @@
         </template>
       </a-comment>
     </div>
+
+    <ModeratorActionModal
+      :visible="showModModal"
+      :action-type="modActionType"
+      :target-id="modTargetId"
+      @confirm="handleModConfirm"
+      @cancel="showModModal = false"
+    />
   </div>
 </template>
 
@@ -93,6 +115,9 @@
   import HistoryFileList from './HistoryFileList.vue';
   import { Popconfirm } from 'ant-design-vue';
   import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
+  import CommentActions from '/@/views/content/components/CommentActions.vue';
+  import CommunityRoleBadge from '/@/views/content/components/CommunityRoleBadge.vue';
+  import ModeratorActionModal from '/@/views/content/components/ModeratorActionModal.vue';
 
   export default defineComponent({
     name: 'CommentList',
@@ -103,6 +128,9 @@
       MyComment,
       Popconfirm,
       HistoryFileList,
+      CommentActions,
+      CommunityRoleBadge,
+      ModeratorActionModal,
     },
     props: {
       tableId: propTypes.string.def(''),
@@ -259,6 +287,28 @@
       const storageEmojiIndex = getGloablEmojiIndex()
       const { getHtml } = useEmojiHtml(storageEmojiIndex);
       const bottomCommentRef = ref()
+      const showModModal = ref(false);
+      const modActionType = ref<'deleteComment' | 'warnUser'>('deleteComment');
+      const modTargetId = ref('');
+
+      function handleModDeleteComment(commentId: string) {
+        modActionType.value = 'deleteComment';
+        modTargetId.value = commentId;
+        showModModal.value = true;
+      }
+
+      function handleModWarnUser(userId: string) {
+        modActionType.value = 'warnUser';
+        modTargetId.value = userId;
+        showModModal.value = true;
+      }
+
+      function handleModConfirm(data: { targetId: string; reason: string; level?: string }) {
+        // Emit event for parent to handle actual API call
+        console.log('Moderator action:', data);
+        showModModal.value = false;
+      }
+
       function handleClickItem(){
         bottomCommentRef.value.changeActive()
       }
@@ -307,6 +357,12 @@
         visibleChange,
         listRef,
         lineFeed,
+        showModModal,
+        modActionType,
+        modTargetId,
+        handleModDeleteComment,
+        handleModWarnUser,
+        handleModConfirm,
       };
     },
   });
