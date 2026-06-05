@@ -106,10 +106,41 @@ private List<String> subscriptionChannels;
 
 ---
 
+## 问题 5: 订阅更新通知开关字段缺失（高优先级）
+
+**现状**: `ContentUserNotificationSettingVO` 仅包含 6 个 Boolean 开关字段:
+- `likeNoticeEnabled`
+- `commentNoticeEnabled`
+- `followNoticeEnabled`
+- `favoriteNoticeEnabled`
+- `mentionNoticeEnabled`
+- `messageNoticeEnabled`
+
+**缺失**: `subscriptionNoticeEnabled` 字段（对应第 7 类通知"订阅更新"的主开关）。
+
+**前端需求**: PRD 定义 7 类通知，订阅更新也需要独立开关。
+
+**注意**: 实体 `ContentUserNotificationSetting` 已有 `subscriptionNoticeEnabled` 字段，但 VO 未暴露。
+
+**建议修改**: 在 `ContentUserNotificationSettingVO` 中补充:
+
+```java
+@Schema(description = "订阅更新通知开关")
+private Boolean subscriptionNoticeEnabled;
+```
+
+同时确保 getter 方法处理 null 默认值（默认 true）。
+
+**涉及文件**:
+- `ContentUserNotificationSettingVO.java` - 添加字段
+
+---
+
 ## 优先级排序
 
 | 优先级 | 问题 | 阻塞程度 | 预计工作量 |
 |--------|------|----------|-----------|
 | P0 | 隐私设置 GET 端点 | 阻塞隐私设置页面数据加载 | 小（复用已有 service 方法） |
 | P0 | 安全设置更新端点 | 阻塞登录提醒开关保存 | 小（新增 req + service 方法） |
-| P1 | 订阅更新渠道字段 | 影响第 7 类通知渠道配置 | 小（VO 加字段 + JSON 序列化） |
+| P0 | 订阅更新通知开关字段 | 影响第 7 类通知开关配置（VO 已有实体字段但未暴露） | 小（VO 加字段） |
+| P0 | 订阅更新渠道字段 | 影响第 7 类通知渠道配置（与问题 5 配套） | 小（VO 加字段 + JSON 序列化） |

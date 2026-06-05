@@ -1,10 +1,10 @@
 ## ADDED Requirements
 
 ### Requirement: 账户安全设置聚合接口
-系统 SHALL 提供 `/api/v1/settings/security` 接口，返回所有安全功能的入口列表及其当前状态（是否已启用）。
+系统 SHALL 提供 `/content/user/settings/security` 接口，返回所有安全功能的入口列表及其当前状态（是否已启用）。
 
 #### Scenario: 加载安全设置页面
-- **WHEN** 客户端调用 GET /api/v1/settings/security
+- **WHEN** 客户端调用 GET /content/user/settings/security
 - **THEN** 系统返回安全功能列表，包含功能名称、描述、入口路径、当前状态
 
 #### Scenario: 返回安全功能状态

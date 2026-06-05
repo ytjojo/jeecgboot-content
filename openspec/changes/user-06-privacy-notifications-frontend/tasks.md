@@ -1,6 +1,6 @@
 ## 1. 基础设施与 API 封装
 
-- [ ] 1.1 创建 `src/views/content/settings/api.ts`，封装全部 9 个 API 接口（getNotificationSettings / updateNotificationSettings / updateDndRules / getPrivacySettings / updatePrivacySettings / getSecuritySettings / getThirdPartyAuthList / getThirdPartyAuthDetail / revokeThirdPartyAuth）
+- [ ] 1.1 创建 `src/views/content/settings/api.ts`，封装全部 10 个 API 接口（getNotificationSettings / updateNotificationSettings / updateDndRules / getPrivacySettings / updatePrivacySettings / getSecuritySettings / updateSecuritySettings / getThirdPartyAuthList / getThirdPartyAuthDetail / revokeThirdPartyAuth）。同时验证 userId 注入拦截器支持 GET query 和 POST params
 - [ ] 1.2 创建 `src/views/content/settings/` 目录结构（notification / privacy / third-party / security 四个子目录）
 - [ ] 1.3 在内容社区路由配置中新增四个子路由（通知设置、隐私设置、第三方授权、账户安全），使用懒加载
 
@@ -35,11 +35,11 @@
 - [ ] 4.2 实现授权列表 Table：四列（应用名称、授权时间、授权范围 Tag、操作按钮）
 - [ ] 4.3 实现应用名称为 null 时显示"未知应用"，授权范围为空时显示"未知权限"红色 Tag
 - [ ] 4.4 实现查看详情 Modal：点击按钮调用详情接口，弹窗展示数据范围清单
-- [ ] 4.4 实现撤销授权流程：确认弹窗 → 调用 DELETE 接口 → 成功移除行 / 失败提示
-- [ ] 4.5 实现异常处理：授权不存在提示、越权 403 提示
-- [ ] 4.6 实现 authId 类型转换（路由参数 string → API 调用 number）
-- [ ] 4.7 实现空状态展示（无授权记录时的插图 + 文案）
-- [ ] 4.8 实现移动端响应式：Table 转为卡片列表，授权范围折叠
+- [ ] 4.5 实现撤销授权流程：确认弹窗 → 调用 DELETE 接口 → 成功移除行 / 失败提示
+- [ ] 4.6 实现异常处理：授权不存在提示、越权 403 提示
+- [ ] 4.7 实现 authId 类型转换（路由参数 string → API 调用 number）
+- [ ] 4.8 实现空状态展示（无授权记录时的插图 + 文案）
+- [ ] 4.9 实现移动端响应式：Table 转为卡片列表，授权范围折叠
 
 ## 5. 账户安全设置页
 
