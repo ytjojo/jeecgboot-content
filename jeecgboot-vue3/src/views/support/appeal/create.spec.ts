@@ -130,4 +130,78 @@ describe('AppealCreate', () => {
     const wrapper = mount(AppealCreate, { global: { stubs: globalStubs } });
     expect(wrapper.text()).toContain('取消');
   });
+
+  it('should reject upload when file exceeds 10MB', async () => {
+    const { message } = await import('ant-design-vue');
+    const wrapper = mount(AppealCreate, { global: { stubs: globalStubs } });
+    const bigFile = new File([new ArrayBuffer(11 * 1024 * 1024)], 'big.jpg', { type: 'image/jpeg' });
+    const result = (wrapper.vm as any).beforeUpload(bigFile);
+    expect(result).toBe(false);
+    expect(message.error).toHaveBeenCalledWith('文件大小不能超过 10MB');
+  });
+
+  it('should accept upload when file is under 10MB', async () => {
+    const wrapper = mount(AppealCreate, { global: { stubs: globalStubs } });
+    const smallFile = new File([new ArrayBuffer(1024)], 'small.jpg', { type: 'image/jpeg' });
+    const result = (wrapper.vm as any).beforeUpload(smallFile);
+    expect(result).toBe(true);
+  });
+
+  it('should handle attachment upload success', async () => {
+    const { uploadFile } = await import('/@/api/sys/upload');
+    const wrapper = mount(AppealCreate, { global: { stubs: globalStubs } });
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+    await (wrapper.vm as any).handleUpload({ file: new File([], 'test.jpg'), onSuccess, onError });
+    await flushPromises();
+    expect(uploadFile).toHaveBeenCalled();
+    expect(onSuccess).toHaveBeenCalled();
+    expect((wrapper.vm as any).formData.attachmentUrls).toContain('https://example.com/file1.jpg');
+  });
+
+  it('should handle attachment upload error', async () => {
+    const { uploadFile } = await import('/@/api/sys/upload');
+    vi.mocked(uploadFile).mockRejectedValueOnce(new Error('upload failed'));
+    const wrapper = mount(AppealCreate, { global: { stubs: globalStubs } });
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+    await (wrapper.vm as any).handleUpload({ file: new File([], 'test.jpg'), onSuccess, onError });
+    await flushPromises();
+    expect(onError).toHaveBeenCalled();
+  });
+
+  it('should call createAppeal and navigate on valid submission', async () => {
+    const { createAppeal } = await import('/@/api/support/appeal');
+    const wrapper = mount(AppealCreate, { global: { stubs: globalStubs } });
+    (wrapper.vm as any).formData.appealType = 'content_delete';
+    (wrapper.vm as any).formData.reason = '详细申诉理由';
+    await nextTick();
+    await (wrapper.vm as any).handleSubmit();
+    await flushPromises();
+    expect(createAppeal).toHaveBeenCalled();
+    const { message } = await import('ant-design-vue');
+    expect(message.success).toHaveBeenCalledWith('申诉已提交');
+  });
+
+  it('should handle createAppeal API error', async () => {
+    const { createAppeal } = await import('/@/api/support/appeal');
+    vi.mocked(createAppeal).mockRejectedValueOnce(new Error('API error'));
+    const { message } = await import('ant-design-vue');
+    const wrapper = mount(AppealCreate, { global: { stubs: globalStubs } });
+    (wrapper.vm as any).formData.appealType = 'content_delete';
+    (wrapper.vm as any).formData.reason = '详细申诉理由';
+    await nextTick();
+    await (wrapper.vm as any).handleSubmit();
+    await flushPromises();
+    expect(message.error).toHaveBeenCalledWith('提交失败');
+  });
+
+  it('should call handleCancel to go back', async () => {
+    const wrapper = mount(AppealCreate, { global: { stubs: globalStubs } });
+    // handleCancel calls router.back() — verify it executes without error and submitting state is unchanged
+    expect((wrapper.vm as any).submitting).toBe(false);
+    await (wrapper.vm as any).handleCancel();
+    // submitting should remain false (handleCancel doesn't change it)
+    expect((wrapper.vm as any).submitting).toBe(false);
+  });
 });

@@ -255,4 +255,130 @@ describe('ReportModal', () => {
     expect((wrapper.vm as any).formData.reportType).toBe('');
     expect((wrapper.vm as any).formData.description).toBe('');
   });
+
+  const defaultStubs = {
+    'a-modal': { template: '<div><slot /><slot name="footer" /></div>' },
+    'a-form': { template: '<form><slot /></form>' },
+    'a-form-item': { template: '<div><slot /></div>' },
+    'a-radio-group': { template: '<div><slot /></div>' },
+    'a-radio': { template: '<div><slot /></div>', props: ['value'] },
+    'a-textarea': { template: '<textarea />', props: ['value', 'maxlength', 'rows', 'showCount', 'placeholder'] },
+    'a-upload': { template: '<div><slot /><slot name="tip" /></div>', props: ['fileList', 'accept', 'listType'] },
+    'a-button': { template: '<button><slot /></button>', props: ['type', 'loading', 'disabled'] },
+  };
+
+  it('should reject upload when file exceeds 10MB', async () => {
+    const { message } = await import('ant-design-vue');
+    const wrapper = mount(ReportModal, {
+      props: defaultProps,
+      global: { stubs: defaultStubs },
+    });
+    const bigFile = new File([new ArrayBuffer(11 * 1024 * 1024)], 'big.jpg', { type: 'image/jpeg' });
+    const result = (wrapper.vm as any).beforeUpload(bigFile);
+    expect(result).toBe(false);
+    expect(message.error).toHaveBeenCalledWith('文件大小不能超过 10MB');
+  });
+
+  it('should reject upload when file count exceeds 5', async () => {
+    const { message } = await import('ant-design-vue');
+    const wrapper = mount(ReportModal, {
+      props: defaultProps,
+      global: { stubs: defaultStubs },
+    });
+    (wrapper.vm as any).fileList = [{}, {}, {}, {}, {}]; // 5 files already
+    await nextTick();
+    const smallFile = new File([new ArrayBuffer(1024)], 'small.jpg', { type: 'image/jpeg' });
+    const result = (wrapper.vm as any).beforeUpload(smallFile);
+    expect(result).toBe(false);
+    expect(message.error).toHaveBeenCalledWith('最多上传 5 个文件');
+  });
+
+  it('should accept upload for valid file', async () => {
+    const wrapper = mount(ReportModal, {
+      props: defaultProps,
+      global: { stubs: defaultStubs },
+    });
+    const smallFile = new File([new ArrayBuffer(1024)], 'small.jpg', { type: 'image/jpeg' });
+    const result = (wrapper.vm as any).beforeUpload(smallFile);
+    expect(result).toBe(true);
+  });
+
+  it('should handle evidence upload success', async () => {
+    const { uploadFile } = await import('/@/api/sys/upload');
+    const wrapper = mount(ReportModal, {
+      props: defaultProps,
+      global: { stubs: defaultStubs },
+    });
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+    await (wrapper.vm as any).handleUpload({ file: new File([], 'evidence.jpg'), onSuccess, onError });
+    await flushPromises();
+    expect(uploadFile).toHaveBeenCalled();
+    expect(onSuccess).toHaveBeenCalled();
+    expect((wrapper.vm as any).formData.evidenceUrls).toContain('https://example.com/file1.jpg');
+    // uploading should be false after completion
+    expect((wrapper.vm as any).uploading).toBe(false);
+  });
+
+  it('should handle evidence upload error', async () => {
+    const { uploadFile } = await import('/@/api/sys/upload');
+    vi.mocked(uploadFile).mockRejectedValueOnce(new Error('upload failed'));
+    const wrapper = mount(ReportModal, {
+      props: defaultProps,
+      global: { stubs: defaultStubs },
+    });
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+    await (wrapper.vm as any).handleUpload({ file: new File([], 'evidence.jpg'), onSuccess, onError });
+    await flushPromises();
+    expect(onError).toHaveBeenCalled();
+    expect((wrapper.vm as any).uploading).toBe(false);
+  });
+
+  it('should call createReport with all form fields', async () => {
+    const { createReport } = await import('/@/api/support/report');
+    const wrapper = mount(ReportModal, {
+      props: defaultProps,
+      global: { stubs: defaultStubs },
+    });
+    (wrapper.vm as any).formData.reportType = 'harassment';
+    (wrapper.vm as any).formData.description = '包含辱骂内容';
+    (wrapper.vm as any).formData.evidenceUrls = ['https://example.com/evidence1.jpg'];
+    await nextTick();
+    await (wrapper.vm as any).handleSubmit();
+    await flushPromises();
+    expect(createReport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        targetType: 'article',
+        targetId: '123',
+        reportType: 'harassment',
+        description: '包含辱骂内容',
+        evidenceUrls: ['https://example.com/evidence1.jpg'],
+      })
+    );
+  });
+
+  it('should handle generic API error on submit', async () => {
+    const { createReport } = await import('/@/api/support/report');
+    vi.mocked(createReport).mockRejectedValueOnce({ code: 'SERVER_ERROR' });
+    const { message } = await import('ant-design-vue');
+    const wrapper = mount(ReportModal, {
+      props: defaultProps,
+      global: { stubs: defaultStubs },
+    });
+    (wrapper.vm as any).formData.reportType = 'spam';
+    await (wrapper.vm as any).handleSubmit();
+    await flushPromises();
+    expect(message.error).toHaveBeenCalledWith('提交失败，请重试');
+    expect((wrapper.vm as any).submitting).toBe(false);
+  });
+
+  it('should call handleTypeChange without error', () => {
+    const wrapper = mount(ReportModal, {
+      props: defaultProps,
+      global: { stubs: defaultStubs },
+    });
+    // handleTypeChange is a no-op, verify it executes
+    expect(() => (wrapper.vm as any).handleTypeChange()).not.toThrow();
+  });
 });
