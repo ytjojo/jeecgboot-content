@@ -31,7 +31,7 @@
     </a-spin>
 
     <!-- 创建分组弹窗 -->
-    <a-modal v-model:open="showCreateModal" title="新建分组" :width="isMobile ? '95vw' : 520" @ok="handleCreateGroup" @cancel="resetCreateForm">
+    <a-modal v-model:open="showCreateModal" title="新建分组" :width="isMobile ? '95vw' : 520" :confirm-loading="createLoading" @ok="handleCreateGroup" @cancel="resetCreateForm">
       <a-form :label-col="{ span: 4 }">
         <a-form-item label="名称">
           <a-input v-model:value="newGroupName" placeholder="请输入分组名称" :maxlength="20" />
@@ -40,7 +40,7 @@
     </a-modal>
 
     <!-- 重命名弹窗 -->
-    <a-modal v-model:open="showRenameModal" title="重命名分组" :width="isMobile ? '95vw' : 520" @ok="handleRenameGroup" @cancel="resetRenameForm">
+    <a-modal v-model:open="showRenameModal" title="重命名分组" :width="isMobile ? '95vw' : 520" :confirm-loading="renameLoading" @ok="handleRenameGroup" @cancel="resetRenameForm">
       <a-form :label-col="{ span: 4 }">
         <a-form-item label="名称">
           <a-input v-model:value="renameValue" placeholder="请输入新名称" :maxlength="20" />
@@ -69,11 +69,13 @@ const loading = ref(false);
 // 创建分组
 const showCreateModal = ref(false);
 const newGroupName = ref('');
+const createLoading = ref(false);
 
 // 重命名分组
 const showRenameModal = ref(false);
 const renameValue = ref('');
 const renamingGroup = ref<FollowGroup | null>(null);
+const renameLoading = ref(false);
 
 function startRename(group: FollowGroup) {
   renamingGroup.value = group;
@@ -87,6 +89,7 @@ async function handleCreateGroup() {
     message.warning('请输入分组名称');
     return;
   }
+  createLoading.value = true;
   try {
     await followStore.createGroup(currentUserId.value, name);
     message.success('分组创建成功');
@@ -95,6 +98,8 @@ async function handleCreateGroup() {
   } catch (error) {
     console.error('[GroupManage] create group failed:', error);
     message.error('创建分组失败');
+  } finally {
+    createLoading.value = false;
   }
 }
 
@@ -105,6 +110,7 @@ async function handleRenameGroup() {
     return;
   }
   if (!renamingGroup.value) return;
+  renameLoading.value = true;
   try {
     await followStore.updateGroup(currentUserId.value, renamingGroup.value.id, name);
     message.success('重命名成功');
@@ -114,6 +120,8 @@ async function handleRenameGroup() {
   } catch (error) {
     console.error('[GroupManage] rename group failed:', error);
     message.error('重命名失败');
+  } finally {
+    renameLoading.value = false;
   }
 }
 
