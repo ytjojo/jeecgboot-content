@@ -998,4 +998,37 @@ public class ContentUserRelationServiceImpl implements IContentUserRelationServi
             .setUnblockConfirmation("解除拉黑后，双方将恢复正常可见性，但之前的关注关系不会自动恢复，如需关注请重新操作。")
             .setBlockVsMuteComparison("拉黑是双向切断：双方无法查看对方主页和内容，并自动解除互相关注。\n屏蔽是单向降噪：你不再看到对方信息流内容，但关注关系保留，对方不受影响。");
     }
+
+    /**
+     * 批量查询指定用户列表与当前用户的互关状态。
+     */
+    @Override
+    public Map<String, Boolean> getMutualStatus(String operatorUserId, List<String> targetUserIds) {
+        requireValidUserId(operatorUserId, "当前用户ID不能为空", "当前用户ID长度不能超过64位");
+        if (targetUserIds == null || targetUserIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        // 验证目标用户ID列表
+        for (String targetUserId : targetUserIds) {
+            if (targetUserId == null || targetUserId.trim().isEmpty()) {
+                throw new JeecgBootException("目标用户ID不能为空");
+            }
+            if (targetUserId.length() > USER_ID_MAX_LENGTH) {
+                throw new JeecgBootException("目标用户ID长度不能超过64位");
+            }
+        }
+        // 查询当前用户关注的目标用户集合
+        Set<String> followedTargets = new HashSet<>(relationMapper.selectFollowedTargetIds(operatorUserId, targetUserIds));
+        if (followedTargets.isEmpty()) {
+            // 当前用户没有关注任何目标用户，直接返回全部 false
+            return targetUserIds.stream().collect(Collectors.toMap(id -> id, id -> false));
+        }
+        // 查询目标用户中关注了当前用户的用户集合
+        Set<String> reverseFollowed = new HashSet<>(relationMapper.selectFollowedTargetIds(operatorUserId, followedTargets));
+        // 构建结果：只有双向关注才是互关
+        return targetUserIds.stream().collect(Collectors.toMap(
+            id -> id,
+            id -> followedTargets.contains(id) && reverseFollowed.contains(id)
+        ));
+    }
 }

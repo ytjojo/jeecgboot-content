@@ -23,6 +23,7 @@ import org.jeecg.modules.content.user.vo.ContentUserRelationVO;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * ReST endpoints for content user relation.
@@ -281,6 +282,16 @@ public class ContentUserRelationController {
                                                                @RequestParam(value = "pageNo", required = false, defaultValue = "1") Long pageNo,
                                                                @RequestParam(value = "pageSize", required = false, defaultValue = "10") Long pageSize) {
         return Result.OK(relationService.getMutualFollowList(userId, keyword, pageNo, pageSize));
+    }
+
+    /**
+     * 批量查询互关状态。
+     */
+    @Operation(summary = "批量查询互关状态")
+    @GetMapping("/mutual-status")
+    public Result<Map<String, Boolean>> mutualStatus(@RequestParam("userId") String userId,
+                                                      @RequestParam("userIds") List<String> userIds) {
+        return Result.OK(relationService.getMutualStatus(userId, userIds));
     }
 
     /**
