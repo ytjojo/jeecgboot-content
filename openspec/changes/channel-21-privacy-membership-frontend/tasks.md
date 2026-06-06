@@ -1,3 +1,16 @@
+> **跨文档索引:** 本文件为实现任务清单，与 `plan.md` 中的详细步骤一一对应。
+> - 任务 1 (API 层) ↔ plan.md Task 1-5
+> - 任务 2 (隐私设置) ↔ plan.md Task 6-9
+> - 任务 3 (订阅功能) ↔ plan.md Task 10-14
+> - 任务 4 (申请加入) ↔ plan.md Task 15-19
+> - 任务 5 (成员管理) ↔ plan.md Task 20-25
+> - 任务 6 (黑名单/治理日志) ↔ plan.md Task 26-30
+> - 任务 7 (上下文/路由) ↔ plan.md Task 31-34
+> - 任务 8 (响应式) ↔ plan.md Task 35-38
+> - 任务 9-10 (验证/测试) ↔ plan.md Test Strategy
+>
+> 详细代码示例、接口定义和实现说明请查阅 `plan.md`；设计约束和边界条件请查阅 `design.md`。
+
 ## 1. API 层与 Composable 基础
 
 - [ ] 1.1 创建 `src/api/content/channelSubscription.ts` — 订阅/取消订阅/查询状态/订阅列表/分组CRUD/提醒设置/移动分组 API
@@ -72,3 +85,19 @@
 - [ ] 9.3 运行集成测试：订阅流程、申请加入流程、成员管理流程、治理操作流程
 - [ ] 9.4 响应式验证：桌面端和移动端各页面核心操作可用
 - [ ] 9.5 性能验证：页面首屏 < 2s，核心操作 P95 <= 500ms
+
+## 10. 测试编写
+
+> **关联:** 以下 11 个测试文件对应 `design.md` Test Strategy 中列出的全部测试文件。每个任务需编写完整的测试代码，而非仅运行已有测试。
+
+- [ ] 10.1 编写 `useChannelContext.test.ts` — 状态隔离（不同 channelId 独立）、权限 computed、resetContext、loadContext 异常处理
+- [ ] 10.2 编写 `useChannelOperation.test.ts` — 乐观更新成功/失败回滚、并发操作处理、缓存失效触发
+- [ ] 10.3 编写 `SubscribeButton.test.ts` — 6 种状态渲染、点击订阅/取消、乐观更新视觉反馈、错误态展示
+- [ ] 10.4 编写 `JoinApplyModal.test.ts` — 表单验证（10-200字）、字数统计、提交成功/失败、关闭重置
+- [ ] 10.5 编写 `SubscriptionList.test.ts` — 分组标签页切换、搜索过滤、卡片列表渲染、空状态、新建分组 Modal
+- [ ] 10.6 编写 `PendingApplications.test.ts` — 待审列表渲染、超时高亮、单条批准/拒绝、批量操作、时间范围筛选
+- [ ] 10.7 编写 `MemberList.test.ts` — 成员列表渲染、角色筛选、搜索防抖、操作菜单权限控制、批量操作
+- [ ] 10.8 编写 `MuteModal.test.ts` — 时长选择、原因必填验证、提交确认、取消关闭
+- [ ] 10.9 编写 `GovernanceDetailDrawer.test.ts` — Drawer 打开/关闭、操作前后状态对比渲染、Description 组件数据填充
+- [ ] 10.10 编写 `ChannelPrivacySettings.test.ts` — 公开/私有切换、系统频道锁定、变更影响确认弹窗、skeleton 加载态
+- [ ] 10.11 编写 `SubscriptionCard.test.ts` — 卡片信息渲染、提醒开关切换、取消订阅确认、来源标签展示

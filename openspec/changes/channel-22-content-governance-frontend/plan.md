@@ -31,12 +31,12 @@ mkdir -p jeecgboot-vue3/src/api/content/channel
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  available = '/api/channel/publish/available',
-  submit = '/api/channel/publish/submit',
-  result = '/api/channel/publish/result',
-  scheduled = '/api/channel/publish/scheduled',
-  scheduledList = '/api/channel/publish/scheduled/list',
-  limitCheck = '/api/channel/publish/limit/check',
+  available = '/content/channel/publish/available',
+  submit = '/content/channel/publish',
+  result = '/content/channel/publish/result',
+  scheduled = '/content/channel/publish/scheduled',
+  scheduledList = '/content/channel/publish/scheduled/list',
+  limitCheck = '/content/channel/publish/limit/check',
 }
 
 /** 获取用户可发布/投稿/管理的频道列表 */
@@ -77,13 +77,12 @@ export const checkPublishLimit = (data: { contentId: string; channelIds: string[
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  list = '/api/channel/review/list',
-  approve = '/api/channel/review/approve',
-  reject = '/api/channel/review/reject',
-  stats = '/api/channel/review/stats',
+  list = '/content/channel/review/list',
+  action = '/content/channel/review',
+  stats = '/content/channel/review/stats',
 }
 
-/** 获取待审区列表 */
+/** 获取待审区列表（后端使用 current/size 分页） */
 export const getReviewList = (params: {
   channelId: string;
   contentType?: string;
@@ -93,17 +92,16 @@ export const getReviewList = (params: {
   reviewStatus?: string;
   timeoutStatus?: string;
   keyword?: string;
-  pageNo?: number;
-  pageSize?: number;
+  current?: number;
+  size?: number;
 }) => defHttp.get({ url: Api.list, params });
 
-/** 审核通过（支持批量） */
-export const approveReview = (data: { ids: string[] }) =>
-  defHttp.post({ url: Api.approve, data });
-
-/** 审核拒绝（支持批量，含原因） */
-export const rejectReview = (data: { ids: string[]; reason: string }) =>
-  defHttp.post({ url: Api.reject, data });
+/** 审核操作（逐条，action: APPROVE | REJECT） */
+export const executeReview = (data: {
+  reviewId: string;
+  action: 'APPROVE' | 'REJECT';
+  rejectReason?: string;
+}) => defHttp.post({ url: Api.action, data });
 
 /** 待审统计 */
 export const getReviewStats = (channelId: string) =>
@@ -118,19 +116,24 @@ export const getReviewStats = (channelId: string) =>
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  contentList = '/api/channel/governance/content/list',
-  pin = '/api/channel/governance/pin',
-  feature = '/api/channel/governance/feature',
-  delete = '/api/channel/governance/delete',
-  move = '/api/channel/governance/move',
-  editAssist = '/api/channel/governance/edit-assist',
-  editAssistHistory = '/api/channel/governance/edit-assist/history',
-  recycleBinList = '/api/channel/governance/recycle-bin/list',
-  recycleBinRestore = '/api/channel/governance/recycle-bin/restore',
-  logList = '/api/channel/governance/log/list',
+  governance = '/content/channel/governance',
+  contentList = '/content/channel/governance/content/list',
+  editAssistHistory = '/content/channel/governance/edit-assist/history',
+  recycleBinList = '/content/channel/governance/recycle-bin/list',
+  logList = '/content/channel/governance/log/list',
 }
 
-/** 频道内容列表 */
+/** 统一治理操作（后端使用 action 字段区分操作类型） */
+export const executeGovernance = (data: {
+  channelId: string;
+  contentId: string;
+  action: 'PIN' | 'UNPIN' | 'FEATURE' | 'UNFEATURE' | 'DELETE' | 'RESTORE' | 'MOVE' | 'EDIT_ASSIST';
+  targetChannelId?: string;
+  reason?: string;
+  editFields?: Record<string, any>;
+}) => defHttp.post({ url: Api.governance, data });
+
+/** 频道内容列表（后端使用 current/size 分页） */
 export const getGovernanceContentList = (params: {
   channelId: string;
   contentType?: string;
@@ -140,50 +143,26 @@ export const getGovernanceContentList = (params: {
   endTime?: string;
   sortBy?: string;
   keyword?: string;
-  pageNo?: number;
-  pageSize?: number;
+  current?: number;
+  size?: number;
 }) => defHttp.get({ url: Api.contentList, params });
-
-/** 置顶/取消置顶 */
-export const togglePin = (data: { contentId: string; channelId: string; pin: boolean }) =>
-  defHttp.post({ url: Api.pin, data });
-
-/** 精华/取消精华 */
-export const toggleFeature = (data: { contentId: string; channelId: string; feature: boolean }) =>
-  defHttp.post({ url: Api.feature, data });
-
-/** 删除内容到回收站 */
-export const deleteContent = (data: { contentIds: string[]; channelId: string; reason?: string; notifyAuthor?: boolean }) =>
-  defHttp.post({ url: Api.delete, data });
-
-/** 移出频道 */
-export const moveContent = (data: { contentId: string; sourceChannelId: string; targetChannelId: string }) =>
-  defHttp.post({ url: Api.move, data });
-
-/** 编辑协助 */
-export const editAssist = (data: { contentId: string; channelId: string; title?: string; tags?: string[]; summary?: string; reason: string }) =>
-  defHttp.post({ url: Api.editAssist, data });
 
 /** 获取编辑协助修订历史 */
 export const getEditAssistHistory = (contentId: string) =>
   defHttp.get({ url: `${Api.editAssistHistory}/${contentId}` });
 
-/** 回收站列表 */
+/** 回收站列表（后端使用 current/size 分页） */
 export const getRecycleBinList = (params: {
   channelId: string;
   contentType?: string;
   deletedBy?: string;
   startTime?: string;
   endTime?: string;
-  pageNo?: number;
-  pageSize?: number;
+  current?: number;
+  size?: number;
 }) => defHttp.get({ url: Api.recycleBinList, params });
 
-/** 恢复回收站内容 */
-export const restoreContent = (data: { ids: string[]; channelId: string }) =>
-  defHttp.post({ url: Api.recycleBinRestore, data });
-
-/** 治理日志列表 */
+/** 治理日志列表（后端使用 current/size 分页） */
 export const getGovernanceLogList = (params: {
   channelId: string;
   actionType?: string;
@@ -191,8 +170,8 @@ export const getGovernanceLogList = (params: {
   startTime?: string;
   endTime?: string;
   keyword?: string;
-  pageNo?: number;
-  pageSize?: number;
+  current?: number;
+  size?: number;
 }) => defHttp.get({ url: Api.logList, params });
 ```
 
@@ -204,25 +183,24 @@ export const getGovernanceLogList = (params: {
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  get = '/api/channel/announcement',
-  post = '/api/channel/announcement',
-  delete = '/api/channel/announcement',
-  preview = '/api/channel/announcement/preview',
-  history = '/api/channel/announcement/history',
-  restore = '/api/channel/announcement/restore',
+  base = '/content/channel/announcement',
+  channel = '/content/channel/announcement/channel',
+  preview = '/content/channel/announcement/preview',
+  history = '/content/channel/announcement/history',
+  restore = '/content/channel/announcement/restore',
 }
 
 /** 获取频道当前公告 */
 export const getAnnouncement = (channelId: string) =>
-  defHttp.get({ url: `${Api.get}/${channelId}` });
+  defHttp.get({ url: `${Api.channel}/${channelId}` });
 
 /** 发布/更新公告 */
 export const saveAnnouncement = (data: { channelId: string; title: string; content: string; version?: number }) =>
-  defHttp.post({ url: Api.post, data });
+  defHttp.post({ url: Api.base, data });
 
 /** 删除公告 */
 export const deleteAnnouncement = (id: string) =>
-  defHttp.delete({ url: `${Api.delete}/${id}` });
+  defHttp.delete({ url: `${Api.base}/${id}` });
 
 /** 公告预览 */
 export const previewAnnouncement = (data: { content: string }) =>
@@ -245,9 +223,9 @@ export const restoreAnnouncementVersion = (versionId: string) =>
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  add = '/api/channel/content/add',
-  search = '/api/channel/content/add/search',
-  channels = '/api/channel/content/channels',
+  add = '/content/channel/publish/add-existing',
+  search = '/content/channel/publish/add-existing/search',
+  channels = '/content/channel/publish/content-channels',
 }
 
 /** 添加已发布内容到频道 */
@@ -258,7 +236,7 @@ export const addContentToChannel = (data: {
 }) => defHttp.post({ url: Api.add, data });
 
 /** 搜索可添加的已发布内容 */
-export const searchAddableContent = (params: { keyword: string; contentType?: string; pageNo?: number; pageSize?: number }) =>
+export const searchAddableContent = (params: { keyword: string; contentType?: string; current?: number; size?: number }) =>
   defHttp.get({ url: Api.search, params });
 
 /** 查看内容所在频道列表 */
@@ -403,7 +381,7 @@ export function useChannelPublishStoreWithOut() {
 ```typescript
 import { defineStore } from 'pinia';
 import { store } from '/@/store';
-import { getReviewList, approveReview, rejectReview, getReviewStats } from '/@/api/content/channel/review';
+import { getReviewList, executeReview, getReviewStats } from '/@/api/content/channel/review';
 
 interface ReviewItem {
   id: string;
@@ -430,8 +408,8 @@ interface ReviewFilter {
   reviewStatus?: string;
   timeoutStatus?: string;
   keyword?: string;
-  pageNo: number;
-  pageSize: number;
+  current: number;
+  size: number;
 }
 
 interface ChannelReviewState {
@@ -449,8 +427,8 @@ export const useChannelReviewStore = defineStore({
     reviewList: [],
     filterParams: {
       channelId: '',
-      pageNo: 1,
-      pageSize: 20,
+      current: 1,
+      size: 20,
     },
     selectedIds: [],
     stats: { total: 0, timeoutCount: 0 },
@@ -478,21 +456,27 @@ export const useChannelReviewStore = defineStore({
     setSelectedIds(ids: string[]) {
       this.selectedIds = ids;
     },
-    async approve(ids: string[]) {
-      await approveReview({ ids });
+    async approve(reviewId: string) {
+      await executeReview({ reviewId, action: 'APPROVE' });
       await this.fetchList();
     },
-    async reject(ids: string[], reason: string) {
-      await rejectReview({ ids, reason });
+    async reject(reviewId: string, rejectReason: string) {
+      await executeReview({ reviewId, action: 'REJECT', rejectReason });
       await this.fetchList();
     },
     async batchApprove() {
-      await this.approve(this.selectedIds);
+      for (const id of this.selectedIds) {
+        await executeReview({ reviewId: id, action: 'APPROVE' });
+      }
       this.selectedIds = [];
+      await this.fetchList();
     },
     async batchReject(reason: string) {
-      await this.reject(this.selectedIds, reason);
+      for (const id of this.selectedIds) {
+        await executeReview({ reviewId: id, action: 'REJECT', rejectReason: reason });
+      }
       this.selectedIds = [];
+      await this.fetchList();
     },
   },
 });
@@ -511,13 +495,8 @@ import { defineStore } from 'pinia';
 import { store } from '/@/store';
 import {
   getGovernanceContentList,
-  togglePin,
-  toggleFeature,
-  deleteContent,
-  moveContent,
-  editAssist,
+  executeGovernance,
   getRecycleBinList,
-  restoreContent,
   getGovernanceLogList,
 } from '/@/api/content/channel/governance';
 
@@ -562,8 +541,8 @@ interface GovernanceFilter {
   endTime?: string;
   sortBy?: string;
   keyword?: string;
-  pageNo: number;
-  pageSize: number;
+  current: number;
+  size: number;
 }
 
 interface ChannelGovernanceState {
@@ -581,7 +560,7 @@ export const useChannelGovernanceStore = defineStore({
   id: 'app-channel-governance',
   state: (): ChannelGovernanceState => ({
     contentList: [],
-    filterParams: { channelId: '', pageNo: 1, pageSize: 20 },
+    filterParams: { channelId: '', current: 1, size: 20 },
     total: 0,
     recycleBinList: [],
     recycleBinTotal: 0,
@@ -603,26 +582,32 @@ export const useChannelGovernanceStore = defineStore({
     setFilter(params: Partial<GovernanceFilter>) {
       this.filterParams = { ...this.filterParams, ...params };
     },
-    async pin(contentId: string, channelId: string, pin: boolean) {
-      await togglePin({ contentId, channelId, pin });
+    async pin(contentId: string, channelId: string, isPinned: boolean) {
+      await executeGovernance({ contentId, channelId, action: isPinned ? 'UNPIN' : 'PIN' });
       await this.fetchList();
     },
     async feature(contentId: string, channelId: string, isFeatured: boolean) {
-      await toggleFeature({ contentId, channelId, feature: isFeatured });
+      await executeGovernance({ contentId, channelId, action: isFeatured ? 'UNFEATURE' : 'FEATURE' });
       await this.fetchList();
     },
-    async deleteContent(contentIds: string[], channelId: string, reason?: string, notifyAuthor?: boolean) {
-      await deleteContent({ contentIds, channelId, reason, notifyAuthor });
+    async deleteContent(contentId: string, channelId: string, reason?: string) {
+      await executeGovernance({ contentId, channelId, action: 'DELETE', reason });
       await this.fetchList();
     },
-    async moveContent(contentId: string, sourceChannelId: string, targetChannelId: string) {
-      await moveContent({ contentId, sourceChannelId, targetChannelId });
+    async moveContent(contentId: string, channelId: string, targetChannelId: string) {
+      await executeGovernance({ contentId, channelId, action: 'MOVE', targetChannelId });
       await this.fetchList();
     },
     async editAssist(data: { contentId: string; channelId: string; title?: string; tags?: string[]; summary?: string; reason: string }) {
-      await editAssist(data);
+      await executeGovernance({
+        contentId: data.contentId,
+        channelId: data.channelId,
+        action: 'EDIT_ASSIST',
+        reason: data.reason,
+        editFields: { title: data.title, tags: data.tags, summary: data.summary },
+      });
     },
-    async fetchRecycleBin(channelId: string, params?: { contentType?: string; deletedBy?: string; startTime?: string; endTime?: string; pageNo?: number; pageSize?: number }) {
+    async fetchRecycleBin(channelId: string, params?: { contentType?: string; deletedBy?: string; startTime?: string; endTime?: string; current?: number; size?: number }) {
       this.loading = true;
       try {
         const res = await getRecycleBinList({ channelId, ...params });
@@ -632,10 +617,10 @@ export const useChannelGovernanceStore = defineStore({
         this.loading = false;
       }
     },
-    async restore(ids: string[], channelId: string) {
-      await restoreContent({ ids, channelId });
+    async restore(contentId: string, channelId: string) {
+      await executeGovernance({ contentId, channelId, action: 'RESTORE' });
     },
-    async fetchGovernanceLog(channelId: string, params?: { actionType?: string; operator?: string; startTime?: string; endTime?: string; keyword?: string; pageNo?: number; pageSize?: number }) {
+    async fetchGovernanceLog(channelId: string, params?: { actionType?: string; operator?: string; startTime?: string; endTime?: string; keyword?: string; current?: number; size?: number }) {
       this.loading = true;
       try {
         const res = await getGovernanceLogList({ channelId, ...params });
@@ -1344,7 +1329,7 @@ const handleSave = () => {
     onOk: async () => {
       saving.value = true;
       try {
-        await defHttp.post({ url: '/api/channel/publish/permission', data: { channelId: props.channelId, ...formData } });
+        await defHttp.post({ url: '/content/channel/publish/permission', data: { channelId: props.channelId, ...formData } });
         message.success('发布权限配置已保存');
       } finally {
         saving.value = false;
@@ -1560,8 +1545,7 @@ vi.mock('/@/api/content/channel/review', () => ({
     total: 1,
   }),
   getReviewStats: vi.fn().mockResolvedValue({ total: 5, timeoutCount: 2 }),
-  approveReview: vi.fn().mockResolvedValue({}),
-  rejectReview: vi.fn().mockResolvedValue({}),
+  executeReview: vi.fn().mockResolvedValue({}),
 }));
 
 describe('ReviewQueue', () => {
@@ -1842,7 +1826,7 @@ const handleConfirm = async () => {
   if (!targetChannelId.value) return;
   submitting.value = true;
   try {
-    await store.moveContent(props.contentId, props.sourceChannelId, targetChannelId.value);
+    await store.moveContent(props.contentId, props.channelId, targetChannelId.value);
     message.success('已移出');
     emit('moved');
     emit('update:visible', false);
@@ -2006,9 +1990,7 @@ vi.mock('/@/api/content/channel/governance', () => ({
     ],
     total: 1,
   }),
-  togglePin: vi.fn().mockResolvedValue({}),
-  toggleFeature: vi.fn().mockResolvedValue({}),
-  deleteContent: vi.fn().mockResolvedValue({}),
+  executeGovernance: vi.fn().mockResolvedValue({}),
 }));
 
 describe('ContentManage', () => {
@@ -2149,7 +2131,7 @@ const handleAction = async (action: string, record: any) => {
       Modal.confirm({
         title: '确认删除',
         content: `确认将《${record.title}》从频道删除？内容将进入回收站，30天内可恢复。`,
-        onOk: async () => { await store.deleteContent([record.id], props.channelId); message.success('已删除并移入回收站'); },
+        onOk: async () => { await store.deleteContent(record.id, props.channelId); message.success('已删除并移入回收站'); },
       });
       break;
   }
@@ -2159,7 +2141,7 @@ const handleBatchDelete = () => {
   Modal.confirm({
     title: '批量删除',
     content: `确认删除选中的 ${selectedIds.value.length} 条内容？`,
-    onOk: async () => { await store.deleteContent(selectedIds.value, props.channelId); selectedIds.value = []; message.success('批量删除完成'); },
+    onOk: async () => { for (const id of selectedIds.value) { await store.deleteContent(id, props.channelId); } selectedIds.value = []; message.success('批量删除完成'); },
   });
 };
 

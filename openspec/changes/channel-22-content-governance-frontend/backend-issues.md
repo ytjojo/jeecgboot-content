@@ -2,14 +2,15 @@
 
 > 记录时间: 2026-06-04
 > 来源: verification-review.md 验证结果
+> 更新时间: 2026-06-06 — 根据 review-report.md 修复 BLOCK 问题
 
 ## 总览
 
 | 分类 | 数量 | 说明 |
 |------|------|------|
 | 完全缺失的端点 | 13 | spec 中引用但后端未实现 |
-| 路径偏差 | 8 | 实际路径与 spec 不一致 |
-| 架构差异 | 2 | 治理和审核操作模式不同 |
+| ~~路径偏差~~ | ~~8~~ 0 | **已修复** — plan.md 全部路径已修正为 `/content/channel/...` |
+| ~~架构差异~~ | ~~2~~ 0 | **已修复** — plan.md 已重构为统一入口 + action 模式 |
 
 ---
 
@@ -55,21 +56,15 @@
 
 ---
 
-## P1 - 架构差异（需适配）
+## ~~P1 - 架构差异（需适配）~~ — 已修复
 
-### 1. 治理操作统一入口
+### ~~1. 治理操作统一入口~~ — 已修复
 
-**现状**: spec 设计为独立端点（`/pin`、`/feature`、`/delete`、`/move`、`/edit-assist`），实际后端统一为 `POST /content/channel/governance` + `ChannelGovernanceReq.action` 字段。
+**修复内容**: plan.md 中 `governance.ts` 已重构为 `executeGovernance` 统一入口函数，使用 `action` 字段区分操作类型（PIN/UNPIN/FEATURE/UNFEATURE/DELETE/RESTORE/MOVE/EDIT_ASSIST）。Store 层 `useChannelGovernanceStore` 已同步更新。
 
-**影响**: 前端 API 封装层需适配，将独立调用转为统一入口 + action 模式。
+### ~~2. 审核操作统一入口~~ — 已修复
 
-**涉及操作**: PIN, UNPIN, FEATURE, UNFEATURE, DELETE, RESTORE, MOVE, EDIT_ASSIST
-
-### 2. 审核操作统一入口
-
-**现状**: spec 设计为 `/approve`、`/reject` 独立端点，实际统一为 `POST /content/channel/review` + `action` 字段。
-
-**影响**: 前端 API 封装层需适配。
+**修复内容**: plan.md 中 `review.ts` 已重构为 `executeReview` 函数，使用 `{reviewId, action: 'APPROVE'|'REJECT', rejectReason?}` 逐条审核模式。批量审核改为前端循环调用。Store 层 `useChannelReviewStore` 已同步更新。
 
 **注意**: 存在两个审核控制器：
 - `ChannelContentReviewController` (`/content/channel/review`) - 内容发布审核
@@ -77,17 +72,17 @@
 
 ---
 
-## P2 - 路径偏差（需修正 spec）
+## ~~P2 - 路径偏差（需修正 spec）~~ — 已修复
 
-所有 spec 文件使用 `/api/channel/...` 格式，实际后端使用 `/content/channel/...`。需系统性修正。
+plan.md 中所有 API 路径已修正为 `/content/channel/...` 格式，与后端实际路径一致。
 
-| spec 路径 | 实际路径 |
-|-----------|---------|
-| `/api/channel/publish/submit` | `POST /content/channel/publish` |
-| `/api/channel/review/list` | `GET /jeecg-boot/api/v1/content/channel/review/list` |
-| `/api/channel/governance/pin` | `POST /content/channel/governance` (action=PIN) |
-| `/api/channel/announcement/{channelId}` | `GET /content/channel/announcement/channel/{channelId}` |
-| `/api/channel/content/add` | `POST /content/channel/publish/add-existing` |
+| 修正前 | 修正后 |
+|--------|--------|
+| `/api/channel/publish/submit` | `/content/channel/publish` |
+| `/api/channel/review/list` | `/content/channel/review/list` |
+| `/api/channel/governance/pin` | `/content/channel/governance` (action=PIN) |
+| `/api/channel/announcement/{channelId}` | `/content/channel/announcement/channel/{channelId}` |
+| `/api/channel/content/add` | `/content/channel/publish/add-existing` |
 
 ---
 
@@ -104,8 +99,14 @@
 
 ---
 
+## 附加修复（2026-06-06）
+
+- **分页参数统一**: 所有列表接口分页参数从 `pageNo/pageSize` 改为 `current/size`，与后端 MyBatis-Plus `Page<T>` 一致
+- **治理操作签名变更**: `deleteContent` 从批量(`contentIds[]`)改为逐条(`contentId`)，与后端 `ChannelGovernanceReq` 一致
+- **审核操作签名变更**: `approveReview`/`rejectReview` 从批量(`ids[]`)改为逐条(`reviewId`)，与后端 `ChannelReviewReq` 一致
+
 ## 实施建议
 
 1. **短期**（阻塞前端）: 实现 P0 中 #1, #5, #6, #7 共 4 个核心端点
 2. **中期**: 实现剩余 P0 端点
-3. **长期**: 统一路径前缀，消除 `/api/channel` vs `/content/channel` 混淆
+3. ~~**长期**: 统一路径前缀~~ — **已完成**（2026-06-06）

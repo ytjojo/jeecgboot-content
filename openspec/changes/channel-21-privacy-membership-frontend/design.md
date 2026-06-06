@@ -146,7 +146,36 @@ jeecgboot-vue3/src/
     └── useChannelOperation.ts            # 频道操作 hook（乐观更新封装）
 ```
 
+## Data Formats
+
+### 治理详情 beforeState / afterState 对比格式
+
+治理详情 Drawer 中的 beforeState 和 afterState 字段采用 JSON 对象格式，存储操作前后的完整字段快照。前端通过字段级 diff 对比展示变更：
+
+```typescript
+// beforeState / afterState 结构
+interface GovernanceStateSnapshot {
+  [fieldName: string]: unknown;  // 字段名 → 字段值，扁平 key-value 结构
+}
+
+// 示例：角色变更操作
+// beforeState: { "role": "member", "muted": false }
+// afterState:  { "role": "admin",  "muted": false }
+
+// 示例：禁言操作
+// beforeState: { "muted": false, "muteEndTime": null }
+// afterState:  { "muted": true,  "muteEndTime": "2026-06-07T12:00:00Z" }
+```
+
+**前端渲染规则**：
+- 对 beforeState 和 afterState 做 key 级别 diff，生成三类变更：新增字段（绿色）、删除字段（红色）、修改字段（黄色）
+- 未变更字段默认折叠，点击展开显示完整快照
+- 嵌套对象递归 diff，数组按索引逐元素对比
+- 时间字段格式化为本地时间展示
+
 ## Test Strategy
+
+### 单元与组件测试
 
 | 测试文件 | 测试策略 |
 |---------|---------|
@@ -161,6 +190,87 @@ jeecgboot-vue3/src/
 | `BlacklistPage.test.ts` | 组件测试：列表渲染、移出确认 |
 | `GovernanceLog.test.ts` | 组件测试：筛选、详情 Drawer |
 | `channelOperation.test.ts` | 单元测试：乐观更新封装、缓存失效逻辑 |
+
+### 集成测试场景
+
+#### 场景 1: 订阅流程
+
+**前置条件**: 用户已登录，存在公开频道 A（可订阅）和私有频道 B（需申请）。
+
+| 步骤 | 操作 | 预期结果 |
+|------|------|----------|
+| 1 | 进入频道 A 主页 | SubscribeButton 显示"订阅"状态 |
+| 2 | 点击"订阅" | 按钮立即变为"已订阅"（乐观更新），后台发送订阅请求 |
+| 3 | 进入个人订阅列表 | 频道 A 出现在订阅列表中 |
+| 4 | 在订阅列表中关闭频道 A 的提醒 | 提醒开关切换成功，接口同步 |
+| 5 | 在订阅列表中取消订阅频道 A | 频道 A 从列表移除，频道 A 主页按钮恢复为"订阅" |
+| 6 | 进入私有频道 B 主页，点击"订阅" | 显示 JoinApplyModal，填写申请理由并提交 |
+| 7 | 提交申请后再次点击"订阅" | 按钮显示"已申请"且不可点击 |
+
+#### 场景 2: 申请加入流程
+
+**前置条件**: 用户 A 已登录为频道管理员，用户 B 已登录并申请加入私有频道。
+
+| 步骤 | 操作 | 预期结果 |
+|------|------|----------|
+| 1 | 用户 B 提交加入申请 | JoinApplyModal 关闭，提示"申请已提交" |
+| 2 | 用户 A 进入待审队列页 | 用户 B 的申请出现在列表中，显示申请理由和提交时间 |
+| 3 | 等待超过阈值时间 | 超时申请行高亮显示 |
+| 4 | 用户 A 点击单条"通过" | 申请从待审列表移除，用户 B 成为频道成员 |
+| 5 | 用户 A 批量选择多条申请，点击"批量通过" | Loading Modal 显示进度，完成后逐条展示结果 |
+| 6 | 用户 A 批量选择多条申请，点击"批量拒绝" | 弹出统一拒绝原因输入框，确认后批量拒绝 |
+
+#### 场景 3: 成员管理流程
+
+**前置条件**: 频道已有多个成员（不同角色），当前用户为管理员。
+
+| 步骤 | 操作 | 预期结果 |
+|------|------|----------|
+| 1 | 进入成员列表页 | 列表展示所有成员，支持角色筛选和搜索 |
+| 2 | 搜索特定成员 | 列表按关键词过滤 |
+| 3 | 选择某成员，点击"变更角色" | RoleAssignModal 显示当前角色，可选择新角色 |
+| 4 | 确认角色变更 | 成员角色更新，列表刷新 |
+| 5 | 选择某成员，点击"禁言" | MuteModal 显示，可设置禁言时长 |
+| 6 | 确认禁言 | 成员状态变为"已禁言" |
+| 7 | 批量选择成员，点击"移除" | RemoveMemberModal 显示确认，确认后批量移除 |
+| 8 | 被移除成员再次访问频道 | 频道主页显示"已被移除"提示 |
+
+#### 场景 4: 治理操作流程
+
+**前置条件**: 频道已产生治理操作记录（角色变更、禁言、移除等）。
+
+| 步骤 | 操作 | 预期结果 |
+|------|------|----------|
+| 1 | 进入治理日志页 | 列表展示治理操作记录，含操作类型、操作人、时间 |
+| 2 | 按操作类型筛选 | 列表仅显示匹配类型记录 |
+| 3 | 点击某条记录的"查看详情" | GovernanceDetailDrawer 打开，显示 beforeState/afterState 字段级 diff |
+| 4 | 查看 beforeState/afterState 对比 | JSON diff 高亮显示变更字段，新增/删除/修改一目了然 |
+| 5 | 关闭 Drawer 返回列表 | 列表状态保持，筛选条件不丢失 |
+
+### E2E 测试策略
+
+对于以下复杂流程，建议在集成测试基础上补充 E2E 测试覆盖：
+
+- **订阅状态机完整流转**: 从未订阅 → 订阅 → 取消订阅 → 重新订阅 → 申请中 → 已订阅的全链路验证，确保状态切换无死锁或中间态残留
+- **批量审核流程**: 大量申请（50+ 条）的批量审核操作，验证分页加载、批量提交、部分失败处理的端到端体验
+- **频道隐私切换影响链**: 公开 → 私有切换后，验证订阅按钮、加入方式、成员列表等关联 UI 的同步更新
+
+E2E 测试建议使用 Playwright，优先覆盖桌面端核心路径，移动端作为 P2 补充。
+
+## API 路径映射
+
+前端 API 模块路径与后端 Controller 路径对应关系：
+
+| 前端 API 文件 | 前端函数路径前缀 | 后端 Controller | 后端路径前缀 |
+|--------------|----------------|----------------|-------------|
+| `api/content/channelSubscription.ts` | `/channel/subscription/*` | ChannelSubscriptionController | `/channel/subscription` |
+| `api/content/channelMember.ts` | `/channel/member/*` | ChannelMemberController | `/channel/member` |
+| `api/content/channelInvite.ts` | `/channel/invite/*` | ChannelInviteController | `/channel/invite` |
+| `api/content/channelGovernance.ts` | `/channel/governance/*` | ChannelGovernanceController | `/channel/governance` |
+| `api/content/channelPrivacy.ts` | `/api/v1/channels/{id}/privacy` | ChannelController | `/api/v1/channels` |
+| `api/content/channelBlacklist.ts` | `/channel/member/blacklist/*` | ChannelMemberController | `/channel/member` |
+
+前端 API 文件统一通过 `defHttp` 发起请求，路径与后端一一对应，无需额外转换层。隐私设置接口挂在 ChannelController 下（`/api/v1/channels/{id}/privacy`），其余治理类接口独立前缀。
 
 ## Migration Plan
 

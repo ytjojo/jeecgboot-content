@@ -31,8 +31,8 @@ enum Api {
   groupRename = '/channel/subscription/group/rename',  // 注意：后端使用 POST /group/rename
   groupDelete = '/channel/subscription/group/delete',
   groupList = '/channel/subscription/group/list',
+  reminder = '/channel/subscription/reminder',
   // P2 功能，后续迭代实现
-  // reminder = '/channel/subscription/reminder',
   // moveGroup = '/channel/subscription/move-group',
 }
 
@@ -68,11 +68,11 @@ export const deleteSubscriptionGroup = (groupId: string) =>
 export const getSubscriptionGroupList = () =>
   defHttp.get({ url: Api.groupList });
 
-// P2 功能，后续迭代实现
-// /** 更新提醒设置 */
-// export const updateSubscriptionReminder = (data: { channelId: string; enabled: boolean }) =>
-//   defHttp.put({ url: Api.reminder, data });
+/** 更新提醒设置 */
+export const updateSubscriptionReminder = (data: { channelId: string; enabled: boolean }) =>
+  defHttp.put({ url: Api.reminder, data });
 
+// P2 功能，后续迭代实现
 // /** 移动频道到分组 */
 // export const moveChannelToGroup = (data: { channelId: string; groupId: string }) =>
 //   defHttp.put({ url: Api.moveGroup, data });
@@ -120,11 +120,12 @@ enum Api {
 
 /** 提交加入申请 */
 export const applyToJoin = (data: { channelId: string; reason: string }) =>
-  defHttp.post({ url: Api.apply, data });
+  defHttp.post({ url: Api.joinApply, data });
 
-/** 查询申请状态 */
-export const getApplicationStatus = (channelId: string) =>
-  defHttp.get({ url: `${Api.applicationStatus}/${channelId}` });
+// TODO: 后端需添加 applicationStatus 端点后再启用
+// /** 查询申请状态 */
+// export const getApplicationStatus = (channelId: string) =>
+//   defHttp.get({ url: `${Api.applicationStatus}/${channelId}` });
 
 /** 待审列表 */
 export const getPendingApplications = (params: { channelId: string; [key: string]: any }) =>
@@ -144,19 +145,19 @@ export const getMemberList = (params: { channelId: string; [key: string]: any })
 
 /** 修改角色 */
 export const updateMemberRole = (data: { channelId: string; memberId: string; role: string }) =>
-  defHttp.put({ url: Api.updateRole, data });
+  defHttp.put({ url: Api.assignRole, data });
 
 /** 移除成员（支持批量） */
 export const removeMembers = (data: { channelId: string; memberIds: string[]; reason: string }) =>
-  defHttp.post({ url: Api.remove, data });
+  defHttp.post({ url: Api.governanceRemove, data });
 
 /** 禁言成员 */
 export const muteMember = (data: { channelId: string; memberId: string; duration: string; reason: string }) =>
-  defHttp.post({ url: Api.mute, data });
+  defHttp.post({ url: Api.governanceMute, data });
 
 /** 解除禁言 */
 export const unmuteMember = (data: { channelId: string; memberId: string }) =>
-  defHttp.post({ url: Api.unmute, data });
+  defHttp.post({ url: Api.governanceUnmute, data });
 ```
 
 - [ ] **Step 2: 验证文件创建成功**
@@ -188,9 +189,13 @@ git commit -m "feat(channel): add member API layer"
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  add = '/api/channel/blacklist/add',
-  remove = '/api/channel/blacklist/remove',
-  list = '/api/channel/blacklist/list',
+  // ADVISORY-8: RESTful 规范建议使用 HTTP 方法代替路径动词：
+  //   add → POST /channel/governance/blacklist
+  //   remove → DELETE /channel/governance/blacklist
+  // 当前后端路径需确认是否支持 RESTful 风格后再调整
+  add = '/channel/governance/blacklist/add',
+  remove = '/channel/governance/blacklist/remove',
+  list = '/channel/governance/blacklist/list',
 }
 
 /** 加入黑名单 */
@@ -213,10 +218,10 @@ export const getBlacklist = (params: { channelId: string; [key: string]: any }) 
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  create = '/api/channel/invite/create',
-  list = '/api/channel/invite/list',
-  revoke = '/api/channel/invite/revoke',
-  join = '/api/channel/invite/join',
+  create = '/channel/invite/create',
+  list = '/channel/invite/list',
+  revoke = '/channel/invite/revoke',
+  use = '/channel/invite/use',
 }
 
 /** 创建邀请 */
@@ -233,7 +238,7 @@ export const revokeInvite = (inviteId: string) =>
 
 /** 使用邀请加入 */
 export const joinByInvite = (inviteCode: string) =>
-  defHttp.post({ url: Api.join, data: { inviteCode } });
+  defHttp.post({ url: Api.use, data: { inviteCode } });
 ```
 
 - [ ] **Step 3: 创建隐私设置 API**
@@ -243,8 +248,12 @@ export const joinByInvite = (inviteCode: string) =>
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  updatePrivacy = '/api/channel/privacy/update',
-  updateJoinMethod = '/api/channel/join-method/update',
+  // ADVISORY-8: RESTful 规范建议使用 HTTP 方法代替路径动词：
+  //   updatePrivacy → PUT /channel/privacy
+  //   updateJoinMethod → PUT /channel/join-method
+  // 当前后端路径需确认是否支持 RESTful 风格后再调整
+  updatePrivacy = '/channel/privacy/update',
+  updateJoinMethod = '/channel/join-method/update',
 }
 
 /** 更新隐私设置 */
@@ -263,7 +272,7 @@ export const updateJoinMethod = (data: { channelId: string; joinMethod: string; 
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  log = '/api/channel/governance/log',
+  log = '/channel/governance/log',
 }
 
 /** 治理日志列表 */
@@ -326,6 +335,8 @@ export function useChannelContext(channelId: Ref<string>) {
   const isMuted = ref(false);
   const isBlacklisted = ref(false);
   const loading = ref(false);
+  const channelNotFound = ref(false);
+  const loadError = ref(false);
 
   const canManageMembers = computed(() => {
     const role = userRelation.value?.role;
@@ -338,6 +349,8 @@ export function useChannelContext(channelId: Ref<string>) {
 
   async function loadContext() {
     loading.value = true;
+    channelNotFound.value = false;
+    loadError.value = false;
     try {
       const [info, relation] = await Promise.all([
         getChannelInfo(channelId.value),
@@ -351,6 +364,12 @@ export function useChannelContext(channelId: Ref<string>) {
       memberRole.value = relation.role;
       isMuted.value = relation.isMuted;
       isBlacklisted.value = relation.isBlacklisted;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        channelNotFound.value = true;
+      } else {
+        loadError.value = true;
+      }
     } finally {
       loading.value = false;
     }
@@ -365,11 +384,14 @@ export function useChannelContext(channelId: Ref<string>) {
     memberRole.value = null;
     isMuted.value = false;
     isBlacklisted.value = false;
+    channelNotFound.value = false;
+    loadError.value = false;
   }
 
   const context = {
     channelInfo, userRelation, privacyType, joinMethod,
     isSubscribed, memberRole, isMuted, isBlacklisted, loading,
+    channelNotFound, loadError,
     canManageMembers, canPublish,
     loadContext, resetContext,
   };
@@ -414,8 +436,6 @@ git commit -m "feat(channel): add useChannelContext composable"
 import { ref } from 'vue';
 import { useMessage } from '/@/hooks/web/useMessage';
 
-const { createMessage } = useMessage();
-
 interface OptimisticOperationOptions<T> {
   /** 实际执行的 API 调用 */
   apiCall: () => Promise<T>;
@@ -432,6 +452,7 @@ interface OptimisticOperationOptions<T> {
 }
 
 export function useChannelOperation() {
+  const { createMessage } = useMessage();
   const operating = ref(false);
 
   async function optimisticExecute<T>(options: OptimisticOperationOptions<T>) {
@@ -1175,7 +1196,7 @@ git commit -m "feat(channel): add join apply modal component"
     try {
       const params: any = {
         channelId: props.channelId,
-        page: pagination.current,
+        pageNo: pagination.current,
         pageSize: pagination.pageSize,
       };
       if (dateRange.value) {
@@ -1186,6 +1207,14 @@ git commit -m "feat(channel): add join apply modal component"
       applicationList.value = res.records || res;
       total.value = res.total || applicationList.value.length;
       pagination.total = total.value;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        applicationList.value = [];
+        total.value = 0;
+        message.warning('频道不存在或已被删除');
+      } else {
+        message.error('加载待审列表失败，请重试');
+      }
     } finally {
       loading.value = false;
     }
@@ -1233,17 +1262,25 @@ git commit -m "feat(channel): add join apply modal component"
     }
   }
 
+  const batchOperating = ref(false);
+
   async function handleBatchApprove() {
-    const res = await approveApplications({
-      channelId: props.channelId,
-      applicationIds: selectedRowKeys.value,
-    });
-    batchResult.success = res.success;
-    batchResult.failed = res.failed;
-    batchResult.details = res.details || [];
-    resultModalVisible.value = true;
-    selectedRowKeys.value = [];
-    loadData();
+    if (batchOperating.value) return;
+    batchOperating.value = true;
+    try {
+      const res = await approveApplications({
+        channelId: props.channelId,
+        applicationIds: selectedRowKeys.value,
+      });
+      batchResult.success = res.success;
+      batchResult.failed = res.failed;
+      batchResult.details = res.details || [];
+      resultModalVisible.value = true;
+      selectedRowKeys.value = [];
+      loadData();
+    } finally {
+      batchOperating.value = false;
+    }
   }
 
   async function handleBatchReject() {
@@ -1405,9 +1442,11 @@ git commit -m "feat(channel): add pending applications page"
 <template>
   <Modal v-model:open="visible" title="禁言成员" :confirmLoading="loading" @ok="handleConfirm">
     <Form layout="vertical">
+      <!-- 注意：禁言时长值需与后端对齐，后端若使用小时格式则改为 1h/24h/168h/720h -->
       <Form.Item label="禁言时长" required>
         <Select v-model:value="duration" style="width: 100%">
-          <Select.Option value="1d">1 天</Select.Option>
+          <Select.Option value="1h">1 小时</Select.Option>
+          <Select.Option value="24h">24 小时</Select.Option>
           <Select.Option value="7d">7 天</Select.Option>
           <Select.Option value="30d">30 天</Select.Option>
           <Select.Option value="permanent">永久</Select.Option>
@@ -1433,12 +1472,12 @@ git commit -m "feat(channel): add pending applications page"
   const visible = ref(false);
   const loading = ref(false);
   const memberId = ref('');
-  const duration = ref('1d');
+  const duration = ref('1h');
   const reason = ref('');
 
   function open(member: { id: string; nickname: string }) {
     memberId.value = member.id;
-    duration.value = '1d';
+    duration.value = '1h';
     reason.value = '';
     visible.value = true;
   }
@@ -1606,12 +1645,20 @@ git commit -m "feat(channel): add pending applications page"
         role: roleFilter.value || undefined,
         keyword: searchKeyword.value || undefined,
         sort: sortOrder.value,
-        page: pagination.current,
+        pageNo: pagination.current,
         pageSize: pagination.pageSize,
       });
       memberList.value = res.records || res;
       total.value = res.total || memberList.value.length;
       pagination.total = total.value;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        memberList.value = [];
+        total.value = 0;
+        createMessage.warning('频道不存在或已被删除');
+      } else {
+        createMessage.error('加载成员列表失败，请重试');
+      }
     } finally {
       loading.value = false;
     }
@@ -1651,8 +1698,13 @@ git commit -m "feat(channel): add pending applications page"
     removeMemberModalRef.value.open(members);
   }
 
+  const batchOperating = ref(false);
+
   function handleBatchMute() {
-    // TODO: implement batch mute
+    if (batchOperating.value) return;
+    // TODO: implement batch mute — when implemented, wrap in batchOperating guard:
+    // batchOperating.value = true;
+    // try { ... } finally { batchOperating.value = false; }
   }
 
   onMounted(loadData);
@@ -1709,7 +1761,7 @@ git commit -m "feat(channel): add member list page with role assign, remove, mut
 <script setup lang="ts">
   import { Avatar, Tag, Switch, Button } from 'ant-design-vue';
 
-  defineProps<{
+  const props = defineProps<{
     channel: {
       id: string;
       name: string;
@@ -1727,11 +1779,11 @@ git commit -m "feat(channel): add member list page with role assign, remove, mut
   }>();
 
   function handleReminderChange(checked: boolean) {
-    emit('toggleReminder', (this as any).channel.id, checked);
+    emit('toggleReminder', props.channel.id, checked);
   }
 
   function handleUnsubscribe() {
-    emit('unsubscribe', (this as any).channel.id);
+    emit('unsubscribe', props.channel.id);
   }
 </script>
 
@@ -1960,7 +2012,7 @@ git commit -m "feat(channel): add subscription list page with cards and groups"
   async function loadData() {
     loading.value = true;
     try {
-      const res = await getBlacklist({ channelId: props.channelId, page: pagination.current, pageSize: pagination.pageSize });
+      const res = await getBlacklist({ channelId: props.channelId, pageNo: pagination.current, pageSize: pagination.pageSize });
       blacklist.value = res.records || res;
       total.value = res.total || blacklist.value.length;
       pagination.total = total.value;
@@ -2128,7 +2180,7 @@ git commit -m "feat(channel): add subscription list page with cards and groups"
     try {
       const params: any = {
         channelId: props.channelId,
-        page: pagination.current,
+        pageNo: pagination.current,
         pageSize: pagination.pageSize,
       };
       if (actionFilter.value) params.action = actionFilter.value;

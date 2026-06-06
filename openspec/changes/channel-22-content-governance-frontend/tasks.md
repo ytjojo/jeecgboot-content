@@ -1,8 +1,8 @@
 ## 1. API 层封装
 
 - [ ] 1.1 创建 `src/api/content/channel/publish.ts`，封装发布相关 API（available、submit、result、scheduled CRUD、limit check）
-- [ ] 1.2 创建 `src/api/content/channel/review.ts`，封装审核相关 API（list、approve、reject、stats）
-- [ ] 1.3 创建 `src/api/content/channel/governance.ts`，封装治理相关 API（content list、pin、feature、delete、move、edit-assist、recycle-bin、log）
+- [ ] 1.2 创建 `src/api/content/channel/review.ts`，封装审核相关 API（list、executeReview[逐条action]、stats）
+- [ ] 1.3 创建 `src/api/content/channel/governance.ts`，封装治理相关 API（content list、executeGovernance[统一入口+action]、edit-assist history、recycle-bin list、log list）
 - [ ] 1.4 创建 `src/api/content/channel/announcement.ts`，封装公告相关 API（get、post、delete、preview、history、restore）
 - [ ] 1.5 创建 `src/api/content/channel/addContent.ts`，封装添加内容相关 API（add、search、channels）
 

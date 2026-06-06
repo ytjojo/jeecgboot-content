@@ -145,6 +145,34 @@ public Result<Void> updateJoinMethod(@PathVariable String id,
 
 ---
 
+#### 1.1.6 用户频道关系查询（升级为 P0）
+
+> **FLAG-15 修正**: 此 API 原列为 P1，但它是 `useChannelContext` composable 的核心依赖，而所有频道页面均依赖该 composable。缺少此 API 将导致整个频道页面体系无法运行，因此升级为 P0。
+
+**问题描述**: 前端 `useChannelContext` 需要查询用户与频道的关系（角色、订阅状态、禁言状态等），后端无独立端点。
+
+**后端现状**: 无对应实现
+
+**建议实现**:
+```java
+// ChannelMemberController.java
+@Operation(summary = "查询用户频道关系")
+@GetMapping("/relation")
+public Result<UserChannelRelationVO> getUserChannelRelation(@RequestParam String channelId) {
+    String userId = SecureUtil.currentUser().getId();
+    return Result.OK(memberBizService.getUserChannelRelation(channelId, userId));
+}
+```
+
+**前端依赖**: tasks.md 1.7 useChannelContext composable — 所有频道页面的基础依赖
+
+**临时方案**: 在后端实现到位前，前端可通过组合已有 API 模拟此接口：
+- `getSubscriptionStatus(channelId)` 获取订阅状态
+- `getMemberList(channelId)` 查询当前用户获取角色和禁言状态
+- 在 `useChannelContext` 中合并上述结果，待后端端点就绪后替换为单一调用
+
+---
+
 ### 1.2 P1 优先级（影响扩展功能）
 
 #### 1.2.1 更新提醒设置
@@ -194,29 +222,6 @@ public Result<Void> moveChannelToGroup(@RequestParam String channelId,
 **前端依赖**: tasks.md 3.5 订阅列表分组管理
 
 **建议**: 标记为 P2，后续迭代实现
-
----
-
-#### 1.2.3 用户频道关系查询
-
-**问题描述**: 前端 `useChannelContext` 需要查询用户与频道的关系（角色、订阅状态、禁言状态等），后端无独立端点。
-
-**后端现状**: 无对应实现
-
-**建议实现**:
-```java
-// ChannelMemberController.java
-@Operation(summary = "查询用户频道关系")
-@GetMapping("/relation")
-public Result<UserChannelRelationVO> getUserChannelRelation(@RequestParam String channelId) {
-    String userId = SecureUtil.currentUser().getId();
-    return Result.OK(memberBizService.getUserChannelRelation(channelId, userId));
-}
-```
-
-**前端依赖**: tasks.md 1.7 useChannelContext composable
-
-**建议**: 可通过组合现有 API 实现，或后续迭代添加
 
 ---
 
@@ -317,7 +322,7 @@ public Result<String> renameGroup(@RequestParam String groupId, @RequestParam St
 | P0 | 治理日志列表 | 治理日志页面 | 立即实现 |
 | P0 | 隐私设置更新 | 隐私设置页面 | 立即实现 |
 | P0 | 加入方式更新 | 加入方式配置 | 立即实现 |
-| P1 | 用户频道关系查询 | useChannelContext | 短期实现 |
+| P0 | 用户频道关系查询 | useChannelContext（所有页面基础依赖） | 立即实现，临时方案：组合 getSubscriptionStatus + getMemberList |
 | P2 | 提醒设置更新 | 订阅列表 | 后续迭代 |
 | P2 | 移动频道到分组 | 订阅列表 | 后续迭代 |
 
