@@ -1,18 +1,20 @@
+import { vi } from 'vitest';
+
 // Mock the API module
-jest.mock('/@/api/content/userStatus', () => ({
-  getCurrentStatus: jest.fn(),
-  getUserStatus: jest.fn(),
-  getStatusHistory: jest.fn(),
-  getTransitions: jest.fn(),
-  changeUserStatus: jest.fn(),
-  releaseUser: jest.fn(),
-  batchReleaseUsers: jest.fn(),
-  verifySecurity: jest.fn(),
+vi.mock('/@/api/content/userStatus', () => ({
+  getCurrentStatus: vi.fn(),
+  getUserStatus: vi.fn(),
+  getStatusHistory: vi.fn(),
+  getTransitions: vi.fn(),
+  changeUserStatus: vi.fn(),
+  releaseUser: vi.fn(),
+  batchReleaseUsers: vi.fn(),
+  verifySecurity: vi.fn(),
 }));
 
 // Mock pinia store
-jest.mock('/@/store', () => ({
-  store: { install: jest.fn() },
+vi.mock('/@/store', () => ({
+  store: { install: vi.fn() },
 }));
 
 import { createPinia, setActivePinia } from 'pinia';
@@ -41,7 +43,7 @@ const createStore = () => {
 
 describe('UserStatusStore', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -58,7 +60,7 @@ describe('UserStatusStore', () => {
   describe('fetchCurrentStatus', () => {
     it('should fetch and update current status', async () => {
       const mockDetail = { userId: 'u1', status: 'NORMAL', statusName: '正常' };
-      (getCurrentStatus as jest.Mock).mockResolvedValue(mockDetail);
+      (getCurrentStatus as any).mockResolvedValue(mockDetail);
 
       const store = createStore();
       await store.fetchCurrentStatus('u1');
@@ -70,7 +72,7 @@ describe('UserStatusStore', () => {
     });
 
     it('should not update state on API failure', async () => {
-      (getCurrentStatus as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (getCurrentStatus as any).mockRejectedValue(new Error('Network error'));
 
       const store = createStore();
       await store.fetchCurrentStatus('u1');
@@ -81,7 +83,7 @@ describe('UserStatusStore', () => {
 
     it('should set loading during fetch', async () => {
       let resolveFn: Function;
-      (getCurrentStatus as jest.Mock).mockReturnValue(
+      (getCurrentStatus as any).mockReturnValue(
         new Promise((resolve) => { resolveFn = resolve; })
       );
 
@@ -100,7 +102,7 @@ describe('UserStatusStore', () => {
   describe('fetchUserStatus', () => {
     it('should fetch status for a specific user', async () => {
       const mockDetail = { userId: 'u2', status: 'MUTED', statusName: '禁言' };
-      (getUserStatus as jest.Mock).mockResolvedValue(mockDetail);
+      (getUserStatus as any).mockResolvedValue(mockDetail);
 
       const store = createStore();
       const result = await store.fetchUserStatus('u2');
@@ -113,7 +115,7 @@ describe('UserStatusStore', () => {
   describe('fetchStatusHistory', () => {
     it('should fetch status history for a user', async () => {
       const mockHistory = [{ id: 'h1', fromStatus: 'NORMAL', toStatus: 'MUTED' }];
-      (getStatusHistory as jest.Mock).mockResolvedValue(mockHistory);
+      (getStatusHistory as any).mockResolvedValue(mockHistory);
 
       const store = createStore();
       const result = await store.fetchStatusHistory('u1');
@@ -123,7 +125,7 @@ describe('UserStatusStore', () => {
     });
 
     it('should pass pagination params', async () => {
-      (getStatusHistory as jest.Mock).mockResolvedValue([]);
+      (getStatusHistory as any).mockResolvedValue([]);
 
       const store = createStore();
       await store.fetchStatusHistory('u1', { page: 2, pageSize: 20 });
@@ -135,7 +137,7 @@ describe('UserStatusStore', () => {
   describe('fetchTransitions', () => {
     it('should fetch transitions for current status', async () => {
       const mockTransitions = ['NORMAL', 'MUTED', 'FROZEN'];
-      (getTransitions as jest.Mock).mockResolvedValue(mockTransitions);
+      (getTransitions as any).mockResolvedValue(mockTransitions);
 
       const store = createStore();
       const result = await store.fetchTransitions('NORMAL');
@@ -148,9 +150,9 @@ describe('UserStatusStore', () => {
 
   describe('changeStatus', () => {
     it('should change user status and refresh', async () => {
-      (changeUserStatus as jest.Mock).mockResolvedValue(undefined);
+      (changeUserStatus as any).mockResolvedValue(undefined);
       const mockDetail = { userId: 'u1', status: 'MUTED', statusName: '禁言' };
-      (getCurrentStatus as jest.Mock).mockResolvedValue(mockDetail);
+      (getCurrentStatus as any).mockResolvedValue(mockDetail);
 
       const store = createStore();
       await store.changeStatus('u1', { toStatus: 'MUTED', reason: '违规' });
@@ -162,9 +164,9 @@ describe('UserStatusStore', () => {
 
   describe('releaseUser', () => {
     it('should release user and refresh', async () => {
-      (releaseUser as jest.Mock).mockResolvedValue(undefined);
+      (releaseUser as any).mockResolvedValue(undefined);
       const mockDetail = { userId: 'u1', status: 'NORMAL', statusName: '正常' };
-      (getCurrentStatus as jest.Mock).mockResolvedValue(mockDetail);
+      (getCurrentStatus as any).mockResolvedValue(mockDetail);
 
       const store = createStore();
       await store.releaseUser('u1', '误封');
@@ -176,7 +178,7 @@ describe('UserStatusStore', () => {
 
   describe('batchRelease', () => {
     it('should batch release users', async () => {
-      (batchReleaseUsers as jest.Mock).mockResolvedValue(undefined);
+      (batchReleaseUsers as any).mockResolvedValue(undefined);
 
       const store = createStore();
       await store.batchRelease(['u1', 'u2'], '批量解禁');
@@ -187,7 +189,7 @@ describe('UserStatusStore', () => {
 
   describe('verifySecurity', () => {
     it('should verify security code', async () => {
-      (verifySecurity as jest.Mock).mockResolvedValue(undefined);
+      (verifySecurity as any).mockResolvedValue(undefined);
 
       const store = createStore();
       await store.verifySecurity('13800138000', '123456');
@@ -199,7 +201,7 @@ describe('UserStatusStore', () => {
   describe('refreshStatus', () => {
     it('should force refresh ignoring cache', async () => {
       const mockDetail = { userId: 'u1', status: 'FROZEN', statusName: '冻结' };
-      (getCurrentStatus as jest.Mock).mockResolvedValue(mockDetail);
+      (getCurrentStatus as any).mockResolvedValue(mockDetail);
 
       const store = createStore();
       store.lastFetchedAt = Date.now();

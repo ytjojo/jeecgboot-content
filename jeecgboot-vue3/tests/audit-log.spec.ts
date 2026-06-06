@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+
 vi.mock('/@/api/content/governance', () => ({
   listAuditLog: vi.fn().mockResolvedValue({ items: [], total: 0 }),
 }));
@@ -17,6 +18,12 @@ vi.mock('/@/hooks/system/useListPage', () => ({
   }),
 }));
 
+vi.mock('/@/hooks/web/usePermission', () => ({
+  usePermission: vi.fn(() => ({
+    hasPermission: vi.fn(() => true),
+  })),
+}));
+
 import { mount } from '@vue/test-utils';
 
 describe('AuditLog page', () => {
@@ -26,6 +33,7 @@ describe('AuditLog page', () => {
       global: {
         stubs: {
           BasicTable: { template: '<div class="basic-table-stub"><slot name="tableTitle" /></div>', props: ['onRegister'] },
+          'a-result': { template: '<div />', props: ['status', 'title', 'subTitle'] },
         },
       },
     });

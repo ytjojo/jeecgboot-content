@@ -1,4 +1,23 @@
+import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { createPinia, setActivePinia } from 'pinia';
+
+// Mock the mutualFollow store to avoid real API calls
+vi.mock('/@/store/modules/mutualFollow', () => ({
+  useMutualFollowStore: vi.fn(() => ({
+    isMutual: vi.fn(() => false),
+    fetchAndCache: vi.fn(),
+  })),
+}));
+
+// Mock PrivateContentGuard to avoid deeper dependency chain
+vi.mock('/@/views/content/components/PrivateContentGuard.vue', () => ({
+  default: {
+    name: 'PrivateContentGuard',
+    template: '<div class="private-guard-stub"><slot /></div>',
+    props: ['accessible', 'reason'],
+  },
+}));
 
 function makeFeed(overrides: Record<string, any> = {}) {
   return {
@@ -17,6 +36,10 @@ function makeFeed(overrides: Record<string, any> = {}) {
 }
 
 describe('FeedCard.vue', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia());
+  });
+
   async function mountComponent(feedOverrides: Record<string, any> = {}, props: { isMobile?: boolean } = {}) {
     const Component = (await import('/@/components/social/FeedCard.vue')).default;
     const feed = makeFeed(feedOverrides);

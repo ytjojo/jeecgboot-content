@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import dayjs from 'dayjs';
@@ -8,12 +9,12 @@ dayjs.extend(duration);
 
 describe('StatusCountdown', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-06-05T12:00:00Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-05T12:00:00Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const mountCountdown = (props: Record<string, any> = {}) => {
@@ -39,13 +40,13 @@ describe('StatusCountdown', () => {
   });
 
   it('should call onExpired when countdown reaches zero', async () => {
-    const onExpired = jest.fn();
+    const onExpired = vi.fn();
     mountCountdown({
       endTime: dayjs().add(2, 'second').toISOString(),
       onExpired,
     });
 
-    jest.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(3000);
     await nextTick();
 
     expect(onExpired).toHaveBeenCalled();
@@ -58,7 +59,7 @@ describe('StatusCountdown', () => {
     await nextTick();
 
     const initialText = wrapper.text();
-    jest.advanceTimersByTime(5000);
+    vi.advanceTimersByTime(5000);
     await nextTick();
 
     expect(wrapper.text()).not.toBe(initialText);
@@ -89,7 +90,7 @@ describe('StatusCountdown', () => {
   });
 
   it('should cleanup timer on unmount', () => {
-    const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+    const clearIntervalSpy = vi.spyOn(global, 'clearInterval');
     const w = mountCountdown();
     w.unmount();
     expect(clearIntervalSpy).toHaveBeenCalled();

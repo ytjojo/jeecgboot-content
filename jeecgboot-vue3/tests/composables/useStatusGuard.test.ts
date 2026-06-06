@@ -1,13 +1,15 @@
-jest.mock('/@/store/modules/userStatus', () => ({
-  useUserStatusStore: jest.fn(),
+import { vi } from 'vitest';
+
+vi.mock('/@/store/modules/userStatus', () => ({
+  useUserStatusStore: vi.fn(),
 }));
 
-jest.mock('/@/store/modules/user', () => ({
-  useUserStore: jest.fn(),
+vi.mock('/@/store/modules/user', () => ({
+  useUserStore: vi.fn(),
 }));
 
-jest.mock('/@/hooks/web/useMessage', () => ({
-  useMessage: jest.fn(),
+vi.mock('/@/hooks/web/useMessage', () => ({
+  useMessage: vi.fn(),
 }));
 
 import { useStatusGuard } from '/@/composables/useStatusGuard';
@@ -15,17 +17,17 @@ import { useUserStatusStore } from '/@/store/modules/userStatus';
 import { useUserStore } from '/@/store/modules/user';
 import { useMessage } from '/@/hooks/web/useMessage';
 
-const mockCreateWarningModal = jest.fn();
-const mockFetchCurrentStatus = jest.fn();
+const mockCreateWarningModal = vi.fn();
+const mockFetchCurrentStatus = vi.fn();
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (useMessage as unknown as jest.Mock).mockReturnValue({ createWarningModal: mockCreateWarningModal });
-  (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+  vi.clearAllMocks();
+  (useMessage as any).mockReturnValue({ createWarningModal: mockCreateWarningModal });
+  (useUserStatusStore as any).mockReturnValue({
     currentStatus: null,
     fetchCurrentStatus: mockFetchCurrentStatus,
   });
-  (useUserStore as unknown as jest.Mock).mockReturnValue({
+  (useUserStore as any).mockReturnValue({
     getUserInfo: { id: 'u1' },
   });
 });
@@ -38,7 +40,7 @@ describe('useStatusGuard', () => {
     });
 
     it('should return true when status is NORMAL', () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'NORMAL',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });
@@ -50,7 +52,7 @@ describe('useStatusGuard', () => {
     });
 
     it('should block comment/message/post for MUTED status', () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'MUTED',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });
@@ -62,7 +64,7 @@ describe('useStatusGuard', () => {
     });
 
     it('should block recommend for RESTRICTED_RECOMMEND status', () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'RESTRICTED_RECOMMEND',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });
@@ -72,7 +74,7 @@ describe('useStatusGuard', () => {
     });
 
     it('should block all actions for FROZEN status', () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'FROZEN',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });
@@ -84,7 +86,7 @@ describe('useStatusGuard', () => {
     });
 
     it('should block all actions for BANNED status', () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'BANNED',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });
@@ -98,7 +100,7 @@ describe('useStatusGuard', () => {
 
   describe('showBlockModal', () => {
     it('should show MUTED message', () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'MUTED',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });
@@ -111,7 +113,7 @@ describe('useStatusGuard', () => {
     });
 
     it('should show FROZEN message', () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'FROZEN',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });
@@ -124,7 +126,7 @@ describe('useStatusGuard', () => {
     });
 
     it('should show BANNED message', () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'BANNED',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });
@@ -139,7 +141,7 @@ describe('useStatusGuard', () => {
 
   describe('guardAction', () => {
     it('should return true for allowed action', async () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'NORMAL',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });
@@ -149,7 +151,7 @@ describe('useStatusGuard', () => {
     });
 
     it('should fetch status if not loaded and return true for allowed', async () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: null,
         fetchCurrentStatus: mockFetchCurrentStatus.mockResolvedValue(undefined),
       });
@@ -160,7 +162,7 @@ describe('useStatusGuard', () => {
     });
 
     it('should return false and show modal for blocked action', async () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'MUTED',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });
@@ -171,7 +173,7 @@ describe('useStatusGuard', () => {
     });
 
     it('should not fetch status if already loaded', async () => {
-      (useUserStatusStore as unknown as jest.Mock).mockReturnValue({
+      (useUserStatusStore as any).mockReturnValue({
         currentStatus: 'NORMAL',
         fetchCurrentStatus: mockFetchCurrentStatus,
       });

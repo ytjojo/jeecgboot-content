@@ -1,12 +1,13 @@
+import { vi } from 'vitest';
 import { defHttp } from '/@/utils/http/axios';
 
 // Mock defHttp
-jest.mock('/@/utils/http/axios', () => ({
+vi.mock('/@/utils/http/axios', () => ({
   defHttp: {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
@@ -29,13 +30,13 @@ import {
 
 describe('userStatus API', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getCurrentStatus', () => {
     it('should call GET /api/content/user-status/current with userId', async () => {
       const mockResult = { code: 200, result: { userId: 'u1', status: 'NORMAL' } };
-      (defHttp.get as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.get as any).mockResolvedValue(mockResult);
 
       const result = await getCurrentStatus('u1');
 
@@ -50,7 +51,7 @@ describe('userStatus API', () => {
   describe('getUserStatus', () => {
     it('should call GET /api/content/user-status/{userId}', async () => {
       const mockResult = { code: 200, result: { userId: 'u1', status: 'MUTED' } };
-      (defHttp.get as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.get as any).mockResolvedValue(mockResult);
 
       const result = await getUserStatus('u1');
 
@@ -64,7 +65,7 @@ describe('userStatus API', () => {
   describe('getStatusList', () => {
     it('should call GET /api/content/user-status/list with query params', async () => {
       const mockResult = { code: 200, result: { records: [], total: 0 } };
-      (defHttp.get as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.get as any).mockResolvedValue(mockResult);
 
       const params = { userId: 'u1', status: 'NORMAL', page: 1, pageSize: 10 };
       const result = await getStatusList(params);
@@ -77,7 +78,7 @@ describe('userStatus API', () => {
     });
 
     it('should work with empty params', async () => {
-      (defHttp.get as jest.Mock).mockResolvedValue({ code: 200, result: { records: [], total: 0 } });
+      (defHttp.get as any).mockResolvedValue({ code: 200, result: { records: [], total: 0 } });
 
       await getStatusList({});
 
@@ -91,7 +92,7 @@ describe('userStatus API', () => {
   describe('getTransitions', () => {
     it('should call GET /api/content/user-status/transitions/{currentStatus}', async () => {
       const mockResult = { code: 200, result: ['NORMAL', 'MUTED'] };
-      (defHttp.get as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.get as any).mockResolvedValue(mockResult);
 
       const result = await getTransitions('NORMAL');
 
@@ -105,7 +106,7 @@ describe('userStatus API', () => {
   describe('changeUserStatus', () => {
     it('should call POST /api/content/user-status/{userId}/change with payload', async () => {
       const mockResult = { code: 200, result: null };
-      (defHttp.post as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.post as any).mockResolvedValue(mockResult);
 
       const payload = { toStatus: 'MUTED', reason: '违规', endTime: '2026-06-10' };
       const result = await changeUserStatus('u1', payload);
@@ -121,7 +122,7 @@ describe('userStatus API', () => {
   describe('releaseUser', () => {
     it('should call POST /api/content/user-status/{userId}/release', async () => {
       const mockResult = { code: 200, result: null };
-      (defHttp.post as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.post as any).mockResolvedValue(mockResult);
 
       const result = await releaseUser('u1', '误封解禁');
 
@@ -136,7 +137,7 @@ describe('userStatus API', () => {
   describe('batchReleaseUsers', () => {
     it('should call POST /api/content/user-status/batch-release', async () => {
       const mockResult = { code: 200, result: null };
-      (defHttp.post as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.post as any).mockResolvedValue(mockResult);
 
       const result = await batchReleaseUsers(['u1', 'u2'], '批量解禁');
 
@@ -151,7 +152,7 @@ describe('userStatus API', () => {
   describe('getStatusHistory', () => {
     it('should call GET /api/content/user-status/{userId}/history', async () => {
       const mockResult = { code: 200, result: [] };
-      (defHttp.get as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.get as any).mockResolvedValue(mockResult);
 
       const result = await getStatusHistory('u1');
 
@@ -163,7 +164,7 @@ describe('userStatus API', () => {
     });
 
     it('should support pagination params', async () => {
-      (defHttp.get as jest.Mock).mockResolvedValue({ code: 200, result: [] });
+      (defHttp.get as any).mockResolvedValue({ code: 200, result: [] });
 
       await getStatusHistory('u1', { page: 2, pageSize: 20 });
 
@@ -177,7 +178,7 @@ describe('userStatus API', () => {
   describe('getAuditLogList', () => {
     it('should call GET /api/content/user-status/audit-logs with query params', async () => {
       const mockResult = { code: 200, result: { records: [], total: 0 } };
-      (defHttp.get as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.get as any).mockResolvedValue(mockResult);
 
       const params = { userId: 'u1', startTime: '2026-01-01', endTime: '2026-06-01', page: 1, pageSize: 10 };
       const result = await getAuditLogList(params);
@@ -193,7 +194,7 @@ describe('userStatus API', () => {
   describe('getAuditLogDetail', () => {
     it('should call GET /api/content/user-status/audit-logs/{logId}', async () => {
       const mockResult = { code: 200, result: { id: 'log1', action: 'CHANGE_STATUS' } };
-      (defHttp.get as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.get as any).mockResolvedValue(mockResult);
 
       const result = await getAuditLogDetail('log1');
 
@@ -207,7 +208,7 @@ describe('userStatus API', () => {
   describe('getUserAuditLogs', () => {
     it('should call GET /api/content/user-status/users/{userId}/audit-logs', async () => {
       const mockResult = { code: 200, result: { records: [], total: 0 } };
-      (defHttp.get as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.get as any).mockResolvedValue(mockResult);
 
       const result = await getUserAuditLogs('u1', { page: 1, pageSize: 10 });
 
@@ -222,7 +223,7 @@ describe('userStatus API', () => {
   describe('exportAuditLogs', () => {
     it('should call GET /api/content/user-status/audit-logs/export with blob response', async () => {
       const mockBlob = new Blob(['test']);
-      (defHttp.get as jest.Mock).mockResolvedValue(mockBlob);
+      (defHttp.get as any).mockResolvedValue(mockBlob);
 
       const params = { userId: 'u1', format: 'excel' as const };
       const result = await exportAuditLogs(params);
@@ -242,7 +243,7 @@ describe('userStatus API', () => {
   describe('verifySecurity', () => {
     it('should call POST /api/content/user-status/verify-security', async () => {
       const mockResult = { code: 200, result: null };
-      (defHttp.post as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.post as any).mockResolvedValue(mockResult);
 
       const result = await verifySecurity('13800138000', '123456');
 
@@ -257,7 +258,7 @@ describe('userStatus API', () => {
   describe('sendVerifyCode', () => {
     it('should call POST /api/content/user-status/send-verify-code', async () => {
       const mockResult = { code: 200, result: null };
-      (defHttp.post as jest.Mock).mockResolvedValue(mockResult);
+      (defHttp.post as any).mockResolvedValue(mockResult);
 
       const result = await sendVerifyCode('13800138000');
 

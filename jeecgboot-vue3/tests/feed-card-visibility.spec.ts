@@ -1,11 +1,33 @@
 import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { createPinia, setActivePinia } from 'pinia';
 
 vi.mock('@ant-design/icons-vue', () => ({
   EyeInvisibleOutlined: { template: '<span class="eye-icon" />' },
 }));
 
+// Mock the mutualFollow store to avoid real API calls
+vi.mock('/@/store/modules/mutualFollow', () => ({
+  useMutualFollowStore: vi.fn(() => ({
+    isMutual: vi.fn(() => false),
+    fetchAndCache: vi.fn(),
+  })),
+}));
+
+// Mock PrivateContentGuard to avoid deeper dependency chain
+vi.mock('/@/views/content/components/PrivateContentGuard.vue', () => ({
+  default: {
+    name: 'PrivateContentGuard',
+    template: '<div class="private-guard-stub"><slot /></div>',
+    props: ['accessible', 'reason'],
+  },
+}));
+
 describe('FeedCard visibility badge', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia());
+  });
+
   const baseFeed = {
     id: '1',
     userId: 'u1',
