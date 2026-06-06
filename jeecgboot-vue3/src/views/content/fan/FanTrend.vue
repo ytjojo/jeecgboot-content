@@ -17,8 +17,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import * as echarts from 'echarts';
+import { ref, onMounted, nextTick } from 'vue';
+import { useECharts } from '/@/hooks/web/useECharts';
 import { getFanTrend } from '/@/api/content/fan-analytics';
 import { SOCIAL_EVENTS, trackSocialEvent } from '/@/utils/social/analytics';
 
@@ -29,11 +29,15 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits<{
+  (e: 'point-click', data: { date: string; value: number }): void;
+}>();
+
 const range = ref('day');
 const loading = ref(false);
 const hasData = ref(false);
 const chartRef = ref<HTMLDivElement>();
-let chart: echarts.ECharts | null = null;
+const { setOptions, getInstance } = useECharts(chartRef);
 
 const fetchData = async () => {
   loading.value = true;
@@ -54,11 +58,7 @@ const fetchData = async () => {
 };
 
 const renderChart = (dates: string[], counts: number[]) => {
-  if (!chartRef.value) return;
-  if (!chart) {
-    chart = echarts.init(chartRef.value);
-  }
-  chart.setOption({
+  setOptions({
     tooltip: { trigger: 'axis' },
     xAxis: { type: 'category', data: dates },
     yAxis: { type: 'value', minInterval: 1 },
@@ -73,12 +73,14 @@ const renderChart = (dates: string[], counts: number[]) => {
     ],
     grid: { left: 50, right: 20, bottom: 30, top: 30 },
   });
-  chart.on('click', (params: any) => {
+  const instance = getInstance();
+  instance?.on('click', (params: any) => {
     trackSocialEvent(SOCIAL_EVENTS.FAN_TREND_POINT_CLICK, {
       date: params.name,
       value: params.value,
       period: range.value,
     });
+    emit('point-click', { date: params.name, value: params.value });
   });
 };
 
@@ -86,20 +88,9 @@ const handleRangeChange = () => {
   fetchData();
 };
 
-const handleResize = () => {
-  chart?.resize();
-};
-
 onMounted(() => {
   trackSocialEvent(SOCIAL_EVENTS.FAN_TREND_VIEW, { period: range.value });
   fetchData();
-  window.addEventListener('resize', handleResize);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize);
-  chart?.dispose();
-  chart = null;
 });
 </script>
 

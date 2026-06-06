@@ -20,6 +20,7 @@ const userStatus: AppRouteModule = {
         title: '状态管理',
       },
     },
+    // 用户状态变更审计日志（冻结、封禁、解封等操作记录）
     {
       path: 'audit-log',
       name: 'UserStatusAuditLog',

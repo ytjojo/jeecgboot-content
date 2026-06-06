@@ -1,7 +1,7 @@
 <template>
   <a-tag
     v-if="mutualFollow"
-    color="blue"
+    color="green"
     class="mutual-follow-badge"
     :class="{
       'mutual-follow-badge--small': size === 'small',

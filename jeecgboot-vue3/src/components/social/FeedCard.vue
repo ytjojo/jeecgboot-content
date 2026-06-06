@@ -21,18 +21,25 @@
       </span>
       <span class="feed-card__time">{{ feed.createTime }}</span>
     </div>
-    <div class="feed-card__content">
-      <h3 class="feed-card__title">{{ feed.contentTitle }}</h3>
-      <p v-if="!isMobile && feed.contentSummary" class="feed-card__summary">
-        {{ feed.contentSummary }}
-      </p>
-    </div>
+    <PrivateContentGuard
+      :accessible="isAccessible"
+      reason="not_mutual_follow"
+    >
+      <div class="feed-card__content">
+        <h3 class="feed-card__title">{{ feed.contentTitle }}</h3>
+        <p v-if="!isMobile && feed.contentSummary" class="feed-card__summary">
+          {{ feed.contentSummary }}
+        </p>
+      </div>
+    </PrivateContentGuard>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { EyeInvisibleOutlined } from '@ant-design/icons-vue';
+import PrivateContentGuard from '/@/views/content/components/PrivateContentGuard.vue';
+import { useMutualFollowStore } from '/@/store/modules/mutualFollow';
 
 interface FeedProp {
   id: string;
@@ -58,6 +65,19 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'click', feed: FeedProp): void;
 }>();
+
+const mutualFollowStore = useMutualFollowStore();
+
+const isAccessible = computed(() => {
+  if (props.feed.visibility !== 'MUTUAL_FOLLOW') return true;
+  return mutualFollowStore.isMutual(props.feed.userId);
+});
+
+onMounted(() => {
+  if (props.feed.visibility === 'MUTUAL_FOLLOW') {
+    mutualFollowStore.fetchAndCache([props.feed.userId]);
+  }
+});
 
 const dynamicTypeMap: Record<string, { label: string; color: string }> = {
   post: { label: '发帖', color: 'blue' },

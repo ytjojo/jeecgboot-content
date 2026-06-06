@@ -13,6 +13,7 @@
               show-count
             />
             <div class="post-editor-actions">
+              <VisibilitySelector v-model="visibility" size="small" />
               <a-button type="primary" :disabled="!canPost" :loading="sending" @click="handlePublish">
                 发布
               </a-button>
@@ -36,6 +37,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useStatusGuard } from '/@/composables/useStatusGuard';
 import { useUserStore } from '/@/store/modules/user';
 import { useUserStatusStore } from '/@/store/modules/userStatus';
+import VisibilitySelector from '/@/views/content/components/VisibilitySelector.vue';
 
 const props = withDefaults(defineProps<{
   placeholder?: string;
@@ -44,7 +46,7 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits<{
-  (e: 'publish', content: string): void;
+  (e: 'publish', payload: { content: string; visibility: string }): void;
 }>();
 
 const userStore = useUserStore();
@@ -52,6 +54,7 @@ const userStatusStore = useUserStatusStore();
 const { canPerformAction } = useStatusGuard();
 
 const postContent = ref('');
+const visibility = ref('PUBLIC');
 const sending = ref(false);
 const blockModalVisible = ref(false);
 const showTooltip = ref(false);
@@ -96,8 +99,9 @@ async function handlePublish() {
   if (!postContent.value.trim()) return;
   sending.value = true;
   try {
-    emit('publish', postContent.value);
+    emit('publish', { content: postContent.value, visibility: visibility.value });
     postContent.value = '';
+    visibility.value = 'PUBLIC';
   } finally {
     sending.value = false;
   }
@@ -125,7 +129,8 @@ onMounted(async () => {
 }
 .post-editor-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 8px;
 }
 </style>

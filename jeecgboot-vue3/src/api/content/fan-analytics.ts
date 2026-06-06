@@ -8,7 +8,7 @@ enum Api {
 }
 
 /** 查询粉丝列表 */
-export const listFans = (userId: string, params?: { keyword?: string; pageNo?: number; pageSize?: number }) =>
+export const listFans = (userId: string, params?: { keyword?: string; pageNo?: number; pageSize?: number; date?: string }) =>
   defHttp.get({ url: Api.list, params: { userId, ...params } });
 
 /** 查询粉丝趋势数据 */

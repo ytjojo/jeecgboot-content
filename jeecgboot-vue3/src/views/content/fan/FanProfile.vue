@@ -36,8 +36,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import * as echarts from 'echarts';
+import { ref, onMounted, nextTick } from 'vue';
+import { useECharts } from '/@/hooks/web/useECharts';
 import { getFanProfile } from '/@/api/content/fan-analytics';
 
 const props = defineProps({
@@ -53,9 +53,9 @@ const profileData = ref<any>(null);
 const interestChartRef = ref<HTMLDivElement>();
 const regionChartRef = ref<HTMLDivElement>();
 const heatmapChartRef = ref<HTMLDivElement>();
-let interestChart: echarts.ECharts | null = null;
-let regionChart: echarts.ECharts | null = null;
-let heatmapChart: echarts.ECharts | null = null;
+const { setOptions: setInterestOptions } = useECharts(interestChartRef);
+const { setOptions: setRegionOptions } = useECharts(regionChartRef);
+const { setOptions: setHeatmapOptions } = useECharts(heatmapChartRef);
 
 const fetchData = async () => {
   loading.value = true;
@@ -73,9 +73,7 @@ const fetchData = async () => {
 };
 
 const renderInterestChart = (data: any[]) => {
-  if (!interestChartRef.value) return;
-  if (!interestChart) interestChart = echarts.init(interestChartRef.value);
-  interestChart.setOption({
+  setInterestOptions({
     tooltip: { trigger: 'item' },
     series: [
       {
@@ -88,9 +86,7 @@ const renderInterestChart = (data: any[]) => {
 };
 
 const renderRegionChart = (data: any[]) => {
-  if (!regionChartRef.value) return;
-  if (!regionChart) regionChart = echarts.init(regionChartRef.value);
-  regionChart.setOption({
+  setRegionOptions({
     tooltip: { trigger: 'axis' },
     xAxis: { type: 'category', data: data.map((d) => d.label) },
     yAxis: { type: 'value', minInterval: 1 },
@@ -105,9 +101,6 @@ const renderRegionChart = (data: any[]) => {
 };
 
 const renderHeatmapChart = (data: any[]) => {
-  if (!heatmapChartRef.value) return;
-  if (!heatmapChart) heatmapChart = echarts.init(heatmapChartRef.value);
-
   const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`);
   const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   const heatData: [number, number, number][] = [];
@@ -115,7 +108,7 @@ const renderHeatmapChart = (data: any[]) => {
     heatData.push([d.hour, d.dayOfWeek, d.count]);
   });
 
-  heatmapChart.setOption({
+  setHeatmapOptions({
     tooltip: {
       formatter: (p: any) => `${days[p.value[1]]} ${hours[p.value[0]]}: ${p.value[2]}人`,
     },
@@ -140,25 +133,8 @@ const renderHeatmapChart = (data: any[]) => {
   });
 };
 
-const handleResize = () => {
-  interestChart?.resize();
-  regionChart?.resize();
-  heatmapChart?.resize();
-};
-
 onMounted(() => {
   fetchData();
-  window.addEventListener('resize', handleResize);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize);
-  interestChart?.dispose();
-  regionChart?.dispose();
-  heatmapChart?.dispose();
-  interestChart = null;
-  regionChart = null;
-  heatmapChart = null;
 });
 </script>
 

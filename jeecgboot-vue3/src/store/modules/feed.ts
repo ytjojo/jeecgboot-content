@@ -17,6 +17,7 @@ export interface FeedItem {
   sourceName?: string;
   createTime: string;
   isPriority: boolean;
+  visibility?: 'PUBLIC' | 'MUTUAL_FOLLOW';
 }
 
 export const useFeedStore = defineStore('social-feed', () => {

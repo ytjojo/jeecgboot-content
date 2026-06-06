@@ -1,6 +1,6 @@
 import * as echarts from 'echarts/core';
 
-import { BarChart, LineChart, PieChart, MapChart, PictorialBarChart, RadarChart } from 'echarts/charts';
+import { BarChart, LineChart, PieChart, MapChart, PictorialBarChart, RadarChart, HeatmapChart } from 'echarts/charts';
 
 import {
   TitleComponent,
@@ -38,6 +38,7 @@ echarts.use([
   RadarChart,
   // TODO 因为要兼容Online图表自适应打印，所以改成 CanvasRenderer，可能会模糊
   CanvasRenderer,
+  HeatmapChart,
   PictorialBarChart,
   RadarComponent,
   ToolboxComponent,

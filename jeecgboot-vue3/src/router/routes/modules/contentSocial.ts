@@ -10,7 +10,7 @@ const ContentSocialRoutes: AppRouteRecordRaw[] = [
   {
     path: '/content/fan',
     name: 'ContentFan',
-    component: () => import('/@/views/content/fan/FanList.vue'),
+    component: () => import('/@/views/content/fan/FanDashboard.vue'),
     meta: { title: '粉丝管理', hideMenu: true },
   },
   {
