@@ -1,13 +1,18 @@
 package org.jeecg.modules.content.circle.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.circle.biz.ICircleMemberBiz;
+import org.jeecg.modules.content.circle.entity.CircleMember;
 import org.jeecg.modules.content.circle.req.update.CircleMemberUpdateReq;
+import org.jeecg.modules.content.circle.service.ICircleMemberService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +24,9 @@ public class CircleMemberController {
 
     @Resource
     private ICircleMemberBiz circleMemberBiz;
+
+    @Resource
+    private ICircleMemberService circleMemberService;
 
     @Operation(summary = "变更成员角色")
     @PostMapping("/change-role")
@@ -50,5 +58,18 @@ public class CircleMemberController {
         String operatorId = SecureUtil.currentUser().getId();
         circleMemberBiz.removeMember(req, operatorId);
         return Result.OK("移除成功");
+    }
+
+    @Operation(summary = "获取圈子成员列表")
+    @GetMapping("/list")
+    public Result<Page<CircleMember>> listMembers(
+            @Parameter(description = "圈子ID", required = true) @RequestParam String circleId,
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "10") Integer size) {
+        LambdaQueryWrapper<CircleMember> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CircleMember::getCircleId, circleId)
+                .ne(CircleMember::getStatus, CircleMember.Status.REMOVED)
+                .orderByAsc(CircleMember::getCreateTime);
+        return Result.OK(circleMemberService.page(new Page<>(current, size), wrapper));
     }
 }

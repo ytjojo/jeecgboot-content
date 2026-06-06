@@ -30,6 +30,9 @@ public class CircleRecommendSource {
     @Schema(description = "来源ID")
     private String sourceId;
 
+    @Schema(description = "曝光时间")
+    private LocalDateTime exposureTime;
+
     @Schema(description = "点击时间")
     private LocalDateTime clickTime;
 

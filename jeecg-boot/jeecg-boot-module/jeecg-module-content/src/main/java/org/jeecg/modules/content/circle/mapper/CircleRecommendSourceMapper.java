@@ -11,6 +11,9 @@ import java.util.List;
 @Mapper
 public interface CircleRecommendSourceMapper extends BaseMapper<CircleRecommendSource> {
 
+    @Update("UPDATE circle_recommend_source SET exposure_time = NOW() WHERE id = #{id} AND user_id = #{userId} AND exposure_time IS NULL")
+    int updateExposureTime(@Param("id") String id, @Param("userId") String userId);
+
     @Update("UPDATE circle_recommend_source SET click_time = NOW() WHERE id = #{id} AND user_id = #{userId} AND click_time IS NULL")
     int updateClickTime(@Param("id") String id, @Param("userId") String userId);
 

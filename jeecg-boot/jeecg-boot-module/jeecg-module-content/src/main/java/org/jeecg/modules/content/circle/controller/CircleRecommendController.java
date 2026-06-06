@@ -43,4 +43,12 @@ public class CircleRecommendController {
         recommendService.recordJoin(sourceId, userId);
         return Result.OK("记录成功");
     }
+
+    @Operation(summary = "记录推荐曝光")
+    @PostMapping("/recommend/exposure")
+    public Result<String> recordExposure(@RequestParam String sourceId) {
+        String userId = SecureUtil.currentUser().getId();
+        recommendService.recordExposure(sourceId, userId);
+        return Result.OK("记录成功");
+    }
 }

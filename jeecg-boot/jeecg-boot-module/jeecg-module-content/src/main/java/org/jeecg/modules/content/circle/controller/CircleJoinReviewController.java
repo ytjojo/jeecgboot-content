@@ -1,5 +1,7 @@
 package org.jeecg.modules.content.circle.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +16,7 @@ import org.jeecg.modules.content.circle.req.CircleJoinReviewReq;
 import org.jeecg.modules.content.circle.service.ICircleJoinReviewService;
 import org.jeecg.modules.content.circle.vo.CircleJoinRequestVO;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +35,22 @@ public class CircleJoinReviewController {
 
     @Resource
     private ICircleJoinReviewService circleJoinReviewService;
+
+    @Operation(summary = "查询加入申请列表")
+    @GetMapping("/list")
+    public Result<Page<CircleJoinRequest>> listRequests(
+            @Parameter(description = "圈子ID", required = true) @RequestParam String circleId,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "10") Integer size) {
+        LambdaQueryWrapper<CircleJoinRequest> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CircleJoinRequest::getCircleId, circleId);
+        if (StringUtils.hasText(status)) {
+            wrapper.eq(CircleJoinRequest::getStatus, status);
+        }
+        wrapper.orderByDesc(CircleJoinRequest::getCreateTime);
+        return Result.OK(circleJoinReviewService.page(new Page<>(current, size), wrapper));
+    }
 
     @Operation(summary = "获取待审核申请列表")
     @GetMapping("/pending/{circleId}")

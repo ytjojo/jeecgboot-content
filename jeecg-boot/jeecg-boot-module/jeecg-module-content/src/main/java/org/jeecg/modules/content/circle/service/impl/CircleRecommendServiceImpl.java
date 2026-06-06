@@ -95,6 +95,11 @@ public class CircleRecommendServiceImpl implements ICircleRecommendService {
         sourceMapper.updateJoinTime(sourceId, userId);
     }
 
+    @Override
+    public void recordExposure(String sourceId, String userId) {
+        sourceMapper.updateExposureTime(sourceId, userId);
+    }
+
     private List<Circle> applyDiversityControl(List<Circle> candidates, int limit) {
         if (candidates.size() <= limit) {
             return candidates;

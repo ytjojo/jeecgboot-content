@@ -41,6 +41,13 @@ public class CircleAnnouncementController {
         return Result.OK("发布成功");
     }
 
+    @Operation(summary = "删除公告")
+    @DeleteMapping("/{id}")
+    public Result<String> delete(@PathVariable @Parameter(description = "公告ID") String id) {
+        circleAnnouncementService.removeById(id);
+        return Result.OK("删除成功");
+    }
+
     @Operation(summary = "获取圈子当前有效公告")
     @GetMapping("/active/{circleId}")
     public Result<CircleAnnouncementVO> getActive(

@@ -17,4 +17,9 @@ public interface ICircleRecommendService {
      * 记录推荐加入转化
      */
     void recordJoin(String sourceId, String userId);
+
+    /**
+     * 记录推荐曝光
+     */
+    void recordExposure(String sourceId, String userId);
 }
