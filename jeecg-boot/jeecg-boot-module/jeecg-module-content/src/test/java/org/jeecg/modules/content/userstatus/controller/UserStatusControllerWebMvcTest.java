@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.exception.JeecgBootException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.jeecg.modules.content.auth.enums.VerificationCodeSceneEnum;
 import org.jeecg.modules.content.auth.service.IContentVerificationCodeService;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
@@ -105,11 +108,19 @@ class UserStatusControllerWebMvcTest {
             .setValidator(validator)
             .setControllerAdvice(new TestExceptionHandler())
             .build();
+
+        // Mock SecurityContext，使 SecureUtil.currentUser() 返回 id="admin001" 的 LoginUser
+        // 使用 lenient() 因为部分测试（如 400 校验拦截）不会走到 SecureUtil
+        SecurityContext securityContext = org.mockito.Mockito.mock(SecurityContext.class);
+        Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
+        org.mockito.Mockito.lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
+        org.mockito.Mockito.lenient().when(authentication.getName()).thenReturn("{\"id\":\"admin001\"}");
+        SecurityContextHolder.setContext(securityContext);
     }
 
     @AfterEach
     void tearDown() {
-        // 无 SecurityContext 依赖，无需清理
+        SecurityContextHolder.clearContext();
     }
 
     private ContentUserProfile profile(String userId, String statusName) {
@@ -222,40 +233,32 @@ class UserStatusControllerWebMvcTest {
         }
 
         @Test
-        @DisplayName("reason 为空：当前 controller 未启用 @Valid，业务流继续（遗留问题见报告）")
-        void blankReason_currentlyPassesThroughToBiz() throws Exception {
-            when(userProfileMapper.selectByUserId("u1")).thenReturn(profile("u1", "NORMAL"));
-
+        @DisplayName("reason 为空：@Valid 校验拦截，返回 400")
+        void blankReason_returnsValidationError() throws Exception {
             UserStatusChangeReq req = new UserStatusChangeReq();
             req.setToStatus(UserStatusEnum.MUTED);
             req.setReason("");
             String body = objectMapper.writeValueAsString(req);
 
-            // 期望：当前 controller 未在 @RequestBody 上加 @Valid，所以 reason 不会触发 400
-            // 规范应启用校验：见审计报告遗留问题
+            // @Valid + @NotBlank 校验：reason 为空直接返回 400
             mockMvc.perform(post("/api/content/user-status/u1/change")
-                    .param("operatorId", "admin001")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(status().isBadRequest());
         }
 
         @Test
-        @DisplayName("toStatus 为空：当前 controller 未启用 @Valid，业务流继续（遗留问题见报告）")
-        void nullToStatus_currentlyPassesThroughToBiz() throws Exception {
-            when(userProfileMapper.selectByUserId("u1")).thenReturn(profile("u1", "NORMAL"));
-
+        @DisplayName("toStatus 为空：@Valid 校验拦截，返回 400")
+        void nullToStatus_returnsValidationError() throws Exception {
             UserStatusChangeReq req = new UserStatusChangeReq();
             req.setReason("只有原因没有目标");
             String body = objectMapper.writeValueAsString(req);
 
+            // @Valid + @NotNull 校验：toStatus 为空直接返回 400
             mockMvc.perform(post("/api/content/user-status/u1/change")
-                    .param("operatorId", "admin001")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(status().isBadRequest());
         }
 
         @Test
@@ -378,11 +381,11 @@ class UserStatusControllerWebMvcTest {
             when(userProfileMapper.selectByUserId("u1")).thenReturn(profile("u1", "MUTED"));
 
             UserStatusChangeReq req = new UserStatusChangeReq();
+            req.setToStatus(UserStatusEnum.NORMAL); // @Valid 要求非空，release 端点会忽略此值
             req.setReason("管理员人工解禁");
             String body = objectMapper.writeValueAsString(req);
 
             mockMvc.perform(post("/api/content/user-status/u1/release")
-                    .param("operatorId", "admin001")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isOk())
@@ -400,20 +403,18 @@ class UserStatusControllerWebMvcTest {
         }
 
         @Test
-        @DisplayName("reason 为空：当前 controller 未启用 @Valid，业务流继续（遗留问题见报告）")
-        void blankReason_currentlyPassesThroughToBiz() throws Exception {
-            when(userProfileMapper.selectByUserId("u1")).thenReturn(profile("u1", "MUTED"));
-
+        @DisplayName("reason 为空：@Valid 校验拦截，返回 400")
+        void blankReason_returnsValidationError() throws Exception {
             UserStatusChangeReq req = new UserStatusChangeReq();
+            req.setToStatus(UserStatusEnum.NORMAL);
             req.setReason("");
             String body = objectMapper.writeValueAsString(req);
 
+            // @Valid + @NotBlank 校验：reason 为空直接返回 400
             mockMvc.perform(post("/api/content/user-status/u1/release")
-                    .param("operatorId", "admin001")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(status().isBadRequest());
         }
 
         @Test
@@ -422,11 +423,11 @@ class UserStatusControllerWebMvcTest {
             when(userProfileMapper.selectByUserId("ghost")).thenReturn(null);
 
             UserStatusChangeReq req = new UserStatusChangeReq();
+            req.setToStatus(UserStatusEnum.NORMAL); // @Valid 要求非空
             req.setReason("解禁");
             String body = objectMapper.writeValueAsString(req);
 
             mockMvc.perform(post("/api/content/user-status/ghost/release")
-                    .param("operatorId", "admin001")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isOk())
@@ -596,17 +597,17 @@ class UserStatusControllerWebMvcTest {
         }
 
         @Test
-        @DisplayName("手机号为空 → 参数校验失败")
+        @DisplayName("手机号为空 → 参数校验失败，返回 400")
         void blankPhone_returnsValidationError() throws Exception {
             SendVerifyCodeReq req = new SendVerifyCodeReq();
             req.setPhone("");
             String body = objectMapper.writeValueAsString(req);
 
+            // @Valid + @NotBlank 校验：phone 为空直接返回 400
             mockMvc.perform(post("/api/content/user-status/send-verify-code")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(false));
+                .andExpect(status().isBadRequest());
         }
     }
 
@@ -622,8 +623,10 @@ class UserStatusControllerWebMvcTest {
             when(verificationCodeService.verifyCode(
                 VerificationCodeSceneEnum.SECURITY_VERIFY, "13800138000", "123456"))
                 .thenReturn(true);
+            when(userProfileMapper.selectByUserId("u1")).thenReturn(profile("u1", "FROZEN"));
 
             VerifySecurityReq req = new VerifySecurityReq();
+            req.setUserId("u1");
             req.setPhone("13800138000");
             req.setVerifyCode("123456");
             String body = objectMapper.writeValueAsString(req);
@@ -633,6 +636,17 @@ class UserStatusControllerWebMvcTest {
                     .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
+
+            // 验证安全核验通过后自动恢复为 NORMAL
+            verify(bizManageService).changeStatus(
+                eq("u1"),
+                eq(UserStatusEnum.FROZEN),
+                eq(UserStatusEnum.NORMAL),
+                eq("安全核验通过，自动恢复"),
+                eq("SYSTEM"),
+                eq("SYSTEM"),
+                eq(null)
+            );
         }
 
         @Test

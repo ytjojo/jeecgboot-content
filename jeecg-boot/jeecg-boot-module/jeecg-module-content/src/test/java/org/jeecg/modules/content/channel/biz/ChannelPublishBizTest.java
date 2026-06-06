@@ -119,7 +119,6 @@ class ChannelPublishBizTest {
         channel.setId("ch-1");
         channel.setName("测试频道");
         channel.setIconUrl("http://icon.png");
-        channel.setPublishPermission("ALL_MEMBERS");
         when(channelMapper.selectById("ch-1")).thenReturn(channel);
 
         ChannelLifecycleLog log = new ChannelLifecycleLog();

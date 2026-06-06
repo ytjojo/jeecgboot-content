@@ -147,7 +147,7 @@ class AuthEnumCompilationTest {
     // ---- VerificationCodeSceneEnum ----
     @Test
     void verificationCodeSceneEnum_hasExpectedValues() {
-        assertThat(VerificationCodeSceneEnum.values()).hasSize(7);
+        assertThat(VerificationCodeSceneEnum.values()).hasSize(8);
         assertThat(VerificationCodeSceneEnum.REGISTER.getCode()).isEqualTo("REGISTER");
         assertThat(VerificationCodeSceneEnum.REGISTER.getDescription()).isEqualTo("注册");
         assertThat(VerificationCodeSceneEnum.LOGIN.getCode()).isEqualTo("LOGIN");
@@ -162,6 +162,8 @@ class AuthEnumCompilationTest {
         assertThat(VerificationCodeSceneEnum.UNBIND_MOBILE.getDescription()).isEqualTo("解绑手机号");
         assertThat(VerificationCodeSceneEnum.UNBIND_EMAIL.getCode()).isEqualTo("UNBIND_EMAIL");
         assertThat(VerificationCodeSceneEnum.UNBIND_EMAIL.getDescription()).isEqualTo("解绑邮箱");
+        assertThat(VerificationCodeSceneEnum.SECURITY_VERIFY.getCode()).isEqualTo("SECURITY_VERIFY");
+        assertThat(VerificationCodeSceneEnum.SECURITY_VERIFY.getDescription()).isEqualTo("安全核验");
     }
 
     @Test
@@ -169,7 +171,7 @@ class AuthEnumCompilationTest {
         List<String> codes = VerificationCodeSceneEnum.codes();
         assertThat(codes).containsExactlyInAnyOrder(
                 "REGISTER", "LOGIN", "BIND_MOBILE", "BIND_EMAIL",
-                "RESET_PASSWORD", "UNBIND_MOBILE", "UNBIND_EMAIL"
+                "RESET_PASSWORD", "UNBIND_MOBILE", "UNBIND_EMAIL", "SECURITY_VERIFY"
         );
     }
 
