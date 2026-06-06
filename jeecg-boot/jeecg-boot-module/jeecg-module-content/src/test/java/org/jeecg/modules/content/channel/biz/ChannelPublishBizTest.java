@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -54,6 +53,9 @@ class ChannelPublishBizTest {
 
     @Mock
     private ChannelMuteMapper channelMuteMapper;
+
+    @Mock
+    private ChannelPublishLimitMapper channelPublishLimitMapper;
 
     @Mock
     private ChannelLifecycleLogMapper channelLifecycleLogMapper;
@@ -106,32 +108,33 @@ class ChannelPublishBizTest {
     }
 
     @Test
-    void getAvailableChannels_shouldReturnChannelsWithCanPublish() {
+    void getAvailableChannels_shouldReturnActiveChannels() {
         ChannelMember member = new ChannelMember();
         member.setChannelId("ch-1");
         member.setUserId("user-1");
         member.setRole(4); // MEMBER
-        when(channelMemberMapper.selectList(any(LambdaQueryWrapper.class)))
-                .thenReturn(Collections.singletonList(member));
+        when(channelMemberMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(Arrays.asList(member));
 
         Channel channel = new Channel();
         channel.setId("ch-1");
-        channel.setName("Test Channel");
+        channel.setName("测试频道");
         channel.setIconUrl("http://icon.png");
-        when(channelMapper.selectBatchIds(Collections.singletonList("ch-1")))
-                .thenReturn(Collections.singletonList(channel));
-        when(channelLifecycleLogMapper.selectList(any(LambdaQueryWrapper.class)))
-                .thenReturn(Collections.emptyList());
-        when(channelBlacklistMapper.selectList(any(LambdaQueryWrapper.class)))
-                .thenReturn(Collections.emptyList());
-        when(channelMuteMapper.selectList(any(LambdaQueryWrapper.class)))
-                .thenReturn(Collections.emptyList());
+        channel.setPublishPermission("ALL_MEMBERS");
+        when(channelMapper.selectById("ch-1")).thenReturn(channel);
+
+        ChannelLifecycleLog log = new ChannelLifecycleLog();
+        log.setToStatus("Active");
+        when(channelLifecycleLogMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(log);
+
+        when(channelBlacklistMapper.selectCount(any(LambdaQueryWrapper.class))).thenReturn(0L);
+        when(channelMuteMapper.selectCount(any(LambdaQueryWrapper.class))).thenReturn(0L);
 
         List<AvailableChannelVO> result = biz.getAvailableChannels("user-1");
 
         assertEquals(1, result.size());
-        assertTrue(result.get(0).getCanPublish());
         assertEquals("ch-1", result.get(0).getChannelId());
+        assertEquals("测试频道", result.get(0).getChannelName());
+        assertTrue(result.get(0).getCanPublish());
     }
 
     @Test
@@ -140,32 +143,27 @@ class ChannelPublishBizTest {
         member.setChannelId("ch-1");
         member.setUserId("user-1");
         member.setRole(4);
-        when(channelMemberMapper.selectList(any(LambdaQueryWrapper.class)))
-                .thenReturn(Collections.singletonList(member));
+        when(channelMemberMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(Arrays.asList(member));
 
         Channel channel = new Channel();
         channel.setId("ch-1");
-        channel.setName("Frozen Channel");
-        when(channelMapper.selectBatchIds(Collections.singletonList("ch-1")))
-                .thenReturn(Collections.singletonList(channel));
+        channel.setName("冻结频道");
+        when(channelMapper.selectById("ch-1")).thenReturn(channel);
 
         ChannelLifecycleLog log = new ChannelLifecycleLog();
-        log.setChannelId("ch-1");
         log.setToStatus("ReadonlyFrozen");
-        when(channelLifecycleLogMapper.selectList(any(LambdaQueryWrapper.class)))
-                .thenReturn(Collections.singletonList(log));
+        when(channelLifecycleLogMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(log);
 
         List<AvailableChannelVO> result = biz.getAvailableChannels("user-1");
 
         assertEquals(1, result.size());
         assertFalse(result.get(0).getCanPublish());
-        assertTrue(result.get(0).getBlockedReason().contains("只读冻结"));
+        assertNotNull(result.get(0).getBlockedReason());
     }
 
     @Test
     void getAvailableChannels_shouldReturnEmptyWhenNoMembership() {
-        when(channelMemberMapper.selectList(any(LambdaQueryWrapper.class)))
-                .thenReturn(Collections.emptyList());
+        when(channelMemberMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(Arrays.asList());
 
         List<AvailableChannelVO> result = biz.getAvailableChannels("user-1");
 

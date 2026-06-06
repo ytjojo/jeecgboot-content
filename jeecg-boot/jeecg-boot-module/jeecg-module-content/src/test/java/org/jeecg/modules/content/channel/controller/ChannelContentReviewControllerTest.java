@@ -75,26 +75,33 @@ class ChannelContentReviewControllerTest {
     @Test
     void should_get_review_stats() {
         ReviewStatsVO stats = ReviewStatsVO.builder()
-                .pendingCount(5L).timeoutCount(2L)
-                .todayApprovedCount(3L).todayRejectedCount(1L).build();
-        when(channelReviewBiz.getReviewStats("ch-1")).thenReturn(stats);
+                .pendingCount(5L)
+                .timeoutCount(2L)
+                .todayApprovedCount(3L)
+                .todayRejectedCount(1L)
+                .build();
+        when(channelReviewBiz.getReviewStats(null)).thenReturn(stats);
 
-        Result<ReviewStatsVO> result = controller.getReviewStats("ch-1");
+        Result<ReviewStatsVO> result = controller.getReviewStats(null);
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getResult().getPendingCount()).isEqualTo(5L);
+        verify(channelReviewBiz).getReviewStats(null);
     }
 
     @Test
     void should_get_review_stats_by_channel() {
         ReviewStatsVO stats = ReviewStatsVO.builder()
-                .pendingCount(10L).timeoutCount(4L)
-                .todayApprovedCount(6L).todayRejectedCount(2L).build();
-        when(channelReviewBiz.getReviewStats("ch-1")).thenReturn(stats);
+                .pendingCount(2L)
+                .timeoutCount(0L)
+                .todayApprovedCount(1L)
+                .todayRejectedCount(0L)
+                .build();
+        when(channelReviewBiz.getReviewStats("ch1")).thenReturn(stats);
 
-        Result<ReviewStatsVO> result = controller.getReviewStats("ch-1");
+        Result<ReviewStatsVO> result = controller.getReviewStats("ch1");
 
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getResult().getPendingCount()).isEqualTo(10L);
+        verify(channelReviewBiz).getReviewStats("ch1");
     }
 }

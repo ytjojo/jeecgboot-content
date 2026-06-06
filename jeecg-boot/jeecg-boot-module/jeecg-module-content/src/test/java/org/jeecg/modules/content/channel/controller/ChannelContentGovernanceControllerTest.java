@@ -1,10 +1,10 @@
 package org.jeecg.modules.content.channel.controller;
 
 import com.alibaba.fastjson2.JSON;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.channel.biz.ChannelGovernanceBiz;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.modules.content.channel.req.governance.ChannelGovernanceReq;
 import org.jeecg.modules.content.channel.req.governance.GovernanceContentListReq;
 import org.jeecg.modules.content.channel.req.governance.RecycleBinListReq;
@@ -66,10 +66,13 @@ class ChannelContentGovernanceControllerTest {
 
     @Test
     void should_get_content_list() {
+        Page<GovernanceContentItemVO> page = new Page<>(1, 10);
+        when(channelGovernanceBiz.getContentList(any(GovernanceContentListReq.class))).thenReturn(page);
+
         GovernanceContentListReq req = new GovernanceContentListReq();
         req.setChannelId("ch1");
-        Page<GovernanceContentItemVO> page = new Page<>(1, 10);
-        when(channelGovernanceBiz.getContentList(req)).thenReturn(page);
+        req.setCurrent(1);
+        req.setSize(10);
 
         Result<Page<GovernanceContentItemVO>> result = controller.getContentList(req);
 
@@ -79,10 +82,13 @@ class ChannelContentGovernanceControllerTest {
 
     @Test
     void should_get_recycle_bin_list() {
+        Page<RecycleBinItemVO> page = new Page<>(1, 10);
+        when(channelGovernanceBiz.getRecycleBinList(any(RecycleBinListReq.class))).thenReturn(page);
+
         RecycleBinListReq req = new RecycleBinListReq();
         req.setChannelId("ch1");
-        Page<RecycleBinItemVO> page = new Page<>(1, 10);
-        when(channelGovernanceBiz.getRecycleBinList(req)).thenReturn(page);
+        req.setCurrent(1);
+        req.setSize(10);
 
         Result<Page<RecycleBinItemVO>> result = controller.getRecycleBinList(req);
 
