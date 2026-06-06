@@ -1,18 +1,19 @@
-const mockGetSubscribeList = jest.fn();
-const mockSubscribeSource = jest.fn();
-const mockCancelSubscription = jest.fn();
-const mockPauseSubscription = jest.fn();
-const mockResumeSubscription = jest.fn();
-const mockGetNotificationPreference = jest.fn();
-const mockSaveNotificationPreference = jest.fn();
-const mockGetSubscribePlaza = jest.fn();
-const mockGetSubscribeSourceDetail = jest.fn();
-const mockSubscribeFromPlaza = jest.fn();
-const mockBatchPauseSubscribe = jest.fn();
-const mockBatchResumeSubscribe = jest.fn();
-const mockBatchCancelSubscribe = jest.fn();
+import { vi } from 'vitest';
+const mockGetSubscribeList = vi.fn();
+const mockSubscribeSource = vi.fn();
+const mockCancelSubscription = vi.fn();
+const mockPauseSubscription = vi.fn();
+const mockResumeSubscription = vi.fn();
+const mockGetNotificationPreference = vi.fn();
+const mockSaveNotificationPreference = vi.fn();
+const mockGetSubscribePlaza = vi.fn();
+const mockGetSubscribeSourceDetail = vi.fn();
+const mockSubscribeFromPlaza = vi.fn();
+const mockBatchPauseSubscribe = vi.fn();
+const mockBatchResumeSubscribe = vi.fn();
+const mockBatchCancelSubscribe = vi.fn();
 
-jest.mock('/@/api/content/subscribe', () => ({
+vi.mock('/@/api/content/subscribe', () => ({
   getSubscribeList: (...args: any[]) => mockGetSubscribeList(...args),
   subscribeSource: (...args: any[]) => mockSubscribeSource(...args),
   cancelSubscription: (...args: any[]) => mockCancelSubscription(...args),
@@ -28,7 +29,7 @@ jest.mock('/@/api/content/subscribe', () => ({
   batchCancelSubscribe: (...args: any[]) => mockBatchCancelSubscribe(...args),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
 import { setActivePinia, createPinia } from 'pinia';
 import { useSubscribeStore } from '/@/store/modules/subscribe';
@@ -52,7 +53,7 @@ function makeSubscribeItem(overrides: Record<string, any> = {}) {
 describe('store/modules/subscribe', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {

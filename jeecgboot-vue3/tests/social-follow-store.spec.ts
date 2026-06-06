@@ -1,21 +1,22 @@
+import { vi } from 'vitest';
 // Mock API module
-const mockGetFollowList = jest.fn();
-const mockGetSpecialFollowList = jest.fn();
-const mockGetFollowGroupList = jest.fn();
-const mockCreateFollowGroup = jest.fn();
-const mockRenameFollowGroup = jest.fn();
-const mockDeleteFollowGroup = jest.fn();
-const mockFollowUser = jest.fn();
-const mockUnfollowUser = jest.fn();
-const mockSetSpecialFollow = jest.fn();
-const mockCancelSpecialFollow = jest.fn();
-const mockMoveFollowGroup = jest.fn();
-const mockRemoveFromGroup = jest.fn();
-const mockGetRecommendations = jest.fn();
-const mockBatchUnfollow = jest.fn();
-const mockBatchCancelSpecial = jest.fn();
+const mockGetFollowList = vi.fn();
+const mockGetSpecialFollowList = vi.fn();
+const mockGetFollowGroupList = vi.fn();
+const mockCreateFollowGroup = vi.fn();
+const mockRenameFollowGroup = vi.fn();
+const mockDeleteFollowGroup = vi.fn();
+const mockFollowUser = vi.fn();
+const mockUnfollowUser = vi.fn();
+const mockSetSpecialFollow = vi.fn();
+const mockCancelSpecialFollow = vi.fn();
+const mockMoveFollowGroup = vi.fn();
+const mockRemoveFromGroup = vi.fn();
+const mockGetRecommendations = vi.fn();
+const mockBatchUnfollow = vi.fn();
+const mockBatchCancelSpecial = vi.fn();
 
-jest.mock('/@/api/content/relation', () => ({
+vi.mock('/@/api/content/relation', () => ({
   getFollowList: (...args: any[]) => mockGetFollowList(...args),
   getSpecialFollowList: (...args: any[]) => mockGetSpecialFollowList(...args),
   getFollowGroupList: (...args: any[]) => mockGetFollowGroupList(...args),
@@ -33,7 +34,7 @@ jest.mock('/@/api/content/relation', () => ({
   batchCancelSpecial: (...args: any[]) => mockBatchCancelSpecial(...args),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
 import { setActivePinia, createPinia } from 'pinia';
 import { useFollowStore } from '/@/store/modules/follow';
@@ -56,7 +57,7 @@ function makeFollowItem(overrides: Record<string, any> = {}) {
 describe('store/modules/follow', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {

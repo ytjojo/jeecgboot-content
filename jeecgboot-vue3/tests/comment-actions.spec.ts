@@ -1,11 +1,12 @@
-const mockPush = jest.fn();
-const mockHasPermission = jest.fn().mockReturnValue(false);
+import { vi } from 'vitest';
+const mockPush = vi.fn();
+const mockHasPermission = vi.fn().mockReturnValue(false);
 
-jest.mock('vue-router', () => ({
+vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 
-jest.mock('/@/hooks/web/usePermission', () => ({
+vi.mock('/@/hooks/web/usePermission', () => ({
   usePermission: () => ({ hasPermission: mockHasPermission }),
 }));
 

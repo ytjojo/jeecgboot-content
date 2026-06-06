@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { partitionBadges } from '/@/views/content/profile/components/badgeStyle';
@@ -5,15 +6,15 @@ import { partitionBadges } from '/@/views/content/profile/components/badgeStyle'
 // ============================================================
 // Mock getBadgeDetail API
 // ============================================================
-const mockGetBadgeDetail = jest.fn();
-jest.mock('/@/api/content/profile', () => ({
+const mockGetBadgeDetail = vi.fn();
+vi.mock('/@/api/content/profile', () => ({
   getBadgeDetail: (...args: any[]) => mockGetBadgeDetail(...args),
 }));
 
 // ============================================================
 // Mock /@/components/Icon to prevent import.meta cascade
 // ============================================================
-jest.mock('/@/components/Icon', () => ({
+vi.mock('/@/components/Icon', () => ({
   Icon: { name: 'Icon', template: '<span class="icon-stub" />', props: ['icon', 'size'] },
   SvgIcon: { name: 'SvgIcon', template: '<span />', props: [] },
   IconPicker: { name: 'IconPicker', template: '<span />', props: [] },
@@ -22,7 +23,7 @@ jest.mock('/@/components/Icon', () => ({
 // ============================================================
 // Mock ant-design-vue components
 // ============================================================
-jest.mock('ant-design-vue', () => ({
+vi.mock('ant-design-vue', () => ({
   Modal: { name: 'AModal', template: '<div class="a-modal"><slot /></div>', props: ['open', 'width', 'title', 'footer'] },
   Drawer: { name: 'ADrawer', template: '<div class="a-drawer"><slot /></div>', props: ['open', 'placement', 'width', 'title', 'closable'] },
   Spin: { name: 'ASpin', template: '<div class="a-spin"><slot /></div>', props: ['spinning'] },
@@ -161,7 +162,7 @@ describe('VerificationBadge.vue', () => {
     mockGetBadgeDetail.mockReset();
   });
 
-  // Dynamic import to avoid hoisting issues with jest.mock
+  // Dynamic import to avoid hoisting issues with vi.mock
   async function mountComponent(badges: any[], options: { windowWidth?: number } = {}) {
     // Set window width before mount
     Object.defineProperty(window, 'innerWidth', {

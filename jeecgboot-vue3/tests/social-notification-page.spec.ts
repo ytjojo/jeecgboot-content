@@ -1,9 +1,10 @@
+import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 
 // -- Mock functions --
-const mockFetchNotificationConfig = jest.fn().mockResolvedValue(undefined);
-const mockSaveConfig = jest.fn().mockResolvedValue(undefined);
-const mockFetchGlobalNotificationDefault = jest.fn().mockResolvedValue(undefined);
+const mockFetchNotificationConfig = vi.fn().mockResolvedValue(undefined);
+const mockSaveConfig = vi.fn().mockResolvedValue(undefined);
+const mockFetchGlobalNotificationDefault = vi.fn().mockResolvedValue(undefined);
 
 // Mutable store state for current/global config
 let currentNotificationConfig: Record<string, any> | null = null;
@@ -13,7 +14,7 @@ let globalNotificationDefault: Record<string, any> | null = null;
 let routeQuery: Record<string, any> = {};
 
 // -- Module mocks --
-jest.mock('/@/store/modules/subscribe', () => ({
+vi.mock('/@/store/modules/subscribe', () => ({
   useSubscribeStore: () => ({
     currentNotificationConfig,
     globalNotificationDefault,
@@ -23,24 +24,24 @@ jest.mock('/@/store/modules/subscribe', () => ({
   }),
 }));
 
-jest.mock('/@/store/modules/user', () => ({
+vi.mock('/@/store/modules/user', () => ({
   useUserStore: () => ({ getUserInfo: { userId: 'u-1' } }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('vue-router', () => ({
+vi.mock('vue-router', () => ({
   useRoute: () => ({ query: routeQuery }),
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
-jest.mock('/@/hooks/web/useMessage', () => ({
+vi.mock('/@/hooks/web/useMessage', () => ({
   useMessage: () => ({
-    createMessage: { success: jest.fn(), error: jest.fn() },
+    createMessage: { success: vi.fn(), error: vi.fn() },
   }),
 }));
 
-jest.mock('/@/hooks/event/useBreakpoint', () => ({
+vi.mock('/@/hooks/event/useBreakpoint', () => ({
   useBreakpoint: () => ({ screenRef: { value: 'MD' } }),
 }));
 
@@ -112,7 +113,7 @@ async function mountPage(overrides: Record<string, any> = {}, query: Record<stri
 // -- Tests --
 describe('notification.vue', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     routeQuery = {};
     currentNotificationConfig = null;
     globalNotificationDefault = null;

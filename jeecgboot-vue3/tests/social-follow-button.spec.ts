@@ -1,36 +1,37 @@
+import { vi } from 'vitest';
 import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 
 // Mock follow store
-const mockFollow = jest.fn();
-const mockUnfollow = jest.fn();
+const mockFollow = vi.fn();
+const mockUnfollow = vi.fn();
 
-jest.mock('/@/store/modules/follow', () => ({
+vi.mock('/@/store/modules/follow', () => ({
   useFollowStore: () => ({
     follow: mockFollow,
     unfollow: mockUnfollow,
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
 // Mock ant-design-vue
-jest.mock('ant-design-vue', () => ({
-  message: { success: jest.fn(), error: jest.fn() },
+vi.mock('ant-design-vue', () => ({
+  message: { success: vi.fn(), error: vi.fn() },
 }));
 
 // Mock ant-design-vue components used in template
-jest.mock('ant-design-vue/es/button', () => ({
+vi.mock('ant-design-vue/es/button', () => ({
   default: { name: 'AButton', template: '<button :disabled="disabled"><slot /></button>', props: ['type', 'loading', 'disabled'] },
 }));
 
-jest.mock('ant-design-vue/es/popconfirm', () => ({
+vi.mock('ant-design-vue/es/popconfirm', () => ({
   default: { name: 'APopconfirm', template: '<div class="popconfirm"><slot /></div>', props: ['title', 'okText', 'cancelText'] },
 }));
 
 describe('FollowButton.vue', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFollow.mockResolvedValue(undefined);
     mockUnfollow.mockResolvedValue(undefined);
   });

@@ -1,26 +1,27 @@
+import { vi } from 'vitest';
 import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 
 // Mock subscribe store
-const mockSubscribe = jest.fn();
-const mockUnsubscribe = jest.fn();
+const mockSubscribe = vi.fn();
+const mockUnsubscribe = vi.fn();
 
-jest.mock('/@/store/modules/subscribe', () => ({
+vi.mock('/@/store/modules/subscribe', () => ({
   useSubscribeStore: () => ({
     subscribe: mockSubscribe,
     unsubscribe: mockUnsubscribe,
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('ant-design-vue', () => ({
-  message: { success: jest.fn(), error: jest.fn() },
+vi.mock('ant-design-vue', () => ({
+  message: { success: vi.fn(), error: vi.fn() },
 }));
 
 describe('SubscribeButton.vue', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSubscribe.mockResolvedValue(undefined);
     mockUnsubscribe.mockResolvedValue(undefined);
   });

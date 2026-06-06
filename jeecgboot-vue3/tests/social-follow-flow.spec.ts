@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 
 // --- Mutable state ---
@@ -14,17 +15,17 @@ let followHasMoreState = false;
 let followTypesState: string[] = [];
 
 // --- Mock functions ---
-const mockFetchFollowList = jest.fn();
-const mockFetchFollowGroups = jest.fn();
-const mockSetSearchKeyword = jest.fn();
-const mockSetSelectedGroupId = jest.fn();
-const mockBatchCancelFollow = jest.fn();
-const mockRouterPush = jest.fn();
-const mockFetchFollowFeed = jest.fn();
-const mockSetFollowTypes = jest.fn();
+const mockFetchFollowList = vi.fn();
+const mockFetchFollowGroups = vi.fn();
+const mockSetSearchKeyword = vi.fn();
+const mockSetSelectedGroupId = vi.fn();
+const mockBatchCancelFollow = vi.fn();
+const mockRouterPush = vi.fn();
+const mockFetchFollowFeed = vi.fn();
+const mockSetFollowTypes = vi.fn();
 
 // --- Store mocks ---
-jest.mock('/@/store/modules/follow', () => ({
+vi.mock('/@/store/modules/follow', () => ({
   useFollowStore: () => ({
     get followList() { return followListState; },
     get followGroups() { return followGroupsState; },
@@ -41,7 +42,7 @@ jest.mock('/@/store/modules/follow', () => ({
   }),
 }));
 
-jest.mock('/@/store/modules/feed', () => ({
+vi.mock('/@/store/modules/feed', () => ({
   useFeedStore: () => ({
     get followFeedList() { return feedFeedListState; },
     get priorityItems() { return priorityItemsState; },
@@ -53,25 +54,25 @@ jest.mock('/@/store/modules/feed', () => ({
   }),
 }));
 
-jest.mock('/@/store/modules/user', () => ({
+vi.mock('/@/store/modules/user', () => ({
   useUserStore: () => ({
     getUserInfo: { userId: 'u-1' },
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('vue-router', () => ({
+vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockRouterPush }),
   useRoute: () => ({ query: {} }),
 }));
 
-jest.mock('/@/hooks/event/useBreakpoint', () => ({
+vi.mock('/@/hooks/event/useBreakpoint', () => ({
   useBreakpoint: () => ({ screenRef: { value: 'MD' } }),
 }));
 
-jest.mock('/@/hooks/web/useMessage', () => ({
-  useMessage: () => ({ createMessage: { success: jest.fn(), error: jest.fn() } }),
+vi.mock('/@/hooks/web/useMessage', () => ({
+  useMessage: () => ({ createMessage: { success: vi.fn(), error: vi.fn() } }),
 }));
 
 // --- Stubs ---
@@ -130,7 +131,7 @@ describe('social follow flow (E2E-style)', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchFollowList.mockResolvedValue(undefined);
     mockFetchFollowGroups.mockResolvedValue(undefined);
     mockBatchCancelFollow.mockResolvedValue(undefined);

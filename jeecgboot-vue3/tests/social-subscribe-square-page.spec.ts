@@ -1,27 +1,28 @@
+import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 
-const mockFetchPlaza = jest.fn();
-const mockPush = jest.fn();
+const mockFetchPlaza = vi.fn();
+const mockPush = vi.fn();
 
-jest.mock('/@/store/modules/subscribe', () => ({
+vi.mock('/@/store/modules/subscribe', () => ({
   useSubscribeStore: () => ({
     fetchPlaza: mockFetchPlaza,
   }),
 }));
 
-jest.mock('/@/store/modules/user', () => ({
+vi.mock('/@/store/modules/user', () => ({
   useUserStore: () => ({
     getUserInfo: { userId: 'u-1' },
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('vue-router', () => ({
+vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 
-jest.mock('/@/hooks/event/useBreakpoint', () => ({
+vi.mock('/@/hooks/event/useBreakpoint', () => ({
   useBreakpoint: () => ({ screenRef: { value: 'MD' } }),
 }));
 
@@ -67,7 +68,7 @@ describe('SubscribeSquarePage.vue', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchPlaza.mockResolvedValue({ records: [], total: 0 });
   });
 

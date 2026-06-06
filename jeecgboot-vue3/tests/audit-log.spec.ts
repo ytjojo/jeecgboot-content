@@ -1,8 +1,9 @@
-jest.mock('/@/api/content/governance', () => ({
-  listAuditLog: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+import { vi } from 'vitest';
+vi.mock('/@/api/content/governance', () => ({
+  listAuditLog: vi.fn().mockResolvedValue({ items: [], total: 0 }),
 }));
 
-jest.mock('/@/components/Table', () => ({
+vi.mock('/@/components/Table', () => ({
   BasicTable: {
     name: 'BasicTable',
     template: '<div class="basic-table-stub"><slot name="tableTitle" /></div>',
@@ -10,9 +11,9 @@ jest.mock('/@/components/Table', () => ({
   },
 }));
 
-jest.mock('/@/hooks/system/useListPage', () => ({
-  useListPage: jest.fn().mockReturnValue({
-    tableContext: [jest.fn(), jest.fn(), {}],
+vi.mock('/@/hooks/system/useListPage', () => ({
+  useListPage: vi.fn().mockReturnValue({
+    tableContext: [vi.fn(), vi.fn(), {}],
   }),
 }));
 

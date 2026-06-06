@@ -1,13 +1,14 @@
+import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 
 // -- Mock functions --
-const mockFetchSubscribeList = jest.fn().mockResolvedValue(undefined);
-const mockSetSearchKeyword = jest.fn();
-const mockSetSelectedSourceType = jest.fn();
-const mockBatchPause = jest.fn().mockResolvedValue(undefined);
-const mockBatchResume = jest.fn().mockResolvedValue(undefined);
-const mockBatchCancel = jest.fn().mockResolvedValue(undefined);
-const mockRouterPush = jest.fn();
+const mockFetchSubscribeList = vi.fn().mockResolvedValue(undefined);
+const mockSetSearchKeyword = vi.fn();
+const mockSetSelectedSourceType = vi.fn();
+const mockBatchPause = vi.fn().mockResolvedValue(undefined);
+const mockBatchResume = vi.fn().mockResolvedValue(undefined);
+const mockBatchCancel = vi.fn().mockResolvedValue(undefined);
+const mockRouterPush = vi.fn();
 
 // Mutable store state so individual tests can override values
 let storeOverrides: Record<string, any> = {};
@@ -29,29 +30,29 @@ function getStoreState() {
 }
 
 // -- Module mocks --
-jest.mock('/@/store/modules/subscribe', () => ({
+vi.mock('/@/store/modules/subscribe', () => ({
   useSubscribeStore: () => getStoreState(),
 }));
 
-jest.mock('/@/store/modules/user', () => ({
+vi.mock('/@/store/modules/user', () => ({
   useUserStore: () => ({
     getUserInfo: { userId: 'u-1' },
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('vue-router', () => ({
+vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
-jest.mock('/@/hooks/event/useBreakpoint', () => ({
+vi.mock('/@/hooks/event/useBreakpoint', () => ({
   useBreakpoint: () => ({ screenRef: { value: 'MD' } }),
 }));
 
-jest.mock('/@/hooks/web/useMessage', () => ({
+vi.mock('/@/hooks/web/useMessage', () => ({
   useMessage: () => ({
-    createMessage: { success: jest.fn(), error: jest.fn() },
+    createMessage: { success: vi.fn(), error: vi.fn() },
   }),
 }));
 
@@ -82,7 +83,7 @@ async function mountPage(overrides: Record<string, any> = {}) {
 // -- Tests --
 describe('subscribe/manage.vue', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     storeOverrides = {};
   });
 

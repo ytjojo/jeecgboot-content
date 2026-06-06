@@ -1,10 +1,11 @@
-const mockGenerateInviteCode = jest.fn();
-const mockGetInviteStats = jest.fn();
-jest.mock('/@/api/content/invite', () => ({
+import { vi } from 'vitest';
+const mockGenerateInviteCode = vi.fn();
+const mockGetInviteStats = vi.fn();
+vi.mock('/@/api/content/invite', () => ({
   generateInviteCode: (...args: any[]) => mockGenerateInviteCode(...args),
   getInviteStats: (...args: any[]) => mockGetInviteStats(...args),
 }));
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
 import { setActivePinia, createPinia } from 'pinia';
 import { useInviteStore } from '/@/store/modules/invite';
@@ -12,7 +13,7 @@ import { useInviteStore } from '/@/store/modules/invite';
 describe('store/modules/invite', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('initializes with null invite code and stats', () => {

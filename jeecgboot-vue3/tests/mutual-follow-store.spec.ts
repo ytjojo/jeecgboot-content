@@ -1,8 +1,9 @@
-const mockGetMutualStatus = jest.fn();
-jest.mock('/@/api/content/relation', () => ({
+import { vi } from 'vitest';
+const mockGetMutualStatus = vi.fn();
+vi.mock('/@/api/content/relation', () => ({
   getMutualStatus: (...args: any[]) => mockGetMutualStatus(...args),
 }));
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
 import { setActivePinia, createPinia } from 'pinia';
 import { useMutualFollowStore } from '/@/store/modules/mutualFollow';
@@ -10,7 +11,7 @@ import { useMutualFollowStore } from '/@/store/modules/mutualFollow';
 describe('store/modules/mutualFollow', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('initializes with empty cache', () => {

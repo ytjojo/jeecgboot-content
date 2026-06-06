@@ -1,18 +1,19 @@
+import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 
-jest.setTimeout(30000);
+vi.setConfig({ testTimeout: 30000 });
 
 // -- Mock functions --
-const mockFetchFollowFeed = jest.fn().mockResolvedValue(undefined);
-const mockSetFollowTypes = jest.fn();
-const mockFetchFollowList = jest.fn().mockResolvedValue(undefined);
-const mockFetchFollowGroups = jest.fn().mockResolvedValue(undefined);
-const mockFetchSubscribeList = jest.fn().mockResolvedValue(undefined);
-const mockSetSearchKeyword = jest.fn();
-const mockSetSelectedSourceType = jest.fn();
-const mockBatchCancelFollow = jest.fn().mockResolvedValue(undefined);
-const mockBatchPause = jest.fn().mockResolvedValue(undefined);
-const mockBatchResume = jest.fn().mockResolvedValue(undefined);
+const mockFetchFollowFeed = vi.fn().mockResolvedValue(undefined);
+const mockSetFollowTypes = vi.fn();
+const mockFetchFollowList = vi.fn().mockResolvedValue(undefined);
+const mockFetchFollowGroups = vi.fn().mockResolvedValue(undefined);
+const mockFetchSubscribeList = vi.fn().mockResolvedValue(undefined);
+const mockSetSearchKeyword = vi.fn();
+const mockSetSelectedSourceType = vi.fn();
+const mockBatchCancelFollow = vi.fn().mockResolvedValue(undefined);
+const mockBatchPause = vi.fn().mockResolvedValue(undefined);
+const mockBatchResume = vi.fn().mockResolvedValue(undefined);
 
 // -- Mutable data slots --
 let feedItems: any[] = [];
@@ -20,7 +21,7 @@ let followItems: any[] = [];
 let subscribeItems: any[] = [];
 
 // -- Module mocks --
-jest.mock('/@/store/modules/feed', () => ({
+vi.mock('/@/store/modules/feed', () => ({
   useFeedStore: () => ({
     get followFeedList() { return feedItems; },
     get priorityItems() { return []; },
@@ -32,7 +33,7 @@ jest.mock('/@/store/modules/feed', () => ({
   }),
 }));
 
-jest.mock('/@/store/modules/follow', () => ({
+vi.mock('/@/store/modules/follow', () => ({
   useFollowStore: () => ({
     get followList() { return followItems; },
     get followGroups() { return []; },
@@ -41,13 +42,13 @@ jest.mock('/@/store/modules/follow', () => ({
     get hasMore() { return false; },
     fetchFollowList: mockFetchFollowList,
     fetchFollowGroups: mockFetchFollowGroups,
-    setSearchKeyword: jest.fn(),
-    setSelectedGroupId: jest.fn(),
+    setSearchKeyword: vi.fn(),
+    setSelectedGroupId: vi.fn(),
     batchUnfollowUsers: mockBatchCancelFollow,
   }),
 }));
 
-jest.mock('/@/store/modules/subscribe', () => ({
+vi.mock('/@/store/modules/subscribe', () => ({
   useSubscribeStore: () => ({
     get subscribeList() { return subscribeItems; },
     get totalSubscribes() { return subscribeItems.length; },
@@ -62,25 +63,25 @@ jest.mock('/@/store/modules/subscribe', () => ({
   }),
 }));
 
-jest.mock('/@/store/modules/user', () => ({
+vi.mock('/@/store/modules/user', () => ({
   useUserStore: () => ({
     getUserInfo: { userId: 'u-1' },
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('vue-router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
-jest.mock('/@/hooks/event/useBreakpoint', () => ({
+vi.mock('/@/hooks/event/useBreakpoint', () => ({
   useBreakpoint: () => ({ screenRef: { value: 'MD' } }),
 }));
 
-jest.mock('/@/hooks/web/useMessage', () => ({
+vi.mock('/@/hooks/web/useMessage', () => ({
   useMessage: () => ({
-    createMessage: { success: jest.fn(), error: jest.fn() },
+    createMessage: { success: vi.fn(), error: vi.fn() },
   }),
 }));
 
@@ -167,7 +168,7 @@ describe('Social module performance', () => {
     feedItems = [];
     followItems = [];
     subscribeItems = [];
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('feed page renders within 2 seconds with 50 items', async () => {

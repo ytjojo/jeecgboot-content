@@ -1,26 +1,27 @@
+import { vi } from 'vitest';
 import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 
 // Mock follow store
-const mockSetSpecial = jest.fn();
-const mockCancelSpecial = jest.fn();
+const mockSetSpecial = vi.fn();
+const mockCancelSpecial = vi.fn();
 
-jest.mock('/@/store/modules/follow', () => ({
+vi.mock('/@/store/modules/follow', () => ({
   useFollowStore: () => ({
     setSpecial: mockSetSpecial,
     cancelSpecial: mockCancelSpecial,
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('ant-design-vue', () => ({
-  message: { success: jest.fn(), error: jest.fn() },
+vi.mock('ant-design-vue', () => ({
+  message: { success: vi.fn(), error: vi.fn() },
 }));
 
 describe('SpecialFollowButton.vue', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSetSpecial.mockResolvedValue(undefined);
     mockCancelSpecial.mockResolvedValue(undefined);
   });

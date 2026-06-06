@@ -1,13 +1,14 @@
+import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { nextTick } from 'vue';
 
-jest.mock('/@/api/content/invite', () => ({
-  generateInviteCode: jest.fn().mockResolvedValue({ inviteCode: 'INV123' }),
-  listInviteRecords: jest.fn().mockResolvedValue({
+vi.mock('/@/api/content/invite', () => ({
+  generateInviteCode: vi.fn().mockResolvedValue({ inviteCode: 'INV123' }),
+  listInviteRecords: vi.fn().mockResolvedValue({
     records: [{ id: 'r1', inviteeNickname: '新用户', registeredAt: '2025-06-01', rewardStatus: 'PAID', inviteeAvatar: '' }],
     total: 1,
   }),
-  getInviteStats: jest.fn().mockResolvedValue({
+  getInviteStats: vi.fn().mockResolvedValue({
     inviteCode: 'INV123',
     totalInvited: 5,
     totalReward: 100,
@@ -15,12 +16,12 @@ jest.mock('/@/api/content/invite', () => ({
   }),
 }));
 
-jest.mock('/@/store/modules/user', () => ({
+vi.mock('/@/store/modules/user', () => ({
   useUserStore: () => ({ getUserInfo: { userId: 'u1' } }),
 }));
 
-jest.mock('/@/hooks/web/useMessage', () => ({
-  useMessage: () => ({ createMessage: { success: jest.fn(), error: jest.fn() } }),
+vi.mock('/@/hooks/web/useMessage', () => ({
+  useMessage: () => ({ createMessage: { success: vi.fn(), error: vi.fn() } }),
 }));
 
 describe('InviteShare.vue', () => {

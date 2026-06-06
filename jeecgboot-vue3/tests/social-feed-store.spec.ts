@@ -1,15 +1,16 @@
-const mockGetFollowingFeed = jest.fn();
-const mockGetSubscribeFeed = jest.fn();
+import { vi } from 'vitest';
+const mockGetFollowingFeed = vi.fn();
+const mockGetSubscribeFeed = vi.fn();
 
-jest.mock('/@/api/content/relation', () => ({
+vi.mock('/@/api/content/relation', () => ({
   getFollowingFeed: (...args: any[]) => mockGetFollowingFeed(...args),
 }));
 
-jest.mock('/@/api/content/subscribe', () => ({
+vi.mock('/@/api/content/subscribe', () => ({
   getSubscribeFeed: (...args: any[]) => mockGetSubscribeFeed(...args),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
 import { setActivePinia, createPinia } from 'pinia';
 import { useFeedStore } from '/@/store/modules/feed';
@@ -33,7 +34,7 @@ function makeFeedItem(overrides: Record<string, any> = {}) {
 describe('store/modules/feed', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {

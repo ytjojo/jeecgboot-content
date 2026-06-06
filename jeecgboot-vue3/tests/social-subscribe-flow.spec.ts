@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 
 // --- Mutable state for subscribe store ---
@@ -7,20 +8,20 @@ let loadingState = false;
 let hasMoreState = false;
 
 // --- Mock functions ---
-const mockFetchSubscribeList = jest.fn();
-const mockFetchPlaza = jest.fn();
-const mockSetSearchKeyword = jest.fn();
-const mockSetSelectedSourceType = jest.fn();
-const mockBatchPause = jest.fn();
-const mockBatchResume = jest.fn();
-const mockBatchCancel = jest.fn();
-const mockFetchNotificationConfig = jest.fn();
-const mockFetchGlobalNotificationDefault = jest.fn();
-const mockSaveConfig = jest.fn();
-const mockRouterPush = jest.fn();
+const mockFetchSubscribeList = vi.fn();
+const mockFetchPlaza = vi.fn();
+const mockSetSearchKeyword = vi.fn();
+const mockSetSelectedSourceType = vi.fn();
+const mockBatchPause = vi.fn();
+const mockBatchResume = vi.fn();
+const mockBatchCancel = vi.fn();
+const mockFetchNotificationConfig = vi.fn();
+const mockFetchGlobalNotificationDefault = vi.fn();
+const mockSaveConfig = vi.fn();
+const mockRouterPush = vi.fn();
 
 // --- Store mocks ---
-jest.mock('/@/store/modules/subscribe', () => ({
+vi.mock('/@/store/modules/subscribe', () => ({
   useSubscribeStore: () => ({
     get subscribeList() { return subscribeListState; },
     get plazaData() { return { records: [], total: 0 }; },
@@ -42,25 +43,25 @@ jest.mock('/@/store/modules/subscribe', () => ({
   }),
 }));
 
-jest.mock('/@/store/modules/user', () => ({
+vi.mock('/@/store/modules/user', () => ({
   useUserStore: () => ({
     getUserInfo: { userId: 'u-1' },
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('vue-router', () => ({
+vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockRouterPush }),
   useRoute: () => ({ query: {} }),
 }));
 
-jest.mock('/@/hooks/event/useBreakpoint', () => ({
+vi.mock('/@/hooks/event/useBreakpoint', () => ({
   useBreakpoint: () => ({ screenRef: { value: 'MD' } }),
 }));
 
-jest.mock('/@/hooks/web/useMessage', () => ({
-  useMessage: () => ({ createMessage: { success: jest.fn(), error: jest.fn() } }),
+vi.mock('/@/hooks/web/useMessage', () => ({
+  useMessage: () => ({ createMessage: { success: vi.fn(), error: vi.fn() } }),
 }));
 
 // --- Stubs ---
@@ -127,7 +128,7 @@ describe('social subscribe flow (E2E-style)', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchSubscribeList.mockResolvedValue(undefined);
     mockFetchPlaza.mockResolvedValue({ records: [], total: 0 });
     mockBatchPause.mockResolvedValue(undefined);

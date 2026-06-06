@@ -1,30 +1,31 @@
+import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { nextTick } from 'vue';
 
 // Mock API
-jest.mock('/@/api/content/relation', () => ({
-  getMutualFollowList: jest.fn().mockResolvedValue({
+vi.mock('/@/api/content/relation', () => ({
+  getMutualFollowList: vi.fn().mockResolvedValue({
     records: [
       { id: '1', nickname: 'Alice', avatar: '' },
       { id: '2', nickname: 'Bob', avatar: '' },
     ],
     total: 2,
   }),
-  unfollowUser: jest.fn().mockResolvedValue(undefined),
+  unfollowUser: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Mock user store
-jest.mock('/@/store/modules/user', () => ({
+vi.mock('/@/store/modules/user', () => ({
   useUserStore: () => ({
     getUserInfo: { userId: 'u1' },
   }),
 }));
 
 // Mock message hook
-jest.mock('/@/hooks/web/useMessage', () => ({
+vi.mock('/@/hooks/web/useMessage', () => ({
   useMessage: () => ({
-    createMessage: { success: jest.fn(), error: jest.fn() },
-    createConfirm: jest.fn().mockResolvedValue(true),
+    createMessage: { success: vi.fn(), error: vi.fn() },
+    createConfirm: vi.fn().mockResolvedValue(true),
   }),
 }));
 
@@ -68,7 +69,7 @@ describe('MutualFollowList.vue', () => {
 
   it('renders empty state when no items', async () => {
     const { getMutualFollowList } = await import('/@/api/content/relation');
-    (getMutualFollowList as jest.Mock).mockResolvedValueOnce({ records: [], total: 0 });
+    (getMutualFollowList as vi.Mock).mockResolvedValueOnce({ records: [], total: 0 });
     const wrapper = await mountPage();
     await flushPromises();
     await nextTick();

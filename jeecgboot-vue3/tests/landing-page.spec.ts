@@ -1,21 +1,22 @@
+import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { nextTick } from 'vue';
 
-const mockPush = jest.fn();
-const mockReplace = jest.fn();
+const mockPush = vi.fn();
+const mockReplace = vi.fn();
 let mockToken = '';
 
-jest.mock('vue-router', () => ({
+vi.mock('vue-router', () => ({
   useRoute: () => ({ params: { inviteCode: 'CODE123' } }),
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
 }));
 
-const mockValidateInviteCode = jest.fn().mockResolvedValue({ valid: true });
-jest.mock('/@/api/content/invite', () => ({
+const mockValidateInviteCode = vi.fn().mockResolvedValue({ valid: true });
+vi.mock('/@/api/content/invite', () => ({
   validateInviteCode: (...args: any[]) => mockValidateInviteCode(...args),
 }));
 
-jest.mock('/@/store/modules/user', () => ({
+vi.mock('/@/store/modules/user', () => ({
   useUserStore: () => ({ getToken: mockToken }),
 }));
 
@@ -34,7 +35,7 @@ describe('LandingPage.vue', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockToken = '';
   });
 

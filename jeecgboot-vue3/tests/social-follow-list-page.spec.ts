@@ -1,14 +1,15 @@
+import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 
 // --- Mock functions ---
-const mockFetchFollowList = jest.fn().mockResolvedValue(undefined);
-const mockFetchFollowGroups = jest.fn().mockResolvedValue(undefined);
-const mockSetSearchKeyword = jest.fn();
-const mockSetSelectedGroupId = jest.fn();
-const mockUnfollow = jest.fn();
-const mockSetSpecial = jest.fn();
-const mockCancelSpecial = jest.fn();
-const mockRouterPush = jest.fn();
+const mockFetchFollowList = vi.fn().mockResolvedValue(undefined);
+const mockFetchFollowGroups = vi.fn().mockResolvedValue(undefined);
+const mockSetSearchKeyword = vi.fn();
+const mockSetSelectedGroupId = vi.fn();
+const mockUnfollow = vi.fn();
+const mockSetSpecial = vi.fn();
+const mockCancelSpecial = vi.fn();
+const mockRouterPush = vi.fn();
 
 // --- Store state (mutable for per-test overrides) ---
 let followListState: any[] = [];
@@ -17,7 +18,7 @@ let followListLoadingState = false;
 let totalFollowsState = 0;
 let hasMoreState = false;
 
-jest.mock('/@/store/modules/follow', () => ({
+vi.mock('/@/store/modules/follow', () => ({
   useFollowStore: () => ({
     get followList() { return followListState; },
     get followGroups() { return followGroupsState; },
@@ -34,19 +35,19 @@ jest.mock('/@/store/modules/follow', () => ({
   }),
 }));
 
-jest.mock('/@/store/modules/user', () => ({
+vi.mock('/@/store/modules/user', () => ({
   useUserStore: () => ({
     getUserInfo: { userId: 'u-1' },
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('vue-router', () => ({
+vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
-jest.mock('/@/hooks/event/useBreakpoint', () => ({
+vi.mock('/@/hooks/event/useBreakpoint', () => ({
   useBreakpoint: () => ({ screenRef: { value: 'MD' } }),
 }));
 
@@ -77,7 +78,7 @@ function createWrapper() {
 // --- Tests ---
 describe('follow/index.vue', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     followListState = [];
     followGroupsState = [];
     followListLoadingState = false;

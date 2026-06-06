@@ -1,6 +1,7 @@
+import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 
-jest.mock('@ant-design/icons-vue', () => ({
+vi.mock('@ant-design/icons-vue', () => ({
   EyeInvisibleOutlined: { template: '<span class="eye-icon" />' },
 }));
 

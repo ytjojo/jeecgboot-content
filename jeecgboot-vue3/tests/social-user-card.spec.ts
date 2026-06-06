@@ -1,11 +1,12 @@
+import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 
 // Mock follow store
-const mockSetSpecial = jest.fn();
-const mockCancelSpecial = jest.fn();
-const mockUnfollow = jest.fn();
+const mockSetSpecial = vi.fn();
+const mockCancelSpecial = vi.fn();
+const mockUnfollow = vi.fn();
 
-jest.mock('/@/store/modules/follow', () => ({
+vi.mock('/@/store/modules/follow', () => ({
   useFollowStore: () => ({
     setSpecial: mockSetSpecial,
     cancelSpecial: mockCancelSpecial,
@@ -13,10 +14,10 @@ jest.mock('/@/store/modules/follow', () => ({
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('ant-design-vue', () => ({
-  message: { success: jest.fn(), error: jest.fn() },
+vi.mock('ant-design-vue', () => ({
+  message: { success: vi.fn(), error: vi.fn() },
 }));
 
 function makeUser(overrides: Record<string, any> = {}) {
@@ -34,7 +35,7 @@ function makeUser(overrides: Record<string, any> = {}) {
 
 describe('UserCard.vue', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSetSpecial.mockResolvedValue(undefined);
     mockCancelSpecial.mockResolvedValue(undefined);
     mockUnfollow.mockResolvedValue(undefined);

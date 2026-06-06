@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { SOCIAL_EVENTS, trackSocialEvent } from '../src/utils/social/analytics';
 
 describe('SOCIAL_EVENTS contract', () => {
@@ -44,7 +45,7 @@ describe('trackSocialEvent', () => {
   });
 
   it('calls window.trackEvent when available', () => {
-    const mockTrackEvent = jest.fn();
+    const mockTrackEvent = vi.fn();
     (window as any).trackEvent = mockTrackEvent;
 
     trackSocialEvent(SOCIAL_EVENTS.FAN_LIST_VIEW, { userId: '123' });
@@ -53,7 +54,7 @@ describe('trackSocialEvent', () => {
   });
 
   it('falls back to dataLayer.push when trackEvent is not available', () => {
-    const mockPush = jest.fn();
+    const mockPush = vi.fn();
     (window as any).dataLayer = { push: mockPush };
 
     trackSocialEvent(SOCIAL_EVENTS.MUTUAL_FOLLOW_CANCEL, { targetUserId: '456' });
@@ -65,7 +66,7 @@ describe('trackSocialEvent', () => {
   });
 
   it('falls back to console.debug when neither trackEvent nor dataLayer exist', () => {
-    const debugSpy = jest.spyOn(console, 'debug').mockImplementation();
+    const debugSpy = vi.spyOn(console, 'debug').mockImplementation();
 
     trackSocialEvent(SOCIAL_EVENTS.INVITE_CODE_COPY, { type: 'code' });
 
@@ -74,7 +75,7 @@ describe('trackSocialEvent', () => {
   });
 
   it('works without payload', () => {
-    const mockTrackEvent = jest.fn();
+    const mockTrackEvent = vi.fn();
     (window as any).trackEvent = mockTrackEvent;
 
     trackSocialEvent(SOCIAL_EVENTS.FAN_LIST_VIEW);
@@ -86,7 +87,7 @@ describe('trackSocialEvent', () => {
     (window as any).trackEvent = () => {
       throw new Error('test');
     };
-    const debugSpy = jest.spyOn(console, 'debug').mockImplementation();
+    const debugSpy = vi.spyOn(console, 'debug').mockImplementation();
 
     // Should not throw
     expect(() => trackSocialEvent(SOCIAL_EVENTS.FAN_LIST_VIEW)).not.toThrow();

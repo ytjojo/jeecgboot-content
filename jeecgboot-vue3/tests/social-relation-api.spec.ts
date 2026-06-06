@@ -1,11 +1,12 @@
-jest.mock('/@/utils/http/axios', () => ({
+import { vi } from 'vitest';
+vi.mock('/@/utils/http/axios', () => ({
   defHttp: {
-    get: jest.fn(),
-    post: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
   },
 }));
 
-const defHttp = require('/@/utils/http/axios').defHttp as { get: jest.Mock; post: jest.Mock };
+import { defHttp } from '/@/utils/http/axios';
 
 import {
   getMutualFollowList,

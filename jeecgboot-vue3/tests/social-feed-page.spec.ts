@@ -1,7 +1,8 @@
+import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 
-const mockFetchFollowFeed = jest.fn().mockResolvedValue(undefined);
-const mockSetFollowTypes = jest.fn();
+const mockFetchFollowFeed = vi.fn().mockResolvedValue(undefined);
+const mockSetFollowTypes = vi.fn();
 
 let feedStoreState: Record<string, any> = {
   followFeedList: [],
@@ -11,7 +12,7 @@ let feedStoreState: Record<string, any> = {
   followTypes: [],
 };
 
-jest.mock('/@/store/modules/feed', () => ({
+vi.mock('/@/store/modules/feed', () => ({
   useFeedStore: () => ({
     ...feedStoreState,
     fetchFollowFeed: mockFetchFollowFeed,
@@ -19,9 +20,9 @@ jest.mock('/@/store/modules/feed', () => ({
   }),
 }));
 
-jest.mock('/@/store', () => ({ store: {} }));
+vi.mock('/@/store', () => ({ store: {} }));
 
-jest.mock('/@/hooks/event/useBreakpoint', () => ({
+vi.mock('/@/hooks/event/useBreakpoint', () => ({
   useBreakpoint: () => ({ screenRef: { value: 'MD' } }),
 }));
 
@@ -69,7 +70,7 @@ describe('FeedPage (src/views/social/feed/index.vue)', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     feedStoreState = {
       followFeedList: [],
       priorityItems: [],
