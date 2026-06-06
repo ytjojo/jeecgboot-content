@@ -9,6 +9,10 @@
 2. 仓库根目录 `AGENTS.md`
 3. `docs/agent-context/` 下的文档仅作参考，不是硬约束
 
+## openspec changes mapping 
+change对应前后端prd和前后端change目录
+docs/requirements/prd/decomposition/change-prd-mapping.yaml
+
 ## 路由
 - 修改后端代码前，先阅读 `jeecg-boot/AGENTS.md`
 - 修改前端代码前，先阅读 `jeecgboot-vue3/AGENTS.md`
@@ -47,152 +51,72 @@
 
 ## Git Worktree & 分支管理
 
-### 禁止事项
-- **严禁**向 `master` 分支提交或合并任何代码
+### 秒懂：不可违反的底线
+1. **严禁**向 `master` 提交或合并代码（`master` 与 `springboot3_content` 是并行分支，基础库不同）
+2. worktree 必须合并回**来源分支**，禁止跨分支合并
+3. **禁止**从 worktree 复制文件到主 worktree 后重新 commit（丢失元数据，绕过 git）
 
-### 分支规则
-- 项目活跃分支：`springboot3_content`
-- `master` 与 `springboot3_content` 为**并行分支**，基础库不同，不可互相合并
+### 标准流程（创建 → 开发 → 合并 → 清理）
+1. **创建**：`EnterWorktree`，名称格式 `<描述>-<6位hex>`（如 `channel-gov-7b9e4d`），创建后写 `.worktree-owner`
+2. **开发**：在 worktree 内 commit 所有改动
+3. **合并**：回主分支 `git merge <feature-branch>`
+4. **验证**：主分支跑模块全量测试
+5. **清理**：`git worktree remove` + `git branch -d`，禁止遗留未清理的 worktree
 
-### Worktree 合并规则
-- worktree 必须合并回**其来源分支**，禁止跨分支合并
-- 示例：从 `springboot3_content` 创建的 worktree → 只能合并回 `springboot3_content`
+> 需要拆分大 commit？先在 worktree 内 `git rebase -i` 拆分，再 cherry-pick 回主分支。
 
-### Worktree 提交规则（禁止复制文件重新提交）
-- **在 worktree 内完成 commit**，然后通过 `git cherry-pick` 或 `git merge` 合并回主分支
-- **禁止**从 worktree 复制文件到主 worktree 后重新 commit — 这会丢失 commit 元数据（author、timestamp）且绕过 git 合并机制
-- 如需拆分大 commit 为多个逻辑提交：先在 worktree 内用 `git rebase -i` 或 `git reset` 拆分，再 cherry-pick 到主分支
+### 详情：安全机制
 
-### Worktree 命名规则（防冲突）
+**命名防冲突**：创建前执行 `git worktree list`，名称冲突则追加随机后缀。
 
-**硬规则：worktree 名称必须唯一，禁止使用通用名（如 `p0-apis`、`feature`、`fix`）。**
-
-命名格式：`<简短描述>-<6位随机hex>`
-- 示例：`p0-apis-a3f2c1`、`channel-gov-7b9e4d`、`user-status-f1a8c2`
-- 创建前**必须**执行 `git worktree list` 检查名称是否已存在
-- 若名称冲突，追加随机后缀而非复用
-
-### Worktree 所有权标记
-
-**硬规则：创建 worktree 后立即写入所有权文件。**
-
+**所有权标记**：创建后立即写入：
 ```bash
-# 创建后立即执行
 echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) $(whoami)" > <worktree-path>/.worktree-owner
 ```
 
-用途：清理前读取此文件确认所有权，避免误删其他 agent 的 worktree。
-
-### Worktree 生命周期（创建 → 完成 → 清理）
-
-**硬规则：创建 worktree 的 agent 负责其完整生命周期，包括最终清理。**
-
-流程：
-1. **创建**：`/using-git-worktrees` or  `EnterWorktree` 生成 worktree + 分支
-   - 名称必须符合命名规则（含随机后缀）
-   - 创建前执行 `git worktree list` 确认无冲突
-   - 创建后立即写入 `.worktree-owner` 文件
-2. **开发**：在 worktree 内 commit 所有改动
-3. **合并**：回主分支执行 `git merge <feature-branch>`
-4. **验证**：在主分支跑模块全量测试，确认通过
-5. **清理**：`git worktree remove <path>` + `git worktree prune` + `git branch -d <feature-branch>`
-
-**禁止**：开发完成后遗留未清理的 worktree。合并回主分支后必须立即删除 worktree 和 feature 分支。
-
-### Worktree 清理安全规则
-
-**硬规则：禁止 `git worktree remove --force`，除非满足以下条件之一。**
-
-允许 `--force` 的场景：
-1. **已确认所有权**：读取 `.worktree-owner` 确认是当前 agent 创建的
-2. **已确认合并**：`git branch --merged` 显示该分支已合并到来源分支
-3. **用户明确要求**：用户直接指示删除该 worktree
-
-清理前检查清单：
+**清理前必须通过 3 项检查**（任一失败 → 停止，报告用户）：
 ```bash
-# 1. 检查是否是自己的 worktree
-cat <worktree-path>/.worktree-owner
-
-# 2. 检查分支是否已合并
-git branch --merged springboot3_content | grep <branch-name>
-
-# 3. 检查 worktree 内是否有未提交的改动
-git -C <worktree-path> status --short
+cat <worktree-path>/.worktree-owner                    # 1. 确认是自己的
+git branch --merged springboot3_content | grep <branch> # 2. 确认已合并
+git -C <worktree-path> status --short                   # 3. 确认无未提交改动
 ```
 
-若以上任一检查失败 → **停止清理，报告给用户**。
+**`--force` 只在 3 种场景允许**：已确认所有权、已确认合并、用户明确要求。
 
-### Worktree 并发安全
-
-**场景**：多个 agent session 同时运行，各自创建 worktree。
-
-- `git worktree list` 中以 `locked` 标记的 worktree 属于其他活跃 session，**绝对不可触碰**
-- 未锁定的 worktree 也需通过 `.worktree-owner` 确认所有权后再操作
-- 若发现孤立 worktree（无 owner 文件、分支已合并、无活跃 session），报告给用户决定是否清理
+**并发安全**：`locked` 的 worktree 属于其他活跃 session，绝对不可触碰。孤立 worktree（无 owner 文件）报告用户决定。
 
 ## 代码实现 Workflow
 
-### 硬规则：必须使用 worktree
-- **所有代码开发任务必须在 worktree 中进行**，禁止直接在主分支上修改代码
-- **启动前检查**：开始编码前必须执行 `git worktree list` 确认当前是否在 worktree 中，不在则立即创建
+### 秒懂：3 条硬规则
+1. **必须在 worktree 中开发**，禁止直接在主分支改代码（启动前 `git worktree list` 确认）
+2. **必须使用 subagent 编排**（`/superpowers:subagent-driven-development`），主 agent 不直接写代码
+3. **必须使用 TDD 流程**（`/superpowers:test-driven-development`）：先写测试 → 红灯 → 绿灯 → 重构
 
-### 硬规则：代码开发必须使用 `/superpowers:subagent-driven-development`
-
-**所有代码开发任务默认使用 `/superpowers:subagent-driven-development` 进行编排，不得由主 agent 直接编写代码。**
-
-跳过条件（必须**全部**满足才可跳过）：
-- a. 单文件修改（涉及 < 3 个文件）
+### subagent 编排：跳过条件
+单任务满足**全部**条件可跳过 subagent，否则必须调用：
+- a. 涉及 < 3 个文件
 - b. 无新增文件
 - c. 无测试编写
 - d. 修改量 < 30 行
 
-不满足上述任一条件 → 必须调用 `/superpowers:subagent-driven-development`。
+### 完成标准（DoD）
+每个代码任务按顺序完成，**不得跳过**：
+1. **实现** — 通过 subagent + TDD 流程
+2. **Code Review** — 代码质量、命名、边界条件、安全性
+3. **覆盖率 ≥ 90%** — 不满足则补充测试
+4. **模块全量测试 100% 通过** — `mvn test -pl <module> -am`，禁止带红提交
+5. **git 操作** — 在 worktree 内 commit → 合并回主分支 → 验证 → 清理
 
-启动流程：
-1. 创建 worktree（`/using-git-worktrees` 或 `EnterWorktree`）
-2. 调用 `/superpowers:subagent-driven-development` 编排实现任务
-3. 内部管理 subagent 分配、代码编写、测试编写
-
-### 硬规则：代码开发必须使用 `/superpowers:test-driven-development`
-
-**所有代码开发任务必须使用 `/superpowers:test-driven-development` 流程。**
-
-适用范围：
-- 所有 `/opsx:apply`、`/openspec-apply-change` 操作
-- 所有多步代码任务（3+ 步骤）
-- 所有涉及新增文件或修改 3+ 文件的代码任务
-
-调用方式：在 `/superpowers:subagent-driven-development` 编排中或独立调用 `/superpowers:test-driven-development`
-
-流程要求：
-1. **先写测试** — 测试定义行为预期
-2. **红灯** — 运行测试，确认失败（测试有效）
-3. **绿灯** — 写最少代码让测试通过
-4. **重构** — 优化代码，保持测试通过
-5. **覆盖率验证** — 变更代码行覆盖率 ≥ 90%
-
-### 完成标准（Definition of Done）
-每个代码任务必须按顺序完成以下步骤，**不得跳过**：
-
-0. **流程检查** — 确认是否使用了 `/superpowers:subagent-driven-development` 和 `/superpowers:test-driven-development`（符合跳过条件的除外）
-1. **实现** — 完成功能代码（通过 `/superpowers:subagent-driven-development` 编排和 `/superpowers:test-driven-development` 流程）
-2. **Code Review** — 检查代码质量、命名、边界条件、安全性
-3. **测试覆盖率** — 检查变更代码的行覆盖率，**必须 ≥ 90%**。不满足则补充测试代码，直至达标且全量测试通过
-4. **单元测试** — 执行**模块级全量测试**（`mvn test -pl <module> -am`），确保 **100% 通过**，禁止带红测试提交
-   - 不能只跑修改的测试类，必须跑模块全量，发现 mock 泄漏和桩冲突
-   - 测试写完必须立即执行验证，不能"写完就算完成"
-5. **git 操作** - 单元测试通过后,分步git commit,如果当前工作区在worktree中 参考 Git Worktree & 分支管理 中要求操作(合并、验证、清理)
-
-### 硬规则：DoD 必须内嵌到任务列表
-- 任何 apply/实现 操作的 task 文件，**最后必须包含 DoD 收尾 tasks**：
-  - `[ ] 流程确认 — 确认使用了 /superpowers:subagent-driven-development 和 /superpowers:test-driven-development`
-  - `[ ] Code Review — subagent 执行代码质量审查`
-  - `[ ] 测试覆盖率检查 — 变更代码行覆盖率 ≥ 90%`
-  - `[ ] 全量单元测试 — 模块级 100% 通过`
-  - `[ ] 合并回主分支 + 验证 + 清理 worktree`
-- **如果 task 文件缺少这些步骤，agent 必须自行补充并执行**，不能以"task 列表已跑完"为由停止
-- **禁止**将"所有 task 完成"等同于"任务完成"。task 列表只覆盖实现步骤，DoD 收尾是硬性要求
-- 合并前必须通过 Code Review，合并后必须跑全量测试，测试通过后必须清理 worktree
+### DoD 内嵌规则
+task 文件**最后必须包含**以下收尾项，缺少则 agent 自行补充：
+```
+- [ ] 流程确认 — subagent + TDD
+- [ ] Code Review
+- [ ] 覆盖率 ≥ 90%
+- [ ] 模块全量测试 100%
+- [ ] 合并 + 验证 + 清理 worktree
+```
+**禁止**将"所有 task 完成"等同于"任务完成"——DoD 收尾是硬性要求。
 
 ---
 
