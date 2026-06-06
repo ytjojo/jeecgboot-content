@@ -1,5 +1,6 @@
 package org.jeecg.modules.content.userstatus.biz;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.entity.ContentUserStatusRecord;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 状态变更编排服务。
@@ -145,8 +147,22 @@ public class UserStatusBizManageService {
      * @return 到期用户ID列表
      */
     public List<String> findExpiredStatusUsers(UserStatusEnum status) {
-        // TODO: 实现查询到期用户逻辑
-        return List.of();
+        Date now = new Date();
+        // 查询状态记录表：指定状态、已到期、且用户当前仍在该状态
+        LambdaQueryWrapper<ContentUserStatusRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ContentUserStatusRecord::getTargetStatus, status.name())
+               .le(ContentUserStatusRecord::getEffectiveEndTime, now)
+               .isNotNull(ContentUserStatusRecord::getEffectiveEndTime);
+        List<ContentUserStatusRecord> records = statusRecordMapper.selectList(wrapper);
+
+        return records.stream()
+                .map(ContentUserStatusRecord::getUserId)
+                .distinct()
+                .filter(userId -> {
+                    ContentUserProfile profile = userProfileMapper.selectByUserId(userId);
+                    return profile != null && status.name().equals(profile.getStatus());
+                })
+                .collect(Collectors.toList());
     }
 
     /**

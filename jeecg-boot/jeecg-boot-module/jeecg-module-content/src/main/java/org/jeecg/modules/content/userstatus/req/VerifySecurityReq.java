@@ -11,6 +11,9 @@ import lombok.Data;
 @Schema(description = "安全核验请求")
 public class VerifySecurityReq {
 
+    @Schema(description = "用户ID（可选，不传则通过手机号查找）")
+    private String userId;
+
     @NotBlank(message = "手机号不能为空")
     @Schema(description = "手机号")
     private String phone;

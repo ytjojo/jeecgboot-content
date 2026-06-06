@@ -24,7 +24,7 @@ public class ContentUserStatusChangeReq {
 
     @NotBlank(message = "当前状态不能为空")
     @Pattern(
-        regexp = "^(GUEST|REGISTERED_INCOMPLETE|NORMAL|MUTED|RECOMMENDATION_LIMITED|FROZEN|BANNED|CANCEL_PENDING|CANCELLED)$",
+        regexp = "^(GUEST|REGISTERED_INCOMPLETE|NORMAL|MUTED|RESTRICTED_RECOMMEND|FROZEN|BANNED|DEACTIVATING|DEACTIVATED)$",
         message = "当前状态取值不合法"
     )
     @Schema(description = "当前状态", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
@@ -32,7 +32,7 @@ public class ContentUserStatusChangeReq {
 
     @NotBlank(message = "目标状态不能为空")
     @Pattern(
-        regexp = "^(GUEST|REGISTERED_INCOMPLETE|NORMAL|MUTED|RECOMMENDATION_LIMITED|FROZEN|BANNED|CANCEL_PENDING|CANCELLED)$",
+        regexp = "^(GUEST|REGISTERED_INCOMPLETE|NORMAL|MUTED|RESTRICTED_RECOMMEND|FROZEN|BANNED|DEACTIVATING|DEACTIVATED)$",
         message = "目标状态取值不合法"
     )
     @Schema(description = "目标状态", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)

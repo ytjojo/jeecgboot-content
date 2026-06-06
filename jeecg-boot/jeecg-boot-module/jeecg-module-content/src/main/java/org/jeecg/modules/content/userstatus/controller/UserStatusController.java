@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.common.system.vo.LoginUser;
+import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.auth.enums.VerificationCodeSceneEnum;
 import org.jeecg.modules.content.auth.service.IContentVerificationCodeService;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
@@ -23,6 +25,7 @@ import org.jeecg.modules.content.userstatus.service.UserStatusAuditLogService;
 import org.jeecg.modules.content.userstatus.service.UserStatusService;
 import org.jeecg.modules.content.userstatus.vo.UserStatusVO;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +46,7 @@ import java.util.Set;
  * 提供状态查询、状态变更、状态历史等接口。
  */
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/api/content/user-status")
 @Tag(name = "用户状态管理", description = "用户状态查询和管理接口")
@@ -95,8 +100,8 @@ public class UserStatusController {
     @Operation(summary = "变更用户状态（管理员）")
     public Result<Void> changeUserStatus(
         @PathVariable String userId,
-        @RequestParam("operatorId") String operatorId,
-        @RequestBody UserStatusChangeReq req) {
+        @Valid @RequestBody UserStatusChangeReq req) {
+        String operatorId = SecureUtil.currentUser().getId();
         ContentUserProfile profile = userProfileMapper.selectByUserId(userId);
         if (profile == null) {
             throw new JeecgBootException("用户资料不存在: " + userId);
@@ -127,8 +132,8 @@ public class UserStatusController {
     @Operation(summary = "人工解禁")
     public Result<Void> releaseUserStatus(
         @PathVariable String userId,
-        @RequestParam("operatorId") String operatorId,
-        @RequestBody UserStatusChangeReq req) {
+        @Valid @RequestBody UserStatusChangeReq req) {
+        String operatorId = SecureUtil.currentUser().getId();
         ContentUserProfile profile = userProfileMapper.selectByUserId(userId);
         if (profile == null) {
             throw new JeecgBootException("用户资料不存在: " + userId);
@@ -191,7 +196,7 @@ public class UserStatusController {
      */
     @PostMapping("/send-verify-code")
     @Operation(summary = "发送安全核验验证码")
-    public Result<Void> sendVerifyCode(@RequestBody SendVerifyCodeReq req) {
+    public Result<Void> sendVerifyCode(@Valid @RequestBody SendVerifyCodeReq req) {
         // 检查冷却期
         if (verificationCodeService.isInCooldown(VerificationCodeSceneEnum.SECURITY_VERIFY, req.getPhone())) {
             throw new JeecgBootException("验证码发送过于频繁，请稍后再试");
@@ -206,17 +211,30 @@ public class UserStatusController {
      */
     @PostMapping("/verify-security")
     @Operation(summary = "安全核验")
-    public Result<Void> verifySecurity(@RequestBody VerifySecurityReq req) {
+    public Result<Void> verifySecurity(@Valid @RequestBody VerifySecurityReq req) {
         boolean valid = verificationCodeService.verifyCode(
             VerificationCodeSceneEnum.SECURITY_VERIFY, req.getPhone(), req.getVerifyCode());
         if (!valid) {
             throw new JeecgBootException("验证码错误或已过期");
         }
-        // 查找该手机号对应的冻结用户
-        LambdaQueryWrapper<ContentUserProfile> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ContentUserProfile::getStatus, UserStatusEnum.FROZEN.name());
-        // 注意：实际项目中手机号和用户的映射需要额外字段，这里简化处理
-        // 前端应传入 userId，这里通过 phone 关联
+        // 确定要恢复的用户ID
+        String userId = req.getUserId();
+        if (!StringUtils.hasText(userId)) {
+            userId = SecureUtil.currentUser().getId();
+        }
+        // 查询用户当前状态
+        ContentUserProfile profile = userProfileMapper.selectByUserId(userId);
+        if (profile == null) {
+            throw new JeecgBootException("用户资料不存在: " + userId);
+        }
+        UserStatusEnum currentStatus = UserStatusEnum.fromNameOrThrow(profile.getStatus());
+        if (currentStatus != UserStatusEnum.FROZEN) {
+            throw new JeecgBootException("当前账号状态不是冻结状态，无需核验");
+        }
+        // 恢复为正常状态
+        bizManageService.changeStatus(
+            userId, currentStatus, UserStatusEnum.NORMAL,
+            "安全核验通过，自动恢复", "SYSTEM", "SYSTEM", null);
         return Result.OK();
     }
 
@@ -275,8 +293,8 @@ public class UserStatusController {
     @Operation(summary = "批量解禁用户")
     public Result<Void> batchReleaseUsers(
             @RequestBody List<String> userIds,
-            @RequestParam("reason") String reason,
-            @RequestParam("operatorId") String operatorId) {
+            @RequestParam("reason") String reason) {
+        String operatorId = SecureUtil.currentUser().getId();
         if (userIds == null || userIds.isEmpty()) {
             throw new JeecgBootException("用户ID列表不能为空");
         }
