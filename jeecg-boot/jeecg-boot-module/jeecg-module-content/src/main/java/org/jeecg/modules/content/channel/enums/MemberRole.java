@@ -18,4 +18,13 @@ public enum MemberRole {
     @JsonValue
     private final int code;
     private final String desc;
+
+    public static MemberRole fromCode(int code) {
+        for (MemberRole role : values()) {
+            if (role.code == code) {
+                return role;
+            }
+        }
+        throw new IllegalArgumentException("Unknown member role code: " + code);
+    }
 }

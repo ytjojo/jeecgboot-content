@@ -1,19 +1,29 @@
 package org.jeecg.modules.content.channel.biz;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.channel.biz.impl.ChannelGovernanceBizImpl;
 import org.jeecg.modules.content.channel.entity.ChannelContentPublish;
+import org.jeecg.modules.content.channel.entity.ChannelRecycleBin;
 import org.jeecg.modules.content.channel.mapper.ChannelContentPublishMapper;
+import org.jeecg.modules.content.channel.mapper.ChannelRecycleBinMapper;
 import org.jeecg.modules.content.channel.req.governance.ChannelGovernanceReq;
+import org.jeecg.modules.content.channel.req.governance.GovernanceContentListReq;
+import org.jeecg.modules.content.channel.req.governance.RecycleBinListReq;
 import org.jeecg.modules.content.channel.service.ChannelContentGovernanceLogService;
 import org.jeecg.modules.content.channel.service.ChannelEditAssistService;
 import org.jeecg.modules.content.channel.service.ChannelRecycleBinService;
+import org.jeecg.modules.content.channel.vo.governance.GovernanceContentItemVO;
+import org.jeecg.modules.content.channel.vo.governance.RecycleBinItemVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,6 +47,9 @@ class ChannelGovernanceBizTest {
 
     @Mock
     private ChannelEditAssistService editAssistService;
+
+    @Mock
+    private ChannelRecycleBinMapper recycleBinMapper;
 
     @Test
     void pin_shouldSetPinnedTrue() {
@@ -143,6 +156,39 @@ class ChannelGovernanceBizTest {
     }
 
     @Test
+    void restore_shouldFailWhenNotRecycled() {
+        ChannelContentPublish publish = new ChannelContentPublish();
+        publish.setPublishStatus("PUBLISHED");
+        when(publishMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(publish);
+
+        ChannelGovernanceReq req = new ChannelGovernanceReq();
+        req.setChannelId("ch-1");
+        req.setContentId("content-1");
+        req.setAction("RESTORE");
+
+        assertThrows(JeecgBootException.class, () -> biz.executeGovernance(req, "admin-1"));
+        verify(publishMapper, never()).updateById(any(ChannelContentPublish.class));
+    }
+
+    @Test
+    void restore_shouldSucceedWhenRecycled() {
+        ChannelContentPublish publish = new ChannelContentPublish();
+        publish.setPublishStatus("RECYCLED");
+        when(publishMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(publish);
+        when(publishMapper.updateById(any(ChannelContentPublish.class))).thenReturn(1);
+
+        ChannelGovernanceReq req = new ChannelGovernanceReq();
+        req.setChannelId("ch-1");
+        req.setContentId("content-1");
+        req.setAction("RESTORE");
+
+        biz.executeGovernance(req, "admin-1");
+
+        assertEquals("PUBLISHED", publish.getPublishStatus());
+        verify(publishMapper).updateById(publish);
+    }
+
+    @Test
     void unsupportedAction_shouldThrow() {
         ChannelGovernanceReq req = new ChannelGovernanceReq();
         req.setChannelId("ch-1");
@@ -151,5 +197,56 @@ class ChannelGovernanceBizTest {
 
         assertThrows(JeecgBootException.class, () -> biz.executeGovernance(req, "admin-1"));
         verify(governanceLogService).log(eq("ch-1"), eq("content-1"), eq("admin-1"), eq("UNKNOWN"), isNull(), isNull(), eq("FAILED"));
+    }
+
+    @Test
+    void getContentList_shouldReturnPaginatedResults() {
+        ChannelContentPublish publish = new ChannelContentPublish();
+        publish.setId("pub-1");
+        publish.setChannelId("ch-1");
+        publish.setContentId("content-1");
+        publish.setContentType("article");
+        publish.setPublishStatus("PUBLISHED");
+        publish.setIsPinned(false);
+        publish.setPublisherId("user-1");
+
+        Page<ChannelContentPublish> page = new Page<>(1, 10);
+        page.setRecords(Collections.singletonList(publish));
+        page.setTotal(1);
+        when(publishMapper.selectPage(any(IPage.class), any(LambdaQueryWrapper.class))).thenReturn(page);
+
+        GovernanceContentListReq req = new GovernanceContentListReq();
+        req.setChannelId("ch-1");
+
+        Page<GovernanceContentItemVO> result = biz.getContentList(req);
+
+        assertEquals(1, result.getRecords().size());
+        assertEquals("pub-1", result.getRecords().get(0).getId());
+        assertEquals("PUBLISHED", result.getRecords().get(0).getPublishStatus());
+    }
+
+    @Test
+    void getRecycleBinList_shouldReturnPaginatedResults() {
+        ChannelRecycleBin recycleBin = new ChannelRecycleBin();
+        recycleBin.setId("rb-1");
+        recycleBin.setChannelId("ch-1");
+        recycleBin.setContentId("content-1");
+        recycleBin.setContentType("article");
+        recycleBin.setDeletedBy("admin-1");
+        recycleBin.setExpireTime(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L));
+
+        Page<ChannelRecycleBin> page = new Page<>(1, 10);
+        page.setRecords(Collections.singletonList(recycleBin));
+        page.setTotal(1);
+        when(recycleBinMapper.selectPage(any(IPage.class), any(LambdaQueryWrapper.class))).thenReturn(page);
+
+        RecycleBinListReq req = new RecycleBinListReq();
+        req.setChannelId("ch-1");
+
+        Page<RecycleBinItemVO> result = biz.getRecycleBinList(req);
+
+        assertEquals(1, result.getRecords().size());
+        assertEquals("rb-1", result.getRecords().get(0).getId());
+        assertNotNull(result.getRecords().get(0).getRemainingDays());
     }
 }

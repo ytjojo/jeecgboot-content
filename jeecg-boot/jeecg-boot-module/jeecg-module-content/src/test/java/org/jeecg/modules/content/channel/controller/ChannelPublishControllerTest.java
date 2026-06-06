@@ -6,6 +6,7 @@ import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.channel.biz.ChannelPublishBiz;
 import org.jeecg.modules.content.channel.req.publish.ChannelAddExistingContentReq;
 import org.jeecg.modules.content.channel.req.publish.ChannelPublishReq;
+import org.jeecg.modules.content.channel.vo.publish.AvailableChannelVO;
 import org.jeecg.modules.content.channel.vo.publish.ChannelPublishResultVO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,5 +74,16 @@ class ChannelPublishControllerTest {
 
         assertThat(result.isSuccess()).isTrue();
         verify(channelPublishBiz).addExistingContent(req, "user1");
+    }
+
+    @Test
+    void should_get_available_channels() {
+        List<AvailableChannelVO> channels = Collections.emptyList();
+        when(channelPublishBiz.getAvailableChannels("user1")).thenReturn(channels);
+
+        Result<List<AvailableChannelVO>> result = controller.getAvailableChannels();
+
+        assertThat(result.isSuccess()).isTrue();
+        verify(channelPublishBiz).getAvailableChannels("user1");
     }
 }

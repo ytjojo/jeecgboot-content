@@ -1,10 +1,15 @@
 package org.jeecg.modules.content.channel.controller;
 
 import com.alibaba.fastjson2.JSON;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.channel.biz.ChannelGovernanceBiz;
 import org.jeecg.modules.content.channel.req.governance.ChannelGovernanceReq;
+import org.jeecg.modules.content.channel.req.governance.GovernanceContentListReq;
+import org.jeecg.modules.content.channel.req.governance.RecycleBinListReq;
+import org.jeecg.modules.content.channel.vo.governance.GovernanceContentItemVO;
+import org.jeecg.modules.content.channel.vo.governance.RecycleBinItemVO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,5 +62,31 @@ class ChannelContentGovernanceControllerTest {
 
         assertThat(result.isSuccess()).isTrue();
         verify(channelGovernanceBiz).executeGovernance(req, "admin1");
+    }
+
+    @Test
+    void should_get_content_list() {
+        GovernanceContentListReq req = new GovernanceContentListReq();
+        req.setChannelId("ch1");
+        Page<GovernanceContentItemVO> page = new Page<>(1, 10);
+        when(channelGovernanceBiz.getContentList(req)).thenReturn(page);
+
+        Result<Page<GovernanceContentItemVO>> result = controller.getContentList(req);
+
+        assertThat(result.isSuccess()).isTrue();
+        verify(channelGovernanceBiz).getContentList(req);
+    }
+
+    @Test
+    void should_get_recycle_bin_list() {
+        RecycleBinListReq req = new RecycleBinListReq();
+        req.setChannelId("ch1");
+        Page<RecycleBinItemVO> page = new Page<>(1, 10);
+        when(channelGovernanceBiz.getRecycleBinList(req)).thenReturn(page);
+
+        Result<Page<RecycleBinItemVO>> result = controller.getRecycleBinList(req);
+
+        assertThat(result.isSuccess()).isTrue();
+        verify(channelGovernanceBiz).getRecycleBinList(req);
     }
 }

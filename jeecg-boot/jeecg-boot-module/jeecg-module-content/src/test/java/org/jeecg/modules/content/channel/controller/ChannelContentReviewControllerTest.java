@@ -5,6 +5,7 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.channel.biz.ChannelReviewBiz;
 import org.jeecg.modules.content.channel.req.review.ChannelReviewReq;
+import org.jeecg.modules.content.channel.vo.review.ReviewStatsVO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,5 +70,31 @@ class ChannelContentReviewControllerTest {
 
         assertThat(result.isSuccess()).isTrue();
         verify(channelReviewBiz).review(req, "reviewer1");
+    }
+
+    @Test
+    void should_get_review_stats() {
+        ReviewStatsVO stats = ReviewStatsVO.builder()
+                .pendingCount(5L).timeoutCount(2L)
+                .todayApprovedCount(3L).todayRejectedCount(1L).build();
+        when(channelReviewBiz.getReviewStats("ch-1")).thenReturn(stats);
+
+        Result<ReviewStatsVO> result = controller.getReviewStats("ch-1");
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getResult().getPendingCount()).isEqualTo(5L);
+    }
+
+    @Test
+    void should_get_review_stats_by_channel() {
+        ReviewStatsVO stats = ReviewStatsVO.builder()
+                .pendingCount(10L).timeoutCount(4L)
+                .todayApprovedCount(6L).todayRejectedCount(2L).build();
+        when(channelReviewBiz.getReviewStats("ch-1")).thenReturn(stats);
+
+        Result<ReviewStatsVO> result = controller.getReviewStats("ch-1");
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getResult().getPendingCount()).isEqualTo(10L);
     }
 }

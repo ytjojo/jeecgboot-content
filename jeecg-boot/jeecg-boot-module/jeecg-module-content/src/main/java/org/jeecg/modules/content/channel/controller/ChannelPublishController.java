@@ -9,6 +9,7 @@ import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.biz.ChannelPublishBiz;
 import org.jeecg.modules.content.channel.req.publish.ChannelAddExistingContentReq;
 import org.jeecg.modules.content.channel.req.publish.ChannelPublishReq;
+import org.jeecg.modules.content.channel.vo.publish.AvailableChannelVO;
 import org.jeecg.modules.content.channel.vo.publish.ChannelPublishResultVO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,5 +36,12 @@ public class ChannelPublishController {
     public Result<List<ChannelPublishResultVO>> addExistingContent(@Valid @RequestBody ChannelAddExistingContentReq req) {
         String userId = SecureUtil.currentUser().getId();
         return Result.OK(channelPublishBiz.addExistingContent(req, userId));
+    }
+
+    @Operation(summary = "获取用户可发布频道列表")
+    @GetMapping("/available")
+    public Result<List<AvailableChannelVO>> getAvailableChannels() {
+        String userId = SecureUtil.currentUser().getId();
+        return Result.OK(channelPublishBiz.getAvailableChannels(userId));
     }
 }
