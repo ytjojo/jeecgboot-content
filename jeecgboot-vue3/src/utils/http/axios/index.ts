@@ -18,8 +18,19 @@ import { useErrorLogStoreWithOut } from '/@/store/modules/errorLog';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { joinTimestamp, formatRequestDate } from './helper';
 import { useUserStoreWithOut } from '/@/store/modules/user';
+import { useUserStatusStoreWithOut } from '/@/store/modules/userStatus';
 import { cloneDeep } from "lodash-es";
 import { growthEmitter } from '/@/store/modules/growth';
+
+// User status error codes from backend
+const USER_STATUS_ERROR_CODES = [
+  'USER_STATUS_FROZEN',
+  'USER_STATUS_BANNED',
+  'USER_STATUS_MUTED',
+  'STATUS_TRANSITION_INVALID',
+  'OPTIMISTIC_LOCK_CONFLICT',
+];
+const BLOCKED_STATUS_CODES = ['USER_STATUS_FROZEN', 'USER_STATUS_BANNED'];
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix;
 const { createMessage, createErrorModal } = useMessage();
@@ -74,7 +85,28 @@ const transform: AxiosTransform = {
         break;
       default:
         if (message) {
-          timeoutMsg = message;
+          // Handle user status error codes
+          const matchedCode = USER_STATUS_ERROR_CODES.find((c) => message.includes(c));
+          if (matchedCode) {
+            const userStatusStore = useUserStatusStoreWithOut();
+            const userStoreForStatus = useUserStoreWithOut();
+            const userId = userStoreForStatus.getUserInfo?.id as string | undefined;
+            if (userId) {
+              userStatusStore.refreshStatus(userId);
+            }
+            if (BLOCKED_STATUS_CODES.includes(matchedCode)) {
+              router.push('/login/blocked');
+            }
+            if (matchedCode === 'OPTIMISTIC_LOCK_CONFLICT') {
+              timeoutMsg = '状态已变更，请刷新后重试';
+            } else if (matchedCode === 'STATUS_TRANSITION_INVALID') {
+              timeoutMsg = '当前状态不允许执行此操作';
+            } else {
+              timeoutMsg = message;
+            }
+          } else {
+            timeoutMsg = message;
+          }
         }
     }
 

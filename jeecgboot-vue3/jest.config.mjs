@@ -20,6 +20,7 @@ export default {
     '/Users/.*/.bun/install/cache/',
   ],
   transform: {
+    '^.+\\.vue$': '@vue/vue3-jest',
     '^.+\\.tsx?$': 'ts-jest',
     '^.+\\.vue$': '<rootDir>/build/jest/sfcTransformer.mjs',
   },

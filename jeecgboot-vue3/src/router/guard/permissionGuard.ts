@@ -26,8 +26,14 @@ const TOKEN_LOGIN = PageEnum.TOKEN_LOGIN;
 
 const ROOT_PATH = RootRoute.path;
 
-// 代码逻辑说明: [VUEN-2472]分享免登录------------
-const whitePathList: PageEnum[] = [LOGIN_PATH, OAUTH2_LOGIN_PAGE_PATH,SYS_FILES_PATH, TOKEN_LOGIN ];
+//update-begin---author:wangshuai ---date:20220629  for：[issues/I5BG1I]vue3不支持auth2登录------------
+//update-begin---author:wangshuai ---date:20221111  for: [VUEN-2472]分享免登录------------
+const LOGIN_BLOCKED_PATH = '/login/blocked' as PageEnum;
+const LOGIN_VERIFY_PATH = '/login/verify' as PageEnum;
+
+const whitePathList: PageEnum[] = [LOGIN_PATH, OAUTH2_LOGIN_PAGE_PATH,SYS_FILES_PATH, TOKEN_LOGIN, LOGIN_BLOCKED_PATH, LOGIN_VERIFY_PATH];
+//update-end---author:wangshuai ---date:20221111  for: [VUEN-2472]分享免登录------------
+//update-end---author:wangshuai ---date:20220629  for：[issues/I5BG1I]vue3不支持auth2登录------------
 
 export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut();

@@ -1,9 +1,9 @@
 import type { ErrorMessageMode } from '/#/axios';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useI18n } from '/@/hooks/web/useI18n';
-// import router from '/@/router';
-// import { PageEnum } from '/@/enums/pageEnum';
+import { router } from '/@/router';
 import { useUserStoreWithOut } from '/@/store/modules/user';
+import { useUserStatusStoreWithOut } from '/@/store/modules/userStatus';
 import projectSetting from '/@/settings/projectSetting';
 import { SessionTimeoutProcessingEnum } from '/@/enums/appEnum';
 
@@ -32,9 +32,22 @@ export function checkStatus(status: number, msg: string, errorMessageMode: Error
         userStore.logout(true);
       }
       break;
-    case 403:
+    case 403: {
       errMessage = t('sys.api.errMsg403');
+      // Check if 403 is due to user status (frozen/banned)
+      try {
+        const userStatusStore = useUserStatusStoreWithOut();
+        const userStoreForStatus = useUserStoreWithOut();
+        const userId = userStoreForStatus.getUserInfo?.id as string | undefined;
+        if (userId) {
+          userStatusStore.refreshStatus(userId);
+          if (userStatusStore.isFrozenOrBanned) {
+            router.push('/login/blocked');
+          }
+        }
+      } catch {}
       break;
+    }
     // 404请求不存在
     case 404:
       errMessage = t('sys.api.errMsg404');

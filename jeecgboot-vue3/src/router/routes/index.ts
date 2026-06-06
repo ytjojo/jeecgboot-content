@@ -80,5 +80,26 @@ export const TokenLoginRoute: AppRouteRecordRaw = {
     ignoreAuth: true,
   },
 };
+
+export const LoginBlockedRoute: AppRouteRecordRaw = {
+  path: '/login/blocked',
+  name: 'LoginBlocked',
+  component: () => import('/@/views/login/blocked/index.vue'),
+  meta: {
+    title: '账号拦截',
+    ignoreAuth: true,
+  },
+};
+
+export const LoginVerifyRoute: AppRouteRecordRaw = {
+  path: '/login/verify',
+  name: 'LoginVerify',
+  component: () => import('/@/views/login/verify/index.vue'),
+  meta: {
+    title: '安全核验',
+    ignoreAuth: true,
+  },
+};
+
 // Basic routing without permission
-export const basicRoutes = [LoginRoute, RootRoute, ...mainOutRoutes, REDIRECT_ROUTE, PAGE_NOT_FOUND_ROUTE, TokenLoginRoute, Oauth2LoginRoute, ...contentAuthRoutes, ...contentProfileRoutes, ...contentGrowthRoutes, ...contentPrivacyRoutes, ...contentSocialRoutes, ...systemAdminRoutes, ...contentChannelRoutes, ...contentChannelAdminRoutes];
+export const basicRoutes = [LoginRoute, RootRoute, ...mainOutRoutes, REDIRECT_ROUTE, PAGE_NOT_FOUND_ROUTE, TokenLoginRoute, Oauth2LoginRoute, LoginBlockedRoute, LoginVerifyRoute, ...contentAuthRoutes, ...contentProfileRoutes, ...contentGrowthRoutes, ...contentPrivacyRoutes, ...contentSocialRoutes, ...systemAdminRoutes, ...contentChannelRoutes, ...contentChannelAdminRoutes];

@@ -12,6 +12,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { router } from '/@/router';
 import { usePermissionStore } from '/@/store/modules/permission';
+import { useUserStatusStoreWithOut } from '/@/store/modules/userStatus';
 import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { isArray } from '/@/utils/is';
@@ -272,6 +273,17 @@ export const useUserStore = defineStore({
       if (!this.getToken) return null;
       //获取用户信息
       const userInfo = await this.getUserInfoAction();
+
+      // Check user status after login - redirect to blocked page if frozen/banned
+      try {
+        const userStatusStore = useUserStatusStoreWithOut();
+        await userStatusStore.fetchCurrentStatus(this.getUserInfo?.id);
+        if (userStatusStore.isFrozenOrBanned) {
+          await router.replace('/login/blocked');
+          return data;
+        }
+      } catch {}
+
       const sessionTimeout = this.sessionTimeout;
       if (sessionTimeout) {
         this.setSessionTimeout(false);
