@@ -114,7 +114,7 @@
 - **必填约束**（前后端共用）: `nickname`、`avatar` 字段在 `@NotBlank` 校验下必须非空，提交前前端表单层必须保证
 - 昵称输入框实时校验：为空时提示"请输入昵称"，含敏感词时提示"昵称包含不当内容，请修改"
 - 简介文本域右下角显示已输入字数/最大字数（如 123/500）
-- 性别使用 Radio.Group 组件（提交时转为 Integer：1=男/2=女/3=保密）
+- 性别使用 Radio.Group 组件（提交时转为 String 枚举：`MALE` / `FEMALE` / `OTHER` / `UNKNOWN`）
 - 生日使用 DatePicker 组件，`disabledDate` 禁用未来日期，提交时序列化为 ISO 8601 字符串
 - 地区使用 Cascader 组件加载省市区数据，最终合并为字符串（max 64）
 - 个人链接输入框失去焦点时校验 URL 格式（regex `^(https?://|/).*$`）
@@ -373,38 +373,41 @@ Modal 弹窗
 > - 字段有值 → 默认推断为 `PUBLIC`
 > - **精确模式**: 后续可增加 `/privacy/settings` 独立接口返回 16 个字段精确配置（待与后端确认）
 
-**页面结构**:
+**页面结构**（对齐 D7 的 7 组 15+2 字段）:
 ```
 顶部导航栏（返回箭头 + "隐私设置" 标题）
 ├── 说明区域（简要说明隐私设置的作用）
 ├── 批量操作区域
-│   ├── "一键全部设为" 快捷操作（Select 组件，批量设置所有可修改字段的可见性）
-│   └── 频率限制提示（被动显示，见下文）
-├── 字段可见性列表（按 4 个分组折叠展示）
-│   ├── 📋 基础资料组
-│   │   ├── 昵称（默认公开，不可修改）
-│   │   ├── 头像（默认公开，不可修改）
-│   │   ├── 简介 → 下拉选择
-│   │   ├── 性别 → 下拉选择
-│   │   ├── 生日 → 下拉选择
-│   │   ├── 地区 → 下拉选择
-│   │   ├── 职业 → 下拉选择
-│   │   └── 个人链接 → 下拉选择
-│   ├── 🏆 认证与绑定组
-│   │   ├── 认证标识 → 下拉选择（verificationBadgeVisibility）
-│   │   ├── 绑定标识（手机/邮箱）→ 下拉选择（contactBadgeVisibility）
-│   │   └── 在线状态 → 下拉选择（特殊枚举，见下文）
-│   ├── 🏠 主页与动态组
-│   │   ├── 主页可见性 → 下拉选择（homepageVisibility）
-│   │   ├── 动态可见性 → 下拉选择（dynamicVisibility）
-│   │   ├── 浏览历史 → 下拉选择（browseHistoryVisibility）
-│   │   ├── 点赞活动 → 下拉选择（likeActivityVisibility）
-│   │   └── 收藏 → 下拉选择（favoriteVisibility）
-│   └── 🔍 搜索与发现组
-│       ├── 允许搜索引擎收录 → Switch（allowSearchEngineIndex）
-│       └── 允许站内用户搜索 → Switch（allowUserSearch）
+│   └── "一键全部设为" 快捷操作（Select 组件，批量设置所有可修改字段的可见性）
+├── 字段可见性列表（按 7 个分组折叠展示）
+│   ├── 📋 基础资料组 (5)
+│   │   ├── 简介 → 下拉选择（bioVisibility）
+│   │   ├── 性别 → 下拉选择（genderVisibility）
+│   │   ├── 生日 → 下拉选择（birthdayVisibility）
+│   │   ├── 地区 → 下拉选择（regionVisibility）
+│   │   └── 职业 → 下拉选择（professionVisibility）
+│   ├── 🔗 扩展资料组 (1)
+│   │   └── 个人链接 → 下拉选择（personalLinkVisibility）
+│   ├── 🏠 主页组 (3)
+│   │   ├── 主页背景 → 下拉选择（homepageBackgroundVisibility）
+│   │   ├── 主题色 → 下拉选择（themeColorVisibility）
+│   │   └── 主页模块 → 下拉选择（homepageModuleVisibility）
+│   ├── 🏆 认证组 (2)
+│   │   ├── 认证标识 → 下拉选择（verificationBadgesVisibility）
+│   │   └── 认证信息 → 下拉选择（certificationVisibility）
+│   ├── 📊 活动组 (3)
+│   │   ├── 资料完善度 → 下拉选择（profileCompletionVisibility）
+│   │   ├── 审核状态 → 下拉选择（profileReviewStatusVisibility）
+│   │   └── 最近活动 → 下拉选择（recentActivityVisibility）
+│   ├── 🟢 在线状态组 (1)
+│   │   └── 在线状态 → 下拉选择（onlineStatusVisibility，特殊枚举，见下文）
+│   └── ⚙️ 显示开关组 (2)
+│       ├── 显示互关好友数 → Switch（showMutualFollowersCount）
+│       └── 显示最近活动高亮 → Switch（showRecentActivityHighlight）
 └── 保存按钮
 ```
+
+> **注意**: 昵称和头像始终公开，不参与隐私控制（后端接口不提供对应字段）。
 
 **批量操作交互规范**:
 - **默认可见性** (本版移除): 后端无 `defaultVisibility` 字段，移除该 UX 控件
@@ -429,7 +432,7 @@ Modal 弹窗
 - 保存成功提示"隐私设置已更新"，调用 `POST /content/user/profile/privacy/update?userId={uid}` 提交，body 为合并后的 `ContentUserPrivacyUpdateReq`
 - **频率限制**: 后端无独立 `/privacy/update-count` 接口，采用**被动拦截**策略：当后端返回"操作过于频繁"错误时，黄色提示条 + 保存按钮禁用 5 分钟（前端 UX 兜底）
 
-**前端提交字段映射**:
+**前端提交字段映射**（对齐 D7 的 15+2 字段）:
 ```typescript
 const visibilityMap: Record<string, string> = {
   PUBLIC: '公开',
@@ -439,21 +442,30 @@ const visibilityMap: Record<string, string> = {
 };
 
 const req: ContentUserPrivacyUpdateReq = {
-  birthdayVisibility: privacyMap.birthday,
+  // 基础资料 (5)
+  bioVisibility: privacyMap.bio,
   genderVisibility: privacyMap.gender,
+  birthdayVisibility: privacyMap.birthday,
   regionVisibility: privacyMap.region,
   professionVisibility: privacyMap.profession,
+  // 扩展资料 (1)
   personalLinkVisibility: privacyMap.personalLink,
-  verificationBadgeVisibility: privacyMap.verification,
-  contactBadgeVisibility: privacyMap.contact,
-  homepageVisibility: privacyMap.homepage,
-  dynamicVisibility: privacyMap.dynamic,
-  onlineStatusVisibility: privacyMap.onlineStatus, // PUBLIC/HIDDEN/MUTUAL_ONLY
-  browseHistoryVisibility: privacyMap.browse,
-  likeActivityVisibility: privacyMap.like,
-  favoriteVisibility: privacyMap.favorite,
-  allowSearchEngineIndex: switches.searchEngine,
-  allowUserSearch: switches.userSearch
+  // 主页 (3)
+  homepageBackgroundVisibility: privacyMap.homepageBackground,
+  themeColorVisibility: privacyMap.themeColor,
+  homepageModuleVisibility: privacyMap.homepageModule,
+  // 认证 (2)
+  certificationVisibility: privacyMap.certification,
+  verificationBadgesVisibility: privacyMap.verificationBadges,
+  // 活动 (3)
+  profileCompletionVisibility: privacyMap.profileCompletion,
+  profileReviewStatusVisibility: privacyMap.profileReviewStatus,
+  recentActivityVisibility: privacyMap.recentActivity,
+  // 在线状态 (1) — 特殊枚举：PUBLIC/HIDDEN/MUTUAL_ONLY，不含 PRIVATE
+  onlineStatusVisibility: privacyMap.onlineStatus,
+  // 布尔开关 (2)
+  showMutualFollowersCount: switches.showMutualFollowersCount,
+  showRecentActivityHighlight: switches.showRecentActivityHighlight
 };
 ```
 - 修改可见性后保存按钮激活
@@ -494,7 +506,7 @@ const req: ContentUserPrivacyUpdateReq = {
 > - 昵称历史: `GET /content/user/profile/history/list?userId={uid}&historyType=NICKNAME`
 > - 头像历史: `GET /content/user/profile/history/list?userId={uid}&historyType=AVATAR`
 > 
-> 响应字段 `ContentUserProfileHistoryVO`: `id`、`historyType`、`historyValue`（昵称文本或头像 URL）、`createTime`、`expiresAt`
+> 响应字段 `ContentUserProfileHistoryVO`: `id`、`historyType`、`historyValue`（昵称文本或头像 URL）、`changedAt`、`expiresAt`
 
 **页面结构**:
 ```
@@ -507,8 +519,8 @@ const req: ContentUserPrivacyUpdateReq = {
 │   └── 头像历史 Tab：当前头像缩略图 + "当前" 标签
 ├── 历史记录列表（倒序排列）
 │   ├── 每条记录
-│   │   ├── 昵称历史项：`historyValue` 文本 + `createTime` + "恢复" 按钮
-│   │   └── 头像历史项：`historyValue`（URL）缩略图 + `createTime` + "恢复" 按钮
+│   │   ├── 昵称历史项：`historyValue` 文本 + `changedAt` + "恢复" 按钮
+│   │   └── 头像历史项：`historyValue`（URL）缩略图 + `changedAt` + "恢复" 按钮
 │   └── 列表底部说明："最多保留 20 条记录，保留期限 180 天（按 expiresAt 字段判定）"
 └── 空状态
 ```
@@ -520,8 +532,8 @@ const req: ContentUserPrivacyUpdateReq = {
 
 **交互要求**:
 - 使用 Tabs 组件切换昵称/头像历史；切换时**重新请求**对应 historyType
-- 列表按 `createTime` 倒序排列，最新记录在最上方
-- 每条记录显示：`historyValue` + `createTime`（格式"YYYY-MM-DD HH:mm"）
+- 列表按 `changedAt` 倒序排列，最新记录在最上方
+- 每条记录显示：`historyValue` + `changedAt`（格式"YYYY-MM-DD HH:mm"）
 - "恢复" 按钮点击后弹出确认框"确定恢复为 {historyValue} 吗？"
 - 确认恢复后调用 `POST /content/user/profile/history/restore?userId={uid}&historyId={id}`，等同于一次新的资料修改，需遵守频率限制（后端错误码拦截）
 - 恢复成功提示"{昵称/头像}已恢复"，刷新 `useUserStore` 资料缓存
@@ -624,14 +636,14 @@ const req: ContentUserPrivacyUpdateReq = {
 
 ## 5. API 对接
 
-> **更新说明（2026-06-03）**: 本节已根据后端 `ContentUserProfileController` 实际实现对齐。所有接口以 `ContentUserProfileController` 的 12 个端点为准（路径前缀 `/content/user/profile`）。后端未提供独立的「上传头像/上传背景图/查询修改次数/查询审核状态/查询隐私修改次数」等接口，对应能力由前端组合现有接口或后端内嵌实现。
+> **更新说明（2026-06-06）**: 本节已根据后端 `ContentUserProfileController` 实际实现对齐。所有接口以 `ContentUserProfileController` 的 11 个端点为准（路径前缀 `/content/user/profile`），其中 `review/handle` 为后台审核端点前端不对接，实际前端使用 10 个端点。4 个 POST 端点（`/update`、`/homepage/update`、`/homepage/defaults/restore`、`/history/restore`）返回 `ContentUserProfileVO`，`/privacy/update` 返回 `String`（"更新成功"）。后端未提供独立的「上传头像/上传背景图/查询修改次数/查询审核状态/查询隐私修改次数」等接口，对应能力由前端组合现有接口或后端内嵌实现。
 
 ### 5.1 资料管理接口（统一端点）
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
 | 获取用户资料 | GET | `/content/user/profile/detail?ownerUserId={uid}&viewerUserId={vid?}` | `ownerUserId` 必填（资料拥有者），`viewerUserId` 选填（当前访问者）。返回完整 `ContentUserProfileVO`，含 `verificationBadges`、`homepageModules`、`profileCompletionState`、`profileReviewStatus` |
-| 更新资料 | POST | `/content/user/profile/update?userId={uid}` | **统一端点**，Body 提交 `ContentUserProfileUpdateReq`。可同时更新基础资料 + 主页背景/主题色 + 模块排序 + 认证展示文案；`nickname`、`avatar` 为 `@NotBlank` 必填 |
+| 更新资料 | POST | `/content/user/profile/update?userId={uid}` | **统一端点**，Body 提交 `ContentUserProfileUpdateReq`。可同时更新基础资料 + 主页背景/主题色 + 模块排序 + 认证展示文案；`nickname`、`avatar` 为 `@NotBlank` 必填。返回 `ContentUserProfileVO` |
 | 处理资料审核 | POST | `/content/user/profile/review/handle` | 管理员处理资料审核（APPROVED/REJECTED），前端不直接调用 |
 
 #### 5.1.1 `ContentUserProfileUpdateReq` 字段
@@ -641,13 +653,13 @@ const req: ContentUserPrivacyUpdateReq = {
 | `nickname` | String | ✅ | max 20 | 昵称 |
 | `avatar` | String | ✅ | max 500 | 头像 URL（由前端 OSS 直传后获得，非 multipart 上传） |
 | `bio` | String | ❌ | max 500 | 个人简介 |
-| `gender` | Integer | ❌ | — | 性别（枚举：1=男/2=女/3=保密） |
+| `gender` | String | ❌ | — | 性别（枚举：`MALE` / `FEMALE` / `OTHER` / `UNKNOWN`） |
 | `birthday` | Date | ❌ | — | 生日（ISO 8601 字符串） |
 | `region` | String | ❌ | max 64 | 地区 |
 | `profession` | String | ❌ | max 64 | 职业 |
 | `personalLink` | String | ❌ | max 255，regex `^(https?://\|/).*$` | 个人链接 |
 | `homepageBackground` | String | ❌ | max 500 | 主页背景图 URL |
-| `themeColor` | String | ❌ | max 32 | 主题色（HEX） |
+| `themeColor` | String | ❌ | max 16 | 主题色（HEX，`#[0-9A-Fa-f]{6}`） |
 | `moduleOrderJson` | String | ❌ | max 2000 | 主页模块排序 JSON 字符串 |
 | `certificationType` | String | ❌ | max 64 | 认证类型 |
 | `certificationLabel` | String | ❌ | max 64 | 认证展示文案 |
@@ -670,8 +682,8 @@ const req: ContentUserPrivacyUpdateReq = {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 更新主页配置 | POST | `/content/user/profile/homepage/update?userId={uid}` | Body 提交 `ContentUserHomepageUpdateReq`（含背景、主题色、模块列表） |
-| 恢复主页默认 | POST | `/content/user/profile/homepage/defaults/restore?userId={uid}` | 恢复默认背景、主题色、模块配置 |
+| 更新主页配置 | POST | `/content/user/profile/homepage/update?userId={uid}` | Body 提交 `ContentUserHomepageUpdateReq`（含背景、主题色、模块列表）。返回 `ContentUserProfileVO` |
+| 恢复主页默认 | POST | `/content/user/profile/homepage/defaults/restore?userId={uid}` | 恢复默认背景、主题色、模块配置。返回 `ContentUserProfileVO` |
 | 查询主页模块 | GET | `/content/user/profile/homepage/modules?userId={uid}` | 返回 `List<ContentUserHomepageModuleVO>`（含 `moduleKey`、`moduleName`、`visible`、`sortOrder`） |
 
 > **简化说明**: 主页配置不再独立于资料更新——`ContentUserProfileUpdateReq` 内的 `homepageBackground`、`themeColor`、`moduleOrderJson` 三个字段已能覆盖主页设置的写入需求。`/profile/homepage/update` 端点用于**单独**提交主页配置（不修改昵称/简介等基础资料）的场景。
@@ -703,48 +715,52 @@ const req: ContentUserPrivacyUpdateReq = {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 更新隐私配置 | POST | `/content/user/profile/privacy/update?userId={uid}` | Body 提交 `ContentUserPrivacyUpdateReq`，按字段逐项更新 |
+| 更新隐私配置 | POST | `/content/user/profile/privacy/update?userId={uid}` | Body 提交 `ContentUserPrivacyUpdateReq`，按字段逐项更新。返回 `String`（"更新成功"） |
 
 > **简化说明**: 后端未提供「获取隐私设置」独立接口。隐私字段通过 `/profile/detail` 的响应隐式返回（不可见字段值为 `null`）；前端在打开隐私设置页时从当前 `UserProfileVO` 推导，并维护一份本地 `PrivacyMap` 用于在 UI 上展示所有可选级别。
 > 
 > 「一键全部设为」「默认可见性」属于前端 UX 概念，前端在批量提交前合并本地状态为 `ContentUserPrivacyUpdateReq` 一次性提交。
 
-#### 5.4.1 `ContentUserPrivacyUpdateReq` 字段（15 项）
+#### 5.4.1 `ContentUserPrivacyUpdateReq` 字段（15 visibility + 2 Boolean）
 
-| 字段 | 可见性枚举 | 说明 |
-|------|-----------|------|
-| `birthdayVisibility` | `PUBLIC` / `FOLLOWERS_ONLY` / `MUTUAL_ONLY` / `PRIVATE` | 生日可见性 |
-| `genderVisibility` | 同上 | 性别可见性 |
-| `regionVisibility` | 同上 | 地区可见性 |
-| `professionVisibility` | 同上 | 职业可见性 |
-| `personalLinkVisibility` | 同上 | 个人链接可见性 |
-| `verificationBadgeVisibility` | 同上 | 认证标识可见性 |
-| `contactBadgeVisibility` | 同上 | 绑定标识（手机/邮箱）可见性 |
-| `homepageVisibility` | 同上 | 主页可见性 |
-| `dynamicVisibility` | 同上 | 动态可见性 |
-| `onlineStatusVisible` | Boolean | **旧字段，兼容保留**，尽量使用新字段 |
-| `onlineStatusVisibility` | `PUBLIC` / `HIDDEN` / `MUTUAL_ONLY` | 在线状态可见性（**特殊枚举，不含 PRIVATE**） |
-| `browseHistoryVisibility` | 同 5.4.1 通用枚举 | 浏览历史可见性 |
-| `likeActivityVisibility` | 同上 | 点赞活动可见性 |
-| `favoriteVisibility` | 同上 | 收藏可见性 |
-| `allowSearchEngineIndex` | Boolean | 是否允许搜索引擎收录 |
-| `allowUserSearch` | Boolean | 是否允许站内用户搜索 |
+对齐后端 `ContentUserPrivacyUpdateReq` 实际字段，按 D7 分组：
+
+| 分组 | 字段 | 可见性枚举 | 说明 |
+|------|------|-----------|------|
+| **基础资料** | `bioVisibility` | `PUBLIC` / `FOLLOWERS_ONLY` / `MUTUAL_ONLY` / `PRIVATE` | 简介可见性 |
+| | `genderVisibility` | 同上 | 性别可见性 |
+| | `birthdayVisibility` | 同上 | 生日可见性 |
+| | `regionVisibility` | 同上 | 地区可见性 |
+| | `professionVisibility` | 同上 | 职业可见性 |
+| **扩展资料** | `personalLinkVisibility` | 同上 | 个人链接可见性 |
+| **主页** | `homepageBackgroundVisibility` | 同上 | 主页背景可见性 |
+| | `themeColorVisibility` | 同上 | 主题色可见性 |
+| | `homepageModuleVisibility` | 同上 | 主页模块可见性 |
+| **认证** | `certificationVisibility` | 同上 | 认证信息可见性 |
+| | `verificationBadgesVisibility` | 同上 | 认证标识可见性 |
+| **活动** | `profileCompletionVisibility` | 同上 | 资料完善度可见性 |
+| | `profileReviewStatusVisibility` | 同上 | 审核状态可见性 |
+| | `recentActivityVisibility` | 同上 | 最近活动可见性 |
+| **在线状态** | `onlineStatusVisibility` | `PUBLIC` / `HIDDEN` / `MUTUAL_ONLY` | 在线状态可见性（**特殊枚举，不含 PRIVATE**） |
+| **布尔开关** | `showMutualFollowersCount` | Boolean | 是否显示互关好友数 |
+| | `showRecentActivityHighlight` | Boolean | 是否显示最近活动高亮 |
 
 > **关键约束**:
 > 1. 所有 `*Visibility` 字段受 `@Pattern(regexp = "^(PUBLIC\|FOLLOWERS_ONLY\|MUTUAL_ONLY\|PRIVATE)$")` 约束，**前端必须在提交前转换中文标签为枚举值**。
 > 2. `onlineStatusVisibility` 特殊：不接受 `PRIVATE`，仅 `PUBLIC`/`HIDDEN`/`MUTUAL_ONLY`。
 > 3. 昵称和头像**不参与**隐私控制（始终公开），本接口不提供对应字段。
+> 4. 字段总数：15 个 visibility + 2 个 Boolean = 17 个字段。
 
 ### 5.5 历史记录接口
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
 | 查询历史 | GET | `/content/user/profile/history/list?userId={uid}&historyType={NICKNAME\|AVATAR}` | 返回 `List<ContentUserProfileHistoryVO>`，按 `historyType` 区分 |
-| 恢复历史 | POST | `/content/user/profile/history/restore?userId={uid}&historyId={id}` | 恢复指定历史值为当前值（仍走资料修改频率限制） |
+| 恢复历史 | POST | `/content/user/profile/history/restore?userId={uid}&historyId={id}` | 恢复指定历史值为当前值（仍走资料修改频率限制）。返回 `ContentUserProfileVO` |
 
 #### 5.5.1 `ContentUserProfileHistoryVO` 字段
 
-`id`、`historyType`（`NICKNAME` 或 `AVATAR`）、`historyValue`（昵称文本或头像 URL）、`createTime`、`expiresAt`（后端按 180 天 TTL 清理）
+`id`、`historyType`（`NICKNAME` 或 `AVATAR`）、`historyValue`（昵称文本或头像 URL）、`changedAt`、`expiresAt`（后端按 180 天 TTL 清理）
 
 ### 5.6 API 封装规范
 
@@ -767,7 +783,7 @@ defHttp.get<Result<ContentUserProfileVO>>({
 });
 
 // 示例：更新资料（统一端点）
-defHttp.post<Result<string>>({
+defHttp.post<Result<ContentUserProfileVO>>({
   url: '/content/user/profile/update',
   params: { userId: 'xxx' },
   data: profileUpdateReq

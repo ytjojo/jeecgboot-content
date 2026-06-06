@@ -456,21 +456,22 @@
 
 | 接口 | 方法 | 路径 | 用途 |
 |------|------|------|------|
-| 创建频道 | POST | `/api/content/channel/create` | 用户端创建个人/组织频道 |
-| 创建系统频道 | POST | `/api/content/channel/admin/create` | 后台创建系统频道 |
-| 我的频道列表 | GET | `/api/content/channel/my-list` | 用户端获取自己的频道列表 |
-| 频道详情 | GET | `/api/content/channel/detail/{id}` | 获取频道详情 |
-| 更新频道 | PUT | `/api/content/channel/update/{id}` | 编辑频道信息 |
-| 删除频道 | POST | `/api/content/channel/delete/{id}` | 申请删除频道 |
-| 撤销删除 | POST | `/api/content/channel/cancel-delete/{id}` | 撤销删除 |
-| 发起转让 | POST | `/api/content/channel/transfer/{id}` | 发起频道转让 |
-| 确认转让 | POST | `/api/content/channel/transfer/confirm/{transferId}` | 目标用户确认转让 |
-| 后台频道列表 | GET | `/api/content/channel/admin/list` | 后台获取所有频道 |
-| 审核频道 | POST | `/api/content/channel/admin/review/{id}` | 执行审核操作 |
-| 审核队列 | GET | `/api/content/channel/admin/review-queue` | 获取待审核列表 |
-| 名称唯一性校验 | GET | `/api/content/channel/check-name` | 校验频道名称是否可用 |
-| 用户搜索（转让） | GET | `/api/content/channel/search-user` | 转让时搜索目标用户，支持按昵称模糊搜索，排除当前用户和冻结用户 |
-| 删除前置校验 | GET | `/api/content/channel/delete-check/{id}` | 校验频道是否满足删除条件，返回阻塞原因列表 |
+| 创建频道 | POST | `/api/v1/channels` | 用户端创建个人/组织频道 |
+| 创建系统频道 | POST | `/api/v1/admin/channels/create-system` | 后台创建系统频道 |
+| 我的频道列表 | GET | `/api/v1/channels/list` | 用户端获取自己的频道列表 |
+| 频道详情 | GET | `/api/v1/channels/{id}` | 获取频道详情 |
+| 更新频道 | PUT | `/api/v1/channels/{id}` | 编辑频道信息 |
+| 删除频道 | DELETE | `/api/v1/channels/{id}` | 申请删除频道 |
+| 撤销删除 | POST | `/api/v1/channels/{id}/cancel-delete` | 撤销删除 |
+| 发起转让 | POST | `/api/v1/channels/{id}/transfer` | 发起频道转让 |
+| 确认转让 | POST | `/api/v1/channels/transfer/{transferId}/confirm` | 目标用户确认转让 |
+| 拒绝转让 | POST | `/api/v1/channels/transfer/{transferId}/reject` | 目标用户拒绝转让 |
+| 后台频道列表 | GET | `/api/v1/admin/channels/list` | 后台获取所有频道 |
+| 审核频道 | POST | `/api/v1/admin/channels/{id}/review` | 执行审核操作 |
+| 审核队列 | GET | `/jeecg-boot/api/v1/content/channel/review/list` | 获取待审核列表 |
+| 名称唯一性校验 | GET | `/api/v1/channels/check-name` | 校验频道名称是否可用 |
+| 用户搜索（转让） | GET | `/api/v1/channels/search-user` | 转让时搜索目标用户，支持按昵称模糊搜索，排除当前用户和冻结用户 |
+| 删除前置校验 | GET | `/api/v1/channels/{id}/delete-check` | 校验频道是否满足删除条件，返回阻塞原因列表 |
 
 ### API 封装规范
 

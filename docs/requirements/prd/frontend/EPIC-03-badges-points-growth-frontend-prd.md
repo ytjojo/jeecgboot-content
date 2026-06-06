@@ -344,31 +344,31 @@ interface BadgeDisplayProps {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取勋章分类列表 | GET | `/content/user/badge/list` | 返回按分类分组的勋章定义和用户授予状态 |
-| 获取勋章详情 | GET | `/content/user/badge/detail/{badgeCode}` | 返回勋章条件、进度、授予信息 |
-| 获取佩戴勋章 | GET | `/content/user/badge/worn` | 返回用户当前佩戴的勋章列表 |
-| 保存佩戴设置 | POST | `/content/user/badge/wear` | body: `{ badgeIds: string[] }`，最多 5 个 |
-| 获取用户佩戴展示 | GET | `/content/user/badge/worn/{userId}` | 返回指定用户佩戴的勋章（他人查看用） |
-| 回收勋章（管理员） | POST | `/content/admin/badge/recycle` | body: `{ grantId, reason }` |
+| 获取勋章分类列表 | GET | `/content/user/growth/badge/catalog` | 返回按分类分组的勋章定义和用户授予状态 |
+| 获取勋章详情 | GET | `/content/user/growth/badge/detail` | query: `badgeCode`，返回勋章条件、进度、授予信息 |
+| 获取佩戴勋章 | GET | `/content/user/growth/badge/worn` | 返回用户当前佩戴的勋章列表 |
+| 保存佩戴设置 | POST | `/content/user/growth/badge/wear` | body: `{ badgeIds: string[] }`，最多 5 个 |
+| 获取用户佩戴展示 | GET | `/content/user/growth/badge/worn` | query: `userId`，返回指定用户佩戴的勋章（他人查看用） |
+| 回收勋章（管理员） | POST | `/content/user/growth/badge/recycle` | body: `{ grantId, reason }` |
 
 ### 5.2 积分相关 API
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取积分余额 | GET | `/content/user/point/balance` | 返回当前余额、今日获取、今日消耗 |
-| 查询积分明细 | GET | `/content/user/point/ledger` | params: `type, startTime, endTime, page, pageSize` |
-| 获取兑换商品列表 | GET | `/content/user/exchange/goods` | 返回可兑换商品列表（含库存） |
-| 兑换商品 | POST | `/content/user/exchange/create` | body: `{ goodsId, quantity, requestId }`，requestId 为前端生成的 UUID，用于幂等校验 |
-| 解锁功能 | POST | `/content/user/feature/unlock` | body: `{ featureCode }` |
-| 赠送礼物 | POST | `/content/user/gift/send` | body: `{ giftId, receiverId, quantity, message }` |
+| 获取积分余额 | GET | `/content/user/growth/summary` | 返回当前余额、今日获取、今日消耗及等级信息（合并接口） |
+| 查询积分明细 | GET | `/content/user/growth/point/ledger` | params: `type, startTime, endTime, page, pageSize` |
+| 获取兑换商品列表 | GET | `/content/user/growth/point/exchange/goods` | 返回可兑换商品列表（含库存） |
+| 兑换商品 | POST | `/content/user/growth/point/exchange` | body: `{ goodsId, quantity, requestId }`，requestId 为前端生成的 UUID，用于幂等校验 |
+| 解锁功能 | POST | `/content/user/growth/point/feature/unlock` | body: `{ featureCode }` |
+| 赠送礼物 | POST | `/content/user/growth/point/gift/send` | body: `{ giftId, receiverId, quantity, message }` |
 
 ### 5.3 等级相关 API
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取等级信息 | GET | `/content/user/growth/level` | 返回等级、经验值、进度、权益、衰减状态 |
-| 获取等级配置 | GET | `/content/user/growth/level-config` | 返回等级阈值表、权益配置 |
-| 获取衰减规则 | GET | `/content/user/growth/decay-rule` | 返回衰减规则说明 |
+| 获取等级信息 | GET | `/content/user/growth/summary` | 返回等级、经验值、进度、权益、衰减状态（合并接口，含积分余额） |
+| 获取等级配置 | GET | `/content/user/growth/level/config` | 返回等级阈值表、权益配置 |
+| 获取衰减规则 | GET | `/content/user/growth/decay/rule` | 返回衰减规则说明 |
 
 ### 5.4 API 封装规范
 
@@ -378,21 +378,20 @@ interface BadgeDisplayProps {
 // src/api/content/badge.ts
 import { defHttp } from '/@/utils/http/axios';
 
-export const getBadgeList = () => defHttp.get({ url: '/content/user/badge/list' });
-export const getBadgeDetail = (badgeCode: string) => defHttp.get({ url: `/content/user/badge/detail/${badgeCode}` });
-export const getWornBadges = () => defHttp.get({ url: '/content/user/badge/worn' });
-export const saveWearConfig = (badgeIds: string[]) => defHttp.post({ url: '/content/user/badge/wear', data: { badgeIds } });
+export const getBadgeCatalog = () => defHttp.get({ url: '/content/user/growth/badge/catalog' });
+export const getBadgeDetail = (badgeCode: string) => defHttp.get({ url: '/content/user/growth/badge/detail', params: { badgeCode } });
+export const getWornBadges = (userId?: string) => defHttp.get({ url: '/content/user/growth/badge/worn', params: { userId } });
+export const saveWearConfig = (badgeIds: string[]) => defHttp.post({ url: '/content/user/growth/badge/wear', data: { badgeIds } });
 
 // src/api/content/point.ts
-export const getPointBalance = () => defHttp.get({ url: '/content/user/point/balance' });
-export const getPointLedger = (params) => defHttp.get({ url: '/content/user/point/ledger', params });
-export const getExchangeGoods = () => defHttp.get({ url: '/content/user/exchange/goods' });
-export const createExchange = (data: { goodsId: string; quantity: number; requestId: string }) => defHttp.post({ url: '/content/user/exchange/create', data });
+export const getGrowthSummary = () => defHttp.get({ url: '/content/user/growth/summary' });
+export const getPointLedger = (params) => defHttp.get({ url: '/content/user/growth/point/ledger', params });
+export const getExchangeGoods = () => defHttp.get({ url: '/content/user/growth/point/exchange/goods' });
+export const createExchange = (data: { goodsId: string; quantity: number; requestId: string }) => defHttp.post({ url: '/content/user/growth/point/exchange', data });
 
 // src/api/content/growth.ts
-export const getLevelInfo = () => defHttp.get({ url: '/content/user/growth/level' });
-export const getLevelConfig = () => defHttp.get({ url: '/content/user/growth/level-config' });
-export const getDecayRule = () => defHttp.get({ url: '/content/user/growth/decay-rule' });
+export const getLevelConfig = () => defHttp.get({ url: '/content/user/growth/level/config' });
+export const getDecayRule = () => defHttp.get({ url: '/content/user/growth/decay/rule' });
 ```
 
 **响应格式**: `{ code: 200, result: any, message: string, success: boolean }`

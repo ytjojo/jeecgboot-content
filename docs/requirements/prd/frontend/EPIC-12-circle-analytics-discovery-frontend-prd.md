@@ -328,23 +328,23 @@
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取统计数据 | GET | `/content/circle/{id}/analytics` | 获取圈子运营统计数据，支持 startDate/endDate 参数 |
-| 导出数据 | GET | `/content/circle/{id}/analytics/export` | 导出 CSV 文件，参数与查询一致 |
+| 获取统计数据 | GET | `/api/circle/{id}/data/statistics` | 获取圈子运营统计数据，支持 startDate/endDate 参数 |
+| 导出数据 | GET | `/api/circle/{id}/data/export` | 导出 CSV 文件，参数与查询一致 |
 
 #### 推荐
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取推荐列表 | GET | `/content/circle/recommend` | 获取推荐圈子列表 |
-| 上报推荐曝光 | POST | `/content/circle/recommend/exposure` | 批量上报推荐圈子曝光事件 |
-| 上报推荐点击 | POST | `/content/circle/recommend/click` | 上报推荐圈子点击事件 |
+| 获取推荐列表 | GET | `/api/circle/recommend` | 获取推荐圈子列表 |
+| 上报推荐曝光 | POST | `/api/circle/recommend/exposure` | 批量上报推荐圈子曝光事件（后端待开发） |
+| 上报推荐点击 | POST | `/api/circle/recommend/click` | 上报推荐圈子点击事件 |
 
 #### 榜单
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取热门榜单 | GET | `/content/circle/ranking/hot` | 获取热门圈子 Top 20 |
-| 获取新锐榜单 | GET | `/content/circle/ranking/new` | 获取新增圈子列表 |
+| 获取热门榜单 | GET | `/api/circle/ranking/hot` | 获取热门圈子 Top 20 |
+| 获取新锐榜单 | GET | `/api/circle/ranking/new` | 获取新增圈子列表 |
 
 ### 5.1.1 API 契约规范
 
@@ -352,13 +352,13 @@
 
 | 接口 | 参数 | 类型 | 格式 | 说明 |
 |------|------|------|------|------|
-| GET /analytics | startDate | string | `YYYY-MM-DD` | 开始日期，不含时区 |
-| GET /analytics | endDate | string | `YYYY-MM-DD` | 结束日期，不含时区 |
-| GET /analytics/export | startDate | string | `YYYY-MM-DD` | 同上 |
-| GET /analytics/export | endDate | string | `YYYY-MM-DD` | 同上 |
-| GET /recommend | limit | number | 整数，默认 20，最大 50 | 控制返回数量，预留扩展能力 |
-| GET /ranking/hot | limit | number | 整数，默认 20 | 返回条数 |
-| GET /ranking/new | limit | number | 整数，默认 20 | 返回条数 |
+| GET /api/circle/{id}/data/statistics | startDate | string | `YYYY-MM-DD` | 开始日期，不含时区 |
+| GET /api/circle/{id}/data/statistics | endDate | string | `YYYY-MM-DD` | 结束日期，不含时区 |
+| GET /api/circle/{id}/data/export | startDate | string | `YYYY-MM-DD` | 同上 |
+| GET /api/circle/{id}/data/export | endDate | string | `YYYY-MM-DD` | 同上 |
+| GET /api/circle/recommend | limit | number | 整数，默认 20，最大 50 | 控制返回数量，预留扩展能力 |
+| GET /api/circle/ranking/hot | limit | number | 整数，默认 20 | 返回条数 |
+| GET /api/circle/ranking/new | limit | number | 整数，默认 20 | 返回条数 |
 
 #### 错误响应格式
 
@@ -426,10 +426,10 @@ interface ApiErrorResponse {
 ```
 用户进入数据统计页
   → 权限校验（前端路由守卫 + 后端接口校验）
-  → 默认加载近 7 天数据（GET /analytics?circleId=xxx&startDate=xxx&endDate=xxx）
+  → 默认加载近 7 天数据（GET /api/circle/{circleId}/data/statistics?startDate=xxx&endDate=xxx）
   → 渲染指标卡片 + 趋势图表
   → 用户切换时间范围 → 重新请求数据 → 刷新视图
-  → 用户点击导出 → GET /analytics/export → 浏览器触发文件下载
+  → 用户点击导出 → GET /api/circle/{circleId}/data/export → 浏览器触发文件下载
 ```
 
 #### 推荐浏览流程
@@ -437,12 +437,12 @@ interface ApiErrorResponse {
 ```
 用户进入圈子列表页
   → 判断是否已登录
-  → 已登录：加载推荐列表（GET /recommend?limit=20）
+  → 已登录：加载推荐列表（GET /api/circle/recommend?limit=20）
   → 未登录：默认展示热门榜 Tab
   → 推荐列表返回 → IntersectionObserver 检测卡片可见 → 加入待上报集合
-  → 延迟 500ms 批量 flush → POST /recommend/exposure（携带圈子 ID 列表）
+  → 延迟 500ms 批量 flush → POST /api/circle/recommend/exposure（携带圈子 ID 列表）
   → 推荐接口返回空数组或请求失败 → 降级展示热门榜单 + 顶部提示
-  → 用户点击推荐圈子 → POST /recommend/click（携带圈子 ID + source）
+  → 用户点击推荐圈子 → POST /api/circle/recommend/click（携带圈子 ID + source）
   → 跳转圈子详情页（URL 携带 source=recommend）
   → 用户离开页面 → visibilitychange 事件触发 → navigator.sendBeacon 保底上报剩余数据
 ```
@@ -451,7 +451,7 @@ interface ApiErrorResponse {
 
 ```
 用户切换到热门榜/新锐榜 Tab
-  → 加载对应榜单数据（GET /ranking/hot 或 /ranking/new）
+  → 加载对应榜单数据（GET /api/circle/ranking/hot 或 /api/circle/ranking/new）
   → 渲染榜单列表
   → 用户点击圈子 → 跳转详情页（URL 携带 source=hot_rank 或 source=new_rank）
 ```
@@ -606,7 +606,7 @@ interface CircleRecommendStoreState {
 #### 批量合并上报
 
 - 卡片进入视口后加入待上报集合
-- 延迟 500ms 后批量 flush，调用 `POST /recommend/exposure`
+- 延迟 500ms 后批量 flush，调用 `POST /api/circle/recommend/exposure`
 - 若 500ms 内有新卡片进入，重置计时器（防抖模式）
 
 #### 页面离开保底

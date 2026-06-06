@@ -476,17 +476,17 @@
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 切换置顶 | PUT | `/circle-content/{id}/pin` | 置顶/取消置顶切换 |
-| 切换精华 | PUT | `/circle-content/{id}/featured` | 精华/取消精华切换 |
+| 切换置顶 | PUT | `/circle-content/{contentId}/pin?circleId={circleId}` | 置顶/取消置顶切换 |
+| 切换精华 | PUT | `/circle-content/{contentId}/featured?circleId={circleId}` | 精华/取消精华切换 |
 
 **请求/响应格式**:
 ```typescript
-// PUT /circle-content/{id}/pin
-// 无请求体，切换操作
+// PUT /circle-content/{contentId}/pin?circleId={circleId}
+// 无请求体，切换操作。circleId 为必需查询参数
 // Response: { code: 200, result: { isPinned: boolean, pinnedAt: string }, success: boolean }
 
-// PUT /circle-content/{id}/featured
-// 无请求体，切换操作
+// PUT /circle-content/{contentId}/featured?circleId={circleId}
+// 无请求体，切换操作。circleId 为必需查询参数
 // Response: { code: 200, result: { isFeatured: boolean }, success: boolean }
 ```
 
@@ -494,13 +494,13 @@
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 发布公告 | POST | `/circle-announcement` | 创建新公告（替换旧公告） |
-| 查询当前公告 | GET | `/circle-announcement/current?circleId={id}` | 获取当前生效公告 |
-| 删除公告 | DELETE | `/circle-announcement/{id}` | 删除公告 |
+| 发布公告 | POST | `/circle-announcement/` | 创建新公告（替换旧公告） |
+| 查询当前公告 | GET | `/circle-announcement/active/{circleId}` | 获取当前生效公告 |
+| 删除公告 | DELETE | `/circle-announcement/{id}` | 删除公告（后端未实现） |
 
 **请求/响应格式**:
 ```typescript
-// POST /circle-announcement
+// POST /circle-announcement/
 interface CreateAnnouncementReq {
   circleId: string;
   content: string;       // 富文本内容
@@ -508,7 +508,7 @@ interface CreateAnnouncementReq {
 }
 // Response: { code: 200, result: AnnouncementVO, success: boolean }
 
-// GET /circle-announcement/current?circleId={id}
+// GET /circle-announcement/active/{circleId}
 // Response: { code: 200, result: AnnouncementVO | null, success: boolean }
 
 interface AnnouncementVO {
@@ -522,7 +522,7 @@ interface AnnouncementVO {
 }
 
 // DELETE /circle-announcement/{id}
-// 无请求体
+// 无请求体。注意：后端当前未实现此接口，待后端补充后启用
 // Response: { code: 200, result: null, success: boolean }
 ```
 
@@ -547,14 +547,14 @@ interface MentionMemberVO {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 查询申请列表 | GET | `/circle-join-request/list?circleId={id}&status={status}&page=&size=` | 分页查询申请 |
-| 批准申请 | PUT | `/circle-join-request/{id}/approve` | 批准加入 |
-| 拒绝申请 | PUT | `/circle-join-request/{id}/reject` | 拒绝加入 |
+| 查询待审核申请列表 | GET | `/circle-join-review/pending/{circleId}` | 查询待处理申请 |
+| 批准申请 | POST | `/circle-join-review/approve?circleId={circleId}` | 批准加入（body 传 requestId） |
+| 拒绝申请 | POST | `/circle-join-review/reject?circleId={circleId}` | 拒绝加入（body 传 requestId + rejectReason） |
 
 **请求/响应格式**:
 ```typescript
-// GET /circle-join-request/list?circleId={id}&status={status}&page=&size=
-// Response: { code: 200, result: { records: JoinRequestVO[], total: number, page: number, size: number }, success: boolean }
+// GET /circle-join-review/pending/{circleId}
+// Response: { code: 200, result: JoinRequestVO[], success: boolean }
 
 interface JoinRequestVO {
   id: string;
@@ -568,13 +568,16 @@ interface JoinRequestVO {
   rejectReason?: string; // 拒绝原因（仅拒绝状态）
 }
 
-// PUT /circle-join-request/{id}/approve
-// 无请求体
+// POST /circle-join-review/approve?circleId={circleId}
+interface CircleJoinReviewReq {
+  requestId: string; // 申请ID
+}
 // Response: { code: 200, result: null, success: boolean }
 
-// PUT /circle-join-request/{id}/reject
-interface RejectJoinReq {
-  reason: string; // 拒绝原因，必填
+// POST /circle-join-review/reject?circleId={circleId}
+interface CircleJoinReviewReq {
+  requestId: string;    // 申请ID
+  rejectReason: string; // 拒绝原因，必填
 }
 // Response: { code: 200, result: null, success: boolean }
 ```
@@ -583,11 +586,11 @@ interface RejectJoinReq {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 提交举报 | POST | `/circle-report` | 成员提交举报 |
-| 查询举报列表 | GET | `/circle-report/list?circleId={id}&status={status}&page=&size=` | 分页查询举报 |
-| 删除被举报内容 | PUT | `/circle-report/{id}/delete-content` | 删除内容并标记举报 |
-| 忽略举报 | PUT | `/circle-report/{id}/ignore` | 忽略举报 |
-| 禁言用户 | PUT | `/circle-report/{id}/mute-user` | 禁言被举报用户 |
+| 提交举报 | POST | `/circle-report/` | 成员提交举报 |
+| 查询举报列表 | GET | `/circle-report/list/{circleId}?status={status}` | 查询举报列表 |
+| 删除被举报内容 | POST | `/circle-report/{reportId}/delete-content?circleId={circleId}` | 删除内容并标记举报 |
+| 忽略举报 | POST | `/circle-report/{reportId}/ignore?circleId={circleId}` | 忽略举报 |
+| 禁言用户 | POST | `/circle-report/{reportId}/mute?circleId={circleId}` | 禁言被举报用户（后端不接受时长参数） |
 
 **请求/响应格式**:
 **举报原因枚举映射表**:
@@ -602,7 +605,7 @@ interface RejectJoinReq {
 > 前端提交举报时，`reasonType` 字段使用英文枚举值；展示举报列表时，使用 `reasonLabel` 字段（后端返回的中文文案）或前端维护上述映射表进行转换。
 
 ```typescript
-// POST /circle-report
+// POST /circle-report/
 interface CreateReportReq {
   contentId: string;      // 被举报内容ID
   reasonType: string;     // 举报原因类型：AD/PORNO/ATTACK/OTHER
@@ -610,8 +613,8 @@ interface CreateReportReq {
 }
 // Response: { code: 200, result: null, success: boolean }
 
-// GET /circle-report/list?circleId={id}&status={status}&page=&size=
-// Response: { code: 200, result: { records: ReportVO[], total: number, page: number, size: number }, success: boolean }
+// GET /circle-report/list/{circleId}?status={status}
+// Response: { code: 200, result: ReportVO[], success: boolean }
 
 interface ReportVO {
   id: string;
@@ -628,18 +631,17 @@ interface ReportVO {
   muteDuration?: string;    // 禁言时长（如有）
 }
 
-// PUT /circle-report/{id}/delete-content
-// 无请求体
+// POST /circle-report/{reportId}/delete-content?circleId={circleId}
+// 无请求体，circleId 为必需查询参数
 // Response: { code: 200, result: null, success: boolean }
 
-// PUT /circle-report/{id}/ignore
-// 无请求体
+// POST /circle-report/{reportId}/ignore?circleId={circleId}
+// 无请求体，circleId 为必需查询参数
 // Response: { code: 200, result: null, success: boolean }
 
-// PUT /circle-report/{id}/mute-user
-interface MuteUserReq {
-  duration: '1h' | '1d' | '7d' | '30d' | 'permanent';
-}
+// POST /circle-report/{reportId}/mute?circleId={circleId}
+// 无请求体，circleId 为必需查询参数
+// 注意：后端当前不接受禁言时长参数（duration），降级方案见 design.md Risks 节
 // Response: { code: 200, result: null, success: boolean }
 ```
 
@@ -650,19 +652,29 @@ interface MuteUserReq {
 ```typescript
 import { defHttp } from '/@/utils/http/axios';
 
-// 示例：切换置顶
-export function togglePin(contentId: string) {
-  return defHttp.put({ url: `/circle-content/${contentId}/pin` });
+// 示例：切换置顶（circleId 为必需查询参数）
+export function togglePin(contentId: string, circleId: string) {
+  return defHttp.put({ url: `/circle-content/${contentId}/pin`, params: { circleId } });
 }
 
 // 示例：发布公告
 export function createAnnouncement(data: CreateAnnouncementReq) {
-  return defHttp.post({ url: '/circle-announcement', data });
+  return defHttp.post({ url: '/circle-announcement/', data });
 }
 
-// 示例：查询申请列表
-export function getJoinRequestList(params: { circleId: string; status?: string; page: number; size: number }) {
-  return defHttp.get({ url: '/circle-join-request/list', params });
+// 示例：查询待审核申请列表
+export function getPendingJoinRequests(circleId: string) {
+  return defHttp.get({ url: `/circle-join-review/pending/${circleId}` });
+}
+
+// 示例：批准加入申请（body 传 requestId）
+export function approveJoinRequest(requestId: string, circleId: string) {
+  return defHttp.post({ url: '/circle-join-review/approve', data: { requestId }, params: { circleId } });
+}
+
+// 示例：删除被举报内容（POST 方法，circleId 查询参数）
+export function deleteReportedContent(reportId: string, circleId: string) {
+  return defHttp.post({ url: `/circle-report/${reportId}/delete-content`, params: { circleId } });
 }
 ```
 

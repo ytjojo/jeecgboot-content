@@ -182,8 +182,8 @@ sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal
 - 取消订阅同理：点击确认后立即更新按钮状态为"订阅"
 - 操作成功后需同步更新以下数据：
   - `useChannelContext` 中的 `isSubscribed` 字段
-  - 使 `/api/channel/subscription/list` 的缓存失效（订阅列表页下次访问重新拉取）
-  - 使 `/api/channel/subscription/status/{channelId}` 的缓存失效
+  - 使 `/channel/subscription/list` 的缓存失效（订阅列表页下次访问重新拉取）
+  - 使 `/channel/subscription/status/{channelId}` 的缓存失效
 
 **状态与边界**：
 - 订阅操作中：按钮显示 loading（乐观更新场景下短暂展示）
@@ -216,8 +216,8 @@ sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal
 **乐观更新与缓存失效**：
 - 提交申请后立即更新按钮为"待审核"状态（不等待接口返回），失败时回滚并展示错误提示
 - 操作成功后需使以下缓存失效：
-  - `/api/channel/member/application/status/{channelId}`（申请状态）
-  - `/api/channel/member/application/pending`（待审列表，管理员侧）
+  - `/channel/member/applications/status/{channelId}`（申请状态）
+  - `/channel/member/applications/pending`（待审列表，管理员侧）
 
 **状态与边界**：
 - 已有待审申请：按钮禁用，Tooltip 提示
@@ -260,9 +260,9 @@ sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal
 
 **缓存失效**：
 - 批准/拒绝操作成功后需使以下缓存失效：
-  - `/api/channel/member/application/pending`（待审列表）
-  - `/api/channel/member/list`（成员列表，批准后新增成员）
-  - `/api/channel/subscription/status/{channelId}`（被批准用户的订阅状态）
+  - `/channel/member/applications/pending`（待审列表）
+  - `/channel/member/list`（成员列表，批准后新增成员）
+  - `/channel/subscription/status/{channelId}`（被批准用户的订阅状态）
 
 **状态与边界**：
 - 空列表：展示空状态"暂无待审核的加入申请" + 引导文案
@@ -353,9 +353,9 @@ sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal
 
 **缓存失效**：
 - 角色变更/移除/禁言/加黑名单操作成功后需使以下缓存失效：
-  - `/api/channel/member/list`（成员列表）
+  - `/channel/member/list`（成员列表）
   - `useChannelContext` 中的 `userRelation` 和 `memberRole`（若操作对象是当前用户）
-  - `/api/channel/blacklist/list`（黑名单列表，加黑名单操作时）
+  - `/channel/governance/blacklist/list`（黑名单列表，加黑名单操作时）
 
 **状态与边界**：
 - 空列表：展示空状态"暂无成员" + "邀请成员"按钮
@@ -450,13 +450,16 @@ sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal
 
 | 接口 | 方法 | URL | 说明 |
 |------|------|-----|------|
-| 订阅频道 | POST | `/api/channel/subscription/subscribe` | `{ channelId }` |
-| 取消订阅 | POST | `/api/channel/subscription/unsubscribe` | `{ channelId }` |
-| 查询订阅状态 | GET | `/api/channel/subscription/status/{channelId}` | 返回 `{ subscribed, source }` |
-| 订阅列表 | GET | `/api/channel/subscription/list` | 支持分组筛选、搜索 |
-| 分组 CRUD | POST/PUT/DELETE | `/api/channel/subscription/group/*` | 分组管理 |
-| 更新提醒设置 | PUT | `/api/channel/subscription/reminder` | `{ channelId, enabled }` |
-| 移动频道到分组 | PUT | `/api/channel/subscription/move-group` | `{ channelId, groupId }` |
+| 订阅频道 | POST | `/channel/subscription/subscribe` | `{ channelId }` |
+| 取消订阅 | POST | `/channel/subscription/unsubscribe` | `{ channelId }` |
+| 查询订阅状态 | GET | `/channel/subscription/status/{channelId}` | 返回 `{ subscribed, source }` |
+| 订阅列表 | GET | `/channel/subscription/list` | 支持分组筛选、搜索 |
+| 创建分组 | POST | `/channel/subscription/group/create` | `{ name }` |
+| 重命名分组 | POST | `/channel/subscription/group/rename` | `{ groupId, name }` |
+| 删除分组 | POST | `/channel/subscription/group/delete` | `{ groupId }` |
+| 分组列表 | GET | `/channel/subscription/group/list` | 返回分组列表 |
+| 更新提醒设置 | PUT | `/channel/subscription/update-reminder` | `{ channelId, enabled }` |
+| 移动频道到分组 | POST | `/channel/subscription/move-to-group` | `{ channelId, groupId }` |
 
 ### 5.2 成员与加入相关
 
@@ -464,16 +467,16 @@ sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal
 
 | 接口 | 方法 | URL | 说明 |
 |------|------|-----|------|
-| 提交加入申请 | POST | `/api/channel/member/apply` | `{ channelId, reason }` |
-| 查询申请状态 | GET | `/api/channel/member/application/status/{channelId}` | 返回 `{ status, canReapply }` |
-| 待审列表 | GET | `/api/channel/member/application/pending` | `{ channelId }`, 支持分页、筛选 |
-| 批准申请 | POST | `/api/channel/member/application/approve` | `{ channelId, applicationIds[] }` |
-| 拒绝申请 | POST | `/api/channel/member/application/reject` | `{ channelId, applicationIds[], reason }` |
-| 成员列表 | GET | `/api/channel/member/list` | `{ channelId }`, 支持角色筛选、搜索、排序、分页 |
-| 修改角色 | PUT | `/api/channel/member/role` | `{ channelId, memberId, role }` |
-| 移除成员 | POST | `/api/channel/member/remove` | `{ channelId, memberIds[], reason }` |
-| 禁言成员 | POST | `/api/channel/member/mute` | `{ channelId, memberId, duration, reason }` |
-| 解除禁言 | POST | `/api/channel/member/unmute` | `{ channelId, memberId }` |
+| 提交加入申请 | POST | `/channel/member/join/apply` | `{ channelId, reason }` |
+| 查询申请状态 | GET | `/channel/member/applications/status/{channelId}` | 返回 `{ status, canReapply }` |
+| 待审列表 | GET | `/channel/member/applications/pending` | `{ channelId }`, 支持分页、筛选 |
+| 批准申请 | POST | `/channel/member/applications/approve` | `{ channelId, applicationIds[] }` |
+| 拒绝申请 | POST | `/channel/member/applications/reject` | `{ channelId, applicationIds[], reason }` |
+| 成员列表 | GET | `/channel/member/list` | `{ channelId }`, 支持角色筛选、搜索、排序、分页 |
+| 修改角色 | POST | `/channel/member/assign-role` | `{ channelId, memberId, role }` |
+| 移除成员 | POST | `/channel/governance/remove` | `{ channelId, memberIds[], reason }` |
+| 禁言成员 | POST | `/channel/governance/mute` | `{ channelId, memberId, duration, reason }` |
+| 解除禁言 | POST | `/channel/governance/unmute` | `{ channelId, memberId }` |
 
 ### 5.3 黑名单相关
 
@@ -481,26 +484,26 @@ sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal
 
 | 接口 | 方法 | URL | 说明 |
 |------|------|-----|------|
-| 加入黑名单 | POST | `/api/channel/blacklist/add` | `{ channelId, userId, reason }` |
-| 移出黑名单 | POST | `/api/channel/blacklist/remove` | `{ channelId, userId }` |
-| 黑名单列表 | GET | `/api/channel/blacklist/list` | `{ channelId }`, 支持分页 |
+| 加入黑名单 | POST | `/channel/governance/blacklist/add` | `{ channelId, userId, reason }` |
+| 移出黑名单 | POST | `/channel/governance/blacklist/remove` | `{ channelId, userId }` |
+| 黑名单列表 | GET | `/channel/governance/blacklist/list` | `{ channelId }`, 支持分页 |
 
 ### 5.4 邀请相关
 
 | 接口 | 方法 | URL | 说明 |
 |------|------|-----|------|
-| 创建邀请 | POST | `/api/channel/invite/create` | `{ type, expireTime, maxUses }` |
-| 邀请列表 | GET | `/api/channel/invite/list` | 支持分页 |
-| 撤销邀请 | POST | `/api/channel/invite/revoke` | `{ inviteId }` |
-| 使用邀请加入 | POST | `/api/channel/invite/join` | `{ inviteCode }` |
+| 创建邀请 | POST | `/channel/invite/create` | `{ type, expireTime, maxUses }` |
+| 邀请列表 | GET | `/channel/invite/list` | 支持分页 |
+| 撤销邀请 | POST | `/channel/invite/revoke` | `{ inviteId }` |
+| 使用邀请加入 | POST | `/channel/invite/use` | `{ inviteCode }` |
 
 ### 5.5 隐私与设置相关
 
 | 接口 | 方法 | URL | 说明 |
 |------|------|-----|------|
-| 更新隐私 | PUT | `/api/channel/privacy/update` | `{ channelId, privacyType }` |
-| 更新加入方式 | PUT | `/api/channel/join-method/update` | `{ channelId, joinMethod, config }` |
-| 治理日志 | GET | `/api/channel/governance/log` | 支持筛选、分页 |
+| 更新隐私 | PUT | `/api/v1/channels/privacy` | `{ channelId, privacyType }` |
+| 更新加入方式 | PUT | `/api/v1/channels/join-method` | `{ channelId, joinMethod, config }` |
+| 治理日志 | GET | `/channel/governance/log` | 支持筛选、分页 |
 
 ---
 

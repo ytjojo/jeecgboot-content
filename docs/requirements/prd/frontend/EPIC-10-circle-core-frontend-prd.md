@@ -451,10 +451,10 @@
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 加入圈子 | POST | `/content/circle/member/join` | 加入圈子（含密码参数） |
-| 退出圈子 | POST | `/content/circle/member/quit` | 退出圈子 |
+| 加入圈子 | POST | `/content/circle/join` | 加入圈子（含密码参数） |
+| 退出圈子 | POST | `/content/circle/leave` | 退出圈子 |
 | 成员列表 | GET | `/content/circle/member/list?circleId={id}` | 分页获取成员列表 |
-| 设置版主 | POST | `/content/circle/member/set-moderator` | 设置/取消版主 |
+| 设置版主 | POST | `/content/circle/member/change-role` | 设置/取消版主 |
 | 禁言成员 | POST | `/content/circle/member/mute` | 禁言（含时长和原因） |
 | 解除禁言 | POST | `/content/circle/member/unmute` | 解除禁言 |
 | 移除成员 | POST | `/content/circle/member/remove` | 移除成员 |

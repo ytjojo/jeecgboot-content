@@ -392,8 +392,8 @@ Page
 
 | API | 方法 | 说明 | 前端调用场景 |
 |-----|------|------|-------------|
-| `/content/user-relation/mutual-follow-list` | GET | 互关好友列表（分页） | 互关好友列表页 |
-| `/content/user-relation/mutual-status` | GET | 查询与指定用户的互关状态（备用，评论列表应自带此字段） | 动态加载评论、非评论列表页面 |
+| `/content/user/relation/mutual-follow-list` | GET | 互关好友列表（分页） | 互关好友列表页 |
+| `/content/user/relation/mutual-status` | GET | 查询与指定用户的互关状态（备用，评论列表应自带此字段） | 动态加载评论、非评论列表页面 |
 
 **请求参数（互关列表）**:
 ```
@@ -417,10 +417,10 @@ keyword?: string  // 昵称/用户名搜索
 
 | API | 方法 | 说明 | 前端调用场景 |
 |-----|------|------|-------------|
-| `/content/fan-analytics/list` | GET | 粉丝列表（分页 + 搜索） | 粉丝列表 Tab |
-| `/content/fan-analytics/trend` | GET | 粉丝趋势数据 | 粉丝趋势 Tab |
-| `/content/fan-analytics/profile` | GET | 粉丝画像数据 | 粉丝画像 Tab **[延后至二期]** |
-| `/content/fan-analytics/export` | POST | 导出粉丝画像 CSV | 画像页导出按钮 **[延后至二期]** |
+| `/content/user/fan/list` | GET | 粉丝列表（分页 + 搜索） | 粉丝列表 Tab |
+| `/content/user/fan/trend` | GET | 粉丝趋势数据 | 粉丝趋势 Tab |
+| `/content/user/fan/profile` | GET | 粉丝画像数据 | 粉丝画像 Tab **[延后至二期]** |
+| `/content/user/fan/export` | POST | 导出粉丝画像 CSV | 画像页导出按钮 **[延后至二期]** |
 
 **请求参数（趋势）**:
 ```
@@ -461,10 +461,10 @@ endDate?: string
 
 | API | 方法 | 说明 | 前端调用场景 |
 |-----|------|------|-------------|
-| `/content/invite/code` | GET | 获取/生成邀请码 | 邀请分享页加载 |
-| `/content/invite/info/:inviteCode` | GET | 通过邀请码获取邀请信息（被邀请者落地页用） | 邀请落地页 |
-| `/content/invite/records` | GET | 邀请记录列表（分页） | 邀请记录列表 |
-| `/content/invite/stats` | GET | 邀请收益统计 | 统计概览区 |
+| `/content/user/invite/generate` | POST | 生成或获取邀请码 | 邀请分享页加载 |
+| `/content/user/invite/info/:inviteCode` | GET | 通过邀请码获取邀请信息（被邀请者落地页用） | 邀请落地页 |
+| `/content/user/invite/records` | GET | 邀请记录列表（分页） | 邀请记录列表 |
+| `/content/user/invite/stats` | GET | 邀请收益统计 | 统计概览区 |
 
 **响应格式（邀请码）**:
 ```json
@@ -518,9 +518,9 @@ endDate?: string
 
 | API | 方法 | 说明 | 前端调用场景 |
 |-----|------|------|-------------|
-| `/content/user-governance/delete-comment` | POST | 删除评论（版主+） | 评论区管理操作 |
-| `/content/user-governance/warn-user` | POST | 警告用户（版主+） | 评论区管理操作 |
-| `/content/user-governance/audit-log` | GET | 审计日志列表（管理员） | 审计日志页 |
+| `/content/user/governance/moderator/comment/delete` | POST | 删除评论（版主+） | 评论区管理操作 |
+| `/content/user/governance/moderator/user/warn` | POST | 警告用户（版主+） | 评论区管理操作 |
+| `/content/user/governance/audit-log` | GET | 审计日志列表（管理员） | 审计日志页 |
 
 > **注意**: 封禁用户（ban-user）、禁言用户（mute-user）、撤销处罚（revoke-punishment）API 统一在 **EPIC-09** 中定义和实现，本 PRD 不重复定义。
 
@@ -555,8 +555,8 @@ src/api/content/
 ```typescript
 import { defHttp } from '/@/utils/http/axios';
 
-export const getInviteCode = () => defHttp.get({ url: '/content/invite/code' });
-export const getFanTrend = (params) => defHttp.get({ url: '/content/fan-analytics/trend', params });
+export const generateInviteCode = () => defHttp.post({ url: '/content/user/invite/generate' });
+export const getFanTrend = (params) => defHttp.get({ url: '/content/user/fan/trend', params });
 // ...
 ```
 

@@ -492,62 +492,83 @@ interface StatusTagProps {
 
 ### 5.1 统计看板 API
 
+**基础路径**: `/jeecg-boot/api/v1/content/channel/stats`（ChannelStatsController）
+
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取核心指标 | GET | `/api/v1/channel/{channelId}/stats/overview` | 参数：`timeRange`, `startDate`, `endDate` |
-| 获取趋势数据 | GET | `/api/v1/channel/{channelId}/stats/trend` | 参数：`timeRange`, `startDate`, `endDate` |
-| 获取互动数据 | GET | `/api/v1/channel/{channelId}/stats/interaction` | 参数：`timeRange` |
-| 获取热门内容 | GET | `/api/v1/channel/{channelId}/stats/hot-content` | 参数：`period`（7d/30d/90d）, `limit` |
-| 获取用户分析 | GET | `/api/v1/channel/{channelId}/stats/user-analysis` | 参数：`timeRange`, `dimension` |
+| 获取核心指标 | GET | `/jeecg-boot/api/v1/content/channel/stats/core` | 参数：`channelId`, `timeRange`, `startDate`, `endDate` |
+| 获取趋势数据 | GET | `/jeecg-boot/api/v1/content/channel/stats/trend` | 参数：`channelId`, `timeRange`, `startDate`, `endDate` |
+| 获取互动数据 | GET | `/jeecg-boot/api/v1/content/channel/stats/interaction` | 参数：`channelId`, `timeRange`（待实现） |
+| 获取热门内容 | GET | `/jeecg-boot/api/v1/content/channel/stats/hot-content` | 参数：`channelId`, `period`（7d/30d/90d）, `limit` |
+| 获取用户分析 | GET | `/jeecg-boot/api/v1/content/channel/stats/user-analysis` | 参数：`channelId`, `timeRange`, `dimension` |
 
 ### 5.2 数据导出 API
 
+**基础路径**: `/jeecg-boot/api/v1/content/channel/export`（ChannelExportController）
+
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 发起导出 | POST | `/api/v1/channel/{channelId}/export` | 请求体：`{ timeRange, fields[], format }` |
-| 查询导出任务状态 | GET | `/api/v1/channel/export/{taskId}` | 返回：`{ status, progress, downloadUrl }` |
-| 导出历史列表 | GET | `/api/v1/channel/{channelId}/export/history` | 分页参数 |
-| 下载导出文件 | GET | `/api/v1/channel/export/{taskId}/download` | 文件下载 |
+| 发起导出 | POST | `/jeecg-boot/api/v1/content/channel/export/create` | 请求体：`{ channelId, timeRange, fields[], format }` |
+| 查询导出任务状态 | GET | `/jeecg-boot/api/v1/content/channel/export/status` | 参数：`taskId`，返回：`{ status, progress, downloadUrl }` |
+| 导出历史列表 | GET | `/jeecg-boot/api/v1/content/channel/export/history` | 参数：`channelId`，分页参数（待实现） |
+| 下载导出文件 | GET | `/jeecg-boot/api/v1/content/channel/export/download` | 参数：`taskId`，文件下载 |
 
 ### 5.3 审核管理 API
 
+**基础路径**: `/jeecg-boot/api/v1/content/channel/review`（ChannelReviewController）
+
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 审核队列列表 | GET | `/api/v1/channel/review/list` | 参数：`channelType`, `applyType`, `status`, `dateRange`, 分页 |
-| 审核详情 | GET | `/api/v1/channel/review/{reviewId}` | 返回审核申请详情 |
-| 执行审核操作 | POST | `/api/v1/channel/review/{reviewId}/action` | 请求体：`{ action: approve/reject/return, reason }` |
+| 审核队列列表 | GET | `/jeecg-boot/api/v1/content/channel/review/list` | 参数：`channelType`, `applyType`, `status`, `dateRange`, 分页 |
+| 审核详情 | GET | `/jeecg-boot/api/v1/content/channel/review/detail/{id}` | 返回审核申请详情（待实现） |
+| 执行审核操作 | POST | `/jeecg-boot/api/v1/content/channel/review/action` | 请求体：`{ reviewId, action: approve/reject/return, reason }` |
 
 ### 5.4 生命周期管理 API
 
+**基础路径**: `/jeecg-boot/api/v1/content/channel/lifecycle`（ChannelLifecycleController）
+
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 治理频道列表 | GET | `/api/v1/channel/governance/list` | 参数：`keyword`, `channelType`, `status`, 分页 |
-| 频道详情（治理） | GET | `/api/v1/channel/governance/{channelId}` | 返回频道详情 + 处罚记录 |
-| 冻结频道 | POST | `/api/v1/channel/{channelId}/lifecycle/freeze` | 请求体：`{ reason }` |
-| 解冻频道 | POST | `/api/v1/channel/{channelId}/lifecycle/unfreeze` | 请求体：`{ reason }` |
-| 限制推荐 | POST | `/api/v1/channel/{channelId}/lifecycle/restrict` | 请求体：`{ reason }` |
-| 强制隐藏 | POST | `/api/v1/channel/{channelId}/lifecycle/hide` | 请求体：`{ reason }` |
-| 恢复可见 | POST | `/api/v1/channel/{channelId}/lifecycle/restore` | 请求体：`{ reason }` |
-| 永久关闭 | POST | `/api/v1/channel/{channelId}/lifecycle/close` | 请求体：`{ reason }` |
-| 申请归档 | POST | `/api/v1/channel/{channelId}/lifecycle/archive` | 请求体：`{ reason }` |
-| 手动归档（运营） | POST | `/api/v1/channel/{channelId}/lifecycle/archive/manual` | 请求体：`{ reason }` |
-| 发起合并 | POST | `/api/v1/channel/{channelId}/lifecycle/merge` | 请求体：`{ targetChannelId, reason }` |
+| 冻结频道 | POST | `/jeecg-boot/api/v1/content/channel/lifecycle/freeze` | 请求体：`{ channelId, reason }` |
+| 解冻频道 | POST | `/jeecg-boot/api/v1/content/channel/lifecycle/unfreeze` | 请求体：`{ channelId, reason }` |
+| 限制推荐 | POST | `/jeecg-boot/api/v1/content/channel/lifecycle/restrict-recommend` | 请求体：`{ channelId, reason }` |
+| 强制隐藏 | POST | `/jeecg-boot/api/v1/content/channel/lifecycle/hide` | 请求体：`{ channelId, reason }` |
+| 恢复可见 | POST | `/jeecg-boot/api/v1/content/channel/lifecycle/restore-visibility` | 请求体：`{ channelId, reason }`（待实现） |
+| 永久关闭 | POST | `/jeecg-boot/api/v1/content/channel/lifecycle/close` | 请求体：`{ channelId, reason }` |
+| 归档 | POST | `/jeecg-boot/api/v1/content/channel/lifecycle/archive` | 请求体：`{ channelId, reason }` |
+| 审计日志 | GET | `/jeecg-boot/api/v1/content/channel/lifecycle/logs` | 参数：`channelId`, 分页 |
+
+**基础路径**: `/jeecg-boot/api/v1/content/channel/governance`（ChannelGovernanceController）
+
+| 接口 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| 治理频道列表 | GET | `/jeecg-boot/api/v1/content/channel/governance/list`（注：当前 Controller 无 list 端点，需确认） | 参数：`keyword`, `channelType`, `status`, 分页 |
+
+**基础路径**: `/jeecg-boot/api/v1/content/channel/merge`（ChannelMergeController）
+
+| 接口 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| 合并校验 | POST | `/jeecg-boot/api/v1/content/channel/merge/validate` | 请求体：`{ sourceChannelId, targetChannelId }` |
+| 执行合并 | POST | `/jeecg-boot/api/v1/content/channel/merge/execute` | 请求体：`{ sourceChannelId, targetChannelId, reason }` |
 
 ### 5.5 审计日志 API
 
+**基础路径**: `/jeecg-boot/api/v1/content/channel/lifecycle`（ChannelLifecycleController）
+
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 审计日志列表 | GET | `/api/v1/channel/audit-log/list` | 参数：`channelKeyword`, `operatorKeyword`, `actionType`, `dateRange`, 分页 |
-| 频道审计日志 | GET | `/api/v1/channel/{channelId}/audit-log` | 按频道查询，分页 |
+| 审计日志列表 | GET | `/jeecg-boot/api/v1/content/channel/lifecycle/logs` | 参数：`channelId`, `operatorKeyword`, `actionType`, `dateRange`, 分页 |
 
 ### 5.6 申诉管理 API
 
+**基础路径**: `/jeecg-boot/api/v1/content/channel/lifecycle/appeal`（ChannelLifecycleController）
+
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 申诉列表 | GET | `/api/v1/channel/appeal/list` | 参数：`status`, `channelKeyword`, `dateRange`, 分页 |
-| 申诉详情 | GET | `/api/v1/channel/appeal/{appealId}` | 返回申诉详情 |
-| 处理申诉 | POST | `/api/v1/channel/appeal/{appealId}/handle` | 请求体：`{ result: restore/maintain, description }` |
-| 提交申诉 | POST | `/api/v1/channel/{channelId}/appeal` | 请求体：`{ description, attachments }` |
+| 申诉列表 | GET | `/jeecg-boot/api/v1/content/channel/lifecycle/appeal/list` | 参数：`channelId`, `status`, `dateRange`, 分页 |
+| 申诉详情 | GET | `/jeecg-boot/api/v1/content/channel/lifecycle/appeal/detail/{id}` | 返回申诉详情（待实现） |
+| 处理申诉 | POST | `/jeecg-boot/api/v1/content/channel/lifecycle/appeal/handle` | 请求体：`{ appealId, result: restore/maintain, description }` |
+| 提交申诉 | POST | `/jeecg-boot/api/v1/content/channel/lifecycle/appeal/submit` | 请求体：`{ channelId, description, attachments }` |
 
 ### 5.7 前端数据模型
 
