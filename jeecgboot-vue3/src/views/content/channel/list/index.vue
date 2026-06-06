@@ -136,7 +136,7 @@
     try {
       const result = await getChannelList({
         current: pagination.current!,
-        pageSize: pagination.pageSize!,
+        size: pagination.pageSize!,
         channelType: filterType.value,
         status: filterStatus.value,
       });

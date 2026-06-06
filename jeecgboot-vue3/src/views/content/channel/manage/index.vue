@@ -99,13 +99,11 @@
             <!-- 删除 -->
             <a-card title="危险操作" size="small">
               <p>删除频道后将进入冷静期，冷静期内可撤销。</p>
-              <a-popconfirm
+              <a-button
                 v-if="channel?.channelType !== 'system'"
-                title="确定要删除此频道吗？"
-                @confirm="handleDelete"
-              >
-                <a-button danger>删除频道</a-button>
-              </a-popconfirm>
+                danger
+                @click="showDeleteModal = true"
+              >删除频道</a-button>
             </a-card>
           </a-space>
         </a-tab-pane>
@@ -145,7 +143,6 @@
     cancelDeleteChannel,
     getTransferHistory,
     getPendingTransfer,
-    deleteChannel,
   } from '/@/api/content/channel';
   import type { ChannelVO, ChannelTransferVO, ChannelCreateReq } from '/@/api/content/channel/model/channelModel';
 
@@ -207,10 +204,6 @@
     } catch {
       message.error('撤销失败');
     }
-  }
-
-  async function handleDelete() {
-    showDeleteModal.value = true;
   }
 
   function onDeleteSuccess() {

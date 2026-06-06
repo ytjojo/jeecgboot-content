@@ -85,9 +85,11 @@
       channelType: ChannelType;
       initialValues?: Partial<ChannelCreateReq>;
       isEdit?: boolean;
+      isSystemChannel?: boolean;
     }>(),
     {
       isEdit: false,
+      isSystemChannel: false,
     },
   );
 

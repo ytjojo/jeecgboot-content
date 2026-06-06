@@ -74,9 +74,9 @@
     checking.value = true;
     try {
       const result = await checkDeletePrecondition(props.channel.id);
-      if (result.blocked) {
+      if (!result.canDelete) {
         hasBlockers.value = true;
-        blockReasons.value = result.reasons || [];
+        blockReasons.value = result.blockReasons || [];
       }
     } catch {
       // 如果检查接口失败，允许继续删除流程

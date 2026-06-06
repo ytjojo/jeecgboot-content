@@ -89,7 +89,6 @@
 
   defineExpose({
     validate: () => formRef.value?.validate(),
-    getFormData: () => formRef.value?.getFormData(),
   });
 </script>
 

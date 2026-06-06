@@ -2,7 +2,7 @@
   <div class="channel-admin">
     <a-page-header title="频道管理" :back-icon="false">
       <template #extra>
-        <a-button type="primary" @click="showSystemModal = true">
+        <a-button type="primary" @click="systemModalRef?.open()">
           <PlusOutlined /> 创建系统频道
         </a-button>
       </template>
@@ -120,7 +120,6 @@
   const loading = ref(false);
   const dataSource = ref<ChannelVO[]>([]);
   const selectedRowKeys = ref<string[]>([]);
-  const showSystemModal = ref(false);
   const systemModalRef = ref<InstanceType<typeof SystemChannelModal>>();
   const detailDrawerRef = ref<InstanceType<typeof ChannelDetailDrawer>>();
 
@@ -156,10 +155,10 @@
     try {
       const result = await getChannelList({
         current: pagination.current!,
-        pageSize: pagination.pageSize!,
+        size: pagination.pageSize!,
         channelType: filterForm.channelType,
         status: filterForm.status,
-        name: filterForm.name || undefined,
+        keyword: filterForm.name || undefined,
       });
       dataSource.value = result.records || [];
       pagination.total = result.total || 0;

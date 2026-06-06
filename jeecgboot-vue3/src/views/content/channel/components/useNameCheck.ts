@@ -20,7 +20,7 @@ export function useNameCheck(excludeId?: string) {
         checking.value = true;
         try {
           const result = await checkNameUnique(name.trim(), excludeId);
-          if (result.exists) {
+          if (!result.available) {
             nameError.value = '该频道名称已被使用';
             resolve(false);
           } else {

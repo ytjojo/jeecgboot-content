@@ -45,9 +45,11 @@
 
     <!-- 拒绝原因弹窗 -->
     <a-modal v-model:open="rejectModalVisible" title="拒绝审核" @ok="handleReject">
-      <a-form-item label="拒绝原因">
-        <a-textarea v-model:value="rejectNote" :maxlength="200" show-count placeholder="请输入拒绝原因" />
-      </a-form-item>
+      <a-form layout="vertical">
+        <a-form-item label="拒绝原因">
+          <a-textarea v-model:value="rejectNote" :maxlength="200" show-count placeholder="请输入拒绝原因" />
+        </a-form-item>
+      </a-form>
     </a-modal>
 
     <ChannelDetailDrawer ref="detailDrawerRef" />
@@ -120,7 +122,7 @@
       content: `确定通过频道 "${record.channelName}" 的审核吗？`,
       onOk: async () => {
         try {
-          await reviewAction({ channelId: record.id, action: 'APPROVE' });
+          await reviewAction({ channelId: record.channelId, action: 'APPROVE' });
           message.success('审核通过');
           loadData();
         } catch {
@@ -140,7 +142,7 @@
     if (!rejectingRecord.value) return;
     try {
       await reviewAction({
-        channelId: rejectingRecord.value.id,
+        channelId: rejectingRecord.value.channelId,
         action: 'REJECT',
         note: rejectNote.value,
       });
