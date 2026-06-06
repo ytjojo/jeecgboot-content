@@ -1,8 +1,10 @@
 package org.jeecg.modules.content.channel.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.modules.content.channel.entity.ContentChannelEditorialPick;
 import org.jeecg.modules.content.channel.req.create.ChannelEditorialPickCreateReq;
+import org.jeecg.modules.content.channel.req.query.ChannelEditorialPickQueryReq;
 import org.jeecg.modules.content.channel.req.update.ChannelEditorialPickUpdateReq;
 import org.jeecg.modules.content.channel.vo.ChannelEditorialPickVO;
 
@@ -17,4 +19,6 @@ public interface IContentChannelEditorialPickService extends IService<ContentCha
     void removePick(String pickId);
 
     List<ChannelEditorialPickVO> listActivePicks();
+
+    IPage<ChannelEditorialPickVO> listPicksPage(ChannelEditorialPickQueryReq req);
 }

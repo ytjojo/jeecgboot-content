@@ -1,8 +1,11 @@
 package org.jeecg.modules.content.channel.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.channel.entity.ContentChannelEditorialPick;
 import org.jeecg.modules.content.channel.req.create.ChannelEditorialPickCreateReq;
+import org.jeecg.modules.content.channel.req.query.ChannelEditorialPickQueryReq;
 import org.jeecg.modules.content.channel.req.update.ChannelEditorialPickUpdateReq;
 import org.jeecg.modules.content.channel.service.IContentChannelEditorialPickService;
 import org.jeecg.modules.content.channel.vo.ChannelEditorialPickVO;
@@ -66,5 +69,20 @@ class ContentChannelEditorialPickControllerTest {
 
         assertThat(result.isSuccess()).isTrue();
         verify(editorialPickService).removePick("p1");
+    }
+
+    @Test
+    void should_page_picks() {
+        ChannelEditorialPickQueryReq req = new ChannelEditorialPickQueryReq();
+        req.setPageNo(1);
+        req.setPageSize(10);
+
+        IPage<ChannelEditorialPickVO> page = new Page<>();
+        when(editorialPickService.listPicksPage(req)).thenReturn(page);
+
+        Result<IPage<ChannelEditorialPickVO>> result = controller.pagePicks(req);
+
+        assertThat(result.isSuccess()).isTrue();
+        verify(editorialPickService).listPicksPage(req);
     }
 }

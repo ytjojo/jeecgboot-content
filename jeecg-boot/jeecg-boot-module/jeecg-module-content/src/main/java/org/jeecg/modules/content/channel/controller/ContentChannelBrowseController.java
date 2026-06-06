@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.channel.req.query.ChannelBrowseQueryReq;
-import org.jeecg.modules.content.channel.service.IContentChannelVisibilityService;
+import org.jeecg.modules.content.channel.service.IContentChannelBrowseService;
 import org.jeecg.modules.content.channel.vo.ChannelBrowseItemVO;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +16,12 @@ import org.springframework.web.bind.annotation.*;
 public class ContentChannelBrowseController {
 
     @Resource
-    private IContentChannelVisibilityService visibilityService;
+    private IContentChannelBrowseService browseService;
 
     @Operation(summary = "按分类浏览频道")
     @GetMapping("/category")
     public Result<IPage<ChannelBrowseItemVO>> browseByCategory(ChannelBrowseQueryReq req) {
-        return Result.OK();
+        IPage<ChannelBrowseItemVO> page = browseService.browseByCategory(req);
+        return Result.OK(page);
     }
 }

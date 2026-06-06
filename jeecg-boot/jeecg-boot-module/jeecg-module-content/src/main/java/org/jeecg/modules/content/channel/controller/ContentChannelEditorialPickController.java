@@ -1,7 +1,6 @@
 package org.jeecg.modules.content.channel.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -9,6 +8,7 @@ import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.channel.entity.ContentChannelEditorialPick;
 import org.jeecg.modules.content.channel.req.create.ChannelEditorialPickCreateReq;
+import org.jeecg.modules.content.channel.req.query.ChannelEditorialPickQueryReq;
 import org.jeecg.modules.content.channel.req.update.ChannelEditorialPickUpdateReq;
 import org.jeecg.modules.content.channel.service.IContentChannelEditorialPickService;
 import org.jeecg.modules.content.channel.vo.ChannelEditorialPickVO;
@@ -32,12 +32,8 @@ public class ContentChannelEditorialPickController {
 
     @Operation(summary = "分页查询精选列表（管理端）")
     @GetMapping("/page")
-    public Result<Page<ContentChannelEditorialPick>> pagePicks(
-            @RequestParam(defaultValue = "1") Integer current,
-            @RequestParam(defaultValue = "10") Integer size) {
-        LambdaQueryWrapper<ContentChannelEditorialPick> wrapper = new LambdaQueryWrapper<>();
-        wrapper.orderByDesc(ContentChannelEditorialPick::getCreateTime);
-        return Result.OK(editorialPickService.page(new Page<>(current, size), wrapper));
+    public Result<IPage<ChannelEditorialPickVO>> pagePicks(ChannelEditorialPickQueryReq req) {
+        return Result.OK(editorialPickService.listPicksPage(req));
     }
 
     @Operation(summary = "创建编辑精选")

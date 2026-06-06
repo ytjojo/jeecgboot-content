@@ -40,8 +40,6 @@ public enum EnableStatusEnum implements BaseEnum<EnableStatusEnum,Integer>  {
      */
     DELETED(-1, "deleted", "删除状态");
 
-  
-    
     /**
      * 状态值
      */

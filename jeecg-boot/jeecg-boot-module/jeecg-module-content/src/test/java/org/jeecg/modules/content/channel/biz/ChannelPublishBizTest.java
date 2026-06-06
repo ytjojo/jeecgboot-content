@@ -119,14 +119,13 @@ class ChannelPublishBizTest {
         channel.setId("ch-1");
         channel.setName("测试频道");
         channel.setIconUrl("http://icon.png");
-        when(channelMapper.selectById("ch-1")).thenReturn(channel);
+        when(channelMapper.selectBatchIds(any())).thenReturn(Arrays.asList(channel));
 
-        ChannelLifecycleLog log = new ChannelLifecycleLog();
-        log.setToStatus("Active");
-        when(channelLifecycleLogMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(log);
+        // No lifecycle logs => channel is ACTIVE
+        when(channelLifecycleLogMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(Arrays.asList());
 
-        when(channelBlacklistMapper.selectCount(any(LambdaQueryWrapper.class))).thenReturn(0L);
-        when(channelMuteMapper.selectCount(any(LambdaQueryWrapper.class))).thenReturn(0L);
+        when(channelBlacklistMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(Arrays.asList());
+        when(channelMuteMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(Arrays.asList());
 
         List<AvailableChannelVO> result = biz.getAvailableChannels("user-1");
 
@@ -147,11 +146,15 @@ class ChannelPublishBizTest {
         Channel channel = new Channel();
         channel.setId("ch-1");
         channel.setName("冻结频道");
-        when(channelMapper.selectById("ch-1")).thenReturn(channel);
+        when(channelMapper.selectBatchIds(any())).thenReturn(Arrays.asList(channel));
 
         ChannelLifecycleLog log = new ChannelLifecycleLog();
+        log.setChannelId("ch-1");
         log.setToStatus("ReadonlyFrozen");
-        when(channelLifecycleLogMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(log);
+        when(channelLifecycleLogMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(Arrays.asList(log));
+
+        when(channelBlacklistMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(Arrays.asList());
+        when(channelMuteMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(Arrays.asList());
 
         List<AvailableChannelVO> result = biz.getAvailableChannels("user-1");
 
