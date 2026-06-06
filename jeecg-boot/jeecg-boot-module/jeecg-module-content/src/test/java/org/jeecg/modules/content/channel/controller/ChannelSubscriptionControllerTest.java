@@ -87,4 +87,24 @@ class ChannelSubscriptionControllerTest {
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.getResult()).hasSize(2);
     }
+
+    @Test
+    void should_get_subscription_status() {
+        when(subscriptionService.isSubscribed("ch1", "user1")).thenReturn(true);
+
+        Result<Boolean> result = controller.getStatus("ch1");
+
+        assertThat(result.getCode()).isEqualTo(200);
+        assertThat(result.getResult()).isTrue();
+    }
+
+    @Test
+    void should_get_subscription_status_false_when_not_subscribed() {
+        when(subscriptionService.isSubscribed("ch1", "user1")).thenReturn(false);
+
+        Result<Boolean> result = controller.getStatus("ch1");
+
+        assertThat(result.getCode()).isEqualTo(200);
+        assertThat(result.getResult()).isFalse();
+    }
 }

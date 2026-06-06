@@ -1,5 +1,7 @@
 package org.jeecg.modules.content.channel.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.modules.content.channel.entity.ChannelGovernanceLog;
 import org.jeecg.modules.content.channel.enums.GovernanceAction;
 import org.jeecg.modules.content.channel.mapper.ChannelGovernanceLogMapper;
@@ -11,8 +13,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * 频道治理日志服务测试
@@ -58,5 +64,33 @@ class ChannelGovernanceLogServiceTest {
         ArgumentCaptor<ChannelGovernanceLog> captor = ArgumentCaptor.forClass(ChannelGovernanceLog.class);
         verify(logMapper).insert(captor.capture());
         assertThat(captor.getValue().getAction()).isEqualTo(GovernanceAction.REMOVE.getCode());
+    }
+
+    @Test
+    void should_list_by_channel() {
+        ChannelGovernanceLog log = new ChannelGovernanceLog();
+        log.setId("log1");
+        Page<ChannelGovernanceLog> page = new Page<>(1, 20);
+        page.setRecords(List.of(log));
+        page.setTotal(1);
+        when(logMapper.selectPage(any(), any())).thenReturn(page);
+
+        IPage<ChannelGovernanceLog> result = logService.listByChannel("ch1", null, 1, 20);
+
+        assertThat(result.getRecords()).hasSize(1);
+        verify(logMapper).selectPage(any(), any());
+    }
+
+    @Test
+    void should_list_by_channel_with_action_filter() {
+        Page<ChannelGovernanceLog> page = new Page<>(1, 20);
+        page.setRecords(List.of());
+        page.setTotal(0);
+        when(logMapper.selectPage(any(), any())).thenReturn(page);
+
+        IPage<ChannelGovernanceLog> result = logService.listByChannel("ch1", GovernanceAction.MUTE.getCode(), 1, 20);
+
+        assertThat(result.getRecords()).isEmpty();
+        verify(logMapper).selectPage(any(), any());
     }
 }

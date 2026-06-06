@@ -9,6 +9,9 @@ import org.jeecg.modules.content.channel.enums.MemberRole;
 import org.jeecg.modules.content.channel.service.ChannelJoinApplicationService;
 import org.jeecg.modules.content.channel.service.ChannelMemberListService;
 import org.jeecg.modules.content.channel.service.ChannelMemberService;
+import org.jeecg.modules.content.channel.service.ChannelMuteService;
+import org.jeecg.modules.content.channel.service.ChannelSubscriptionService;
+import org.jeecg.modules.content.channel.vo.UserChannelRelationVO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +41,10 @@ class ChannelMemberControllerTest {
     private ChannelMemberListService memberListService;
     @Mock
     private ChannelJoinApplicationService applicationService;
+    @Mock
+    private ChannelSubscriptionService subscriptionService;
+    @Mock
+    private ChannelMuteService muteService;
 
     @InjectMocks
     private ChannelMemberController controller;
@@ -147,5 +154,57 @@ class ChannelMemberControllerTest {
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.getMessage()).isEqualTo("已拒绝");
         verify(applicationService).reject("app1", "admin1", "不符合条件");
+    }
+
+    @Test
+    void should_get_user_channel_relation_as_member() {
+        setUserContext("user1");
+
+        ChannelMember member = new ChannelMember();
+        member.setRole(MemberRole.MEMBER.getCode());
+        when(memberService.getByChannelAndUser("ch1", "user1")).thenReturn(member);
+        when(subscriptionService.isSubscribed("ch1", "user1")).thenReturn(true);
+        when(muteService.isMuted("ch1", "user1")).thenReturn(false);
+
+        Result<UserChannelRelationVO> result = controller.getUserChannelRelation("ch1");
+
+        assertThat(result.getCode()).isEqualTo(200);
+        assertThat(result.getResult().getIsMember()).isTrue();
+        assertThat(result.getResult().getRole()).isEqualTo(MemberRole.MEMBER.getCode());
+        assertThat(result.getResult().getIsSubscribed()).isTrue();
+        assertThat(result.getResult().getIsMuted()).isFalse();
+    }
+
+    @Test
+    void should_get_user_channel_relation_as_non_member() {
+        setUserContext("user1");
+
+        when(memberService.getByChannelAndUser("ch1", "user1")).thenReturn(null);
+        when(subscriptionService.isSubscribed("ch1", "user1")).thenReturn(false);
+        when(muteService.isMuted("ch1", "user1")).thenReturn(false);
+
+        Result<UserChannelRelationVO> result = controller.getUserChannelRelation("ch1");
+
+        assertThat(result.getCode()).isEqualTo(200);
+        assertThat(result.getResult().getIsMember()).isFalse();
+        assertThat(result.getResult().getRole()).isNull();
+        assertThat(result.getResult().getIsSubscribed()).isFalse();
+        assertThat(result.getResult().getIsMuted()).isFalse();
+    }
+
+    @Test
+    void should_get_user_channel_relation_when_muted() {
+        setUserContext("user1");
+
+        ChannelMember member = new ChannelMember();
+        member.setRole(MemberRole.MEMBER.getCode());
+        when(memberService.getByChannelAndUser("ch1", "user1")).thenReturn(member);
+        when(subscriptionService.isSubscribed("ch1", "user1")).thenReturn(true);
+        when(muteService.isMuted("ch1", "user1")).thenReturn(true);
+
+        Result<UserChannelRelationVO> result = controller.getUserChannelRelation("ch1");
+
+        assertThat(result.getCode()).isEqualTo(200);
+        assertThat(result.getResult().getIsMuted()).isTrue();
     }
 }

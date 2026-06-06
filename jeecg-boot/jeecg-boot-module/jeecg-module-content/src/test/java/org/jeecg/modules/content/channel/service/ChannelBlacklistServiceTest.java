@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,5 +61,28 @@ class ChannelBlacklistServiceTest {
         blacklistService.removeFromBlacklist("ch1", "user1", "admin1");
 
         verify(blacklistMapper).deleteById("bl1");
+    }
+
+    @Test
+    void should_list_by_channel() {
+        ChannelBlacklist entry1 = new ChannelBlacklist();
+        entry1.setId("bl1");
+        ChannelBlacklist entry2 = new ChannelBlacklist();
+        entry2.setId("bl2");
+        when(blacklistMapper.selectList(any())).thenReturn(List.of(entry1, entry2));
+
+        List<ChannelBlacklist> result = blacklistService.listByChannel("ch1");
+
+        assertThat(result).hasSize(2);
+        verify(blacklistMapper).selectList(any());
+    }
+
+    @Test
+    void should_list_by_channel_return_empty_when_no_entries() {
+        when(blacklistMapper.selectList(any())).thenReturn(List.of());
+
+        List<ChannelBlacklist> result = blacklistService.listByChannel("ch1");
+
+        assertThat(result).isEmpty();
     }
 }

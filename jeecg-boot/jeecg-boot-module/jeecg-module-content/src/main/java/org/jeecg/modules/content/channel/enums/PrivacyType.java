@@ -16,4 +16,13 @@ public enum PrivacyType {
     @JsonValue
     private final int code;
     private final String desc;
+
+    public static PrivacyType fromCode(int code) {
+        for (PrivacyType type : values()) {
+            if (type.code == code) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("无效的隐私设置值: " + code);
+    }
 }

@@ -59,4 +59,11 @@ public class ChannelBlacklistServiceImpl implements ChannelBlacklistService {
             .map(ChannelBlacklist::getUserId)
             .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ChannelBlacklist> listByChannel(String channelId) {
+        return blacklistMapper.selectList(new LambdaQueryWrapper<ChannelBlacklist>()
+            .eq(ChannelBlacklist::getChannelId, channelId)
+            .orderByDesc(ChannelBlacklist::getCreateTime));
+    }
 }

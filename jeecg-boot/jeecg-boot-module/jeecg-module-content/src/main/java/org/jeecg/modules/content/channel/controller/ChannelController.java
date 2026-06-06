@@ -13,7 +13,13 @@ import org.jeecg.modules.content.channel.dto.UpdateChannelDTO;
 import org.jeecg.modules.content.channel.entity.Channel;
 import org.jeecg.modules.content.channel.entity.ChannelTransfer;
 import org.jeecg.modules.content.channel.enums.ChannelType;
+import org.jeecg.modules.content.channel.enums.JoinMethod;
+import org.jeecg.modules.content.channel.enums.PrivacyType;
 import org.jeecg.modules.content.channel.req.ChannelListQuery;
+import org.jeecg.modules.content.channel.req.UpdateJoinMethodReq;
+import org.jeecg.modules.content.channel.req.UpdatePrivacyReq;
+import org.jeecg.modules.content.channel.service.ChannelJoinMethodService;
+import org.jeecg.modules.content.channel.service.ChannelPrivacyService;
 import org.jeecg.modules.content.channel.service.ChannelService;
 import org.jeecg.modules.content.channel.util.ChannelConvertUtil;
 import org.jeecg.modules.content.channel.service.ChannelTransferService;
@@ -41,6 +47,12 @@ public class ChannelController {
 
     @Resource
     private ChannelTransferService channelTransferService;
+
+    @Resource
+    private ChannelPrivacyService channelPrivacyService;
+
+    @Resource
+    private ChannelJoinMethodService channelJoinMethodService;
 
     @PostMapping("/create")
     @Operation(summary = "创建频道")
@@ -171,6 +183,34 @@ public class ChannelController {
     public Result<Void> cancelDelete(@PathVariable String id) {
         String userId = SecureUtil.currentUser().getId();
         channelBizManageService.cancelDelete(id, userId);
+        return Result.OK();
+    }
+
+    @PutMapping("/privacy")
+    @Operation(summary = "更新隐私设置")
+    public Result<Void> updatePrivacy(@Valid @RequestBody UpdatePrivacyReq req) {
+        String userId = SecureUtil.currentUser().getId();
+        PrivacyType privacyType;
+        try {
+            privacyType = PrivacyType.fromCode(req.getPrivacy());
+        } catch (IllegalArgumentException e) {
+            return Result.error(e.getMessage());
+        }
+        channelPrivacyService.updatePrivacy(req.getChannelId(), privacyType, userId);
+        return Result.OK();
+    }
+
+    @PutMapping("/join-method")
+    @Operation(summary = "更新加入方式")
+    public Result<Void> updateJoinMethod(@Valid @RequestBody UpdateJoinMethodReq req) {
+        String userId = SecureUtil.currentUser().getId();
+        JoinMethod joinMethod;
+        try {
+            joinMethod = JoinMethod.fromCode(req.getJoinMethod());
+        } catch (IllegalArgumentException e) {
+            return Result.error(e.getMessage());
+        }
+        channelJoinMethodService.updateJoinMethod(req.getChannelId(), joinMethod, userId);
         return Result.OK();
     }
 

@@ -23,6 +23,13 @@ public class ChannelSubscriptionController {
     @Resource
     private ChannelSubscriptionGroupService groupService;
 
+    @Operation(summary = "订阅状态查询")
+    @GetMapping("/status/{channelId}")
+    public Result<Boolean> getStatus(@PathVariable String channelId) {
+        String userId = SecureUtil.currentUser().getId();
+        return Result.OK(subscriptionService.isSubscribed(channelId, userId));
+    }
+
     @Operation(summary = "订阅频道")
     @PostMapping("/subscribe")
     public Result<String> subscribe(@RequestParam String channelId) {

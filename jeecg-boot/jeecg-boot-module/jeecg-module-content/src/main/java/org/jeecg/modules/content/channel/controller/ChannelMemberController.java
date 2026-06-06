@@ -10,8 +10,11 @@ import org.jeecg.modules.content.channel.entity.ChannelMember;
 import org.jeecg.modules.content.channel.enums.MemberRole;
 import org.jeecg.modules.content.channel.service.ChannelJoinApplicationService;
 import org.jeecg.modules.content.channel.service.ChannelMemberListService;
+import org.jeecg.modules.content.channel.service.ChannelMuteService;
+import org.jeecg.modules.content.channel.service.ChannelSubscriptionService;
 import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.service.ChannelMemberService;
+import org.jeecg.modules.content.channel.vo.UserChannelRelationVO;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
@@ -30,6 +33,10 @@ public class ChannelMemberController {
     private ChannelMemberListService memberListService;
     @Resource
     private ChannelJoinApplicationService applicationService;
+    @Resource
+    private ChannelSubscriptionService subscriptionService;
+    @Resource
+    private ChannelMuteService muteService;
 
     @Operation(summary = "自由加入频道")
     @PostMapping("/join/free")
@@ -111,5 +118,26 @@ public class ChannelMemberController {
         String reviewerId = SecureUtil.currentUser().getId();
         applicationService.reject(applicationId, reviewerId, reason);
         return Result.OK("已拒绝");
+    }
+
+    @Operation(summary = "用户频道关系查询")
+    @GetMapping("/relation")
+    public Result<UserChannelRelationVO> getUserChannelRelation(@RequestParam String channelId) {
+        String userId = SecureUtil.currentUser().getId();
+        UserChannelRelationVO vo = new UserChannelRelationVO();
+        vo.setChannelId(channelId);
+        vo.setUserId(userId);
+
+        ChannelMember member = memberService.getByChannelAndUser(channelId, userId);
+        if (member != null) {
+            vo.setIsMember(true);
+            vo.setRole(member.getRole());
+        } else {
+            vo.setIsMember(false);
+        }
+        vo.setIsMuted(muteService.isMuted(channelId, userId));
+        vo.setIsSubscribed(subscriptionService.isSubscribed(channelId, userId));
+
+        return Result.OK(vo);
     }
 }

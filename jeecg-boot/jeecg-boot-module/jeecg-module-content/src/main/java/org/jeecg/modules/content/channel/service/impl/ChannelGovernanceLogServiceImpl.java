@@ -1,5 +1,8 @@
 package org.jeecg.modules.content.channel.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.modules.content.channel.entity.ChannelGovernanceLog;
 import org.jeecg.modules.content.channel.enums.GovernanceAction;
 import org.jeecg.modules.content.channel.mapper.ChannelGovernanceLogMapper;
@@ -24,5 +27,16 @@ public class ChannelGovernanceLogServiceImpl implements ChannelGovernanceLogServ
         log.setReason(reason);
         log.setExtraData(extraData);
         governanceLogMapper.insert(log);
+    }
+
+    @Override
+    public IPage<ChannelGovernanceLog> listByChannel(String channelId, Integer action, int pageNum, int pageSize) {
+        LambdaQueryWrapper<ChannelGovernanceLog> wrapper = new LambdaQueryWrapper<ChannelGovernanceLog>()
+            .eq(ChannelGovernanceLog::getChannelId, channelId)
+            .orderByDesc(ChannelGovernanceLog::getCreateTime);
+        if (action != null) {
+            wrapper.eq(ChannelGovernanceLog::getAction, action);
+        }
+        return governanceLogMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
     }
 }

@@ -10,6 +10,12 @@ import org.jeecg.modules.content.channel.entity.ChannelTransfer;
 import org.jeecg.modules.content.channel.enums.ChannelType;
 import org.jeecg.modules.content.channel.enums.TransferStatus;
 import org.jeecg.modules.content.channel.req.ChannelListQuery;
+import org.jeecg.modules.content.channel.enums.JoinMethod;
+import org.jeecg.modules.content.channel.enums.PrivacyType;
+import org.jeecg.modules.content.channel.req.UpdateJoinMethodReq;
+import org.jeecg.modules.content.channel.req.UpdatePrivacyReq;
+import org.jeecg.modules.content.channel.service.ChannelJoinMethodService;
+import org.jeecg.modules.content.channel.service.ChannelPrivacyService;
 import org.jeecg.modules.content.channel.service.ChannelService;
 import org.jeecg.modules.content.channel.service.ChannelTransferService;
 import org.jeecg.modules.content.channel.biz.ChannelBizManageService;
@@ -45,6 +51,10 @@ class ChannelControllerTest {
     private ChannelService channelService;
     @Mock
     private ChannelTransferService channelTransferService;
+    @Mock
+    private ChannelPrivacyService channelPrivacyService;
+    @Mock
+    private ChannelJoinMethodService channelJoinMethodService;
 
     @InjectMocks
     private ChannelController controller;
@@ -278,5 +288,81 @@ class ChannelControllerTest {
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getResult()).isNull();
+    }
+
+    // ===== updatePrivacy =====
+
+    @Test
+    void should_update_privacy() {
+        UpdatePrivacyReq req = new UpdatePrivacyReq();
+        req.setChannelId("ch1");
+        req.setPrivacy(1);
+
+        Result<Void> result = controller.updatePrivacy(req);
+
+        assertThat(result.isSuccess()).isTrue();
+        verify(channelPrivacyService).updatePrivacy("ch1", PrivacyType.PUBLIC, "user1");
+    }
+
+    @Test
+    void should_update_privacy_to_private() {
+        UpdatePrivacyReq req = new UpdatePrivacyReq();
+        req.setChannelId("ch1");
+        req.setPrivacy(2);
+
+        Result<Void> result = controller.updatePrivacy(req);
+
+        assertThat(result.isSuccess()).isTrue();
+        verify(channelPrivacyService).updatePrivacy("ch1", PrivacyType.PRIVATE, "user1");
+    }
+
+    @Test
+    void should_reject_invalid_privacy_code() {
+        UpdatePrivacyReq req = new UpdatePrivacyReq();
+        req.setChannelId("ch1");
+        req.setPrivacy(99);
+
+        Result<Void> result = controller.updatePrivacy(req);
+
+        assertThat(result.getCode()).isEqualTo(500);
+        assertThat(result.getMessage()).contains("无效的隐私设置值");
+    }
+
+    // ===== updateJoinMethod =====
+
+    @Test
+    void should_update_join_method() {
+        UpdateJoinMethodReq req = new UpdateJoinMethodReq();
+        req.setChannelId("ch1");
+        req.setJoinMethod(1);
+
+        Result<Void> result = controller.updateJoinMethod(req);
+
+        assertThat(result.isSuccess()).isTrue();
+        verify(channelJoinMethodService).updateJoinMethod("ch1", JoinMethod.FREE, "user1");
+    }
+
+    @Test
+    void should_update_join_method_to_review() {
+        UpdateJoinMethodReq req = new UpdateJoinMethodReq();
+        req.setChannelId("ch1");
+        req.setJoinMethod(2);
+
+        Result<Void> result = controller.updateJoinMethod(req);
+
+        assertThat(result.isSuccess()).isTrue();
+        verify(channelJoinMethodService).updateJoinMethod("ch1", JoinMethod.REVIEW, "user1");
+    }
+
+    @Test
+    void should_reject_invalid_join_method_code() {
+        UpdateJoinMethodReq req = new UpdateJoinMethodReq();
+        req.setChannelId("ch1");
+        req.setJoinMethod(99);
+
+        Result<Void> result = controller.updateJoinMethod(req);
+
+        assertThat(result.getCode()).isEqualTo(500);
+        assertThat(result.getMessage()).contains("无效的加入方式值");
     }
 }
