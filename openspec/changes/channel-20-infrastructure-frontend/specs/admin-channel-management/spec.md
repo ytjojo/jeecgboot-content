@@ -3,7 +3,7 @@
 > **API 路径**:
 > - 创建系统频道: `POST /api/v1/admin/channels/create-system` (已存在)
 > - 审核频道: `POST /api/v1/admin/channels/{id}/review` (已存在)
-> - 频道列表查询: 需后端提供管理端列表接口（待确认）
+> - 频道列表查询: `GET /api/v1/admin/channels/list` (已存在 — ChannelAdminController.listAllChannels)
 > **Controller**: ChannelAdminController
 > **前端封装**: `src/api/content/channel/index.ts` - `createSystemChannel()`, `reviewChannel()`
 
