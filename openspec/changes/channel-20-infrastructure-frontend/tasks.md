@@ -1,13 +1,13 @@
 ## 1. 基础设施层
 
-- [ ] 1.1 创建 API 封装层 `src/api/content/channel/index.ts` 和 `src/api/content/channel/model/channelModel.ts`，封装全部 15 个接口（创建、列表、详情、编辑、删除、转让、审核、校验等），使用 defHttp
-- [ ] 1.2 创建 Pinia Store `src/store/modules/channel.ts`，定义 currentChannel、channelList、reviewQueue、channelTypeOptions、channelStatusOptions 状态
-- [ ] 1.3 创建共用枚举类型定义：ChannelType（system/personal/organization）、ChannelStatus（DRAFT/PENDING_REVIEW/ACTIVE/REJECTED/DELETE_COOLING/DELETED）
-- [ ] 1.4 创建 ChannelTypeTag 组件（根据类型显示不同颜色 Tag：system=蓝、personal=绿、organization=紫）
-- [ ] 1.5 创建 ChannelStatusTag 组件（根据状态显示不同颜色和文案）
-- [ ] 1.6 创建 ChannelForm 组件（频道创建/编辑表单，根据频道类型动态渲染字段，schema 驱动）
-- [ ] 1.7 注册用户端路由：`/content/channel/create`、`/content/channel/list`、`/content/channel/manage/:id`
-- [ ] 1.8 注册后台端路由：`/content/channel/admin`、`/content/channel/review`
+- [x] 1.1 创建 API 封装层 `src/api/content/channel/index.ts` 和 `src/api/content/channel/model/channelModel.ts`，封装全部 15 个接口（创建、列表、详情、编辑、删除、转让、审核、校验等），使用 defHttp
+- [x] 1.2 创建 Pinia Store `src/store/modules/channel.ts`，定义 currentChannel、channelList、reviewQueue、channelTypeOptions、channelStatusOptions 状态
+- [x] 1.3 创建共用枚举类型定义：ChannelType（system/personal/organization）、ChannelStatus（DRAFT/PENDING_REVIEW/ACTIVE/REJECTED/DELETE_COOLING/DELETED）
+- [x] 1.4 创建 ChannelTypeTag 组件（根据类型显示不同颜色 Tag：system=蓝、personal=绿、organization=紫）
+- [x] 1.5 创建 ChannelStatusTag 组件（根据状态显示不同颜色和文案）
+- [x] 1.6 创建 ChannelForm 组件（频道创建/编辑表单，根据频道类型动态渲染字段，schema 驱动）
+- [x] 1.7 注册用户端路由：`/content/channel/create`、`/content/channel/list`、`/content/channel/manage/:id`
+- [x] 1.8 注册后台端路由：`/content/channel/admin`、`/content/channel/review`
 
 ## 2. 频道创建
 
