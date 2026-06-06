@@ -129,4 +129,57 @@ class ChannelServiceTest {
 
         assertThat(result).isNotNull();
     }
+
+    // ===== listAllChannels (admin) =====
+
+    @Test
+    void should_list_all_channels_with_empty_query() {
+        Page<Channel> page = new Page<>(1, 20);
+        when(channelMapper.selectPage(any(Page.class), any(LambdaQueryWrapper.class)))
+            .thenReturn(new Page<>());
+
+        ChannelListQuery query = new ChannelListQuery();
+        IPage<Channel> result = channelService.listAllChannels(page, query);
+
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    void should_list_all_channels_with_type_filter() {
+        Page<Channel> page = new Page<>(1, 20);
+        when(channelMapper.selectPage(any(Page.class), any(LambdaQueryWrapper.class)))
+            .thenReturn(new Page<>());
+
+        ChannelListQuery query = new ChannelListQuery();
+        query.setChannelType("system");
+        IPage<Channel> result = channelService.listAllChannels(page, query);
+
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    void should_list_all_channels_with_status_filter() {
+        Page<Channel> page = new Page<>(1, 20);
+        when(channelMapper.selectPage(any(Page.class), any(LambdaQueryWrapper.class)))
+            .thenReturn(new Page<>());
+
+        ChannelListQuery query = new ChannelListQuery();
+        query.setStatus("ACTIVE");
+        IPage<Channel> result = channelService.listAllChannels(page, query);
+
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    void should_list_all_channels_with_keyword_filter() {
+        Page<Channel> page = new Page<>(1, 20);
+        when(channelMapper.selectPage(any(Page.class), any(LambdaQueryWrapper.class)))
+            .thenReturn(new Page<>());
+
+        ChannelListQuery query = new ChannelListQuery();
+        query.setKeyword("test");
+        IPage<Channel> result = channelService.listAllChannels(page, query);
+
+        assertThat(result).isNotNull();
+    }
 }

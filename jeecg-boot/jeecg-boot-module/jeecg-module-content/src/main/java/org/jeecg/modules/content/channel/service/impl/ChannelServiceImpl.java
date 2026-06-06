@@ -67,6 +67,33 @@ public class ChannelServiceImpl extends JeecgServiceImpl<ChannelMapper, Channel>
         return baseMapper.selectPage(page, wrapper);
     }
 
+    @Override
+    public IPage<Channel> listAllChannels(Page<Channel> page, ChannelListQuery query) {
+        LambdaQueryWrapper<Channel> wrapper = new LambdaQueryWrapper<>();
+        wrapper.ne(Channel::getStatus, ChannelStatus.DELETED);
+
+        if (StringUtils.isNotBlank(query.getChannelType())) {
+            ChannelType type = safeParseChannelType(query.getChannelType());
+            if (type != null) {
+                wrapper.eq(Channel::getChannelType, type);
+            }
+        }
+        if (StringUtils.isNotBlank(query.getStatus())) {
+            ChannelStatus status = safeParseChannelStatus(query.getStatus());
+            if (status != null) {
+                wrapper.eq(Channel::getStatus, status);
+            }
+        }
+        if (StringUtils.isNotBlank(query.getKeyword())) {
+            wrapper.like(Channel::getName, query.getKeyword());
+        }
+
+        // PendingReview 和 Rejected 置顶，然后按创建时间倒序
+        wrapper.orderByDesc(Channel::getStatus, Channel::getCreateTime);
+
+        return baseMapper.selectPage(page, wrapper);
+    }
+
     private ChannelType safeParseChannelType(String value) {
         try {
             return ChannelType.valueOf(value.toUpperCase());

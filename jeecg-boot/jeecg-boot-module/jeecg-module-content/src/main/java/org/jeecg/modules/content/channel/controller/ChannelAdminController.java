@@ -1,5 +1,7 @@
 package org.jeecg.modules.content.channel.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +12,7 @@ import org.jeecg.modules.content.channel.dto.CreateChannelDTO;
 import org.jeecg.modules.content.channel.entity.Channel;
 import org.jeecg.modules.content.channel.enums.ChannelType;
 import org.jeecg.modules.content.channel.enums.ReviewResult;
+import org.jeecg.modules.content.channel.req.ChannelListQuery;
 import org.jeecg.modules.content.channel.service.ChannelService;
 import org.jeecg.modules.content.channel.util.ChannelConvertUtil;
 import org.jeecg.modules.content.channel.vo.ChannelVO;
@@ -47,5 +50,16 @@ public class ChannelAdminController {
         String reviewerId = SecureUtil.currentUser().getId();
         channelBizManageService.reviewChannel(id, reviewerId, result, reason);
         return Result.OK();
+    }
+
+    @GetMapping("/list")
+    @Operation(summary = "查询频道列表（后台）")
+    public Result<IPage<ChannelVO>> listAllChannels(
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "20") Integer size,
+            ChannelListQuery query) {
+        Page<Channel> page = new Page<>(current, size);
+        IPage<Channel> result = channelService.listAllChannels(page, query);
+        return Result.OK(result.convert(ChannelConvertUtil::toVO));
     }
 }

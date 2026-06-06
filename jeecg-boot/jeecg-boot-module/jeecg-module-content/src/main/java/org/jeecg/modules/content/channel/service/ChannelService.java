@@ -24,4 +24,12 @@ public interface ChannelService extends IService<Channel> {
      * @return 分页结果
      */
     IPage<Channel> listMyChannels(Page<Channel> page, String userId, ChannelListQuery query);
+
+    /**
+     * 查询所有频道列表（后台管理用，不限制 owner）
+     * @param page 分页参数
+     * @param query 查询条件
+     * @return 分页结果
+     */
+    IPage<Channel> listAllChannels(Page<Channel> page, ChannelListQuery query);
 }
