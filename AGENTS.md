@@ -43,7 +43,7 @@
 
 ## 单元测试规范
 - 后端测试规范：`docs/agent-context/springboot-testing-conventions.md`
-- 前端测试规范：（待补充）
+- 前端测试规范：`docs/agent-context/frontend-testing-conventions.md`
 
 ## Git Worktree & 分支管理
 
@@ -63,12 +63,35 @@
 - **禁止**从 worktree 复制文件到主 worktree 后重新 commit — 这会丢失 commit 元数据（author、timestamp）且绕过 git 合并机制
 - 如需拆分大 commit 为多个逻辑提交：先在 worktree 内用 `git rebase -i` 或 `git reset` 拆分，再 cherry-pick 到主分支
 
+### Worktree 命名规则（防冲突）
+
+**硬规则：worktree 名称必须唯一，禁止使用通用名（如 `p0-apis`、`feature`、`fix`）。**
+
+命名格式：`<简短描述>-<6位随机hex>`
+- 示例：`p0-apis-a3f2c1`、`channel-gov-7b9e4d`、`user-status-f1a8c2`
+- 创建前**必须**执行 `git worktree list` 检查名称是否已存在
+- 若名称冲突，追加随机后缀而非复用
+
+### Worktree 所有权标记
+
+**硬规则：创建 worktree 后立即写入所有权文件。**
+
+```bash
+# 创建后立即执行
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) $(whoami)" > <worktree-path>/.worktree-owner
+```
+
+用途：清理前读取此文件确认所有权，避免误删其他 agent 的 worktree。
+
 ### Worktree 生命周期（创建 → 完成 → 清理）
 
 **硬规则：创建 worktree 的 agent 负责其完整生命周期，包括最终清理。**
 
 流程：
 1. **创建**：`/using-git-worktrees` or  `EnterWorktree` 生成 worktree + 分支
+   - 名称必须符合命名规则（含随机后缀）
+   - 创建前执行 `git worktree list` 确认无冲突
+   - 创建后立即写入 `.worktree-owner` 文件
 2. **开发**：在 worktree 内 commit 所有改动
 3. **合并**：回主分支执行 `git merge <feature-branch>`
 4. **验证**：在主分支跑模块全量测试，确认通过
@@ -76,27 +99,83 @@
 
 **禁止**：开发完成后遗留未清理的 worktree。合并回主分支后必须立即删除 worktree 和 feature 分支。
 
-**权限边界**：每个 agent 只清理自己创建的 worktree，不得删除其他 agent 的 worktree。误删会导致其他 agent 丢失工作上下文。
+### Worktree 清理安全规则
 
-**检查机制**：主 agent 在任务结束前执行 `git worktree list`，仅确认自己创建的 worktree 已清理，忽略其他 worktree。
+**硬规则：禁止 `git worktree remove --force`，除非满足以下条件之一。**
+
+允许 `--force` 的场景：
+1. **已确认所有权**：读取 `.worktree-owner` 确认是当前 agent 创建的
+2. **已确认合并**：`git branch --merged` 显示该分支已合并到来源分支
+3. **用户明确要求**：用户直接指示删除该 worktree
+
+清理前检查清单：
+```bash
+# 1. 检查是否是自己的 worktree
+cat <worktree-path>/.worktree-owner
+
+# 2. 检查分支是否已合并
+git branch --merged springboot3_content | grep <branch-name>
+
+# 3. 检查 worktree 内是否有未提交的改动
+git -C <worktree-path> status --short
+```
+
+若以上任一检查失败 → **停止清理，报告给用户**。
+
+### Worktree 并发安全
+
+**场景**：多个 agent session 同时运行，各自创建 worktree。
+
+- `git worktree list` 中以 `locked` 标记的 worktree 属于其他活跃 session，**绝对不可触碰**
+- 未锁定的 worktree 也需通过 `.worktree-owner` 确认所有权后再操作
+- 若发现孤立 worktree（无 owner 文件、分支已合并、无活跃 session），报告给用户决定是否清理
 
 ## 代码实现 Workflow
 
 ### 硬规则：必须使用 worktree
 - **所有代码开发任务必须在 worktree 中进行**，禁止直接在主分支上修改代码
-- 使用 subagent-driven-development 且新建 worktree 进行开发实现
-  `/using-git-worktrees`
-  `/superpowers:subagent-driven-development`
 - **启动前检查**：开始编码前必须执行 `git worktree list` 确认当前是否在 worktree 中，不在则立即创建
 
-### 多步任务 / apply 操作
-- 执行 `/opsx:apply` `/openspec-apply-change` 或多步多task代码任务时，强制使用测试驱动开发
-  `/superpowers:test-driven-development`
+### 硬规则：代码开发必须使用 `/superpowers:subagent-driven-development`
+
+**所有代码开发任务默认使用 `/superpowers:subagent-driven-development` 进行编排，不得由主 agent 直接编写代码。**
+
+跳过条件（必须**全部**满足才可跳过）：
+- a. 单文件修改（涉及 < 3 个文件）
+- b. 无新增文件
+- c. 无测试编写
+- d. 修改量 < 30 行
+
+不满足上述任一条件 → 必须调用 `/superpowers:subagent-driven-development`。
+
+启动流程：
+1. 创建 worktree（`/using-git-worktrees` 或 `EnterWorktree`）
+2. 调用 `/superpowers:subagent-driven-development` 编排实现任务
+3. 内部管理 subagent 分配、代码编写、测试编写
+
+### 硬规则：代码开发必须使用 `/superpowers:test-driven-development`
+
+**所有代码开发任务必须使用 `/superpowers:test-driven-development` 流程。**
+
+适用范围：
+- 所有 `/opsx:apply`、`/openspec-apply-change` 操作
+- 所有多步代码任务（3+ 步骤）
+- 所有涉及新增文件或修改 3+ 文件的代码任务
+
+调用方式：在 `/superpowers:subagent-driven-development` 编排中或独立调用 `/superpowers:test-driven-development`
+
+流程要求：
+1. **先写测试** — 测试定义行为预期
+2. **红灯** — 运行测试，确认失败（测试有效）
+3. **绿灯** — 写最少代码让测试通过
+4. **重构** — 优化代码，保持测试通过
+5. **覆盖率验证** — 变更代码行覆盖率 ≥ 90%
 
 ### 完成标准（Definition of Done）
 每个代码任务必须按顺序完成以下步骤，**不得跳过**：
 
-1. **实现** — 完成功能代码
+0. **流程检查** — 确认是否使用了 `/superpowers:subagent-driven-development` 和 `/superpowers:test-driven-development`（符合跳过条件的除外）
+1. **实现** — 完成功能代码（通过 `/superpowers:subagent-driven-development` 编排和 `/superpowers:test-driven-development` 流程）
 2. **Code Review** — 检查代码质量、命名、边界条件、安全性
 3. **测试覆盖率** — 检查变更代码的行覆盖率，**必须 ≥ 90%**。不满足则补充测试代码，直至达标且全量测试通过
 4. **单元测试** — 执行**模块级全量测试**（`mvn test -pl <module> -am`），确保 **100% 通过**，禁止带红测试提交
@@ -106,6 +185,7 @@
 
 ### 硬规则：DoD 必须内嵌到任务列表
 - 任何 apply/实现 操作的 task 文件，**最后必须包含 DoD 收尾 tasks**：
+  - `[ ] 流程确认 — 确认使用了 /superpowers:subagent-driven-development 和 /superpowers:test-driven-development`
   - `[ ] Code Review — subagent 执行代码质量审查`
   - `[ ] 测试覆盖率检查 — 变更代码行覆盖率 ≥ 90%`
   - `[ ] 全量单元测试 — 模块级 100% 通过`
