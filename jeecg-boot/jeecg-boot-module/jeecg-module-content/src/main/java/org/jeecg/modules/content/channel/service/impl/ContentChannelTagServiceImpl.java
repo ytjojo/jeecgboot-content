@@ -46,6 +46,26 @@ public class ContentChannelTagServiceImpl
     }
 
     @Override
+    public void updateTag(String tagId, String name) {
+        ContentChannelTag tag = getById(tagId);
+        if (tag == null) {
+            throw new JeecgBootException("标签不存在");
+        }
+        validateName(name, tag.getChannelId());
+        // 检查同频道内是否重名（排除自身）
+        long count = count(Wrappers.<ContentChannelTag>lambdaQuery()
+                .eq(ContentChannelTag::getChannelId, tag.getChannelId())
+                .eq(ContentChannelTag::getName, name)
+                .eq(ContentChannelTag::getStatus, 1)
+                .ne(ContentChannelTag::getId, tagId));
+        if (count > 0) {
+            throw new JeecgBootException("该标签名称已存在");
+        }
+        tag.setName(name);
+        updateById(tag);
+    }
+
+    @Override
     public void deleteTag(String tagId) {
         ContentChannelTag tag = getById(tagId);
         if (tag == null) {

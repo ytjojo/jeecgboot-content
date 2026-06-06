@@ -1,5 +1,7 @@
 package org.jeecg.modules.content.channel.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,6 +47,21 @@ public class ChannelExportController {
             return Result.error("导出任务不存在");
         }
         return Result.OK(vo);
+    }
+
+    @GetMapping("/history")
+    @Operation(summary = "查询导出历史")
+    public Result<Page<ChannelExportTask>> getExportHistory(
+            @Parameter(description = "频道ID") @RequestParam(required = false) String channelId,
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "10") Integer size) {
+        LambdaQueryWrapper<ChannelExportTask> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ChannelExportTask::getUserId, getCurrentUserId());
+        if (channelId != null) {
+            wrapper.eq(ChannelExportTask::getChannelId, channelId);
+        }
+        wrapper.orderByDesc(ChannelExportTask::getCreatedTime);
+        return Result.OK(exportTaskService.page(new Page<>(current, size), wrapper));
     }
 
     @GetMapping("/download")

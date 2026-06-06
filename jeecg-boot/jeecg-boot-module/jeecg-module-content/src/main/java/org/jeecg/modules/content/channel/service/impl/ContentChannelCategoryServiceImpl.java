@@ -117,6 +117,16 @@ public class ContentChannelCategoryServiceImpl
         updateById(category);
     }
 
+    @Override
+    public void enableCategory(String categoryId) {
+        ContentChannelCategory category = getById(categoryId);
+        if (category == null) {
+            throw new JeecgBootException("分类不存在");
+        }
+        category.setStatus(1);
+        updateById(category);
+    }
+
     private void validateName(String name, String excludeId) {
         if (name == null || name.isBlank()) {
             throw new JeecgBootException("分类名称不能为空");

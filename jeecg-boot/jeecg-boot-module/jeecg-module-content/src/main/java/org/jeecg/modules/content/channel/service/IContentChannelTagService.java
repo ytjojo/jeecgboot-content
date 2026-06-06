@@ -11,6 +11,8 @@ public interface IContentChannelTagService extends IService<ContentChannelTag> {
 
     ContentChannelTag createTag(ChannelTagCreateReq req);
 
+    void updateTag(String tagId, String name);
+
     void deleteTag(String tagId);
 
     List<ChannelTagVO> listByChannel(String channelId);

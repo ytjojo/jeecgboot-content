@@ -3,6 +3,7 @@ package org.jeecg.modules.content.channel.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
@@ -35,6 +36,17 @@ public class ChannelReviewController {
 
     @Resource
     private ChannelMergeBiz mergeBiz;
+
+    @GetMapping("/detail/{id}")
+    @Operation(summary = "查询审核详情")
+    public Result<ChannelReviewVO> getReviewDetail(
+            @Parameter(description = "审核记录ID", required = true) @PathVariable String id) {
+        ChannelReview review = reviewService.getById(id);
+        if (review == null) {
+            return Result.error("审核记录不存在");
+        }
+        return Result.OK(convertToVO(review));
+    }
 
     @GetMapping("/list")
     @Operation(summary = "审核队列列表")

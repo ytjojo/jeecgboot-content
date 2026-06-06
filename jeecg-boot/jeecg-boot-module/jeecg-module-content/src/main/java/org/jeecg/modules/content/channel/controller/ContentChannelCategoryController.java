@@ -47,4 +47,11 @@ public class ContentChannelCategoryController {
         categoryService.disableCategory(categoryId);
         return Result.OK();
     }
+
+    @Operation(summary = "启用分类")
+    @PostMapping("/enable")
+    public Result<Void> enableCategory(@RequestParam String categoryId) {
+        categoryService.enableCategory(categoryId);
+        return Result.OK();
+    }
 }

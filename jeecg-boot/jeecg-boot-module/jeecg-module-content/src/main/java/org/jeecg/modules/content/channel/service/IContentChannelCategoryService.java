@@ -29,4 +29,9 @@ public interface IContentChannelCategoryService extends IService<ContentChannelC
      * 停用分类（需检查关联频道）
      */
     void disableCategory(String categoryId);
+
+    /**
+     * 启用分类
+     */
+    void enableCategory(String categoryId);
 }

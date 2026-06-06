@@ -81,6 +81,13 @@ public class ChannelLifecycleController {
         return Result.OK();
     }
 
+    @PostMapping("/restore-visibility")
+    @Operation(summary = "恢复频道活跃状态")
+    public Result<Void> restoreVisibility(@Valid @RequestBody ChannelLifecycleActionReq req) {
+        lifecycleBiz.restoreActivity(req.getChannelId());
+        return Result.OK();
+    }
+
     // ===== 审计日志查询 =====
 
     @GetMapping("/logs")
@@ -133,6 +140,16 @@ public class ChannelLifecycleController {
                     appeal.getChannelId(), actionLabel,
                     req.getHandleResult() != null ? "处理说明：" + req.getHandleResult() : "");
             notificationService.sendNotification(appeal.getApplicantId(), "channel_appeal", title, content);
+        }
+        return Result.OK(appeal);
+    }
+
+    @GetMapping("/appeal/detail/{id}")
+    @Operation(summary = "查询申诉详情")
+    public Result<ChannelAppeal> getAppealDetail(@PathVariable String id) {
+        ChannelAppeal appeal = appealService.getById(id);
+        if (appeal == null) {
+            return Result.error("申诉记录不存在");
         }
         return Result.OK(appeal);
     }

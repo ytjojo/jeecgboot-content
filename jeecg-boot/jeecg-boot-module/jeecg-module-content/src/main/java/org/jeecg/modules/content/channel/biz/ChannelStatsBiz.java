@@ -9,6 +9,7 @@ import org.jeecg.modules.content.channel.mapper.ChannelContentPublishMapper;
 import org.jeecg.modules.content.channel.service.ChannelSubscriptionService;
 import org.jeecg.modules.content.channel.service.IChannelStatsService;
 import org.jeecg.modules.content.channel.vo.ChannelHotContentVO;
+import org.jeecg.modules.content.channel.vo.ChannelInteractionStatsVO;
 import org.jeecg.modules.content.channel.vo.ChannelStatsVO;
 import org.jeecg.modules.content.channel.vo.ChannelTrendVO;
 import org.jeecg.modules.content.channel.vo.ChannelUserAnalysisVO;
@@ -109,6 +110,26 @@ public class ChannelStatsBiz {
                     .build());
         }
         return result;
+    }
+
+    public ChannelInteractionStatsVO getInteractionStats(String channelId) {
+        ChannelStats stats = statsService.getLatestStats(channelId);
+        if (stats == null) {
+            return ChannelInteractionStatsVO.builder()
+                    .channelId(channelId)
+                    .likeCount(0L)
+                    .commentCount(0L)
+                    .favoriteCount(0L)
+                    .shareCount(0L)
+                    .build();
+        }
+        return ChannelInteractionStatsVO.builder()
+                .channelId(stats.getChannelId())
+                .likeCount(stats.getLikeCount())
+                .commentCount(stats.getCommentCount())
+                .favoriteCount(stats.getFavoriteCount())
+                .shareCount(stats.getShareCount())
+                .build();
     }
 
     public ChannelUserAnalysisVO getUserAnalysis(String channelId, LocalDate startDate, LocalDate endDate) {

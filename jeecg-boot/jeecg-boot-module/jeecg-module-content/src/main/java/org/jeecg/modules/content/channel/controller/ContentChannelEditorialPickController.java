@@ -1,5 +1,7 @@
 package org.jeecg.modules.content.channel.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -26,6 +28,16 @@ public class ContentChannelEditorialPickController {
     @GetMapping("/list")
     public Result<List<ChannelEditorialPickVO>> listActivePicks() {
         return Result.OK(editorialPickService.listActivePicks());
+    }
+
+    @Operation(summary = "分页查询精选列表（管理端）")
+    @GetMapping("/page")
+    public Result<Page<ContentChannelEditorialPick>> pagePicks(
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "10") Integer size) {
+        LambdaQueryWrapper<ContentChannelEditorialPick> wrapper = new LambdaQueryWrapper<>();
+        wrapper.orderByDesc(ContentChannelEditorialPick::getCreateTime);
+        return Result.OK(editorialPickService.page(new Page<>(current, size), wrapper));
     }
 
     @Operation(summary = "创建编辑精选")

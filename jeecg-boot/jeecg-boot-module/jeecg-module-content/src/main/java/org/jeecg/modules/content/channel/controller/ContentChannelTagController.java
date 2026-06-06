@@ -33,6 +33,13 @@ public class ContentChannelTagController {
         return Result.OK(tagService.createTag(req));
     }
 
+    @Operation(summary = "更新标签")
+    @PostMapping("/update")
+    public Result<Void> updateTag(@RequestParam String tagId, @RequestParam String name) {
+        tagService.updateTag(tagId, name);
+        return Result.OK();
+    }
+
     @Operation(summary = "删除标签")
     @PostMapping("/delete")
     public Result<Void> deleteTag(@RequestParam String tagId) {

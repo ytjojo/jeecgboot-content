@@ -8,6 +8,7 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.channel.biz.ChannelStatsBiz;
 import org.jeecg.modules.content.channel.constant.ChannelStatsConstant;
 import org.jeecg.modules.content.channel.vo.ChannelHotContentVO;
+import org.jeecg.modules.content.channel.vo.ChannelInteractionStatsVO;
 import org.jeecg.modules.content.channel.vo.ChannelStatsVO;
 import org.jeecg.modules.content.channel.vo.ChannelTrendVO;
 import org.jeecg.modules.content.channel.vo.ChannelUserAnalysisVO;
@@ -69,6 +70,14 @@ public class ChannelStatsController {
             @Parameter(description = "统计天数")
             @RequestParam(required = false) Integer days) {
         return Result.OK(channelStatsBiz.getHotContent(channelId, limit, days));
+    }
+
+    @GetMapping("/interaction")
+    @Operation(summary = "获取互动统计")
+    public Result<ChannelInteractionStatsVO> getInteractionStats(
+            @Parameter(description = "频道ID", required = true)
+            @RequestParam String channelId) {
+        return Result.OK(channelStatsBiz.getInteractionStats(channelId));
     }
 
     @GetMapping("/user-analysis")
