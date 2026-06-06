@@ -37,6 +37,7 @@ enum Api {
   scheduled = '/content/channel/publish/scheduled',
   scheduledList = '/content/channel/publish/scheduled/list',
   limitCheck = '/content/channel/publish/limit/check',
+  permission = '/content/channel/publish/permission',
 }
 
 /** 获取用户可发布/投稿/管理的频道列表 */
@@ -67,6 +68,19 @@ export const getScheduledList = () => defHttp.get({ url: Api.scheduledList });
 /** 预校验发布限额 */
 export const checkPublishLimit = (data: { contentId: string; channelIds: string[] }) =>
   defHttp.post({ url: Api.limitCheck, data });
+
+/** 获取频道发布权限配置 */
+export const getPublishPermission = (channelId: string) =>
+  defHttp.get({ url: `${Api.permission}/${channelId}` });
+
+/** 保存频道发布权限配置 */
+export const savePublishPermission = (data: {
+  channelId: string;
+  publishModel: string;
+  hourlyLimit?: number;
+  dailyLimit?: number;
+  minWordCount?: number;
+}) => defHttp.post({ url: Api.permission, data });
 ```
 
 ### Step 1.2: 创建 review.ts API 模块
@@ -77,8 +91,8 @@ export const checkPublishLimit = (data: { contentId: string; channelIds: string[
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  list = '/content/channel/review/list',
-  action = '/content/channel/review',
+  list = '/jeecg-boot/api/v1/content/channel/review/list',
+  action = '/jeecg-boot/api/v1/content/channel/review/action',
   stats = '/content/channel/review/stats',
 }
 
@@ -120,7 +134,7 @@ enum Api {
   contentList = '/content/channel/governance/content/list',
   editAssistHistory = '/content/channel/governance/edit-assist/history',
   recycleBinList = '/content/channel/governance/recycle-bin/list',
-  logList = '/content/channel/governance/log/list',
+  logList = '/channel/governance/log',
 }
 
 /** 统一治理操作（后端使用 action 字段区分操作类型） */
@@ -1298,7 +1312,7 @@ cd jeecgboot-vue3 && npx vitest run src/views/channel/__tests__/PublishPermissio
 <script lang="ts" setup>
 import { ref, reactive, onMounted } from 'vue';
 import { Card, Form, RadioGroup, Radio, Space, InputNumber, Divider, Button, Alert, Modal, message } from 'ant-design-vue';
-import { defHttp } from '/@/utils/http/axios';
+import { getPublishPermission, savePublishPermission } from '/@/api/content/channel/publish';
 
 const props = defineProps<{ channelId: string }>();
 
@@ -1329,7 +1343,7 @@ const handleSave = () => {
     onOk: async () => {
       saving.value = true;
       try {
-        await defHttp.post({ url: '/content/channel/publish/permission', data: { channelId: props.channelId, ...formData } });
+        await savePublishPermission({ channelId: props.channelId, ...formData });
         message.success('发布权限配置已保存');
       } finally {
         saving.value = false;
@@ -1343,7 +1357,7 @@ const handleCancel = () => {
 };
 
 onMounted(async () => {
-  const res = await defHttp.get({ url: `/api/channel/publish/permission/${props.channelId}` });
+  const res = await getPublishPermission(props.channelId);
   if (res) Object.assign(formData, res);
 });
 </script>

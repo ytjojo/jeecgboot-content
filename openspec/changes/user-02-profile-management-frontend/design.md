@@ -14,7 +14,7 @@
 ## Goals / Non-Goals
 
 **Goals:**
-- 对接后端 12 个端点，实现前端资料管理与主页个性化能力
+- 对接后端 10 个端点（11 个端点中 `review/handle` 为后台审核端点，前端不对接），实现前端资料管理与主页个性化能力
 - 头像/背景图走 OSS 客户端直传方案，不引入内容社区上传端点
 - 15 个 `*Visibility` 字段全部覆盖前端隐私设置页；`onlineStatusVisibility` 特殊枚举
 - 历史记录通过 `historyType` 参数区分类型，前端用 Tabs 切换
@@ -110,21 +110,21 @@
 
 ## API 对接矩阵
 
-> **全局说明**：所有端点均返回 `Result<T>` 包装类型（JeecgBoot 惯例），前端 `defHttp` 自动解包。下表"出参"列展示解包后的实际业务类型。**后端改造需求**：4 个 POST 端点需改造为返回更新后的 VO（下表标注为"待改造"），`/privacy/update` 保持返回 `Result<String>`。
+> **全局说明**：所有端点均返回 `Result<T>` 包装类型（JeecgBoot 惯例），前端 `defHttp` 自动解包。下表"出参"列展示解包后的实际业务类型。4 个 POST 端点（`/update`、`/homepage/update`、`/homepage/defaults/restore`、`/history/restore`）返回 `ContentUserProfileVO`，`/privacy/update` 返回 `String`（"更新成功"）。
 
 | 端点 | HTTP | 入参 | 出参（解包后） | 涉及能力 |
 |------|------|------|----------------|----------|
 | `/content/user/profile/detail` | GET | `ownerUserId`, `viewerUserId`(可选) | `ContentUserProfileVO` | profile-editing / verification-badge / homepage-customization |
-| `/content/user/profile/update` | POST | `userId` (query) + `ContentUserProfileUpdateReq` | `ContentUserProfileVO`（待改造） | profile-editing / homepage-customization |
+| `/content/user/profile/update` | POST | `userId` (query) + `ContentUserProfileUpdateReq` | `ContentUserProfileVO` | profile-editing / homepage-customization |
 | `/content/user/profile/review/handle` | POST | `ContentUserReviewHandleReq` | `String`（"处理成功"） | 后台审核，前端**不**对接 |
 | `/content/user/profile/privacy/update` | POST | `userId` (query) + `ContentUserPrivacyUpdateReq` | `String`（"更新成功"） | privacy-settings |
-| `/content/user/profile/homepage/update` | POST | `userId` (query) + `ContentUserHomepageUpdateReq` | `ContentUserProfileVO`（待改造） | homepage-customization |
-| `/content/user/profile/homepage/defaults/restore` | POST | `userId` (query) | `ContentUserProfileVO`（待改造） | homepage-customization |
+| `/content/user/profile/homepage/update` | POST | `userId` (query) + `ContentUserHomepageUpdateReq` | `ContentUserProfileVO` | homepage-customization |
+| `/content/user/profile/homepage/defaults/restore` | POST | `userId` (query) | `ContentUserProfileVO` | homepage-customization |
 | `/content/user/profile/homepage/modules` | GET | `userId` (query) | `List<ContentUserHomepageModuleVO>` | homepage-customization |
 | `/content/user/profile/badge/list` | GET | `userId` (query) | `List<ContentUserVerificationBadgeVO>` | verification-badge |
 | `/content/user/profile/badge/detail` | GET | `badgeId` (query) | `ContentUserVerificationBadgeVO` | verification-badge |
 | `/content/user/profile/history/list` | GET | `userId`, `historyType` (NICKNAME\|AVATAR) | `List<ContentUserProfileHistoryVO>` | profile-history |
-| `/content/user/profile/history/restore` | POST | `userId`, `historyId` (query) | `ContentUserProfileVO`（待改造） | profile-history |
+| `/content/user/profile/history/restore` | POST | `userId`, `historyId` (query) | `ContentUserProfileVO` | profile-history |
 
 > **端点总数**：11 个（其中 `review/handle` 为后台审核端点，前端不对接，实际前端使用 10 个端点）。
 

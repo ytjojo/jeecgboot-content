@@ -57,20 +57,20 @@ EPIC-06 覆盖内容社区用户的通知偏好、免打扰、隐私可见性、
 
 ## File Structure
 
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/entity/ContentUserNotificationDeliveryLog.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/entity/ContentThirdPartyAuthorization.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/mapper/ContentUserNotificationDeliveryLogMapper.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/mapper/ContentThirdPartyAuthorizationMapper.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/IContentThirdPartyAuthorizationService.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/entity/ContentNotificationAuditLog.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/entity/ContentUserThirdPartyAuth.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/mapper/ContentNotificationAuditLogMapper.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/mapper/ContentUserThirdPartyAuthMapper.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/IContentUserThirdPartyAuthService.java`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/ContentThirdPartyTokenRevocationPort.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/impl/ContentThirdPartyAuthorizationServiceImpl.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/impl/ContentUserThirdPartyAuthServiceImpl.java`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/impl/ContentNoopThirdPartyTokenRevocationPort.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/dto/ContentNotificationDecisionDTO.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/req/settings/ContentThirdPartyAuthorizationRevokeReq.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentThirdPartyAuthorizationVO.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentSubscriptionNotificationDecisionVO.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentThirdPartyAuthVO.java`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentThirdPartyAuthorizationDetailVO.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentAccountSecuritySettingVO.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/vo/ContentUserSecuritySettingVO.java`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/controller/ContentUserSettingsController.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/controller/ContentUserThirdPartyAuthController.java`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/entity/ContentUserNotificationSetting.java`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/entity/ContentUserPrivacySetting.java`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/service/IContentUserNotificationSettingService.java`
@@ -81,8 +81,9 @@ EPIC-06 覆盖内容社区用户的通知偏好、免打扰、隐私可见性、
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/V3.9.1_58__content_privacy_notifications_rollback.sql`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentUserNotificationSettingServiceTest.java`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentUserVisibilityPolicyServiceTest.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentThirdPartyAuthorizationServiceTest.java`
-- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/controller/ContentUserControllerWebMvcTest.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentUserThirdPartyAuthServiceTest.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/controller/ContentUserSettingsControllerWebMvcTest.java`
+- `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/controller/ContentUserThirdPartyAuthControllerWebMvcTest.java`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/req/ContentUserReqValidationTest.java`
 - `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentPrivacyNotificationsMigrationTest.java`
 
@@ -90,8 +91,8 @@ EPIC-06 覆盖内容社区用户的通知偏好、免打扰、隐私可见性、
 
 - `ContentUserNotificationSettingServiceTest`: 覆盖通知类型开关、渠道过滤、跨午夜 DND、多时段 DND、临时关闭、安全通知白名单、决策日志写入和非法类型显式失败。
 - `ContentUserVisibilityPolicyServiceTest`: 覆盖浏览记录/点赞动态/收藏夹的公开、关注者、仅自己规则，在线状态公开/互关/隐藏规则，搜索引擎 noindex 判定和缓存失效调用。
-- `ContentThirdPartyAuthorizationServiceTest`: 覆盖授权列表、详情、越权访问拦截、撤销幂等、令牌失效端口调用和撤销后访问拒绝。
-- `ContentUserControllerWebMvcTest`: 覆盖设置页接口返回 `Result<T>`、账户安全入口、第三方授权列表/详情/撤销、通知设置保存和隐私设置保存的 HTTP 契约。
+- `ContentUserThirdPartyAuthServiceTest`: 覆盖授权列表、详情、越权访问拦截、撤销幂等、令牌失效端口调用和撤销后访问拒绝。
+- `ContentUserSettingsControllerWebMvcTest` / `ContentUserThirdPartyAuthControllerWebMvcTest`: 覆盖设置页接口返回 `Result<T>`、账户安全入口、第三方授权列表/详情/撤销、通知设置保存和隐私设置保存的 HTTP 契约。
 - `ContentUserReqValidationTest`: 覆盖通知渠道、DND 时间、临时关闭时长、隐私可见性枚举、第三方撤销入参的校验消息。
 - `ContentPrivacyNotificationsMigrationTest`: 覆盖新增表、字段、索引和 rollback SQL 文件存在且包含反向 DDL。
 

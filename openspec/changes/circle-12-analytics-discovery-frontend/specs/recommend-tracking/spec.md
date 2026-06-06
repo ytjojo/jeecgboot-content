@@ -10,7 +10,7 @@
 
 #### Scenario: 批量合并上报
 - **WHEN** 待上报集合中有新增 ID 后延迟 500ms 无新 ID 加入
-- **THEN** 调用 POST /recommend/exposure 批量上报所有待上报圈子 ID
+- **THEN** 调用 POST /api/circle/recommend/exposure 批量上报所有待上报圈子 ID
 
 #### Scenario: 500ms 内有新卡片进入
 - **WHEN** 500ms 内有新卡片进入视口
@@ -52,7 +52,7 @@
 
 #### Scenario: 点击推荐圈子上报
 - **WHEN** 用户点击推荐 Tab 中的圈子卡片
-- **THEN** 调用 POST /recommend/click 上报（携带圈子 ID + source），同时跳转详情页
+- **THEN** 调用 POST /api/circle/recommend/click 上报（携带圈子 ID + source），同时跳转详情页
 
 #### Scenario: 上报不阻塞跳转
 - **WHEN** 点击上报请求未完成
@@ -65,9 +65,9 @@
 系统 SHALL 在曝光或点击上报失败时静默处理，不重试，不阻塞用户操作。
 
 #### Scenario: 曝光上报失败
-- **WHEN** POST /recommend/exposure 请求失败
+- **WHEN** POST /api/circle/recommend/exposure 请求失败
 - **THEN** 静默处理，不重试，不展示错误提示，仅开发环境控制台打印日志
 
 #### Scenario: 点击上报失败
-- **WHEN** POST /recommend/click 请求失败
+- **WHEN** POST /api/circle/recommend/click 请求失败
 - **THEN** 静默处理，不重试，不展示错误提示，仅开发环境控制台打印日志

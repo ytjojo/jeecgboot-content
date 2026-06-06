@@ -82,20 +82,27 @@ EPIC-20 后端 API 已定义 15 个频道相关接口，前端需要从零构建
 |----------|------------|----------|--------------|
 | 用户端频道 CRUD | ChannelController | `/api/v1/channels` | `/api/v1/channels/*` |
 | 后台频道管理 | ChannelAdminController | `/api/v1/admin/channels` | `/api/v1/admin/channels/*` |
-| 审核队列 | ChannelReviewController | `/jeecg-boot/api/v1/content/channel/review` | `/content/channel/review/*` |
-| 生命周期管理 | ChannelLifecycleController | `/jeecg-boot/api/v1/content/channel/lifecycle` | `/content/channel/lifecycle/*` |
+| 审核队列 | ChannelReviewController | `/jeecg-boot/api/v1/content/channel/review` | `/jeecg-boot/api/v1/content/channel/review/*` |
+| 生命周期管理 | ChannelLifecycleController | `/jeecg-boot/api/v1/content/channel/lifecycle` | `/jeecg-boot/api/v1/content/channel/lifecycle/*` |
 | 频道治理 | ChannelGovernanceController | `/channel/governance` | `/channel/governance/*` |
-| 内容发布 | ChannelPublishController | `/content/channel/publish` | `/content/channel/publish/*` |
+| 内容发布 | ChannelPublishController | `/content/channel/publish` | `/content/channel/publish` |
 
 **理由**: 后端 API 存在多个 Controller，路径前缀不一致，前端需统一管理避免混淆。
 
-**待补充 API**（后端尚未实现）:
-| 功能 | 建议路径 | 用途 |
-|------|----------|------|
-| 我的频道列表 | `GET /api/v1/channels/list` | 用户端频道列表查询 |
-| 删除前置校验 | `GET /api/v1/channels/{id}/delete-check` | 删除条件检查 |
-| 转让历史查询 | `GET /api/v1/channels/{id}/transfers` | 转让记录展示 |
-| 名称唯一性校验 | `GET /api/v1/channels/check-name` | 实时校验 |
+**后端已实现的 API（ChannelController）**:
+- `POST /api/v1/channels` — 创建频道
+- `GET /api/v1/channels/list` — 我的频道列表
+- `GET /api/v1/channels/{id}` — 频道详情
+- `PUT /api/v1/channels/{id}` — 更新频道
+- `DELETE /api/v1/channels/{id}` — 删除频道
+- `POST /api/v1/channels/{id}/cancel-delete` — 撤销删除
+- `POST /api/v1/channels/{id}/transfer` — 发起转让
+- `POST /api/v1/channels/transfer/{transferId}/confirm` — 确认转让
+- `POST /api/v1/channels/transfer/{transferId}/reject` — 拒绝转让
+- `GET /api/v1/channels/{id}/delete-check` — 删除前置校验
+- `GET /api/v1/channels/{id}/transfers` — 转让历史查询
+- `GET /api/v1/channels/{id}/transfer/pending` — 待确认转让查询
+- `GET /api/v1/channels/check-name` — 名称唯一性校验
 
 ## Risks / Trade-offs
 

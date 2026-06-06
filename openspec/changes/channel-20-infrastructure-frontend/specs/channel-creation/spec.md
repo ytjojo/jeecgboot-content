@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 > **API 路径**:
-> - 用户端创建频道: `POST /api/v1/channels/create` (已存在)
+> - 用户端创建频道: `POST /api/v1/channels` (已存在)
 > - 后台创建系统频道: `POST /api/v1/admin/channels/create-system` (已存在)
 > - 名称唯一性校验: `GET /api/v1/channels/check-name` (待后端实现)
 > **Controller**: ChannelController, ChannelAdminController

@@ -32,7 +32,7 @@ JeecgBoot 内容社区前端基于 Vue 3 + TypeScript + Vite 6 + Ant Design Vue 
 
 **理由**: 状态转换规则可能随业务变化，后端统一管理避免前后端规则不一致。前端仅做二次校验。
 
-**后端依赖**: 此 API 当前未实现，需要后端补充。后端已有 `UserStatusTransition.getAllowedTransitions()` 方法，只需在 Controller 层暴露端点。
+**后端依赖**: 已在 UserStatusController.java 中实现（`GET /api/content/user-status/transitions/{currentStatus}`），后端调用 `UserStatusTransition.getAllowedTransitions()` 返回允许转换的状态列表。
 
 **替代方案**: 前端硬编码转换矩阵 — 优点是无额外请求，缺点是维护成本高、前后端可能不一致。
 
@@ -103,20 +103,20 @@ JeecgBoot 内容社区前端基于 Vue 3 + TypeScript + Vite 6 + Ant Design Vue 
 
 | API | 权限要求 | 说明 |
 |-----|---------|------|
-| GET /current | 登录用户 | 查询自身状态 |
-| GET /{userId} | admin:user-status:query | 管理员查询指定用户 |
-| POST /{userId}/change | admin:user-status:manage | 管理员变更状态 |
-| GET /{userId}/history | admin:user-status:query | 管理员查看历史 |
-| POST /{userId}/release | admin:user-status:manage | 管理员解禁 |
-| GET /transitions/{status} | admin:user-status:query | 获取可转换状态 |
-| GET /list | admin:user-status:query | 分页查询列表 |
-| POST /batch-release | admin:user-status:manage | 批量解禁 |
-| GET /audit-logs | admin:audit-log:query | 审计日志查询 |
-| GET /audit-logs/{id} | admin:audit-log:query | 审计日志详情 |
-| GET /audit-logs/export | admin:audit-log:export | 导出审计日志 |
-| GET /users/{id}/audit-logs | admin:audit-log:query | 用户审计日志 |
-| POST /send-verify-code | 登录用户 | 发送验证码 |
-| POST /verify-security | 登录用户 | 安全核验 |
+| GET /api/content/user-status/current | 登录用户 | 查询自身状态（需 userId 参数） |
+| GET /api/content/user-status/{userId} | admin:user-status:query | 管理员查询指定用户 |
+| POST /api/content/user-status/{userId}/change | admin:user-status:manage | 管理员变更状态 |
+| GET /api/content/user-status/{userId}/history | admin:user-status:query | 管理员查看历史 |
+| POST /api/content/user-status/{userId}/release | admin:user-status:manage | 管理员解禁 |
+| GET /api/content/user-status/transitions/{currentStatus} | admin:user-status:query | 获取可转换状态 |
+| GET /api/content/user-status/list | admin:user-status:query | 分页查询列表 |
+| POST /api/content/user-status/batch-release | admin:user-status:manage | 批量解禁 |
+| GET /api/content/user-status/audit-logs | admin:audit-log:query | 审计日志查询 |
+| GET /api/content/user-status/audit-logs/{logId} | admin:audit-log:query | 审计日志详情 |
+| GET /api/content/user-status/audit-logs/export | admin:audit-log:export | 导出审计日志（GET 方法） |
+| GET /api/content/user-status/users/{userId}/audit-logs | admin:audit-log:query | 用户审计日志 |
+| POST /api/content/user-status/send-verify-code | 登录用户 | 发送验证码 |
+| POST /api/content/user-status/verify-security | 登录用户 | 安全核验 |
 
 ## File Structure
 
@@ -172,21 +172,21 @@ N/A — 本变更为纯前端新增功能，不涉及部署变更。登录接口
 
 ## 后端 API 依赖清单
 
-以下 API 在后端尚未实现，需要后端开发完成后前端才能完整联调：
+以下 API 已在 UserStatusController.java 中全部实现（2026-06-06 确认）。
 
-### 高优先级（阻塞核心功能）
-| API | 路径 | 用途 | 后端基础 |
+### 高优先级
+| API | 路径 | 用途 | 后端状态 |
 |-----|------|------|----------|
-| getTransitions | GET /transitions/{currentStatus} | 获取可转换状态列表 | UserStatusTransition 已实现 |
-| getStatusList | GET /list | 管理员分页查询用户状态 | 需新增 |
-| verifySecurity | POST /verify-security | 安全核验解冻 | 需新增 |
-| sendVerifyCode | POST /send-verify-code | 发送手机验证码 | 需新增 |
+| getTransitions | GET /api/content/user-status/transitions/{currentStatus} | 获取可转换状态列表 | ✅ 已实现 |
+| getStatusList | GET /api/content/user-status/list | 管理员分页查询用户状态 | ✅ 已实现 |
+| verifySecurity | POST /api/content/user-status/verify-security | 安全核验解冻 | ✅ 已实现 |
+| sendVerifyCode | POST /api/content/user-status/send-verify-code | 发送手机验证码 | ✅ 已实现 |
 
-### 中优先级（影响完整功能）
-| API | 路径 | 用途 | 后端基础 |
+### 中优先级
+| API | 路径 | 用途 | 后端状态 |
 |-----|------|------|----------|
-| getAuditLogList | GET /audit-logs | 审计日志分页查询 | UserStatusAuditLogService 需扩展 |
-| getAuditLogDetail | GET /audit-logs/{logId} | 审计日志详情 | UserStatusAuditLogService 需扩展 |
-| batchReleaseUsers | POST /batch-release | 批量解禁 | UserStatusBizManageService 已有 batchChangeStatus |
-| exportAuditLogs | GET /audit-logs/export | 导出审计日志 | 需新增 |
-| getUserAuditLogs | GET /users/{userId}/audit-logs | 用户审计日志 | UserStatusAuditLogService 需扩展 |
+| getAuditLogList | GET /api/content/user-status/audit-logs | 审计日志分页查询 | ✅ 已实现 |
+| getAuditLogDetail | GET /api/content/user-status/audit-logs/{logId} | 审计日志详情 | ✅ 已实现 |
+| batchReleaseUsers | POST /api/content/user-status/batch-release | 批量解禁 | ✅ 已实现 |
+| exportAuditLogs | GET /api/content/user-status/audit-logs/export | 导出审计日志 | ✅ 已实现 |
+| getUserAuditLogs | GET /api/content/user-status/users/{userId}/audit-logs | 用户审计日志 | ✅ 已实现 |

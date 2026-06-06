@@ -53,7 +53,7 @@ JeecgBoot_sass 内容社区模块已有频道基础功能（EPIC-20 创建、EPI
 **理由**: 减少 HTTP 请求数，后端可做聚合优化，前端只需一次 loading 状态管理。聚合失败时降级为并行请求各子接口。
 
 **降级策略**: 聚合接口超时或失败时，前端 fallback 为并行调用以下独立接口：
-- `GET /content/channel/recommendation/list`（推荐频道）
+- `GET /content/channel/recommendation/list`（推荐频道，需 userId 参数）
 - `GET /content/channel/ranking/hot`（热门排行榜）
 - `GET /content/channel/editorial-pick/list`（编辑精选）
 

@@ -119,7 +119,7 @@ src/views/channel/
 
 **[Risk] 多频道发布部分失败的 UX** → PublishResult 组件逐频道展示结果，失败项展示具体原因和重试按钮，用户可选择性重试。
 
-**[Risk] 待审区超时提醒的实时性** → 前端每 60 秒轮询 `/api/channel/review/stats` 更新 badge；超时内容在列表中高亮标识。
+**[Risk] 待审区超时提醒的实时性** → 前端每 60 秒轮询 `/content/channel/review/stats` 更新 badge；超时内容在列表中高亮标识。
 
 **[Risk] 公告并发编辑冲突** → 保存时后端校验版本号（乐观锁），前端捕获冲突后提示用户刷新。
 

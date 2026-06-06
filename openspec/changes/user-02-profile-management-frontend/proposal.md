@@ -5,7 +5,7 @@
 > **实施更新（2026-06-04）**: 本变更对接的后端 `ContentUserProfileController` 实际提供 11 个接口（`/content/user/profile/*`），其中：
 > - 头像/背景图素材 **不** 通过后端上传端点处理，由前端使用 OSS 客户端直传后回填 URL；
 > - 统一资料更新端点 `POST /profile/update` 承载基础资料 + 主页配置字段；
-> - **所有 POST 写入端点仅返回 `Result<String>` 操作结果字符串**，不返回更新后的 VO；前端保存后需重新调用 `GET /detail` 获取最新数据；
+> - 4 个 POST 端点（`/update`、`/homepage/update`、`/homepage/defaults/restore`、`/history/restore`）返回 `Result<ContentUserProfileVO>`，`/privacy/update` 返回 `Result<String>`（"更新成功"）；
 > - 隐私接口覆盖 15 个 `*Visibility` 字段，`onlineStatusVisibility` 特殊枚举 `PUBLIC|HIDDEN|MUTUAL_ONLY`；
 > - 历史记录通过 `GET /history/list?historyType=NICKNAME|AVATAR` 区分类型；
 > - `review/handle` 为后台审核端点，前端不对接。
@@ -39,7 +39,7 @@
 
 - **前端路由**: 新增 4 个页面路由（编辑资料、主页设置、隐私设置、历史记录）
 - **状态管理**: 扩展 useUserStore，新增 `profileCompletionRate`、`reviewStatus`、`reviewReason` 等字段
-- **API 对接**: 对接 12 个后端接口，路径前缀 `/content/user/profile/*`（详见 design.md API 对接矩阵）
+- **API 对接**: 对接 10 个后端接口（11 个端点中 `review/handle` 为后台审核端点，前端不对接），路径前缀 `/content/user/profile/*`（详见 design.md API 对接矩阵）
 - **组件依赖**: 复用 Ant Design Vue 4 组件（Form、Modal、Tabs、Select、Switch 等），新增 `VerificationBadge` 自定义组件、`AvatarCropper` 裁剪组件
 - **第三方库**: 引入 `cropperjs`（裁剪）、`vuedraggable`（拖拽排序）、OSS 客户端 SDK（图片上传）
 - **响应式适配**: 所有新增页面需适配 PC/平板/移动端三端布局

@@ -74,5 +74,5 @@
 - **新增页面**: 待审区管理页、内容治理页、回收站页、治理日志页、公告管理页、发布权限配置页
 - **新增组件**: ChannelSelector、PublishResult、ReviewQueueTable、GovernanceActionMenu、RecycleBinTable、GovernanceLogTable、AnnouncementEditor、AddContentDialog、RejectReasonModal、MoveChannelDialog、EditAssistDrawer、PublishPermissionRadio、PublishLimitConfig（共 13 个业务组件）
 - **新增 Store**: useChannelPublishStore、useChannelReviewStore、useChannelGovernanceStore
-- **API 对接**: 对接后端 EPIC-22 全部 REST API（发布、审核、治理、公告、添加内容共 5 组约 25 个接口）
+- **API 对接**: 对接后端 EPIC-22 全部 REST API（发布、审核、治理、公告、添加内容共 5 组约 20 个端点）
 - **依赖**: 依赖后端 EPIC-22 API、EPIC-20 频道状态查询、EPIC-21 角色/禁言/黑名单状态、Tinymce 富文本编辑器、项目现有 JVxeTable/Table/Form/Modal/Drawer 等基础组件

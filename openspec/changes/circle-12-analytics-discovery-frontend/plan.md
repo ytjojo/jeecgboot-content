@@ -1768,7 +1768,7 @@ export function useRecommendTracking(source = 'recommend') {
     ids.forEach((id) => reportedIds.add(id));
     pendingIds.clear();
     const data = JSON.stringify({ circleIds: ids, source });
-    navigator.sendBeacon('/content/circle/recommend/exposure', data);
+    navigator.sendBeacon('/api/circle/recommend/exposure', data);
   };
 
   const observeCard = (el: HTMLElement, circleId: string) => {

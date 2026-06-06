@@ -94,22 +94,21 @@ mkdir -p jeecgboot-vue3/src/styles
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  follow = '/api/v1/user/follow',
-  unfollow = '/api/v1/user/unfollow',
-  specialFollow = '/api/v1/user/follow/special',
-  cancelSpecialFollow = '/api/v1/user/follow/special/cancel',
-  followList = '/api/v1/user/follow/list',
-  specialFollowList = '/api/v1/user/follow/special/list',
-  followGroupList = '/api/v1/user/follow/group/list',
-  createFollowGroup = '/api/v1/user/follow/group',
-  updateFollowGroup = '/api/v1/user/follow/group',
-  deleteFollowGroup = '/api/v1/user/follow/group',
-  moveFollowGroup = '/api/v1/user/follow/group/move',
-  recommendList = '/api/v1/user/recommend',
-  recommendFeedback = '/api/v1/user/recommend/feedback',
-  batchUnfollow = '/api/v1/user/follow/batch/unfollow',
-  batchMoveGroup = '/api/v1/user/follow/batch/move-group',
-  batchCancelSpecial = '/api/v1/user/follow/batch/cancel-special',
+  follow = '/content/user/relation/follow',
+  unfollow = '/content/user/relation/unfollow',
+  specialFollow = '/content/user/relation/special-follow',
+  cancelSpecialFollow = '/content/user/relation/special-follow/cancel',
+  followList = '/content/user/relation/follow-list',
+  specialFollowList = '/content/user/relation/special-follow-list',
+  followGroupList = '/content/user/relation/groups',
+  createFollowGroup = '/content/user/relation/group/create',
+  renameFollowGroup = '/content/user/relation/group/rename',
+  deleteFollowGroup = '/content/user/relation/group/delete',
+  moveFollowGroup = '/content/user/relation/group/move',
+  removeFromGroup = '/content/user/relation/group/remove',
+  recommendList = '/content/user/relation/recommendations',
+  batchUnfollow = '/content/user/relation/batch/unfollow',
+  batchCancelSpecial = '/content/user/relation/batch/special-follow/cancel',
 }
 
 /** 关注用户 */
@@ -144,36 +143,32 @@ export const getFollowGroupList = (userId: string) =>
 export const createFollowGroup = (userId: string, data: { name: string; sortOrder?: number }) =>
   defHttp.post({ url: Api.createFollowGroup, params: { userId }, data });
 
-/** 更新关注分组 */
-export const updateFollowGroup = (userId: string, groupId: string, data: { name: string; sortOrder?: number }) =>
-  defHttp.put({ url: `${Api.updateFollowGroup}/${groupId}`, params: { userId }, data });
+/** 重命名关注分组 */
+export const renameFollowGroup = (userId: string, groupId: string, data: { name: string; sortOrder?: number }) =>
+  defHttp.post({ url: Api.renameFollowGroup, params: { userId, groupId }, data });
 
 /** 删除关注分组 */
 export const deleteFollowGroup = (userId: string, groupId: string) =>
-  defHttp.delete({ url: `${Api.deleteFollowGroup}/${groupId}`, params: { userId } });
+  defHttp.post({ url: Api.deleteFollowGroup, params: { userId, groupId } });
 
-/** 移动用户到分组 */
-export const moveFollowGroup = (userId: string, data: { targetUserId: string; groupId: string }) =>
+/** 移动关注对象到分组 */
+export const moveFollowGroup = (userId: string, data: { targetUserIds: string[]; relationGroupId: string }) =>
   defHttp.post({ url: Api.moveFollowGroup, params: { userId }, data });
+
+/** 移出关注分组 */
+export const removeFromGroup = (userId: string, data: { targetUserIds: string[] }) =>
+  defHttp.post({ url: Api.removeFromGroup, params: { userId }, data });
 
 /** 获取推荐用户列表 */
 export const getRecommendList = (params?: { page?: number; size?: number }) =>
   defHttp.get({ url: Api.recommendList, params });
 
-/** 推荐反馈（不感兴趣） */
-export const recommendFeedback = (data: { userId: string; action: 'not_interested' }) =>
-  defHttp.post({ url: Api.recommendFeedback, data });
-
 /** 批量取消关注 */
 export const batchUnfollow = (userId: string, data: { targetUserIds: string[] }) =>
   defHttp.post({ url: Api.batchUnfollow, params: { userId }, data });
 
-/** 批量移动分组 */
-export const batchMoveGroup = (userId: string, data: { targetUserIds: string[]; groupId: string }) =>
-  defHttp.post({ url: Api.batchMoveGroup, params: { userId }, data });
-
 /** 批量取消特别关注 */
-export const batchCancelSpecial = (userId: string, data: { targetUserIds: string[] }) =>
+export const batchCancelSpecialFollow = (userId: string, data: { targetUserIds: string[] }) =>
   defHttp.post({ url: Api.batchCancelSpecial, params: { userId }, data });
 ```
 
@@ -184,19 +179,21 @@ export const batchCancelSpecial = (userId: string, data: { targetUserIds: string
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  subscribe = '/api/v1/subscribe',
-  unsubscribe = '/api/v1/subscribe',
-  pause = '/api/v1/subscribe/pause',
-  resume = '/api/v1/subscribe/resume',
-  list = '/api/v1/subscribe/list',
-  detail = '/api/v1/subscribe/detail',
-  square = '/api/v1/subscribe/square',
-  squareDetail = '/api/v1/subscribe/square/detail',
-  notificationConfig = '/api/v1/subscribe/notification/config',
-  globalNotificationDefault = '/api/v1/subscribe/notification/global-default',
-  batchPause = '/api/v1/subscribe/batch/pause',
-  batchResume = '/api/v1/subscribe/batch/resume',
-  batchCancel = '/api/v1/subscribe/batch/cancel',
+  subscribe = '/content/user/subscription/subscribe',
+  cancel = '/content/user/subscription/cancel',
+  pause = '/content/user/subscription/pause',
+  resume = '/content/user/subscription/resume',
+  list = '/content/user/subscription/list',
+  feed = '/content/user/subscription/feed',
+  plaza = '/content/user/subscription/plaza',
+  sourceDetail = '/content/user/subscription/source/detail',
+  sourceSubscribe = '/content/user/subscription/source/subscribe',
+  sourceSave = '/content/user/subscription/source/save',
+  notificationPreference = '/content/user/subscription/notification/preference',
+  notificationDecision = '/content/user/subscription/notification/decision',
+  batchPause = '/content/user/subscription/batch/pause',
+  batchResume = '/content/user/subscription/batch/resume',
+  batchCancel = '/content/user/subscription/batch/cancel',
 }
 
 /** 订阅内容源 */
@@ -204,61 +201,70 @@ export const subscribeSource = (userId: string, data: { sourceId: string; source
   defHttp.post({ url: Api.subscribe, params: { userId }, data });
 
 /** 取消订阅 */
-export const unsubscribeSource = (userId: string, sourceId: string) =>
-  defHttp.delete({ url: `${Api.unsubscribe}/${sourceId}`, params: { userId } });
+export const cancelSubscription = (userId: string, subscriptionId: string) =>
+  defHttp.post({ url: Api.cancel, params: { userId, subscriptionId } });
 
 /** 暂停订阅 */
-export const pauseSubscribe = (userId: string, sourceId: string) =>
-  defHttp.post({ url: `${Api.pause}/${sourceId}`, params: { userId } });
+export const pauseSubscription = (userId: string, subscriptionId: string) =>
+  defHttp.post({ url: Api.pause, params: { userId, subscriptionId } });
 
 /** 恢复订阅 */
-export const resumeSubscribe = (userId: string, sourceId: string) =>
-  defHttp.post({ url: `${Api.resume}/${sourceId}`, params: { userId } });
+export const resumeSubscription = (userId: string, subscriptionId: string) =>
+  defHttp.post({ url: Api.resume, params: { userId, subscriptionId } });
 
 /** 获取订阅列表 */
-export const getSubscribeList = (userId: string, params?: { keyword?: string; sourceType?: string; pageNo?: number; pageSize?: number }) =>
+export const getSubscribeList = (userId: string, params?: { sourceType?: string; pageNo?: number; pageSize?: number }) =>
   defHttp.get({ url: Api.list, params: { userId, ...params } });
 
-/** 获取订阅详情 */
-export const getSubscribeDetail = (userId: string, sourceId: string) =>
-  defHttp.get({ url: `${Api.detail}/${sourceId}`, params: { userId } });
+/** 获取订阅流 */
+export const getSubscribeFeed = (userId: string, params?: { sourceType?: string; pageNo?: number; pageSize?: number }) =>
+  defHttp.get({ url: Api.feed, params: { userId, ...params } });
 
 /** 获取订阅广场列表 */
-export const getSubscribeSquare = (params?: { keyword?: string; category?: string; page?: number; size?: number }) =>
-  defHttp.get({ url: Api.square, params });
+export const getSubscribePlaza = (userId: string, params?: { keyword?: string; category?: string; sourceType?: string; pageNo?: number; pageSize?: number }) =>
+  defHttp.get({ url: Api.plaza, params: { userId, ...params } });
 
-/** 获取订阅广场详情 */
-export const getSubscribeSquareDetail = (sourceId: string) =>
-  defHttp.get({ url: `${Api.squareDetail}/${sourceId}` });
+/** 获取订阅源详情 */
+export const getSourceDetail = (userId: string, sourceType: string, sourceId: string) =>
+  defHttp.get({ url: Api.sourceDetail, params: { userId, sourceType, sourceId } });
 
-/** 获取通知配置 */
-export const getNotificationConfig = (userId: string, sourceId: string) =>
-  defHttp.get({ url: `${Api.notificationConfig}/${sourceId}`, params: { userId } });
+/** 从订阅广场订阅内容源 */
+export const subscribeFromPlaza = (userId: string, sourceType: string, sourceId: string) =>
+  defHttp.post({ url: Api.sourceSubscribe, params: { userId, sourceType, sourceId } });
 
-/** 保存通知配置 */
-export const saveNotificationConfig = (userId: string, sourceId: string, data: {
+/** 写入订阅源目录 */
+export const saveSource = (data: { sourceId: string; sourceType: string; name: string; category?: string }) =>
+  defHttp.post({ url: Api.sourceSave, data });
+
+/** 获取订阅级通知偏好 */
+export const getNotificationPreference = (userId: string, subscriptionId: string) =>
+  defHttp.get({ url: Api.notificationPreference, params: { userId, subscriptionId } });
+
+/** 保存订阅级通知偏好 */
+export const saveNotificationPreference = (userId: string, data: {
+  subscriptionId: string;
   channelInsite: boolean;
   channelPush: boolean;
   channelEmail: boolean;
   frequency: 'realtime' | 'daily';
   quietStart?: string;
   quietEnd?: string;
-}) => defHttp.put({ url: `${Api.notificationConfig}/${sourceId}`, params: { userId }, data });
+}) => defHttp.post({ url: Api.notificationPreference, params: { userId }, data });
 
-/** 获取全局默认通知配置 */
-export const getGlobalNotificationDefault = () =>
-  defHttp.get({ url: Api.globalNotificationDefault });
+/** 计算订阅源更新通知决策 */
+export const getNotificationDecision = (userId: string, subscriptionId: string, updateBizId: string) =>
+  defHttp.get({ url: Api.notificationDecision, params: { userId, subscriptionId, updateBizId } });
 
 /** 批量暂停订阅 */
-export const batchPauseSubscribe = (userId: string, data: { sourceIds: string[] }) =>
+export const batchPauseSubscribe = (userId: string, data: { subscriptionIds: string[] }) =>
   defHttp.post({ url: Api.batchPause, params: { userId }, data });
 
 /** 批量恢复订阅 */
-export const batchResumeSubscribe = (userId: string, data: { sourceIds: string[] }) =>
+export const batchResumeSubscribe = (userId: string, data: { subscriptionIds: string[] }) =>
   defHttp.post({ url: Api.batchResume, params: { userId }, data });
 
 /** 批量取消订阅 */
-export const batchCancelSubscribe = (userId: string, data: { sourceIds: string[] }) =>
+export const batchCancelSubscribe = (userId: string, data: { subscriptionIds: string[] }) =>
   defHttp.post({ url: Api.batchCancel, params: { userId }, data });
 ```
 
@@ -269,17 +275,17 @@ export const batchCancelSubscribe = (userId: string, data: { sourceIds: string[]
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  followingFeed = '/api/v1/feed/following',
-  subscribeFeed = '/api/v1/feed/subscribe',
+  followingFeed = '/content/user/relation/feed',
+  subscribeFeed = '/content/user/subscription/feed',
 }
 
 /** 获取关注流 */
-export const getFollowingFeed = (params: { page?: number; size?: number; types?: string }) =>
-  defHttp.get({ url: Api.followingFeed, params });
+export const getFollowingFeed = (userId: string, params?: { pageNo?: number; pageSize?: number }) =>
+  defHttp.get({ url: Api.followingFeed, params: { userId, ...params } });
 
 /** 获取订阅流 */
-export const getSubscribeFeed = (params: { page?: number; size?: number; sourceType?: string }) =>
-  defHttp.get({ url: Api.subscribeFeed, params });
+export const getSubscribeFeed = (userId: string, params?: { sourceType?: string; pageNo?: number; pageSize?: number }) =>
+  defHttp.get({ url: Api.subscribeFeed, params: { userId, ...params } });
 ```
 
 - [ ] **Step 5: 运行TypeScript检查**

@@ -9,7 +9,7 @@
 ## 2. API 层封装
 
 - [ ] 2.1 封装圈子 CRUD 接口：createCircle、updateCircle、getCircleDetail、getMyCircleList、getPublicCircleList、checkCircleName
-- [ ] 2.2 封装成员管理接口：joinCircle、quitCircle、getMemberList、setModerator、muteMember、unmuteMember、removeMember
+- [ ] 2.2 封装成员管理接口：joinCircle、leaveCircle、getMemberList、changeRole、muteMember、unmuteMember、removeMember
 - [ ] 2.3 封装搜索接口：searchCircles
 - [ ] 2.4 封装治理日志接口：getGovernanceLogList
 
@@ -55,7 +55,7 @@
 - [ ] 6.4 实现加入流程：直接加入、申请审核（确认Modal+申请中状态）、密码加入（密码Modal）、邀请限制
 - [ ] 6.5 实现申请状态持久化：根据 applyStatus 字段展示按钮状态（PENDING→申请中、REJECTED→可重新申请）
 - [ ] 6.6 实现邀请判断：根据 isInvited 字段展示按钮（true→加入、false→仅限邀请加入）
-- [ ] 6.7 实现退出流程：确认 Modal + 调用 quitCircle 接口 + 清空 Store + 返回列表
+- [ ] 6.7 实现退出流程：确认 Modal + 调用 leaveCircle 接口 + 清空 Store + 返回列表
 - [ ] 6.8 实现满员状态：加入按钮禁用 + Tooltip 提示
 - [ ] 6.9 实现成员 Tab：展示成员列表，支持按角色筛选
 - [ ] 6.10 实现 404 状态：圈子不存在时展示 404 页面
@@ -66,7 +66,7 @@
 - [ ] 7.1 实现成员管理页布局：筛选区（角色/状态/搜索）+ 成员 Table + 分页
 - [ ] 7.2 实现筛选功能：角色下拉（全部/创建者/版主/成员）、状态下拉（全部/正常/禁言中/已移除）、昵称搜索
 - [ ] 7.3 实现操作列动态按钮：根据权限矩阵展示操作（设为版主/取消版主/禁言/解除禁言/移除）
-- [ ] 7.4 实现角色变更：确认 Modal + 调用 setModerator 接口 + 列表刷新
+- [ ] 7.4 实现角色变更：确认 Modal + 调用 changeRole 接口 + 列表刷新
 - [ ] 7.5 实现禁言操作：MuteMemberModal（时长选择+原因）+ 调用 muteMember 接口 + 列表刷新
 - [ ] 7.6 实现解除禁言：调用 unmuteMember 接口 + 列表刷新
 - [ ] 7.7 实现移除操作：GovernanceConfirmModal + 调用 removeMember 接口 + 列表刷新

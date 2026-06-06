@@ -48,7 +48,8 @@
 - Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentUserNotificationSettingServiceTest.java`
 - Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentUserVisibilityPolicyServiceTest.java`
 - Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/service/ContentUserThirdPartyAuthServiceTest.java`
-- Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/controller/ContentUserControllerWebMvcTest.java`
+- Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/controller/ContentUserSettingsControllerWebMvcTest.java`
+- Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/controller/ContentUserThirdPartyAuthControllerWebMvcTest.java`
 - Test: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/test/java/org/jeecg/modules/content/user/req/ContentUserReqValidationTest.java`
 
 ## Steps
@@ -70,7 +71,7 @@
 - [ ] Extend `ContentUserPrivacySetting` with new visibility fields and Chinese comments.
 - [ ] Create `ContentNotificationAuditLog` and `ContentUserThirdPartyAuth` entities with `@TableName` and project-consistent base fields.
 - [ ] Create mappers for notification delivery logs and third-party authorizations.
-- [ ] Create `ContentNotificationDecisionDTO`, third-party authorization VOs, revoke request, and account security VO.
+- [ ] Create `ContentSubscriptionNotificationDecisionVO`, third-party authorization VOs, revoke request, and account security VO.
 - [ ] Add validation annotations and Chinese validation messages to request objects.
 - [ ] Commit point: `feat(content): add privacy notification contracts`.
 
@@ -209,8 +210,8 @@
 **Maps to task:** `4.4 Add service and controller tests for list, detail, owner isolation, revoke, token revocation invocation, revoked access rejection, and reauthorization requirement.`
 
 - [ ] Complete `ContentUserThirdPartyAuthServiceTest` coverage for revoked access rejection and reauthorization requirement.
-- [ ] Complete `ContentUserControllerWebMvcTest` coverage for HTTP response shapes and owner isolation.
-- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserThirdPartyAuthServiceTest,ContentUserControllerWebMvcTest test"`.
+- [ ] Complete `ContentUserSettingsControllerWebMvcTest` coverage for HTTP response shapes and owner isolation.
+- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserThirdPartyAuthServiceTest,ContentUserSettingsControllerWebMvcTest test"`.
 - [ ] Commit point: `test(content): cover third-party authorization management`.
 
 ### Step 5.1: Add Account Security Settings Response Model
@@ -246,9 +247,9 @@
 
 **Maps to task:** `5.4 Add controller and validation tests for the account security entry response and login reminder preference updates.`
 
-- [ ] Add `ContentUserControllerWebMvcTest` coverage for the account security settings endpoint.
+- [ ] Add `ContentUserSettingsControllerWebMvcTest` coverage for the account security settings endpoint.
 - [ ] Add `ContentUserReqValidationTest` coverage for login reminder update request validation.
-- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserControllerWebMvcTest,ContentUserReqValidationTest test"`.
+- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserSettingsControllerWebMvcTest,ContentUserReqValidationTest test"`.
 - [ ] Commit point: `test(content): cover account security settings`.
 
 ### Step 6.1: Extend Settings Controller Endpoints
@@ -276,9 +277,9 @@
 
 **Maps to task:** `6.3 Add WebMvc tests covering HTTP contracts, validation messages, owner isolation, and response shapes for all new settings endpoints.`
 
-- [ ] Complete `ContentUserControllerWebMvcTest` cases for notification preferences, privacy settings, third-party authorizations, account security, validation errors, and owner isolation.
+- [ ] Complete `ContentUserSettingsControllerWebMvcTest` cases for notification preferences, privacy settings, third-party authorizations, account security, validation errors, and owner isolation.
 - [ ] Confirm all responses use `Result<T>` and expected VO fields.
-- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserControllerWebMvcTest test"`.
+- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserSettingsControllerWebMvcTest test"`.
 - [ ] Commit point: `test(content): cover settings controller contracts`.
 
 ### Step 7.1: Add Regression Tests
@@ -294,7 +295,7 @@
 
 **Maps to task:** `7.2 Run targeted Maven tests for notification settings, visibility policy, third-party authorization, settings controller, request validation, and migration coverage.`
 
-- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserNotificationSettingServiceTest,ContentUserVisibilityPolicyServiceTest,ContentUserThirdPartyAuthServiceTest,ContentUserControllerWebMvcTest,ContentUserReqValidationTest,ContentPrivacyNotificationsMigrationTest,ContentSubscriptionNotificationPreferenceServiceTest,ContentUserProfileServiceTest test"`.
+- [ ] Run `/bin/zsh -lc "JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home mvn -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserNotificationSettingServiceTest,ContentUserVisibilityPolicyServiceTest,ContentUserThirdPartyAuthServiceTest,ContentUserSettingsControllerWebMvcTest,ContentUserReqValidationTest,ContentPrivacyNotificationsMigrationTest,ContentSubscriptionNotificationPreferenceServiceTest,ContentUserProfileServiceTest test"`.
 - [ ] Fix only failures directly caused by EPIC-06 changes.
 - [ ] Rerun the same targeted Maven command until it passes.
 - [ ] Commit point: `test(content): pass epic 06 targeted tests`.
