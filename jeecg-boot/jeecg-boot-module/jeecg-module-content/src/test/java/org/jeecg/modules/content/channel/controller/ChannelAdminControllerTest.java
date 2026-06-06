@@ -1,6 +1,8 @@
 package org.jeecg.modules.content.channel.controller;
 
 import com.alibaba.fastjson2.JSON;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.channel.biz.ChannelBizManageService;
@@ -8,6 +10,9 @@ import org.jeecg.modules.content.channel.dto.CreateChannelDTO;
 import org.jeecg.modules.content.channel.entity.Channel;
 import org.jeecg.modules.content.channel.enums.ChannelType;
 import org.jeecg.modules.content.channel.enums.ReviewResult;
+import org.jeecg.modules.content.channel.req.ChannelListQuery;
+import org.jeecg.modules.content.channel.service.ChannelService;
+import org.jeecg.modules.content.channel.vo.ChannelVO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +25,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -31,6 +37,9 @@ class ChannelAdminControllerTest {
 
     @Mock
     private ChannelBizManageService channelBizManageService;
+
+    @Mock
+    private ChannelService channelService;
 
     @InjectMocks
     private ChannelAdminController controller;
@@ -74,5 +83,19 @@ class ChannelAdminControllerTest {
 
         assertThat(result.isSuccess()).isTrue();
         verify(channelBizManageService).reviewChannel("ch1", "admin1", ReviewResult.PASS, "ok");
+    }
+
+    @Test
+    void should_list_all_channels_for_admin() {
+        Page<Channel> page = new Page<>(1, 20);
+        IPage<Channel> serviceResult = new Page<>();
+        when(channelService.listAllChannels(any(Page.class), any(ChannelListQuery.class)))
+            .thenReturn(serviceResult);
+
+        Result<IPage<ChannelVO>> result = controller.listAllChannels(1, 20, new ChannelListQuery());
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getResult()).isNotNull();
+        verify(channelService).listAllChannels(any(Page.class), any(ChannelListQuery.class));
     }
 }
