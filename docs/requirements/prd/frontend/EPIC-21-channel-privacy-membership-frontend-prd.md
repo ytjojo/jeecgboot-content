@@ -501,8 +501,8 @@ sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal
 
 | 接口 | 方法 | URL | 说明 |
 |------|------|-----|------|
-| 更新隐私 | PUT | `/api/v1/channels/privacy` | `{ channelId, privacyType }` |
-| 更新加入方式 | PUT | `/api/v1/channels/join-method` | `{ channelId, joinMethod, config }` |
+| 更新隐私 | PUT | `/api/v1/content/channels/privacy` | `{ channelId, privacyType }` |
+| 更新加入方式 | PUT | `/api/v1/content/channels/join-method` | `{ channelId, joinMethod, config }` |
 | 治理日志 | GET | `/channel/governance/log` | 支持筛选、分页 |
 
 ---

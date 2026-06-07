@@ -47,7 +47,7 @@ PRD 8.5 节描述了升级祝贺交互，但仅说明"用户进入等级页面 /
 
 PRD 要求在主页、帖子卡片、评论区三处展示佩戴勋章（`BadgeDisplay` 组件），但这些位置分布在不同模块（个人中心、内容社区）。如果 `BadgeDisplay` 组件内部直接调用 `useBadgeStore.fetchWornBadges()`，会导致：
 - 每个帖子卡片都触发 API 请求（帖子列表页可能有 20+ 个帖子）
-- 查看他人主页时需要额外调用 `/content/user/badge/worn/{userId}`
+- 查看他人主页时需要额外调用 `/api/v1/content/user/growth/badge/worn/{userId}`
 
 **建议**：
 - `BadgeDisplay` 组件应接受 `badges` 作为 prop，而非内部请求数据
@@ -122,7 +122,7 @@ PRD 建议路由为 `/content/my-badges`、`/content/point-detail`、`/content/m
 
 **9. 等级配置接口缺少版本控制**
 
-`/content/user/growth/level-config` 返回等级阈值配置，但 PRD 未说明配置变更时前端如何感知。如果运营调整了等级阈值，用户看到的等级进度条可能与实际不符。
+`/api/v1/content/user/growth/level-config` 返回等级阈值配置，但 PRD 未说明配置变更时前端如何感知。如果运营调整了等级阈值，用户看到的等级进度条可能与实际不符。
 
 **建议**：在等级配置响应中增加 `version` 或 `updatedAt` 字段，前端对比本地缓存版本，有变化时自动刷新。
 

@@ -96,10 +96,10 @@
    - 回收原因（已回收时显示）
 
 **交互逻辑**:
-- 进入页面时调用 `GET /content/user/badge/catalog` 获取勋章分类列表
+- 进入页面时调用 `GET /api/v1/content/user/growth/badge/catalog` 获取勋章分类列表
 - 切换分类 Tab 时可前端过滤或重新请求
-- 点击勋章卡片调用 `GET /content/user/badge/{badgeCode}/detail` 获取详情
-- 已过期分类调用 `GET /content/user/badge/catalog?status=expired`
+- 点击勋章卡片调用 `GET /api/v1/content/user/growth/badge/{badgeCode}/detail` 获取详情
+- 已过期分类调用 `GET /api/v1/content/user/growth/badge/catalog?status=expired`
 
 #### P-02 勋章佩戴设置页
 
@@ -112,10 +112,10 @@
 3. **操作栏**: "保存佩戴设置"按钮 + 已选数量提示（如 "已选 3/5"）
 
 **交互逻辑**:
-- 进入页面时调用 `GET /content/user/badge/worn` 获取当前佩戴列表，调用 `GET /content/user/badge/owned` 获取已拥有勋章
+- 进入页面时调用 `GET /api/v1/content/user/growth/badge/worn` 获取当前佩戴列表，调用 `GET /api/v1/content/user/growth/badge/owned` 获取已拥有勋章
 - 用户点击可选勋章添加到已佩戴区域（最多 5 个）
 - 点击移除按钮从已佩戴区域移除
-- 保存时调用 `PUT /content/user/badge/wear` 提交勋章 ID 列表
+- 保存时调用 `PUT /api/v1/content/user/growth/badge/wear` 提交勋章 ID 列表
 - 校验：不可重复选择、不可选择已过期/已回收勋章、不超过 5 个
 - 保存成功后返回我的勋章页
 
@@ -136,10 +136,10 @@
 4. **空状态**: 无记录时展示空状态插画和提示文字
 
 **交互逻辑**:
-- 进入页面时调用 `GET /content/user/point/ledger?page=1&size=20`
-- 筛选时调用 `GET /content/user/point/ledger?type=earn&startDate=xxx&endDate=xxx&page=1&size=20`
+- 进入页面时调用 `GET /api/v1/content/user/growth/point/ledger?page=1&size=20`
+- 筛选时调用 `GET /api/v1/content/user/growth/point/ledger?type=earn&startDate=xxx&endDate=xxx&page=1&size=20`
 - 滚动加载更多，触底时 page+1
-- 积分余额调用 `GET /content/user/point/balance`
+- 积分余额调用 `GET /api/v1/content/user/growth/point/balance`
 
 #### P-04 兑换商城页
 
@@ -159,9 +159,9 @@
 5. **兑换成功弹窗**: 展示兑换结果，可跳转查看积分明细
 
 **交互逻辑**:
-- 进入页面时调用 `GET /content/user/exchange/goods` 获取商品列表
+- 进入页面时调用 `GET /api/v1/content/user/growth/point/exchange/goods` 获取商品列表
 - 点击"立即兑换"弹出确认弹窗，检查余额是否充足
-- 确认兑换调用 `POST /content/user/exchange/order` 创建兑换订单
+- 确认兑换调用 `POST /api/v1/content/user/growth/point/exchange/order` 创建兑换订单
 - 积分不足时按钮置灰并显示"积分不足"
 - 库存为 0 时按钮置灰并显示"已售罄"
 
@@ -183,9 +183,9 @@
 3. **赠送弹窗**: 选择接收人 + 附言输入 + 确认赠送
 
 **交互逻辑**:
-- 功能解锁调用 `POST /content/user/feature/unlock` 提交解锁请求
-- 已解锁功能再次使用不再扣积分，通过 `GET /content/user/feature/unlock/status` 查询状态
-- 赠送礼物调用 `POST /content/user/gift/send` 提交赠送请求
+- 功能解锁调用 `POST /api/v1/content/user/growth/point/feature/unlock` 提交解锁请求
+- 已解锁功能再次使用不再扣积分，通过 `GET /api/v1/content/user/growth/point/feature/unlock/status` 查询状态
+- 赠送礼物调用 `POST /api/v1/content/user/growth/point/gift/send` 提交赠送请求
 - 接收人不能是自己
 
 #### P-06 等级与成长页
@@ -214,9 +214,9 @@
 5. **衰减说明入口**: "了解经验衰减规则"链接，跳转衰减说明页
 
 **交互逻辑**:
-- 进入页面时调用 `GET /content/user/growth/summary` 获取成长概览
-- 等级权益调用 `GET /content/user/level/benefits` 获取当前等级权益配置
-- 等级历史调用 `GET /content/user/growth/level-history` 获取变更记录
+- 进入页面时调用 `GET /api/v1/content/user/growth/summary` 获取成长概览
+- 等级权益调用 `GET /api/v1/content/user/growth/level/benefits` 获取当前等级权益配置
+- 等级历史调用 `GET /api/v1/content/user/growth/level-history` 获取变更记录
 - 升级时通过 WebSocket 或轮询触发展示升级祝贺弹窗（全屏动画 + "恭喜您升级到 LV.X！"）
 
 #### P-07 衰减说明页
@@ -237,7 +237,7 @@
 3. **FAQ 区域**: 常见问题解答
 
 **交互逻辑**:
-- 进入页面时调用 `GET /content/user/growth/decay-state` 获取个人衰减状态
+- 进入页面时调用 `GET /api/v1/content/user/growth/decay-state` 获取个人衰减状态
 - 衰减规则说明从配置或静态内容获取
 
 ---
@@ -284,22 +284,22 @@
 
 | API 编号 | 方法 | 路径 | 说明 | 关联页面 |
 |---------|------|------|------|---------|
-| API-01 | GET | /content/user/badge/catalog | 获取勋章分类列表 | P-01 |
-| API-02 | GET | /content/user/badge/{badgeCode}/detail | 获取勋章详情（含进度） | P-01 |
-| API-03 | GET | /content/user/badge/worn | 获取当前佩戴勋章列表 | P-02, 跨页面 |
-| API-04 | GET | /content/user/badge/owned | 获取用户已拥有勋章列表 | P-02 |
-| API-05 | PUT | /content/user/badge/wear | 保存佩戴设置 | P-02 |
-| API-06 | GET | /content/user/point/balance | 获取积分余额 | P-03, P-04 |
-| API-07 | GET | /content/user/point/ledger | 获取积分明细（分页+筛选） | P-03 |
-| API-08 | GET | /content/user/exchange/goods | 获取兑换商品列表 | P-04 |
-| API-09 | POST | /content/user/exchange/order | 创建兑换订单 | P-04 |
-| API-10 | GET | /content/user/feature/unlock/status | 查询功能解锁状态 | P-05 |
-| API-11 | POST | /content/user/feature/unlock | 提交功能解锁请求 | P-05 |
-| API-12 | POST | /content/user/gift/send | 赠送虚拟礼物 | P-05 |
-| API-13 | GET | /content/user/growth/summary | 获取成长概览（等级、经验值、进度） | P-06 |
-| API-14 | GET | /content/user/level/benefits | 获取当前等级权益配置 | P-06 |
-| API-15 | GET | /content/user/growth/level-history | 获取等级变更历史 | P-06 |
-| API-16 | GET | /content/user/growth/decay-state | 获取个人衰减状态 | P-07 |
+| API-01 | GET | /api/v1/content/user/growth/badge/catalog | 获取勋章分类列表 | P-01 |
+| API-02 | GET | /api/v1/content/user/growth/badge/{badgeCode}/detail | 获取勋章详情（含进度） | P-01 |
+| API-03 | GET | /api/v1/content/user/growth/badge/worn | 获取当前佩戴勋章列表 | P-02, 跨页面 |
+| API-04 | GET | /api/v1/content/user/growth/badge/owned | 获取用户已拥有勋章列表 | P-02 |
+| API-05 | PUT | /api/v1/content/user/growth/badge/wear | 保存佩戴设置 | P-02 |
+| API-06 | GET | /api/v1/content/user/growth/point/balance | 获取积分余额 | P-03, P-04 |
+| API-07 | GET | /api/v1/content/user/growth/point/ledger | 获取积分明细（分页+筛选） | P-03 |
+| API-08 | GET | /api/v1/content/user/growth/point/exchange/goods | 获取兑换商品列表 | P-04 |
+| API-09 | POST | /api/v1/content/user/growth/point/exchange/order | 创建兑换订单 | P-04 |
+| API-10 | GET | /api/v1/content/user/growth/point/feature/unlock/status | 查询功能解锁状态 | P-05 |
+| API-11 | POST | /api/v1/content/user/growth/point/feature/unlock | 提交功能解锁请求 | P-05 |
+| API-12 | POST | /api/v1/content/user/growth/point/gift/send | 赠送虚拟礼物 | P-05 |
+| API-13 | GET | /api/v1/content/user/growth/summary | 获取成长概览（等级、经验值、进度） | P-06 |
+| API-14 | GET | /api/v1/content/user/growth/level/benefits | 获取当前等级权益配置 | P-06 |
+| API-15 | GET | /api/v1/content/user/growth/level-history | 获取等级变更历史 | P-06 |
+| API-16 | GET | /api/v1/content/user/growth/decay-state | 获取个人衰减状态 | P-07 |
 
 ### 5.2 数据流
 

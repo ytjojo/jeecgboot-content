@@ -384,34 +384,34 @@
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
 | 创建圈子 | POST | `/content/circle` | 创建新圈子 |
-| 更新圈子 | PUT | `/content/circle/{id}` | 更新圈子信息（名称不可改） |
-| 获取圈子详情 | GET | `/content/circle/{id}` | 获取圈子完整信息 |
-| 获取公开圈子列表 | GET | `/content/circle/list` | 分页获取公开圈子 |
+| 更新圈子 | PUT | `/api/v1/content/circle/{id}` | 更新圈子信息（名称不可改） |
+| 获取圈子详情 | GET | `/api/v1/content/circle/{id}` | 获取圈子完整信息 |
+| 获取公开圈子列表 | GET | `/api/v1/content/circle/list` | 分页获取公开圈子 |
 
 #### 成员管理
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 加入圈子 | POST | `/content/circle/{id}/join` | 加入圈子（含密码验证） |
-| 退出圈子 | POST | `/content/circle/{id}/leave` | 退出圈子 |
-| 获取成员列表 | GET | `/content/circle/{id}/members` | 分页获取成员列表，支持角色/状态筛选 |
-| 变更成员角色 | PUT | `/content/circle/{id}/members/{userId}/role` | 设置/取消版主 |
-| 禁言成员 | POST | `/content/circle/{id}/members/{userId}/mute` | 禁言指定成员 |
-| 解除禁言 | POST | `/content/circle/{id}/members/{userId}/unmute` | 解除禁言 |
-| 移除成员 | DELETE | `/content/circle/{id}/members/{userId}` | 移除成员 |
-| 获取治理日志 | GET | `/content/circle/{id}/governance-logs` | 获取治理操作记录 |
+| 加入圈子 | POST | `/api/v1/content/circle/{id}/join` | 加入圈子（含密码验证） |
+| 退出圈子 | POST | `/api/v1/content/circle/{id}/leave` | 退出圈子 |
+| 获取成员列表 | GET | `/api/v1/content/circle/{id}/members` | 分页获取成员列表，支持角色/状态筛选 |
+| 变更成员角色 | PUT | `/api/v1/content/circle/{id}/members/{userId}/role` | 设置/取消版主 |
+| 禁言成员 | POST | `/api/v1/content/circle/{id}/members/{userId}/mute` | 禁言指定成员 |
+| 解除禁言 | POST | `/api/v1/content/circle/{id}/members/{userId}/unmute` | 解除禁言 |
+| 移除成员 | DELETE | `/api/v1/content/circle/{id}/members/{userId}` | 移除成员 |
+| 获取治理日志 | GET | `/api/v1/content/circle/{id}/governance-logs` | 获取治理操作记录 |
 
 #### 搜索
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 搜索圈子 | GET | `/content/circle/search` | 关键词搜索公开圈子 |
+| 搜索圈子 | GET | `/api/v1/content/circle/search` | 关键词搜索公开圈子 |
 
 #### 校验
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 名称唯一性校验 | GET | `/content/circle/check-name` | 校验圈子名称是否已存在 |
+| 名称唯一性校验 | GET | `/api/v1/content/circle/check-name` | 校验圈子名称是否已存在 |
 
 ### 5.2 数据流
 
@@ -456,7 +456,7 @@
 ```
 用户输入关键词 → 点击搜索/回车
   → 跳转搜索结果页（携带 keyword 参数）
-  → 调用搜索 API（GET /content/circle/search?keyword=xxx）
+  → 调用搜索 API（GET /api/v1/content/circle/search?keyword=xxx）
   → 成功 → 渲染结果列表
   → 无结果 → 展示空状态 + 浏览入口
   → 服务异常 → 展示降级提示 + 浏览入口

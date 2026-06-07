@@ -370,28 +370,28 @@
 
 | 模块 | API | 方法 | 说明 |
 |------|-----|------|------|
-| 分类 | `/content/channel/category/tree` | GET | 获取分类树 |
-| 分类 | `/content/channel/category/create` | POST | 新增分类 |
-| 分类 | `/content/channel/category/update` | POST | 编辑分类 |
-| 分类 | `/content/channel/category/disable` | POST | 停用分类（含影响范围） |
-| 分类 | `/content/channel/category/enable` | POST | 启用分类 |
-| 标签 | `/content/channel/tag/list` | GET | 获取频道标签列表 |
-| 标签 | `/content/channel/tag/create` | POST | 新增标签 |
-| 标签 | `/content/channel/tag/update` | POST | 编辑标签（参数: tagId, name） |
-| 标签 | `/content/channel/tag/delete` | POST | 删除标签 |
-| 推荐 | `/content/channel/recommendation/list` | GET | 获取推荐频道列表（参数: userId，自动注入） |
-| 推荐 | `/content/channel/recommendation/cold-start` | GET | 冷启动推荐（未登录/新用户） |
-| 推荐 | `/content/channel/recommendation/not-interested` | POST | 提交不感兴趣反馈 |
-| 排行榜 | `/content/channel/ranking/hot` | GET | 获取热门排行榜 |
-| 排行榜 | `/content/channel/ranking/new` | GET | 获取新晋排行榜 |
-| 排行榜 | `/content/channel/ranking/system` | GET | 获取系统排行榜 |
-| 精选 | `/content/channel/editorial-pick/list` | GET | 获取编辑精选列表 |
-| 精选 | `/content/channel/editorial-pick/create` | POST | 添加精选频道 |
-| 精选 | `/content/channel/editorial-pick/update` | POST | 编辑精选频道 |
-| 精选 | `/content/channel/editorial-pick/remove` | POST | 取消精选 |
-| 搜索 | `/content/channel/search/query` | GET | 搜索频道（参数: userId 自动注入, keyword, type, category, sort, page, pageSize） |
-| 浏览 | `/content/channel/browse/category` | GET | 分类浏览频道列表（参数: categoryId, type, sort, page, pageSize） |
-| 发现 | `/content/channel/discovery/home` | GET | 发现页聚合数据（推荐+榜单+精选） |
+| 分类 | `/api/v1/content/channel/category/tree` | GET | 获取分类树 |
+| 分类 | `/api/v1/content/channel/category/create` | POST | 新增分类 |
+| 分类 | `/api/v1/content/channel/category/update` | POST | 编辑分类 |
+| 分类 | `/api/v1/content/channel/category/disable` | POST | 停用分类（含影响范围） |
+| 分类 | `/api/v1/content/channel/category/enable` | POST | 启用分类 |
+| 标签 | `/api/v1/content/channel/tag/list` | GET | 获取频道标签列表 |
+| 标签 | `/api/v1/content/channel/tag/create` | POST | 新增标签 |
+| 标签 | `/api/v1/content/channel/tag/update` | POST | 编辑标签（参数: tagId, name） |
+| 标签 | `/api/v1/content/channel/tag/delete` | POST | 删除标签 |
+| 推荐 | `/api/v1/content/channel/recommendation/list` | GET | 获取推荐频道列表（参数: userId，自动注入） |
+| 推荐 | `/api/v1/content/channel/recommendation/cold-start` | GET | 冷启动推荐（未登录/新用户） |
+| 推荐 | `/api/v1/content/channel/recommendation/not-interested` | POST | 提交不感兴趣反馈 |
+| 排行榜 | `/api/v1/content/channel/ranking/hot` | GET | 获取热门排行榜 |
+| 排行榜 | `/api/v1/content/channel/ranking/new` | GET | 获取新晋排行榜 |
+| 排行榜 | `/api/v1/content/channel/ranking/system` | GET | 获取系统排行榜 |
+| 精选 | `/api/v1/content/channel/editorial-pick/list` | GET | 获取编辑精选列表 |
+| 精选 | `/api/v1/content/channel/editorial-pick/create` | POST | 添加精选频道 |
+| 精选 | `/api/v1/content/channel/editorial-pick/update` | POST | 编辑精选频道 |
+| 精选 | `/api/v1/content/channel/editorial-pick/remove` | POST | 取消精选 |
+| 搜索 | `/api/v1/content/channel/search/query` | GET | 搜索频道（参数: userId 自动注入, keyword, type, category, sort, page, pageSize） |
+| 浏览 | `/api/v1/content/channel/browse/category` | GET | 分类浏览频道列表（参数: categoryId, type, sort, page, pageSize） |
+| 发现 | `/api/v1/content/channel/discovery/home` | GET | 发现页聚合数据（推荐+榜单+精选） |
 
 ### 5.2 API 调用方式
 
@@ -400,16 +400,16 @@
 import { defHttp } from '/@/utils/http/axios';
 
 // 获取推荐频道（userId 从 useUserStore 自动注入）
-defHttp.get<ChannelRecommendationVO[]>({ url: '/content/channel/recommendation/list', params: { userId } });
+defHttp.get<ChannelRecommendationVO[]>({ url: '/api/v1/content/channel/recommendation/list', params: { userId } });
 
 // 搜索频道
 defHttp.get<PageResult<ChannelSearchResultVO>>({
-  url: '/content/channel/search/query',
+  url: '/api/v1/content/channel/search/query',
   params: { userId, keyword, type, category, sort, page, pageSize }
 });
 
 // 提交不感兴趣反馈
-defHttp.post({ url: '/content/channel/recommendation/not-interested', data: { channelId } });
+defHttp.post({ url: '/api/v1/content/channel/recommendation/not-interested', data: { channelId } });
 ```
 
 ### 5.3 API 请求/响应类型定义
@@ -761,7 +761,7 @@ interface ChannelSearchState {
 | 骨架屏 | 所有列表页首屏展示骨架屏，减少布局抖动 |
 | 图片懒加载 | 频道图标使用懒加载 |
 | 虚拟滚动 | 排行榜列表超过 100 条时启用虚拟滚动 |
-| 接口合并 | 发现页使用聚合 API `/content/channel/discovery/home` 一次性获取推荐+榜单+精选 |
+| 接口合并 | 发现页使用聚合 API `/api/v1/content/channel/discovery/home` 一次性获取推荐+榜单+精选 |
 
 ### 10.3 网络异常处理
 

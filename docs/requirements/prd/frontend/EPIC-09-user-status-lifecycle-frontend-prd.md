@@ -362,26 +362,26 @@ Page
 
 ### 4.3 API 接口
 
-> **设计说明**: 所有 14 个 API 均在 `UserStatusController` 中实现，基路径为 `/api/content/user-status`。审计日志相关接口也在此 Controller 内，使用 `/audit-logs` 子路径。`change` 和 `release` 采用 RPC 风格端点，因其语义为操作动作而非资源名词。
+> **设计说明**: 所有 14 个 API 均在 `UserStatusController` 中实现，基路径为 `/api/v1/content/user-status`。审计日志相关接口也在此 Controller 内，使用 `/audit-logs` 子路径。`change` 和 `release` 采用 RPC 风格端点，因其语义为操作动作而非资源名词。
 >
 > **后端状态**: 14/14 API 已全部实现（2026-06-06 确认，UserStatusController.java）。
 
 | 接口 | 方法 | 路径 | 后端状态 | 说明 |
 |------|------|------|----------|------|
-| 查询当前用户状态 | GET | `/api/content/user-status/current` | ✅ 已实现 | 返回当前用户状态详情，需 userId 参数 |
-| 查询指定用户状态 | GET | `/api/content/user-status/{userId}` | ✅ 已实现 | 管理员查询指定用户状态 |
-| 用户状态列表 | GET | `/api/content/user-status/list` | ✅ 已实现 | 管理员分页查询用户状态列表，支持 query 参数筛选 |
-| 获取可转换状态列表 | GET | `/api/content/user-status/transitions/{currentStatus}` | ✅ 已实现 | 返回当前状态允许转换的目标状态列表 |
-| 变更用户状态 | POST | `/api/content/user-status/{userId}/change` | ✅ 已实现 | 管理员手动变更用户状态 |
-| 解禁用户 | POST | `/api/content/user-status/{userId}/release` | ✅ 已实现 | 管理员手动解禁 |
-| 批量解禁 | POST | `/api/content/user-status/batch-release` | ✅ 已实现 | 批量解禁操作 |
-| 用户状态历史 | GET | `/api/content/user-status/{userId}/history` | ✅ 已实现 | 查询用户状态变更历史 |
-| 审计日志列表 | GET | `/api/content/user-status/audit-logs` | ✅ 已实现 | 分页查询审计日志 |
-| 审计日志详情 | GET | `/api/content/user-status/audit-logs/{logId}` | ✅ 已实现 | 查询审计日志详情 |
-| 用户审计日志 | GET | `/api/content/user-status/users/{userId}/audit-logs` | ✅ 已实现 | 查询指定用户的审计日志 |
-| 导出审计日志 | GET | `/api/content/user-status/audit-logs/export` | ✅ 已实现 | 导出审计日志，后端返回数据列表 |
-| 安全核验 | POST | `/api/content/user-status/verify-security` | ✅ 已实现 | 冻结用户安全核验 |
-| 发送验证码 | POST | `/api/content/user-status/send-verify-code` | ✅ 已实现 | 发送手机验证码 |
+| 查询当前用户状态 | GET | `/api/v1/content/user-status/current` | ✅ 已实现 | 返回当前用户状态详情，需 userId 参数 |
+| 查询指定用户状态 | GET | `/api/v1/content/user-status/{userId}` | ✅ 已实现 | 管理员查询指定用户状态 |
+| 用户状态列表 | GET | `/api/v1/content/user-status/list` | ✅ 已实现 | 管理员分页查询用户状态列表，支持 query 参数筛选 |
+| 获取可转换状态列表 | GET | `/api/v1/content/user-status/transitions/{currentStatus}` | ✅ 已实现 | 返回当前状态允许转换的目标状态列表 |
+| 变更用户状态 | POST | `/api/v1/content/user-status/{userId}/change` | ✅ 已实现 | 管理员手动变更用户状态 |
+| 解禁用户 | POST | `/api/v1/content/user-status/{userId}/release` | ✅ 已实现 | 管理员手动解禁 |
+| 批量解禁 | POST | `/api/v1/content/user-status/batch-release` | ✅ 已实现 | 批量解禁操作 |
+| 用户状态历史 | GET | `/api/v1/content/user-status/{userId}/history` | ✅ 已实现 | 查询用户状态变更历史 |
+| 审计日志列表 | GET | `/api/v1/content/user-status/audit-logs` | ✅ 已实现 | 分页查询审计日志 |
+| 审计日志详情 | GET | `/api/v1/content/user-status/audit-logs/{logId}` | ✅ 已实现 | 查询审计日志详情 |
+| 用户审计日志 | GET | `/api/v1/content/user-status/users/{userId}/audit-logs` | ✅ 已实现 | 查询指定用户的审计日志 |
+| 导出审计日志 | GET | `/api/v1/content/user-status/audit-logs/export` | ✅ 已实现 | 导出审计日志，后端返回数据列表 |
+| 安全核验 | POST | `/api/v1/content/user-status/verify-security` | ✅ 已实现 | 冻结用户安全核验 |
+| 发送验证码 | POST | `/api/v1/content/user-status/send-verify-code` | ✅ 已实现 | 发送手机验证码 |
 
 ---
 
@@ -478,15 +478,15 @@ enum UserStatusEnum {
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  CurrentStatus = '/api/content/user-status/current',
-  UserStatus = '/api/content/user-status',
-  Transitions = '/api/content/user-status/transitions',
-  List = '/api/content/user-status/list',
-  BatchRelease = '/api/content/user-status/batch-release',
-  AuditLogs = '/api/content/user-status/audit-logs',
-  AuditLogExport = '/api/content/user-status/audit-logs/export',
-  SecurityVerify = '/api/content/user-status/verify-security',
-  SendCode = '/api/content/user-status/send-verify-code',
+  CurrentStatus = '/api/v1/content/user-status/current',
+  UserStatus = '/api/v1/content/user-status',
+  Transitions = '/api/v1/content/user-status/transitions',
+  List = '/api/v1/content/user-status/list',
+  BatchRelease = '/api/v1/content/user-status/batch-release',
+  AuditLogs = '/api/v1/content/user-status/audit-logs',
+  AuditLogExport = '/api/v1/content/user-status/audit-logs/export',
+  SecurityVerify = '/api/v1/content/user-status/verify-security',
+  SendCode = '/api/v1/content/user-status/send-verify-code',
 }
 
 // 查询当前用户状态
@@ -580,7 +580,7 @@ export const sendVerifyCode = (phone: string) =>
 ```
 管理员点击"变更状态" 
   → 弹出状态变更弹窗
-  → 调用 GET /api/content/user-status/transitions/{currentStatus} 获取可转换状态列表（后端已实现）
+  → 调用 GET /api/v1/content/user-status/transitions/{currentStatus} 获取可转换状态列表（后端已实现）
   → 选择目标状态（下拉框，仅显示 API 返回的允许转换状态）
   → 填写原因（必填）
   → 填写期限（禁言/封禁时显示，支持日期时间选择器 + 永久选项）
@@ -598,7 +598,7 @@ export const sendVerifyCode = (phone: string) =>
 **获取可转换状态 API**:
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取可转换状态列表 | GET | `/api/content/user-status/transitions/{currentStatus}` | 返回当前状态允许转换的目标状态列表 |
+| 获取可转换状态列表 | GET | `/api/v1/content/user-status/transitions/{currentStatus}` | 返回当前状态允许转换的目标状态列表 |
 
 **参考矩阵（以后端 API 返回为准）**:
 
@@ -617,7 +617,7 @@ export const sendVerifyCode = (phone: string) =>
 > **说明**: GUEST、REGISTERED_INCOMPLETE、DEACTIVATED 为终态或初始态，管理员不可直接变更。Y=允许转换，N=不允许，-=自身。
 
 **前端实现要点**:
-- StatusChangeModal 打开时调用 `GET /api/content/user-status/transitions/{currentStatus}` 获取可选列表
+- StatusChangeModal 打开时调用 `GET /api/v1/content/user-status/transitions/{currentStatus}` 获取可选列表
 - 下拉框仅渲染返回的可转换状态
 - 提交前前端做合法性二次校验，后端做最终校验（双重校验）
 - API 返回空列表时，禁用"变更状态"按钮并提示"当前状态无可执行的转换操作"

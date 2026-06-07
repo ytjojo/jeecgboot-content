@@ -116,7 +116,7 @@ PRD 质量较高，功能拆分清晰，状态机定义完整，API 设计合理
 ### 1. 页面组件架构建议
 
 ```
-src/views/content/channel/
+src/views/api/v1/content/channel/
 ├── settings/                    # 频道设置页
 │   ├── index.vue               # 容器组件
 │   ├── PrivacySettings.vue     # 隐私设置子组件

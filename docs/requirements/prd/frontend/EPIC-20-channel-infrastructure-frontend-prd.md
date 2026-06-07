@@ -226,7 +226,7 @@
 
 #### 频道管理页信息架构
 
-频道管理页（`/content/channel/manage/:id`）是频道主最常访问的页面，采用 Tab 结构组织内容：
+频道管理页（`/api/v1/content/channel/manage/:id`）是频道主最常访问的页面，采用 Tab 结构组织内容：
 
 | Tab | 名称 | 内容 |
 |-----|------|------|
@@ -426,11 +426,11 @@
 
 | 页面 | 路由（建议） | 端 |
 |------|-------------|-----|
-| 创建频道（用户端） | `/content/channel/create` | 用户端 |
-| 我的频道列表（用户端） | `/content/channel/list` | 用户端 |
-| 频道管理（用户端） | `/content/channel/manage/:id` | 用户端 |
-| 频道管理（后台端） | `/content/channel/admin` | 后台端 |
-| 审核队列（后台端） | `/content/channel/review` | 后台端 |
+| 创建频道（用户端） | `/api/v1/content/channel/create` | 用户端 |
+| 我的频道列表（用户端） | `/api/v1/content/channel/list` | 用户端 |
+| 频道管理（用户端） | `/api/v1/content/channel/manage/:id` | 用户端 |
+| 频道管理（后台端） | `/api/v1/content/channel/admin` | 后台端 |
+| 审核队列（后台端） | `/api/v1/content/channel/review` | 后台端 |
 | 创建系统频道（后台端） | 弹窗，无独立路由 | 后台端 |
 
 ### 共用组件
@@ -456,24 +456,24 @@
 
 | 接口 | 方法 | 路径 | 用途 |
 |------|------|------|------|
-| 创建频道 | POST | `/api/v1/channels/create` | 用户端创建个人/组织频道 |
-| 创建系统频道 | POST | `/api/v1/admin/channels/create-system` | 后台创建系统频道 |
-| 我的频道列表 | GET | `/api/v1/channels/list` | 用户端获取自己的频道列表 |
-| 频道详情 | GET | `/api/v1/channels/{id}` | 获取频道详情 |
-| 更新频道 | PUT | `/api/v1/channels/{id}` | 编辑频道信息 |
-| 删除频道 | DELETE | `/api/v1/channels/{id}` | 申请删除频道 |
-| 撤销删除 | POST | `/api/v1/channels/{id}/cancel-delete` | 撤销删除 |
-| 发起转让 | POST | `/api/v1/channels/{id}/transfer` | 发起频道转让 |
-| 确认转让 | POST | `/api/v1/channels/transfer/{transferId}/confirm` | 目标用户确认转让 |
-| 拒绝转让 | POST | `/api/v1/channels/transfer/{transferId}/reject` | 目标用户拒绝转让 |
-| 转让历史查询 | GET | `/api/v1/channels/{id}/transfers` | 查询频道的转让历史记录 |
-| 待确认转让查询 | GET | `/api/v1/channels/{id}/transfer/pending` | 查询频道当前待确认的转让请求 |
-| 后台频道列表 | GET | `/api/v1/admin/channels/list` | 后台获取所有频道 |
-| 审核频道 | POST | `/api/v1/admin/channels/{id}/review` | 执行审核操作 |
-| 审核队列 | GET | `/jeecg-boot/api/v1/content/channel/review/list` | 获取待审核列表 |
-| 名称唯一性校验 | GET | `/api/v1/channels/check-name` | 校验频道名称是否可用 |
-| 用户搜索（转让） | GET | `/api/v1/channels/search-user` | 转让时搜索目标用户，支持按昵称模糊搜索，排除当前用户和冻结用户 |
-| 删除前置校验 | GET | `/api/v1/channels/{id}/delete-check` | 校验频道是否满足删除条件，返回阻塞原因列表 |
+| 创建频道 | POST | `/api/v1/content/channels/create` | 用户端创建个人/组织频道 |
+| 创建系统频道 | POST | `/api/v1/content/admin/channels/create-system` | 后台创建系统频道 |
+| 我的频道列表 | GET | `/api/v1/content/channels/list` | 用户端获取自己的频道列表 |
+| 频道详情 | GET | `/api/v1/content/channels/{id}` | 获取频道详情 |
+| 更新频道 | PUT | `/api/v1/content/channels/{id}` | 编辑频道信息 |
+| 删除频道 | DELETE | `/api/v1/content/channels/{id}` | 申请删除频道 |
+| 撤销删除 | POST | `/api/v1/content/channels/{id}/cancel-delete` | 撤销删除 |
+| 发起转让 | POST | `/api/v1/content/channels/{id}/transfer` | 发起频道转让 |
+| 确认转让 | POST | `/api/v1/content/channels/transfer/{transferId}/confirm` | 目标用户确认转让 |
+| 拒绝转让 | POST | `/api/v1/content/channels/transfer/{transferId}/reject` | 目标用户拒绝转让 |
+| 转让历史查询 | GET | `/api/v1/content/channels/{id}/transfers` | 查询频道的转让历史记录 |
+| 待确认转让查询 | GET | `/api/v1/content/channels/{id}/transfer/pending` | 查询频道当前待确认的转让请求 |
+| 后台频道列表 | GET | `/api/v1/content/admin/channels/list` | 后台获取所有频道 |
+| 审核频道 | POST | `/api/v1/content/admin/channels/{id}/review` | 执行审核操作 |
+| 审核队列 | GET | `/api/v1/content/channel/review/list` | 获取待审核列表 |
+| 名称唯一性校验 | GET | `/api/v1/content/channels/check-name` | 校验频道名称是否可用 |
+| 用户搜索（转让） | GET | `/api/v1/content/channels/search-user` | 转让时搜索目标用户，支持按昵称模糊搜索，排除当前用户和冻结用户 |
+| 删除前置校验 | GET | `/api/v1/content/channels/{id}/delete-check` | 校验频道是否满足删除条件，返回阻塞原因列表 |
 
 ### API 封装规范
 

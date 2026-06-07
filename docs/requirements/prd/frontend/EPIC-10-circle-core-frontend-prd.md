@@ -440,36 +440,36 @@
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 创建圈子 | POST | `/content/circle/create` | 提交圈子创建表单数据 |
-| 更新圈子 | PUT | `/content/circle/update` | 更新圈子基础信息（名称不可改） |
-| 圈子详情 | GET | `/content/circle/{id}` | 获取圈子详情（返回字段含 `applyStatus` 申请状态、`isInvited` 是否受邀、`memberLimit` 成员上限、`memberCount` 当前成员数） |
-| 圈子列表（已加入） | GET | `/content/circle/my-list` | 当前用户已加入的圈子（后端待实现） |
-| 公开圈子列表 | GET | `/content/circle/public-list` | 公开圈子浏览列表（后端待实现） |
-| 名称唯一性校验 | GET | `/content/circle/check-name?name={name}` | 实时校验名称是否可用 |
+| 创建圈子 | POST | `/api/v1/content/circle/create` | 提交圈子创建表单数据 |
+| 更新圈子 | PUT | `/api/v1/content/circle/update` | 更新圈子基础信息（名称不可改） |
+| 圈子详情 | GET | `/api/v1/content/circle/{id}` | 获取圈子详情（返回字段含 `applyStatus` 申请状态、`isInvited` 是否受邀、`memberLimit` 成员上限、`memberCount` 当前成员数） |
+| 圈子列表（已加入） | GET | `/api/v1/content/circle/my-list` | 当前用户已加入的圈子（后端待实现） |
+| 公开圈子列表 | GET | `/api/v1/content/circle/public-list` | 公开圈子浏览列表（后端待实现） |
+| 名称唯一性校验 | GET | `/api/v1/content/circle/check-name?name={name}` | 实时校验名称是否可用 |
 
 ### 5.2 成员管理
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 加入圈子 | POST | `/content/circle/join` | 加入圈子（含密码参数） |
-| 退出圈子 | POST | `/content/circle/leave` | 退出圈子 |
-| 成员列表 | GET | `/content/circle/member/list?circleId={id}` | 分页获取成员列表 |
-| 设置版主 | POST | `/content/circle/member/change-role` | 设置/取消版主 |
-| 禁言成员 | POST | `/content/circle/member/mute` | 禁言（含时长和原因） |
-| 解除禁言 | POST | `/content/circle/member/unmute` | 解除禁言 |
-| 移除成员 | POST | `/content/circle/member/remove` | 移除成员 |
+| 加入圈子 | POST | `/api/v1/content/circle/join` | 加入圈子（含密码参数） |
+| 退出圈子 | POST | `/api/v1/content/circle/leave` | 退出圈子 |
+| 成员列表 | GET | `/api/v1/content/circle/member/list?circleId={id}` | 分页获取成员列表 |
+| 设置版主 | POST | `/api/v1/content/circle/member/change-role` | 设置/取消版主 |
+| 禁言成员 | POST | `/api/v1/content/circle/member/mute` | 禁言（含时长和原因） |
+| 解除禁言 | POST | `/api/v1/content/circle/member/unmute` | 解除禁言 |
+| 移除成员 | POST | `/api/v1/content/circle/member/remove` | 移除成员 |
 
 ### 5.3 搜索
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 搜索圈子 | GET | `/content/circle/search?keyword={keyword}&pageNum={pageNum}&pageSize={pageSize}` | 关键词搜索公开圈子 |
+| 搜索圈子 | GET | `/api/v1/content/circle/search?keyword={keyword}&pageNum={pageNum}&pageSize={pageSize}` | 关键词搜索公开圈子 |
 
 ### 5.4 治理日志
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 治理日志列表 | GET | `/content/circle/governance-log/list?circleId={id}` | 分页获取治理日志 |
+| 治理日志列表 | GET | `/api/v1/content/circle/governance-log/list?circleId={id}` | 分页获取治理日志 |
 
 ### 5.5 API 调用规范
 
@@ -487,11 +487,11 @@ interface ApiResponse<T> {
 
 // 示例：创建圈子
 export const createCircle = (data: CircleCreateReq) =>
-  defHttp.post({ url: '/content/circle/create', data });
+  defHttp.post({ url: '/api/v1/content/circle/create', data });
 
 // 示例：搜索圈子
 export const searchCircles = (params: { keyword: string; page: number; size: number }) =>
-  defHttp.get({ url: '/content/circle/search', params });
+  defHttp.get({ url: '/api/v1/content/circle/search', params });
 ```
 
 ---

@@ -407,27 +407,27 @@ Page
 
 | API | 方法 | 路径 | 用途 | 说明 |
 |-----|------|------|------|------|
-| 创建举报 | POST | `/content/user/support/report` | 提交举报 | 包含防重复校验 |
-| 撤回举报 | POST | `/content/user/support/report/{id}/withdraw` | 撤回举报 | 仅待处理状态可撤回 |
-| 查询举报列表 | GET | `/content/user/support/report/list` | 我的举报列表 | 分页，支持状态/类型筛选 |
-| 查询举报详情 | GET | `/content/user/support/report/{id}` | 举报详情 | 含处理结果 |
-| 创建申诉 | POST | `/content/user/support/appeal` | 提交申诉 | 包含次数限制校验 |
-| 撤回申诉 | POST | `/content/user/support/appeal/{id}/withdraw` | 撤回申诉 | 仅审核中状态可撤回 |
-| 查询申诉列表 | GET | `/content/user/support/appeal/list` | 我的申诉列表 | 分页，支持状态筛选 |
-| 查询申诉详情 | GET | `/content/user/support/appeal/{id}` | 申诉详情 | 含审核结果 |
-| 搜索帮助文章 | GET | `/content/user/support/help/search` | 帮助中心搜索 | 关键词搜索，响应 <500ms |
-| 获取帮助分类 | GET | `/content/user/support/help/categories` | 帮助中心分类 | 含文章数统计 |
-| 获取帮助文章详情 | GET | `/content/user/support/help/article/{id}` | 文章详情 | 含正文内容 |
-| 文章反馈 | POST | `/content/user/support/help/article/{id}/feedback` | 有用/无用反馈 | 每用户每篇文章仅可反馈一次 |
-| 获取更新日志列表 | GET | `/content/user/support/changelog/list` | 更新日志 | 分页，支持搜索 |
-| 创建客服会话 | POST | `/content/user/support/customer-service/session` | 创建会话 | 智能客服默认 |
-| 转人工客服 | POST | `/content/user/support/customer-service/session/{id}/transfer` | 转人工 | 返回排队位置 |
-| 发送消息 | POST | `/content/user/support/customer-service/session/{id}/message` | 发送消息 | WebSocket 优先 |
-| 结束会话 | POST | `/content/user/support/customer-service/session/{id}/close` | 结束会话 | 触发评分弹窗 |
-| 提交服务评分 | POST | `/content/user/support/customer-service/session/{id}/rating` | 评分 | 1-5 星 + 评价 |
-| 查询会话历史 | GET | `/content/user/support/customer-service/sessions` | 会话历史列表 | 分页，按时间倒序 |
-| 查询会话详情 | GET | `/content/user/support/customer-service/session/{id}` | 会话详情 | 含完整对话记录 |
-| 举报/申诉数量统计 | GET | `/content/user/support/statistics` | 个人中心菜单角标 | 待处理数量 |
+| 创建举报 | POST | `/api/v1/content/user/support/report` | 提交举报 | 包含防重复校验 |
+| 撤回举报 | POST | `/api/v1/content/user/support/report/{id}/withdraw` | 撤回举报 | 仅待处理状态可撤回 |
+| 查询举报列表 | GET | `/api/v1/content/user/support/report/list` | 我的举报列表 | 分页，支持状态/类型筛选 |
+| 查询举报详情 | GET | `/api/v1/content/user/support/report/{id}` | 举报详情 | 含处理结果 |
+| 创建申诉 | POST | `/api/v1/content/user/support/appeal` | 提交申诉 | 包含次数限制校验 |
+| 撤回申诉 | POST | `/api/v1/content/user/support/appeal/{id}/withdraw` | 撤回申诉 | 仅审核中状态可撤回 |
+| 查询申诉列表 | GET | `/api/v1/content/user/support/appeal/list` | 我的申诉列表 | 分页，支持状态筛选 |
+| 查询申诉详情 | GET | `/api/v1/content/user/support/appeal/{id}` | 申诉详情 | 含审核结果 |
+| 搜索帮助文章 | GET | `/api/v1/content/user/support/help/search` | 帮助中心搜索 | 关键词搜索，响应 <500ms |
+| 获取帮助分类 | GET | `/api/v1/content/user/support/help/categories` | 帮助中心分类 | 含文章数统计 |
+| 获取帮助文章详情 | GET | `/api/v1/content/user/support/help/article/{id}` | 文章详情 | 含正文内容 |
+| 文章反馈 | POST | `/api/v1/content/user/support/help/article/{id}/feedback` | 有用/无用反馈 | 每用户每篇文章仅可反馈一次 |
+| 获取更新日志列表 | GET | `/api/v1/content/user/support/changelog/list` | 更新日志 | 分页，支持搜索 |
+| 创建客服会话 | POST | `/api/v1/content/user/support/customer-service/session` | 创建会话 | 智能客服默认 |
+| 转人工客服 | POST | `/api/v1/content/user/support/customer-service/session/{id}/transfer` | 转人工 | 返回排队位置 |
+| 发送消息 | POST | `/api/v1/content/user/support/customer-service/session/{id}/message` | 发送消息 | WebSocket 优先 |
+| 结束会话 | POST | `/api/v1/content/user/support/customer-service/session/{id}/close` | 结束会话 | 触发评分弹窗 |
+| 提交服务评分 | POST | `/api/v1/content/user/support/customer-service/session/{id}/rating` | 评分 | 1-5 星 + 评价 |
+| 查询会话历史 | GET | `/api/v1/content/user/support/customer-service/sessions` | 会话历史列表 | 分页，按时间倒序 |
+| 查询会话详情 | GET | `/api/v1/content/user/support/customer-service/session/{id}` | 会话详情 | 含完整对话记录 |
+| 举报/申诉数量统计 | GET | `/api/v1/content/user/support/statistics` | 个人中心菜单角标 | 待处理数量 |
 
 ### 5.2 API 调用方式
 
@@ -436,13 +436,13 @@ import { defHttp } from '/@/utils/http/axios';
 
 // 示例：创建举报
 defHttp.post({
-  url: '/content/user/support/report',
+  url: '/api/v1/content/user/support/report',
   data: { targetType, targetId, reportType, description, evidenceUrls }
 });
 
 // 示例：查询举报列表
 defHttp.get({
-  url: '/content/user/support/report/list',
+  url: '/api/v1/content/user/support/report/list',
   params: { status, reportType, pageNo, pageSize }
 });
 ```

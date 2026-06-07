@@ -101,6 +101,14 @@ mapping:
     domain: user
     epic: EPIC-09
 
+  - backend_change: user-10-auth-api-alignment
+    prd: null
+    frontend_change: null
+    frontend_prd: null
+    domain: user
+    epic: EPIC-10
+    note: 跨 EPIC 基础设施对齐，无独立 PRD
+
   # ── Circle 域 ──
   - backend_change: circle-10-core
     prd: circle/EPIC-10-circle-core.md

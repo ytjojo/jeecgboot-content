@@ -363,16 +363,16 @@
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 关注用户 | POST | `/content/user/relation/follow` | body: `{ targetUserId, groupId? }` |
-| 取消关注 | POST | `/content/user/relation/unfollow` | body: `{ targetUserId }` |
-| 设为特别关注 | POST | `/content/user/relation/special-follow` | body: `{ targetUserId }` |
-| 取消特别关注 | POST | `/content/user/relation/cancel-special-follow` | body: `{ targetUserId }` |
-| 查询关系详情 | GET | `/content/user/relation/detail` | params: `{ targetUserId }` |
-| 关注列表 | GET | `/content/user/relation/following` | params: `{ userId, groupId?, keyword?, page, size }` |
-| 特别关注列表 | GET | `/content/user/relation/special-following` | params: `{ userId, page, size }` |
-| 批量取消关注 | POST | `/content/user/relation/batch-unfollow` | body: `{ targetUserIds[] }` |
-| 批量取消特别关注 | POST | `/content/user/relation/batch-cancel-special-follow` | body: `{ targetUserIds[] }` |
-| 批量移动分组 | POST | `/content/user/relation/batch-move-group` | body: `{ targetUserIds[], groupId }` |
+| 关注用户 | POST | `/api/v1/content/user/relation/follow` | body: `{ targetUserId, groupId? }` |
+| 取消关注 | POST | `/api/v1/content/user/relation/unfollow` | body: `{ targetUserId }` |
+| 设为特别关注 | POST | `/api/v1/content/user/relation/special-follow` | body: `{ targetUserId }` |
+| 取消特别关注 | POST | `/api/v1/content/user/relation/cancel-special-follow` | body: `{ targetUserId }` |
+| 查询关系详情 | GET | `/api/v1/content/user/relation/detail` | params: `{ targetUserId }` |
+| 关注列表 | GET | `/api/v1/content/user/relation/following` | params: `{ userId, groupId?, keyword?, page, size }` |
+| 特别关注列表 | GET | `/api/v1/content/user/relation/special-following` | params: `{ userId, page, size }` |
+| 批量取消关注 | POST | `/api/v1/content/user/relation/batch-unfollow` | body: `{ targetUserIds[] }` |
+| 批量取消特别关注 | POST | `/api/v1/content/user/relation/batch-cancel-special-follow` | body: `{ targetUserIds[] }` |
+| 批量移动分组 | POST | `/api/v1/content/user/relation/batch-move-group` | body: `{ targetUserIds[], groupId }` |
 
 **关键 VO 结构**：
 
@@ -409,10 +409,10 @@ interface BatchOperationResultVO {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取分组列表 | GET | `/content/user/relation-group/list` | params: `{ userId }` |
-| 创建分组 | POST | `/content/user/relation-group/create` | body: `{ name, sortOrder }` |
-| 重命名分组 | POST | `/content/user/relation-group/rename` | body: `{ groupId, name }` |
-| 删除分组 | POST | `/content/user/relation-group/delete` | body: `{ groupId }` |
+| 获取分组列表 | GET | `/api/v1/content/user/relation/group/list` | params: `{ userId }` |
+| 创建分组 | POST | `/api/v1/content/user/relation/group/create` | body: `{ name, sortOrder }` |
+| 重命名分组 | POST | `/api/v1/content/user/relation/group/rename` | body: `{ groupId, name }` |
+| 删除分组 | POST | `/api/v1/content/user/relation/group/delete` | body: `{ groupId }` |
 
 **关键 VO 结构**：
 
@@ -430,9 +430,9 @@ interface RelationGroupVO {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取关注流 | GET | `/content/user/feed/follow` | params: `{ userId, page, size }` |
-| 获取关注流设置 | GET | `/content/user/feed/setting` | params: `{ userId }` |
-| 更新关注流设置 | POST | `/content/user/feed/setting/update` | body: `{ activityTypes[] }` |
+| 获取关注流 | GET | `/api/v1/content/user/subscription/feed/follow` | params: `{ userId, page, size }` |
+| 获取关注流设置 | GET | `/api/v1/content/user/subscription/feed/setting` | params: `{ userId }` |
+| 更新关注流设置 | POST | `/api/v1/content/user/subscription/feed/setting/update` | body: `{ activityTypes[] }` |
 
 **关键 VO 结构**：
 
@@ -460,7 +460,7 @@ interface FeedSettingVO {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取推荐列表 | GET | `/content/user/relation/recommend` | params: `{ userId, interestTags?, page, size }` |
+| 获取推荐列表 | GET | `/api/v1/content/user/relation/recommend` | params: `{ userId, interestTags?, page, size }` |
 
 **关键 VO 结构**：
 
@@ -482,15 +482,15 @@ interface FollowRecommendItemVO {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 订阅内容源 | POST | `/content/user/subscription/subscribe` | body: `{ sourceType, sourceId, sourceName }` |
-| 取消订阅 | POST | `/content/user/subscription/unsubscribe` | body: `{ subscriptionId }` |
-| 暂停订阅 | POST | `/content/user/subscription/pause` | body: `{ subscriptionId }` |
-| 恢复订阅 | POST | `/content/user/subscription/resume` | body: `{ subscriptionId }` |
-| 我的订阅列表 | GET | `/content/user/subscription/list` | params: `{ userId, sourceType?, page, size }` |
-| 订阅流 | GET | `/content/user/subscription/feed` | params: `{ userId, sourceType?, page, size }` |
-| 批量暂停 | POST | `/content/user/subscription/batch-pause` | body: `{ subscriptionIds[] }` |
-| 批量恢复 | POST | `/content/user/subscription/batch-resume` | body: `{ subscriptionIds[] }` |
-| 批量取消 | POST | `/content/user/subscription/batch-cancel` | body: `{ subscriptionIds[] }` |
+| 订阅内容源 | POST | `/api/v1/content/user/subscription/subscribe` | body: `{ sourceType, sourceId, sourceName }` |
+| 取消订阅 | POST | `/api/v1/content/user/subscription/unsubscribe` | body: `{ subscriptionId }` |
+| 暂停订阅 | POST | `/api/v1/content/user/subscription/pause` | body: `{ subscriptionId }` |
+| 恢复订阅 | POST | `/api/v1/content/user/subscription/resume` | body: `{ subscriptionId }` |
+| 我的订阅列表 | GET | `/api/v1/content/user/subscription/list` | params: `{ userId, sourceType?, page, size }` |
+| 订阅流 | GET | `/api/v1/content/user/subscription/feed` | params: `{ userId, sourceType?, page, size }` |
+| 批量暂停 | POST | `/api/v1/content/user/subscription/batch-pause` | body: `{ subscriptionIds[] }` |
+| 批量恢复 | POST | `/api/v1/content/user/subscription/batch-resume` | body: `{ subscriptionIds[] }` |
+| 批量取消 | POST | `/api/v1/content/user/subscription/batch-cancel` | body: `{ subscriptionIds[] }` |
 
 **关键 VO 结构**：
 
@@ -522,8 +522,8 @@ interface SubscriptionFeedItemVO {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 广场列表 | GET | `/content/user/subscription/plaza` | params: `{ category?, keyword?, page, size }` |
-| 订阅源详情 | GET | `/content/user/subscription/source-detail` | params: `{ sourceType, sourceId }` |
+| 广场列表 | GET | `/api/v1/content/user/subscription/plaza` | params: `{ category?, keyword?, page, size }` |
+| 订阅源详情 | GET | `/api/v1/content/user/subscription/source-detail` | params: `{ sourceType, sourceId }` |
 
 **关键 VO 结构**：
 
@@ -546,10 +546,10 @@ interface SubscriptionSourceVO {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取全局通知设置 | GET | `/content/user/notification-setting/global` | params: `{ userId }` |
-| 更新全局通知设置 | POST | `/content/user/notification-setting/global/update` | body: 通知配置 |
-| 获取订阅通知设置 | GET | `/content/user/notification-setting/subscription` | params: `{ subscriptionId }` |
-| 更新订阅通知设置 | POST | `/content/user/notification-setting/subscription/update` | body: 通知配置 |
+| 获取全局通知设置 | GET | `/api/v1/content/user/settings/notification-setting/global` | params: `{ userId }` |
+| 更新全局通知设置 | POST | `/api/v1/content/user/settings/notification-setting/global/update` | body: 通知配置 |
+| 获取订阅通知设置 | GET | `/api/v1/content/user/settings/notification-setting/subscription` | params: `{ subscriptionId }` |
+| 更新订阅通知设置 | POST | `/api/v1/content/user/settings/notification-setting/subscription/update` | body: 通知配置 |
 
 **关键 VO 结构**：
 

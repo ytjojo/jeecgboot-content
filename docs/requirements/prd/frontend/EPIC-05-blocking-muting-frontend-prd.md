@@ -304,23 +304,23 @@ Page (屏蔽词设置)
 
 > **注意**: 本表为初版设计，实际实现以 `design.md` 和后端代码为准。主要差异：
 > - 所有写操作统一使用 POST（非 DELETE），参数通过 @RequestParam 查询参数传递
-> - API 路径已按领域拆分：拉黑 `/content/user/relation/block`，屏蔽 `/content/user/relation/mute`，规则 `/content/user/filter-rule`
+> - API 路径已按领域拆分：拉黑 `/api/v1/content/user/relation/block`，屏蔽 `/api/v1/content/user/relation/mute`，规则 `/api/v1/content/user/filter-rule`
 > - 详见 [design.md Decision 3](../../openspec/changes/user-05-blocking-muting-frontend/design.md)
 
 | 接口 | 方法 | 路径 | 用途 | 调用时机 |
 |------|------|------|------|---------|
-| 拉黑用户 | POST | `/api/content/user/block` | 拉黑指定用户 | 确认拉黑弹窗 |
-| 解除拉黑 | DELETE | `/api/content/user/block/{targetUserId}` | 解除拉黑 | 黑名单列表 |
-| 获取黑名单 | GET | `/api/content/user/block/list` | 分页查询黑名单 | 黑名单管理页 |
-| 屏蔽用户 | POST | `/api/content/user/mute` | 屏蔽指定用户 | 确认屏蔽弹窗 |
-| 取消屏蔽用户 | DELETE | `/api/content/user/mute/{targetUserId}` | 取消屏蔽 | 屏蔽列表 |
-| 获取屏蔽列表 | GET | `/api/content/user/mute/list` | 分页查询屏蔽列表 | 屏蔽列表管理页 |
-| 不感兴趣反馈 | POST | `/api/content/user/not-interested` | 记录反馈 | 内容卡片操作 |
-| 添加屏蔽规则 | POST | `/api/content/user/filter-rule` | 添加屏蔽词/话题/类型 | 屏蔽词设置页 |
-| 删除屏蔽规则 | DELETE | `/api/content/user/filter-rule/{ruleId}` | 删除屏蔽规则 | 屏蔽词/话题列表 |
-| 获取屏蔽规则列表 | GET | `/api/content/user/filter-rule/list` | 分页查询屏蔽规则 | 屏蔽列表管理页 |
-| 批量取消屏蔽 | POST | `/api/content/user/filter-rule/batch-delete` | 批量删除规则 | 屏蔽列表批量操作 |
-| 查询关系状态 | GET | `/api/content/user/relation/status/{targetUserId}` | 查询与目标用户的拉黑/屏蔽状态 | 页面加载时判断展示状态 |
+| 拉黑用户 | POST | `/api/v1/content/user/relation/block` | 拉黑指定用户 | 确认拉黑弹窗 |
+| 解除拉黑 | DELETE | `/api/v1/content/user/relation/block/{targetUserId}` | 解除拉黑 | 黑名单列表 |
+| 获取黑名单 | GET | `/api/v1/content/user/relation/block/list` | 分页查询黑名单 | 黑名单管理页 |
+| 屏蔽用户 | POST | `/api/v1/content/user/relation/mute` | 屏蔽指定用户 | 确认屏蔽弹窗 |
+| 取消屏蔽用户 | DELETE | `/api/v1/content/user/relation/mute/{targetUserId}` | 取消屏蔽 | 屏蔽列表 |
+| 获取屏蔽列表 | GET | `/api/v1/content/user/relation/mute/list` | 分页查询屏蔽列表 | 屏蔽列表管理页 |
+| 不感兴趣反馈 | POST | `/api/v1/content/user/not-interested` | 记录反馈 | 内容卡片操作 |
+| 添加屏蔽规则 | POST | `/api/v1/content/user/filter-rule` | 添加屏蔽词/话题/类型 | 屏蔽词设置页 |
+| 删除屏蔽规则 | DELETE | `/api/v1/content/user/filter-rule/{ruleId}` | 删除屏蔽规则 | 屏蔽词/话题列表 |
+| 获取屏蔽规则列表 | GET | `/api/v1/content/user/filter-rule/list` | 分页查询屏蔽规则 | 屏蔽列表管理页 |
+| 批量取消屏蔽 | POST | `/api/v1/content/user/filter-rule/batch-delete` | 批量删除规则 | 屏蔽列表批量操作 |
+| 查询关系状态 | GET | `/api/v1/content/user/relation/status/{targetUserId}` | 查询与目标用户的拉黑/屏蔽状态 | 页面加载时判断展示状态 |
 
 ### 5.2 API 封装示例
 
@@ -329,13 +329,13 @@ Page (屏蔽词设置)
 import { defHttp } from '/@/utils/http/axios';
 
 export const blockUser = (targetUserId: string) =>
-  defHttp.post({ url: '/api/content/user/block', data: { targetUserId } });
+  defHttp.post({ url: '/api/v1/content/user/relation/block', data: { targetUserId } });
 
 export const unblockUser = (targetUserId: string) =>
-  defHttp.delete({ url: `/api/content/user/block/${targetUserId}` });
+  defHttp.delete({ url: `/api/v1/content/user/relation/block/${targetUserId}` });
 
 export const getBlacklist = (params: { page: number; pageSize: number }) =>
-  defHttp.get({ url: '/api/content/user/block/list', params });
+  defHttp.get({ url: '/api/v1/content/user/relation/block/list', params });
 ```
 
 ```typescript
@@ -343,13 +343,13 @@ export const getBlacklist = (params: { page: number; pageSize: number }) =>
 import { defHttp } from '/@/utils/http/axios';
 
 export const muteUser = (targetUserId: string) =>
-  defHttp.post({ url: '/api/content/user/mute', data: { targetUserId } });
+  defHttp.post({ url: '/api/v1/content/user/relation/mute', data: { targetUserId } });
 
 export const unmuteUser = (targetUserId: string) =>
-  defHttp.delete({ url: `/api/content/user/mute/${targetUserId}` });
+  defHttp.delete({ url: `/api/v1/content/user/relation/mute/${targetUserId}` });
 
 export const getMuteList = (params: { page: number; pageSize: number; category?: string }) =>
-  defHttp.get({ url: '/api/content/user/mute/list', params });
+  defHttp.get({ url: '/api/v1/content/user/relation/mute/list', params });
 ```
 
 ```typescript
@@ -357,13 +357,13 @@ export const getMuteList = (params: { page: number; pageSize: number; category?:
 import { defHttp } from '/@/utils/http/axios';
 
 export const addFilterRule = (data: { ruleType: string; ruleValue: string; expiresAt?: string }) =>
-  defHttp.post({ url: '/api/content/user/filter-rule', data });
+  defHttp.post({ url: '/api/v1/content/user/filter-rule', data });
 
 export const deleteFilterRule = (ruleId: string) =>
-  defHttp.delete({ url: `/api/content/user/filter-rule/${ruleId}` });
+  defHttp.delete({ url: `/api/v1/content/user/filter-rule/${ruleId}` });
 
 export const getFilterRuleList = (params: { page: number; pageSize: number; ruleType?: string }) =>
-  defHttp.get({ url: '/api/content/user/filter-rule/list', params });
+  defHttp.get({ url: '/api/v1/content/user/filter-rule/list', params });
 ```
 
 ### 5.3 响应格式

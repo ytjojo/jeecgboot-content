@@ -66,7 +66,7 @@
 - 独立支付结算和付费订阅（仅保留状态扩展点）
 - 复杂机器学习推荐算法（本期使用可解释规则）
 - 重构拉黑与屏蔽语义（仅在查询中尊重现有状态）
-- 迁移 `/api/v1/*` 路径到 `/content/user/*`（本期已完成路径统一）
+- 迁移 `/api/v1/*` 路径到 `/api/v1/content/user/*`（本期已完成路径统一）
 
 ---
 
@@ -240,7 +240,7 @@
 **聚合模式**: 读扩散（实时查询聚合），不引入写扩散或消息扇出。
 
 **接口调用时序**:
-1. 前端请求 `GET /content/user/relation/feed?pageNo=1&pageSize=20&types=post,like,favorite`
+1. 前端请求 `GET /api/v1/content/user/relation/feed?pageNo=1&pageSize=20&types=post,like,favorite`
 2. 后端根据当前用户的关注列表，实时聚合查询各关注对象的动态
 3. 后端返回分页数据，包含动态列表 + 游标/页码 + 是否有更多数据
 
@@ -290,7 +290,7 @@
 #### 接口设计
 
 **推荐列表接口**:
-- 请求: `GET /content/user/relation/recommendations?pageNo=1&pageSize=20`
+- 请求: `GET /api/v1/content/user/relation/recommendations?pageNo=1&pageSize=20`
 - 响应字段:
   - `id`: 用户 ID
   - `nickname`: 昵称
@@ -305,7 +305,7 @@
 - 排除逻辑: **后端实现**，排除当前用户已关注、已拉黑、已注销的用户
 
 **用户反馈接口**:
-- 请求: `POST /content/user/relation/recommendations/feedback`，body: `{ userId, action: 'not_interested' }`
+- 请求: `POST /api/v1/content/user/relation/recommendations/feedback`，body: `{ userId, action: 'not_interested' }`
 - 用户点击"不感兴趣"后，该用户不再出现在推荐列表中
 
 #### 核心用户流程
@@ -405,7 +405,7 @@
 - **免打扰时段**: 两个时间选择器（开始时间、结束时间），可选启用
   - 校验：开始时间不能等于结束时间
 - **全局默认值**: 页面顶部展示当前全局通知配置，订阅级配置覆盖全局
-  - **数据来源**: 通过 `GET /content/user/subscription/notification/preference` 接口获取，后端从系统配置表读取
+  - **数据来源**: 通过 `GET /api/v1/content/user/subscription/notification/preference` 接口获取，后端从系统配置表读取
   - **管理入口**: 管理员可在后台"系统设置 → 通知管理"中修改全局默认值，修改后实时生效
   - **前端缓存**: 全局默认配置在用户登录后请求一次并缓存在 Pinia store 中，页面加载时优先读取缓存，无需重复请求
   - **用户未配置时**: 订阅项无独立配置时，展示并使用全局默认值

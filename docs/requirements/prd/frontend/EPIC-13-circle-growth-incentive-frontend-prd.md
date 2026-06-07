@@ -362,14 +362,14 @@
 
 | 接口 | 方法 | 路径（建议） | 用途 | 调用时机 |
 |------|------|-------------|------|----------|
-| 获取圈子等级信息 | GET | `/content/user/growth/level/info?circleId={circleId}` | 等级、成长分、下一等级条件、权益 | 圈子详情页加载 |
-| 获取成员成长信息 | GET | `/content/user/growth/info?circleId={circleId}&userId={userId}` | 经验值、贡献值、等级、排名、连续参与、今日经验 | 个人成长页加载 |
-| 获取成员徽章列表 | GET | `/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` | 已获得徽章、未获得徽章、进度 | 徽章墙页加载 |
-| 获取排行榜 | GET | `/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | Top 50 列表、当前用户排名 | 排行榜页加载 / 维度或周期切换 |
+| 获取圈子等级信息 | GET | `/api/v1/content/user/growth/level/info?circleId={circleId}` | 等级、成长分、下一等级条件、权益 | 圈子详情页加载 |
+| 获取成员成长信息 | GET | `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` | 经验值、贡献值、等级、排名、连续参与、今日经验 | 个人成长页加载 |
+| 获取成员徽章列表 | GET | `/api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` | 已获得徽章、未获得徽章、进度 | 徽章墙页加载 |
+| 获取排行榜 | GET | `/api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | Top 50 列表、当前用户排名 | 排行榜页加载 / 维度或周期切换 |
 
 ### 5.2 接口参数与响应
 
-#### GET `/content/user/growth/level/info?circleId={circleId}`
+#### GET `/api/v1/content/user/growth/level/info?circleId={circleId}`
 
 **响应字段**:
 ```typescript
@@ -388,7 +388,7 @@ interface CircleLevelVO {
 }
 ```
 
-#### GET `/content/user/growth/info?circleId={circleId}&userId={userId}`
+#### GET `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}`
 
 **响应字段**:
 ```typescript
@@ -409,7 +409,7 @@ interface MemberGrowthVO {
 }
 ```
 
-#### GET `/content/user/growth/achievement/list?circleId={circleId}&userId={userId}`
+#### GET `/api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}`
 
 **查询参数**: circleId (圈子ID), userId (用户ID)
 
@@ -428,7 +428,7 @@ interface BadgeVO {
 }
 ```
 
-#### GET `/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}`
+#### GET `/api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}`
 
 **查询参数**:
 
@@ -468,10 +468,10 @@ interface LeaderboardEntryVO {
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  CircleLevel = '/content/user/growth/level/info',
-  MemberGrowth = '/content/user/growth/info',
-  Badges = '/content/user/growth/achievement/list',
-  Leaderboard = '/content/user/growth/leaderboard',
+  CircleLevel = '/api/v1/content/user/growth/level/info',
+  MemberGrowth = '/api/v1/content/user/growth/info',
+  Badges = '/api/v1/content/user/growth/achievement/list',
+  Leaderboard = '/api/v1/content/user/growth/leaderboard',
 }
 
 export function getCircleLevel(circleId: string) {
@@ -705,7 +705,7 @@ interface CircleGrowthState {
 
 | 编号 | 假设 | 依据 |
 |------|------|------|
-| A1 | 圈子详情接口已存在，等级信息通过新增接口 `/content/user/growth/level/info?circleId={circleId}` 获取 | design.md 中独立服务设计 |
+| A1 | 圈子详情接口已存在，等级信息通过新增接口 `/api/v1/content/user/growth/level/info?circleId={circleId}` 获取 | design.md 中独立服务设计 |
 | A2 | 站内通知复用已有 `IContentNotificationService`，前端通过已有 WebSocket 通道接收 | design.md 中通知系统已有完整基础设施 |
 | A3 | 排行榜接口返回 `currentUser` 字段，包含当前用户排名（无论是否在 Top 50 内） | PRD 验收标准要求展示当前用户排名 |
 | A4 | 4 种徽章的图标资源由后端接口返回 URL | 便于运营调整，不依赖前端发版 |

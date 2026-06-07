@@ -83,7 +83,7 @@
 
 **入口**: 个人中心 → 头像/昵称区域 → "编辑资料"按钮
 
-**数据来源**: 页面初始化时调用 `GET /content/user/profile/detail?ownerUserId={currentUid}` 获取当前用户资料。
+**数据来源**: 页面初始化时调用 `GET /api/v1/content/user/profile/detail?ownerUserId={currentUid}` 获取当前用户资料。
 
 **页面结构**:
 ```
@@ -110,7 +110,7 @@
 
 **交互要求**:
 - 头像区域点击触发文件选择，选择后进入裁剪弹窗（复用 `Cropper` 组件，详见 3.2）
-- **提交方式**: 点击保存 → 合并 formData 为 `ContentUserProfileUpdateReq` → 调用 `POST /content/user/profile/update?userId={currentUid}` 一次性提交
+- **提交方式**: 点击保存 → 合并 formData 为 `ContentUserProfileUpdateReq` → 调用 `POST /api/v1/content/user/profile/update?userId={currentUid}` 一次性提交
 - **必填约束**（前后端共用）: `nickname`、`avatar` 字段在 `@NotBlank` 校验下必须非空，提交前前端表单层必须保证
 - 昵称输入框实时校验：为空时提示"请输入昵称"，含敏感词时提示"昵称包含不当内容，请修改"
 - 简介文本域右下角显示已输入字数/最大字数（如 123/500）
@@ -237,10 +237,10 @@ Modal 弹窗
 **交互要求**:
 - **背景图上传**: 复用 3.2 节的 OSS 客户端直传流程（JPG/PNG/WebP，≤5MB），裁剪比例 16:9；上传后获得 CDN URL 暂存于 formData.homepageBackground
 - **保存方式**: 主页设置页提供两种保存路径
-  - **路径 A**（推荐，仅修改主页）: `POST /content/user/profile/homepage/update?userId={uid}` 提交 `ContentUserHomepageUpdateReq`（含 background/themeColor/modules）
+  - **路径 A**（推荐，仅修改主页）: `POST /api/v1/content/user/profile/homepage/update?userId={uid}` 提交 `ContentUserHomepageUpdateReq`（含 background/themeColor/modules）
   - **路径 B**（与基础资料合并保存）: 暂存为 formData，用户返回编辑资料页统一走 `/profile/update`
-- **模块配置**: 通过 `GET /content/user/profile/homepage/modules?userId={uid}` 加载可选模块清单
-- **恢复默认**: 调用 `POST /content/user/profile/homepage/defaults/restore?userId={uid}` 清除自定义配置
+- **模块配置**: 通过 `GET /api/v1/content/user/profile/homepage/modules?userId={uid}` 加载可选模块清单
+- **恢复默认**: 调用 `POST /api/v1/content/user/profile/homepage/defaults/restore?userId={uid}` 清除自定义配置
 - 选择主题色后实时更新预览区效果（不触发接口，CSS 变量切换）
 - 预设色板选中项显示对勾图标
 - 保存成功提示"主页设置已更新"，刷新当前用户主页资料缓存
@@ -280,8 +280,8 @@ Modal 弹窗
 - 显隐开关为 Switch 组件，关闭时该模块从主页隐藏
 - 当所有模块开关都关闭时，保存按钮禁用，提示"至少需要保留一个模块"
 - 拖拽排序后自动标记为"未保存"状态，显示"保存"按钮
-- "恢复默认排序" 复用 `POST /content/user/profile/homepage/defaults/restore?userId={uid}` 端点
-- **保存方式**: 页面 mount 时调用 `GET /content/user/profile/homepage/modules?userId={uid}` 加载模块清单（含 `moduleKey`、`moduleName`、`visible`、`sortOrder`）；用户调整后提交到 `POST /content/user/profile/homepage/update`，body 中 `modules` 字段传入 `List<ContentUserHomepageModuleReq>`（含 `moduleKey`/`visible`/`sortOrder` 必填）
+- "恢复默认排序" 复用 `POST /api/v1/content/user/profile/homepage/defaults/restore?userId={uid}` 端点
+- **保存方式**: 页面 mount 时调用 `GET /api/v1/content/user/profile/homepage/modules?userId={uid}` 加载模块清单（含 `moduleKey`、`moduleName`、`visible`、`sortOrder`）；用户调整后提交到 `POST /api/v1/content/user/profile/homepage/update`，body 中 `modules` 字段传入 `List<ContentUserHomepageModuleReq>`（含 `moduleKey`/`visible`/`sortOrder` 必填）
 - 保存成功提示"主页模块配置已更新"
 
 **移动端拖拽交互规范**:
@@ -304,7 +304,7 @@ Modal 弹窗
 
 **展示位置**: 昵称右侧（所有出现昵称的地方）
 
-> **数据来源调整**: 认证标识列表已内嵌在 `ContentUserProfileVO.verificationBadges` 字段中，**编辑资料页和个人主页**复用 `/profile/detail` 响应即可，无需额外请求。**认证详情弹窗**才需调用 `GET /content/user/profile/badge/detail?badgeId={id}`。
+> **数据来源调整**: 认证标识列表已内嵌在 `ContentUserProfileVO.verificationBadges` 字段中，**编辑资料页和个人主页**复用 `/profile/detail` 响应即可，无需额外请求。**认证详情弹窗**才需调用 `GET /api/v1/content/user/profile/badge/detail?badgeId={id}`。
 > 
 > 字段映射调整（对齐 `ContentUserVerificationBadgeVO`）:
 > - `type` → `badgeType`
@@ -340,7 +340,7 @@ Modal 弹窗
 **交互要求**:
 - 认证标识紧跟昵称右侧显示，与昵称同行
 - 鼠标 hover 标识时显示 Tooltip，简要说明认证类型（取 `badgeLabel`）
-- 点击标识打开认证详情弹窗，调用 `GET /content/user/profile/badge/detail?badgeId={id}` 拉取详情
+- 点击标识打开认证详情弹窗，调用 `GET /api/v1/content/user/profile/badge/detail?badgeId={id}` 拉取详情
 - 多个认证同时存在时，按优先级排列（官方 > 企业 > 达人 > 个人 > 实名 > 手机 > 邮箱），由前端定义的 `BADGE_PRIORITY` 常量控制
 - 无认证时不显示任何标识
 - 认证标识不随昵称审核状态变化，独立展示
@@ -368,7 +368,7 @@ Modal 弹窗
 
 **入口**: 设置 → 隐私设置 / 个人中心 → 隐私设置
 
-> **数据加载调整**: 后端无独立 `/privacy/settings` 接口。隐私设置页 mount 时调用 `GET /content/user/profile/detail?ownerUserId={currentUid}`，从 `ContentUserProfileVO` 中推导初始可见性：
+> **数据加载调整**: 后端无独立 `/privacy/settings` 接口。隐私设置页 mount 时调用 `GET /api/v1/content/user/profile/detail?ownerUserId={currentUid}`，从 `ContentUserProfileVO` 中推导初始可见性：
 > - 字段值为 `null`（后端隐私裁剪）→ 默认推断为 `PRIVATE`（前端 UX 选择）
 > - 字段有值 → 默认推断为 `PUBLIC`
 > - **精确模式**: 后续可增加 `/privacy/settings` 独立接口返回 16 个字段精确配置（待与后端确认）
@@ -429,7 +429,7 @@ Modal 弹窗
   - ⚠️ 不支持 `PRIVATE`，后端 `@Pattern` 拒绝
 - 昵称和头像默认公开且不可修改（**不参与隐私控制**——后端接口不提供对应字段，置灰 + Tooltip 说明"昵称和头像始终公开"）
 - 修改可见性后保存按钮激活
-- 保存成功提示"隐私设置已更新"，调用 `POST /content/user/profile/privacy/update?userId={uid}` 提交，body 为合并后的 `ContentUserPrivacyUpdateReq`
+- 保存成功提示"隐私设置已更新"，调用 `POST /api/v1/content/user/profile/privacy/update?userId={uid}` 提交，body 为合并后的 `ContentUserPrivacyUpdateReq`
 - **频率限制**: 后端无独立 `/privacy/update-count` 接口，采用**被动拦截**策略：当后端返回"操作过于频繁"错误时，黄色提示条 + 保存按钮禁用 5 分钟（前端 UX 兜底）
 
 **前端提交字段映射**（对齐 D7 的 15+2 字段）:
@@ -503,8 +503,8 @@ const req: ContentUserPrivacyUpdateReq = {
 **入口**: 个人中心 → 编辑资料 → "历史记录" 文字链接
 
 > **API 调整说明**: 后端无独立的 `/history/nicknames` 和 `/history/avatars` 接口，改为通过 `historyType` 区分的**统一接口**：
-> - 昵称历史: `GET /content/user/profile/history/list?userId={uid}&historyType=NICKNAME`
-> - 头像历史: `GET /content/user/profile/history/list?userId={uid}&historyType=AVATAR`
+> - 昵称历史: `GET /api/v1/content/user/profile/history/list?userId={uid}&historyType=NICKNAME`
+> - 头像历史: `GET /api/v1/content/user/profile/history/list?userId={uid}&historyType=AVATAR`
 > 
 > 响应字段 `ContentUserProfileHistoryVO`: `id`、`historyType`、`historyValue`（昵称文本或头像 URL）、`changedAt`、`expiresAt`
 
@@ -535,7 +535,7 @@ const req: ContentUserPrivacyUpdateReq = {
 - 列表按 `changedAt` 倒序排列，最新记录在最上方
 - 每条记录显示：`historyValue` + `changedAt`（格式"YYYY-MM-DD HH:mm"）
 - "恢复" 按钮点击后弹出确认框"确定恢复为 {historyValue} 吗？"
-- 确认恢复后调用 `POST /content/user/profile/history/restore?userId={uid}&historyId={id}`，等同于一次新的资料修改，需遵守频率限制（后端错误码拦截）
+- 确认恢复后调用 `POST /api/v1/content/user/profile/history/restore?userId={uid}&historyId={id}`，等同于一次新的资料修改，需遵守频率限制（后端错误码拦截）
 - 恢复成功提示"{昵称/头像}已恢复"，刷新 `useUserStore` 资料缓存
 - 恢复失败（如昵称已被占用）显示对应错误提示
 - 最多显示 20 条记录（后端控制），超出部分不返回
@@ -636,15 +636,15 @@ const req: ContentUserPrivacyUpdateReq = {
 
 ## 5. API 对接
 
-> **更新说明（2026-06-06）**: 本节已根据后端 `ContentUserProfileController` 实际实现对齐。所有接口以 `ContentUserProfileController` 的 11 个端点为准（路径前缀 `/content/user/profile`），其中 `review/handle` 为后台审核端点前端不对接，实际前端使用 10 个端点。4 个 POST 端点（`/update`、`/homepage/update`、`/homepage/defaults/restore`、`/history/restore`）返回 `ContentUserProfileVO`，`/privacy/update` 返回 `String`（"更新成功"）。后端未提供独立的「上传头像/上传背景图/查询修改次数/查询审核状态/查询隐私修改次数」等接口，对应能力由前端组合现有接口或后端内嵌实现。
+> **更新说明（2026-06-06）**: 本节已根据后端 `ContentUserProfileController` 实际实现对齐。所有接口以 `ContentUserProfileController` 的 11 个端点为准（路径前缀 `/api/v1/content/user/profile`），其中 `review/handle` 为后台审核端点前端不对接，实际前端使用 10 个端点。4 个 POST 端点（`/update`、`/homepage/update`、`/homepage/defaults/restore`、`/history/restore`）返回 `ContentUserProfileVO`，`/privacy/update` 返回 `String`（"更新成功"）。后端未提供独立的「上传头像/上传背景图/查询修改次数/查询审核状态/查询隐私修改次数」等接口，对应能力由前端组合现有接口或后端内嵌实现。
 
 ### 5.1 资料管理接口（统一端点）
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取用户资料 | GET | `/content/user/profile/detail?ownerUserId={uid}&viewerUserId={vid?}` | `ownerUserId` 必填（资料拥有者），`viewerUserId` 选填（当前访问者）。返回完整 `ContentUserProfileVO`，含 `verificationBadges`、`homepageModules`、`profileCompletionState`、`profileReviewStatus` |
-| 更新资料 | POST | `/content/user/profile/update?userId={uid}` | **统一端点**，Body 提交 `ContentUserProfileUpdateReq`。可同时更新基础资料 + 主页背景/主题色 + 模块排序 + 认证展示文案；`nickname`、`avatar` 为 `@NotBlank` 必填。返回 `ContentUserProfileVO` |
-| 处理资料审核 | POST | `/content/user/profile/review/handle` | 管理员处理资料审核（APPROVED/REJECTED），前端不直接调用 |
+| 获取用户资料 | GET | `/api/v1/content/user/profile/detail?ownerUserId={uid}&viewerUserId={vid?}` | `ownerUserId` 必填（资料拥有者），`viewerUserId` 选填（当前访问者）。返回完整 `ContentUserProfileVO`，含 `verificationBadges`、`homepageModules`、`profileCompletionState`、`profileReviewStatus` |
+| 更新资料 | POST | `/api/v1/content/user/profile/update?userId={uid}` | **统一端点**，Body 提交 `ContentUserProfileUpdateReq`。可同时更新基础资料 + 主页背景/主题色 + 模块排序 + 认证展示文案；`nickname`、`avatar` 为 `@NotBlank` 必填。返回 `ContentUserProfileVO` |
+| 处理资料审核 | POST | `/api/v1/content/user/profile/review/handle` | 管理员处理资料审核（APPROVED/REJECTED），前端不直接调用 |
 
 #### 5.1.1 `ContentUserProfileUpdateReq` 字段
 
@@ -675,16 +675,16 @@ const req: ContentUserPrivacyUpdateReq = {
 后端无独立上传接口，前端采用 **OSS 客户端直传** 模式：
 1. 前端调用统一的文件上传组件（复用 JeecgBoot 既有 OSS 上传通道）
 2. 上传成功后获得 CDN URL
-3. URL 作为 `avatar` 或 `homepageBackground` 字段提交 `/content/user/profile/update`
+3. URL 作为 `avatar` 或 `homepageBackground` 字段提交 `/api/v1/content/user/profile/update`
 4. 头像裁剪仍由前端完成（复用 `Cropper` 组件，1:1 锁定）
 
 ### 5.2 主页设置接口
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 更新主页配置 | POST | `/content/user/profile/homepage/update?userId={uid}` | Body 提交 `ContentUserHomepageUpdateReq`（含背景、主题色、模块列表）。返回 `ContentUserProfileVO` |
-| 恢复主页默认 | POST | `/content/user/profile/homepage/defaults/restore?userId={uid}` | 恢复默认背景、主题色、模块配置。返回 `ContentUserProfileVO` |
-| 查询主页模块 | GET | `/content/user/profile/homepage/modules?userId={uid}` | 返回 `List<ContentUserHomepageModuleVO>`（含 `moduleKey`、`moduleName`、`visible`、`sortOrder`） |
+| 更新主页配置 | POST | `/api/v1/content/user/profile/homepage/update?userId={uid}` | Body 提交 `ContentUserHomepageUpdateReq`（含背景、主题色、模块列表）。返回 `ContentUserProfileVO` |
+| 恢复主页默认 | POST | `/api/v1/content/user/profile/homepage/defaults/restore?userId={uid}` | 恢复默认背景、主题色、模块配置。返回 `ContentUserProfileVO` |
+| 查询主页模块 | GET | `/api/v1/content/user/profile/homepage/modules?userId={uid}` | 返回 `List<ContentUserHomepageModuleVO>`（含 `moduleKey`、`moduleName`、`visible`、`sortOrder`） |
 
 > **简化说明**: 主页配置不再独立于资料更新——`ContentUserProfileUpdateReq` 内的 `homepageBackground`、`themeColor`、`moduleOrderJson` 三个字段已能覆盖主页设置的写入需求。`/profile/homepage/update` 端点用于**单独**提交主页配置（不修改昵称/简介等基础资料）的场景。
 
@@ -702,8 +702,8 @@ const req: ContentUserPrivacyUpdateReq = {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 查询认证标识列表 | GET | `/content/user/profile/badge/list?userId={uid}` | 返回 `List<ContentUserVerificationBadgeVO>`，已按隐私裁剪 |
-| 查询认证详情 | GET | `/content/user/profile/badge/detail?badgeId={id}` | 返回 `ContentUserVerificationBadgeVO` |
+| 查询认证标识列表 | GET | `/api/v1/content/user/profile/badge/list?userId={uid}` | 返回 `List<ContentUserVerificationBadgeVO>`，已按隐私裁剪 |
+| 查询认证详情 | GET | `/api/v1/content/user/profile/badge/detail?badgeId={id}` | 返回 `ContentUserVerificationBadgeVO` |
 
 > **简化说明**: `ContentUserProfileVO.verificationBadges` 字段已内嵌认证列表，**编辑资料页无需额外请求**。仅"认证详情弹窗"需独立请求 `/badge/detail`。
 
@@ -715,7 +715,7 @@ const req: ContentUserPrivacyUpdateReq = {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 更新隐私配置 | POST | `/content/user/profile/privacy/update?userId={uid}` | Body 提交 `ContentUserPrivacyUpdateReq`，按字段逐项更新。返回 `String`（"更新成功"） |
+| 更新隐私配置 | POST | `/api/v1/content/user/profile/privacy/update?userId={uid}` | Body 提交 `ContentUserPrivacyUpdateReq`，按字段逐项更新。返回 `String`（"更新成功"） |
 
 > **简化说明**: 后端未提供「获取隐私设置」独立接口。隐私字段通过 `/profile/detail` 的响应隐式返回（不可见字段值为 `null`）；前端在打开隐私设置页时从当前 `UserProfileVO` 推导，并维护一份本地 `PrivacyMap` 用于在 UI 上展示所有可选级别。
 > 
@@ -755,8 +755,8 @@ const req: ContentUserPrivacyUpdateReq = {
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 查询历史 | GET | `/content/user/profile/history/list?userId={uid}&historyType={NICKNAME\|AVATAR}` | 返回 `List<ContentUserProfileHistoryVO>`，按 `historyType` 区分 |
-| 恢复历史 | POST | `/content/user/profile/history/restore?userId={uid}&historyId={id}` | 恢复指定历史值为当前值（仍走资料修改频率限制）。返回 `ContentUserProfileVO` |
+| 查询历史 | GET | `/api/v1/content/user/profile/history/list?userId={uid}&historyType={NICKNAME\|AVATAR}` | 返回 `List<ContentUserProfileHistoryVO>`，按 `historyType` 区分 |
+| 恢复历史 | POST | `/api/v1/content/user/profile/history/restore?userId={uid}&historyId={id}` | 恢复指定历史值为当前值（仍走资料修改频率限制）。返回 `ContentUserProfileVO` |
 
 #### 5.5.1 `ContentUserProfileHistoryVO` 字段
 
@@ -778,27 +778,27 @@ interface ApiResponse<T> {
 
 // 示例：获取用户资料
 defHttp.get<Result<ContentUserProfileVO>>({
-  url: '/content/user/profile/detail',
+  url: '/api/v1/content/user/profile/detail',
   params: { ownerUserId: 'xxx', viewerUserId: 'yyy' }
 });
 
 // 示例：更新资料（统一端点）
 defHttp.post<Result<ContentUserProfileVO>>({
-  url: '/content/user/profile/update',
+  url: '/api/v1/content/user/profile/update',
   params: { userId: 'xxx' },
   data: profileUpdateReq
 });
 
 // 示例：更新隐私
 defHttp.post<Result<string>>({
-  url: '/content/user/profile/privacy/update',
+  url: '/api/v1/content/user/profile/privacy/update',
   params: { userId: 'xxx' },
   data: privacyUpdateReq
 });
 
 // 示例：查询历史
 defHttp.get<Result<ContentUserProfileHistoryVO[]>>({
-  url: '/content/user/profile/history/list',
+  url: '/api/v1/content/user/profile/history/list',
   params: { userId: 'xxx', historyType: 'NICKNAME' }
 });
 ```

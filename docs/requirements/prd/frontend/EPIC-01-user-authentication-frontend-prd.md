@@ -174,7 +174,7 @@
   - 注册成功后首次进入首页时，弹出"发现你感兴趣的内容"引导弹窗（全屏或大面积覆盖）
   - 弹窗内容：频道/话题标签选择网格（如：科技、生活、游戏、音乐、影视、设计、职场、教育等，由后端配置返回），至少展示 10 个选项
   - 用户点选标签（至少选 3 个），选中态高亮显示
-  - 点击"开始探索"按钮，提交选择到后端（`POST /api/v1/user/preferences/topics`），关闭弹窗，首页内容流根据选择优先展示相关内容
+  - 点击"开始探索"按钮，提交选择到后端（`POST /api/v1/content/user/preferences/topics`），关闭弹窗，首页内容流根据选择优先展示相关内容
   - 提供"稍后设置"链接，点击后跳过引导直接进入首页
   - 跳过后在个人中心"兴趣设置"入口保留入口，用户可随时设置
   - 若用户既未选择也未跳过，下次登录时再次弹出引导弹窗
@@ -382,8 +382,8 @@ Page 容器
 - 确认后调用下线接口，成功后该设备从列表移除，显示"已下线"消息提示
 - **信任设备管理**:
   - 未信任设备显示"信任设备"按钮，信任设备显示"取消信任"按钮
-  - 点击"信任设备"弹出确认弹窗："信任后该设备将不再触发异常登录提醒，确定信任？"，确认后调用信任接口（`POST /api/v1/account-security/devices/trust`），设备信任状态标签变为"信任"（绿色）
-  - 点击"取消信任"弹出确认弹窗："取消信任后该设备登录将重新触发异常检测，确定取消？"，确认后调用取消信任接口（`POST /api/v1/account-security/devices/untrust`），标签变为"未信任"
+  - 点击"信任设备"弹出确认弹窗："信任后该设备将不再触发异常登录提醒，确定信任？"，确认后调用信任接口（`POST /api/v1/content/account-security/devices/trust`），设备信任状态标签变为"信任"（绿色）
+  - 点击"取消信任"弹出确认弹窗："取消信任后该设备登录将重新触发异常检测，确定取消？"，确认后调用取消信任接口（`POST /api/v1/content/account-security/devices/untrust`），标签变为"未信任"
   - 信任设备登录时跳过 F10 异常登录检测
   - 当前设备标签按钮禁用，不允许修改信任状态
   - 信任/取消信任操作失败时提示"操作失败，请重试"
@@ -737,61 +737,61 @@ Page 容器
 
 ## 5. API 对接
 
-### 5.1 认证接口（/api/v1/auth/*）
+### 5.1 认证接口（/api/v1/content/auth/*）
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 手机号注册 | POST | `/api/v1/auth/register/mobile` | 手机号 + 验证码注册，返回登录态 |
-| 邮箱注册 | POST | `/api/v1/auth/register/email` | 邮箱 + 密码注册，发送验证邮件 |
-| 邮箱注册确认 | GET | `/api/v1/auth/register/email/confirm` | 邮箱验证链接确认，携带 token 参数 |
-| 第三方登录 | POST | `/api/v1/auth/login/third-party` | 第三方授权码登录，返回登录态 |
-| 验证码登录 | POST | `/api/v1/auth/login/sms-code` | 手机号 + 验证码登录 |
-| 密码登录 | POST | `/api/v1/auth/login/password` | 手机号/邮箱 + 密码登录 |
-| 发送短信验证码 | POST | `/api/v1/auth/sms/send` | 发送短信验证码，携带手机号和场景 |
-| 发送邮箱验证邮件 | POST | `/api/v1/auth/email/send` | 发送邮箱验证邮件 |
-| 刷新 Token | POST | `/api/v1/auth/token/refresh` | 使用 refresh_token 刷新 access_token |
-| 退出登录 | POST | `/api/v1/auth/logout` | 退出登录，Token 失效 |
+| 手机号注册 | POST | `/api/v1/content/auth/register/mobile` | 手机号 + 验证码注册，返回登录态 |
+| 邮箱注册 | POST | `/api/v1/content/auth/register/email` | 邮箱 + 密码注册，发送验证邮件 |
+| 邮箱注册确认 | GET | `/api/v1/content/auth/register/email/confirm` | 邮箱验证链接确认，携带 token 参数 |
+| 第三方登录 | POST | `/api/v1/content/auth/login/third-party` | 第三方授权码登录，返回登录态 |
+| 验证码登录 | POST | `/api/v1/content/auth/login/sms-code` | 手机号 + 验证码登录 |
+| 密码登录 | POST | `/api/v1/content/auth/login/password` | 手机号/邮箱 + 密码登录 |
+| 发送短信验证码 | POST | `/api/v1/content/auth/sms/send` | 发送短信验证码，携带手机号和场景 |
+| 发送邮箱验证邮件 | POST | `/api/v1/content/auth/email/send` | 发送邮箱验证邮件 |
+| 刷新 Token | POST | `/api/v1/content/auth/token/refresh` | 使用 refresh_token 刷新 access_token |
+| 退出登录 | POST | `/api/v1/content/auth/logout` | 退出登录，Token 失效 |
 
-### 5.2 账号安全接口（/api/v1/account-security/*）
-
-| 接口 | 方法 | 路径 | 说明 |
-|------|------|------|------|
-| 获取账号安全状态 | GET | `/api/v1/account-security/status` | 获取绑定状态、设备数等 |
-| 绑定手机号 | POST | `/api/v1/account-security/bind/mobile` | 绑定手机号，需验证码 |
-| 绑定邮箱 | POST | `/api/v1/account-security/bind/email` | 绑定邮箱，需验证邮件 |
-| 绑定第三方账号 | POST | `/api/v1/account-security/bind/third-party` | 绑定第三方账号 |
-| 换绑手机号 | POST | `/api/v1/account-security/rebind/mobile` | 换绑手机号，需双向验证码 |
-| 换绑邮箱 | POST | `/api/v1/account-security/rebind/email` | 换绑邮箱 |
-| 解绑手机号 | POST | `/api/v1/account-security/unbind/mobile` | 解绑手机号 |
-| 解绑邮箱 | POST | `/api/v1/account-security/unbind/email` | 解绑邮箱 |
-| 解绑第三方账号 | POST | `/api/v1/account-security/unbind/third-party` | 解绑第三方账号 |
-| 获取设备列表 | GET | `/api/v1/account-security/devices` | 获取当前用户所有活跃设备 |
-| 下线设备 | POST | `/api/v1/account-security/devices/revoke` | 下线指定设备，携带设备 session ID |
-| 信任设备 | POST | `/api/v1/account-security/devices/trust` | 标记指定设备为信任设备，携带设备 session ID |
-| 取消信任设备 | POST | `/api/v1/account-security/devices/untrust` | 取消指定设备的信任状态，携带设备 session ID |
-| 重置密码 | POST | `/api/v1/account-security/password/reset` | 通过手机号/邮箱重置密码 |
-| 修改密码 | POST | `/api/v1/account-security/password/change` | 已登录状态下修改密码 |
-| 获取异常登录通知 | GET | `/api/v1/account-security/anomaly-notifications` | 获取异常登录通知列表 |
-| 确认异常登录 | POST | `/api/v1/account-security/anomaly/confirm` | 确认是本人操作，标记设备信任 |
-| 否认异常登录 | POST | `/api/v1/account-security/anomaly/deny` | 否认操作，下线该设备 |
-| 发送验证码（安全操作） | POST | `/api/v1/account-security/sms/send` | 安全操作场景发送验证码 |
-| 提交兴趣偏好 | POST | `/api/v1/user/preferences/topics` | 注册后提交用户选择的兴趣频道/话题标签 |
-
-### 5.3 账号注销接口（/api/v1/account-cancellation/*）
+### 5.2 账号安全接口（/api/v1/content/account-security/*）
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 查询注销资格 | GET | `/api/v1/account-cancellation/eligibility` | 检查是否有未完成事项 |
-| 申请注销 | POST | `/api/v1/account-cancellation/apply` | 申请账号注销 |
-| 查询注销状态 | GET | `/api/v1/account-cancellation/status` | 查询当前注销状态和冷静期剩余时间 |
-| 取消注销 | POST | `/api/v1/account-cancellation/revoke` | 冷静期内取消注销 |
+| 获取账号安全状态 | GET | `/api/v1/content/account-security/status` | 获取绑定状态、设备数等 |
+| 绑定手机号 | POST | `/api/v1/content/account-security/bind/mobile` | 绑定手机号，需验证码 |
+| 绑定邮箱 | POST | `/api/v1/content/account-security/bind/email` | 绑定邮箱，需验证邮件 |
+| 绑定第三方账号 | POST | `/api/v1/content/account-security/bind/third-party` | 绑定第三方账号 |
+| 换绑手机号 | POST | `/api/v1/content/account-security/rebind/mobile` | 换绑手机号，需双向验证码 |
+| 换绑邮箱 | POST | `/api/v1/content/account-security/rebind/email` | 换绑邮箱 |
+| 解绑手机号 | POST | `/api/v1/content/account-security/unbind/mobile` | 解绑手机号 |
+| 解绑邮箱 | POST | `/api/v1/content/account-security/unbind/email` | 解绑邮箱 |
+| 解绑第三方账号 | POST | `/api/v1/content/account-security/unbind/third-party` | 解绑第三方账号 |
+| 获取设备列表 | GET | `/api/v1/content/account-security/devices` | 获取当前用户所有活跃设备 |
+| 下线设备 | POST | `/api/v1/content/account-security/devices/revoke` | 下线指定设备，携带设备 session ID |
+| 信任设备 | POST | `/api/v1/content/account-security/devices/trust` | 标记指定设备为信任设备，携带设备 session ID |
+| 取消信任设备 | POST | `/api/v1/content/account-security/devices/untrust` | 取消指定设备的信任状态，携带设备 session ID |
+| 重置密码 | POST | `/api/v1/content/account-security/password/reset` | 通过手机号/邮箱重置密码 |
+| 修改密码 | POST | `/api/v1/content/account-security/password/change` | 已登录状态下修改密码 |
+| 获取异常登录通知 | GET | `/api/v1/content/account-security/anomaly-notifications` | 获取异常登录通知列表 |
+| 确认异常登录 | POST | `/api/v1/content/account-security/anomaly/confirm` | 确认是本人操作，标记设备信任 |
+| 否认异常登录 | POST | `/api/v1/content/account-security/anomaly/deny` | 否认操作，下线该设备 |
+| 发送验证码（安全操作） | POST | `/api/v1/content/account-security/sms/send` | 安全操作场景发送验证码 |
+| 提交兴趣偏好 | POST | `/api/v1/content/user/preferences/topics` | 注册后提交用户选择的兴趣频道/话题标签 |
+
+### 5.3 账号注销接口（/api/v1/content/account-cancellation/*）
+
+| 接口 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| 查询注销资格 | GET | `/api/v1/content/account-cancellation/eligibility` | 检查是否有未完成事项 |
+| 申请注销 | POST | `/api/v1/content/account-cancellation/apply` | 申请账号注销 |
+| 查询注销状态 | GET | `/api/v1/content/account-cancellation/status` | 查询当前注销状态和冷静期剩余时间 |
+| 取消注销 | POST | `/api/v1/content/account-cancellation/revoke` | 冷静期内取消注销 |
 
 ### 5.4 风控验证接口
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 获取图形验证码 | GET | `/api/v1/auth/captcha/image` | 获取图形验证码图片 |
-| 校验图形验证码 | POST | `/api/v1/auth/captcha/verify` | 校验图形验证码 |
+| 获取图形验证码 | GET | `/api/v1/content/auth/captcha/image` | 获取图形验证码图片 |
+| 校验图形验证码 | POST | `/api/v1/content/auth/captcha/verify` | 校验图形验证码 |
 
 ### 5.5 API 封装规范
 
@@ -809,15 +809,15 @@ interface ApiResponse<T> {
 
 // 示例：手机号注册
 defHttp.post<LoginResult>({
-  url: '/api/v1/auth/register/mobile',
+  url: '/api/v1/content/auth/register/mobile',
   data: { mobile: '13800138000', smsCode: '123456', captchaCode: 'abc123' }
 });
 
 // 示例：获取设备列表
-defHttp.get<DeviceSessionVO[]>({ url: '/api/v1/account-security/devices' });
+defHttp.get<DeviceSessionVO[]>({ url: '/api/v1/content/account-security/devices' });
 
 // 示例：下线设备
-defHttp.post({ url: '/api/v1/account-security/devices/revoke', data: { sessionId: 'xxx' } });
+defHttp.post({ url: '/api/v1/content/account-security/devices/revoke', data: { sessionId: 'xxx' } });
 ```
 
 ---
@@ -1091,7 +1091,7 @@ interface UserStoreState {
 1. **登录页独立性**: 内容社区登录页是独立页面（`/content/login`），还是复用现有平台登录页（`/sys/login`）？当前假设为独立页面，因为内容社区有独立认证体系。
 2. **第三方登录配置**: 微信/Apple/Google 的 App ID 和回调地址是内容社区独立配置，还是复用平台配置？当前假设为独立配置。
 3. **图形验证码组件**: 是否复用平台层现有的图形验证码（`LoginController.randomImage()`），还是内容社区独立实现？当前假设复用平台层。
-4. ~~**滑块验证组件**~~（已确认）: 本期仅使用图形验证码（`GET /api/v1/auth/captcha/image` + `POST /api/v1/auth/captcha/verify`），不实现滑块验证。
+4. ~~**滑块验证组件**~~（已确认）: 本期仅使用图形验证码（`GET /api/v1/content/auth/captcha/image` + `POST /api/v1/content/auth/captcha/verify`），不实现滑块验证。
 5. **账号注销数据处理**: 匿化优先还是物理删除优先？设计文档标注为"匿名化优先"，前端假设只展示状态，不涉及数据处理细节。
 6. **异常登录检测时机**: 异常登录通知是在用户登录时实时弹出，还是仅在消息中心展示？当前假设为登录时实时弹出 + 消息中心历史记录。
 7. **密码找回中的高风险验证**: 高风险找回场景的"安全问题或身份证明"产品形态尚未确定，前端本期预留接口调用入口，暂不实现具体 UI。

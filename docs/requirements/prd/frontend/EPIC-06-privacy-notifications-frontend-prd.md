@@ -107,8 +107,8 @@ Page
 
 **保存行为**:
 - 页面底部统一"保存"按钮，点击后拆分两次并发请求（`Promise.all`）：
-  - 请求 1：`POST /content/user/settings/notification/update`（通知开关 + 渠道配置）
-  - 请求 2：`POST /content/user/settings/notification/dnd/update`（免打扰规则，仅在免打扰配置有变更时发送）
+  - 请求 1：`POST /api/v1/content/user/settings/notification/update`（通知开关 + 渠道配置）
+  - 请求 2：`POST /api/v1/content/user/settings/notification/dnd/update`（免打扰规则，仅在免打扰配置有变更时发送）
 - 保存中按钮显示 loading 并禁用
 - 两次请求均成功 → 全局消息提示"通知设置已保存"，新设置立即生效
 - 任一请求失败 → 全局错误提示，保留用户已修改的状态；若仅一个失败，提示具体失败项
@@ -220,7 +220,7 @@ Page
 - 默认关闭（保护隐私优先）
 
 **保存行为**:
-- 点击"保存" → 调用 `POST /content/user/settings/privacy/update`
+- 点击"保存" → 调用 `POST /api/v1/content/user/settings/privacy/update`
 - 保存成功 → 全局消息提示"隐私设置已保存"
 - 缓存 5 分钟内失效，对其他用户即时生效
 
@@ -258,7 +258,7 @@ Page
 **交互流程**:
 1. 用户点击某行"撤销授权"按钮
 2. 弹出确认弹窗 `Modal`：标题"撤销授权"，内容"撤销后该应用将无法访问你的数据，是否确认？"
-3. 用户点击"确认撤销" → 调用 `DELETE /content/user/auth/third-party/{authId}`
+3. 用户点击"确认撤销" → 调用 `DELETE /api/v1/content/user/auth/third-party/{authId}`
 4. 请求中按钮显示 loading
 5. 成功 → 全局提示"授权已撤销"，该行从列表中移除
 6. 失败 → 全局错误提示，保留该行
@@ -289,7 +289,7 @@ Page
 |---|---|---|
 | 图标 | 安全相关 SVG 图标 | 每个功能不同图标 |
 | 功能名称 | 设备管理 / 密码修改 / 两步验证 / 登录提醒 | 粗体标题 |
-| 状态描述 | "已启用"/"未启用" | 从 `/content/user/settings/security` 获取，后端仅返回 Boolean |
+| 状态描述 | "已启用"/"未启用" | 从 `/api/v1/content/user/settings/security` 获取，后端仅返回 Boolean |
 | 操作区域 | 箭头图标（跳转）或 Switch（登录提醒） | 点击整张卡片也可跳转 |
 
 **交互规则**:
@@ -301,7 +301,7 @@ Page
 - 安全功能状态为 null 时 → 默认显示"已启用"（安全优先）
 
 **数据加载**:
-- 页面加载时调用 `GET /content/user/settings/security`
+- 页面加载时调用 `GET /api/v1/content/user/settings/security`
 - 后端 `ContentUserSecuritySettingVO` 为扁平结构，字段映射如下：
 
 | 后端字段 | 类型 | 页面展示 | 卡片位置 |
@@ -393,11 +393,11 @@ Page
 
 | 接口 | 方法 | 路径 | 用途 | 调用页面 |
 |---|---|---|---|---|
-| 获取通知设置 | GET | `/content/user/settings/notification` | 加载通知偏好和免打扰配置 | 通知设置页 |
-| 更新通知设置 | POST | `/content/user/settings/notification/update` | 保存通知开关和渠道配置 | 通知设置页 |
-| 更新免打扰规则 | POST | `/content/user/settings/notification/dnd/update` | 保存免打扰多时段配置 | 通知设置页 |
-| 获取隐私设置 | GET | `/content/user/settings/privacy` | 加载可见性配置 | 隐私设置页 |
-| 更新隐私设置 | POST | `/content/user/settings/privacy/update` | 保存可见性配置 | 隐私设置页 |
+| 获取通知设置 | GET | `/api/v1/content/user/settings/notification` | 加载通知偏好和免打扰配置 | 通知设置页 |
+| 更新通知设置 | POST | `/api/v1/content/user/settings/notification/update` | 保存通知开关和渠道配置 | 通知设置页 |
+| 更新免打扰规则 | POST | `/api/v1/content/user/settings/notification/dnd/update` | 保存免打扰多时段配置 | 通知设置页 |
+| 获取隐私设置 | GET | `/api/v1/content/user/settings/privacy` | 加载可见性配置 | 隐私设置页 |
+| 更新隐私设置 | POST | `/api/v1/content/user/settings/privacy/update` | 保存可见性配置 | 隐私设置页 |
 
 **隐私设置 GET 响应字段映射**:
 
@@ -413,11 +413,11 @@ Page
 
 > 注意：后端字段 `favoriteVisibility` 与前端展示字段 `favoritesVisibility` 存在命名差异（无 `s`），前端需在接口响应处理时做映射转换。其余后端字段（生日/性别/地区/职业等）前端忽略。
 
-| 获取安全设置 | GET | `/content/user/settings/security` | 加载安全功能状态 | 账户安全页 |
-| 更新安全设置 | POST | `/content/user/settings/security/update` | 更新登录提醒等安全开关 | 账户安全页 |
-| 获取授权列表 | GET | `/content/user/auth/third-party` | 加载已授权应用列表 | 第三方授权页 |
-| 查看授权详情 | GET | `/content/user/auth/third-party/{authId}` | 获取单个应用授权详情 | 第三方授权页 |
-| 撤销授权 | DELETE | `/content/user/auth/third-party/{authId}` | 撤销指定应用授权 | 第三方授权页 |
+| 获取安全设置 | GET | `/api/v1/content/user/settings/security` | 加载安全功能状态 | 账户安全页 |
+| 更新安全设置 | POST | `/api/v1/content/user/settings/security/update` | 更新登录提醒等安全开关 | 账户安全页 |
+| 获取授权列表 | GET | `/api/v1/content/user/auth/third-party` | 加载已授权应用列表 | 第三方授权页 |
+| 查看授权详情 | GET | `/api/v1/content/user/auth/third-party/{authId}` | 获取单个应用授权详情 | 第三方授权页 |
+| 撤销授权 | DELETE | `/api/v1/content/user/auth/third-party/{authId}` | 撤销指定应用授权 | 第三方授权页 |
 
 ### userId 传递方式
 
@@ -435,39 +435,39 @@ import { defHttp } from '/@/utils/http/axios';
 
 // 获取通知设置
 export const getNotificationSettings = () =>
-  defHttp.get({ url: '/content/user/settings/notification' });
+  defHttp.get({ url: '/api/v1/content/user/settings/notification' });
 
 // 更新通知设置
 export const updateNotificationSettings = (data: NotificationSettingsReq) =>
-  defHttp.post({ url: '/content/user/settings/notification/update', data });
+  defHttp.post({ url: '/api/v1/content/user/settings/notification/update', data });
 
 // 更新免打扰规则
 export const updateDndRules = (data: DndRulesReq) =>
-  defHttp.post({ url: '/content/user/settings/notification/dnd/update', data });
+  defHttp.post({ url: '/api/v1/content/user/settings/notification/dnd/update', data });
 
 // 获取隐私设置
 export const getPrivacySettings = () =>
-  defHttp.get({ url: '/content/user/settings/privacy' });
+  defHttp.get({ url: '/api/v1/content/user/settings/privacy' });
 
 // 更新隐私设置
 export const updatePrivacySettings = (data: PrivacySettingsReq) =>
-  defHttp.post({ url: '/content/user/settings/privacy/update', data });
+  defHttp.post({ url: '/api/v1/content/user/settings/privacy/update', data });
 
 // 获取安全设置
 export const getSecuritySettings = () =>
-  defHttp.get({ url: '/content/user/settings/security' });
+  defHttp.get({ url: '/api/v1/content/user/settings/security' });
 
 // 获取第三方授权列表
 export const getThirdPartyAuthList = () =>
-  defHttp.get({ url: '/content/user/auth/third-party' });
+  defHttp.get({ url: '/api/v1/content/user/auth/third-party' });
 
 // 查看授权详情
 export const getThirdPartyAuthDetail = (authId: number) =>
-  defHttp.get({ url: `/content/user/auth/third-party/${authId}` });
+  defHttp.get({ url: `/api/v1/content/user/auth/third-party/${authId}` });
 
 // 撤销授权
 export const revokeThirdPartyAuth = (authId: number) =>
-  defHttp.delete({ url: `/content/user/auth/third-party/${authId}` });
+  defHttp.delete({ url: `/api/v1/content/user/auth/third-party/${authId}` });
 ```
 
 ---

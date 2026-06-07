@@ -176,7 +176,7 @@ sourceProposal: openspec/changes/channel-22-content-governance-frontend/proposal
 - 已选频道支持标签形式快速移除
 - 搜索支持频道名称模糊匹配
 - **重复发布检测**: 若内容已在某频道发布，该频道卡片展示"已在此频道"标识并置灰不可选，防止同一内容在同一频道重复展示
-- **频道数上限来源**: 上限值 N 由后端接口 `/content/channel/publish/available` 返回（系统配置或用户等级决定），前端从接口响应中读取 `maxChannelCount` 字段
+- **频道数上限来源**: 上限值 N 由后端接口 `/api/v1/content/channel/publish/available` 返回（系统配置或用户等级决定），前端从接口响应中读取 `maxChannelCount` 字段
 - **重试失败项规则**: 重试时仅允许重试原来的失败频道，不可更换目标频道；若需更换频道，需重新发起发布流程
 
 **状态**:
@@ -289,7 +289,7 @@ sourceProposal: openspec/changes/channel-22-content-governance-frontend/proposal
   - 超时阈值: 24 小时（从提交时间起算），超时后前端仅做高亮标识，不触发自动通过或自动拒绝
   - 超时提醒对象: 所有有审核权限的管理员（频道主 + 频道管理员 + 内容编辑），通过站内消息通知
   - 超时提醒频率: 首次超时时提醒一次，之后每 12 小时重复提醒，直到内容被处理
-  - 待审区 badge 统计: `超时数` = 待审列表中提交时间距当前超过 24 小时的内容数量，由 `/content/channel/review/stats` 接口返回，前端每 60 秒刷新一次
+  - 待审区 badge 统计: `超时数` = 待审列表中提交时间距当前超过 24 小时的内容数量，由 `/api/v1/content/channel/review/stats` 接口返回，前端每 60 秒刷新一次
 
 **状态**:
 - 空状态: "暂无待审核内容" + 引导返回频道管理页
@@ -544,53 +544,53 @@ Page (频道设置页)
 
 | API | 方法 | 说明 | 前端使用场景 |
 |-----|------|------|-------------|
-| `/content/channel/publish/available` | GET | 获取用户可发布/投稿/管理的频道列表 | ChannelSelector 加载 |
-| `/content/channel/publish` | POST | 提交内容到频道（支持多频道） | 发布提交 |
-| `/content/channel/publish/result/{taskId}` | GET | 查询发布结果（含逐频道状态） | PublishResult 轮询 |
-| `/content/channel/publish/scheduled` | POST | 设定定时发布 | 定时发布提交 |
-| `/content/channel/publish/scheduled/{id}` | PUT | 修改定时发布时间 | 定时发布编辑 |
-| `/content/channel/publish/scheduled/{id}` | DELETE | 取消定时发布 | 定时发布取消 |
-| `/content/channel/publish/scheduled/list` | GET | 获取当前用户的定时发布任务列表 | 我的定时发布管理 |
-| `/content/channel/publish/limit/check` | POST | 预校验发布限额 | 发布前校验 |
-| `/content/channel/publish/permission` | POST | 保存频道发布权限配置 | PublishPermission 保存 |
-| `/content/channel/publish/permission/{channelId}` | GET | 获取频道发布权限配置 | PublishPermission 加载 |
+| `/api/v1/content/channel/publish/available` | GET | 获取用户可发布/投稿/管理的频道列表 | ChannelSelector 加载 |
+| `/api/v1/content/channel/publish` | POST | 提交内容到频道（支持多频道） | 发布提交 |
+| `/api/v1/content/channel/publish/result/{taskId}` | GET | 查询发布结果（含逐频道状态） | PublishResult 轮询 |
+| `/api/v1/content/channel/publish/scheduled` | POST | 设定定时发布 | 定时发布提交 |
+| `/api/v1/content/channel/publish/scheduled/{id}` | PUT | 修改定时发布时间 | 定时发布编辑 |
+| `/api/v1/content/channel/publish/scheduled/{id}` | DELETE | 取消定时发布 | 定时发布取消 |
+| `/api/v1/content/channel/publish/scheduled/list` | GET | 获取当前用户的定时发布任务列表 | 我的定时发布管理 |
+| `/api/v1/content/channel/publish/limit/check` | POST | 预校验发布限额 | 发布前校验 |
+| `/api/v1/content/channel/publish/permission` | POST | 保存频道发布权限配置 | PublishPermission 保存 |
+| `/api/v1/content/channel/publish/permission/{channelId}` | GET | 获取频道发布权限配置 | PublishPermission 加载 |
 
 ### 5.2 内容审核相关
 
 | API | 方法 | 说明 | 前端使用场景 |
 |-----|------|------|-------------|
-| `/content/channel/review/list` | GET | 获取待审区列表（支持筛选、分页） | ReviewQueueTable 加载 |
-| `/content/channel/review` | POST | 审核操作（统一入口，action: APPROVE \| REJECT，含 rejectReason） | 逐条通过/拒绝，批量操作由前端循环调用 |
-| `/content/channel/review/stats` | GET | 待审统计（总数、超时数） | 待审区 badge |
+| `/api/v1/content/channel/review/list` | GET | 获取待审区列表（支持筛选、分页） | ReviewQueueTable 加载 |
+| `/api/v1/content/channel/review` | POST | 审核操作（统一入口，action: APPROVE \| REJECT，含 rejectReason） | 逐条通过/拒绝，批量操作由前端循环调用 |
+| `/api/v1/content/channel/review/stats` | GET | 待审统计（总数、超时数） | 待审区 badge |
 
 ### 5.3 内容治理相关
 
 | API | 方法 | 说明 | 前端使用场景 |
 |-----|------|------|-------------|
-| `/content/channel/governance/content/list` | GET | 频道内容列表（支持筛选、排序、分页） | ContentGovernance 加载 |
-| `/content/channel/governance` | POST | 统一治理操作入口（action: PIN \| UNPIN \| FEATURE \| UNFEATURE \| DELETE \| RESTORE \| MOVE \| EDIT_ASSIST） | 置顶/精华/删除/恢复/移出/编辑协助，批量操作由前端循环调用 |
-| `/content/channel/governance/edit-assist/history/{contentId}` | GET | 获取编辑协助修订历史（后端待实现） | EditAssistDrawer |
-| `/content/channel/governance/recycle-bin/list` | GET | 回收站列表 | RecycleBinTable 加载 |
-| `/content/channel/governance/log/list` | GET | 治理日志列表（后端待实现） | GovernanceLogTable 加载 |
+| `/api/v1/content/channel/governance/content/list` | GET | 频道内容列表（支持筛选、排序、分页） | ContentGovernance 加载 |
+| `/api/v1/content/channel/governance` | POST | 统一治理操作入口（action: PIN \| UNPIN \| FEATURE \| UNFEATURE \| DELETE \| RESTORE \| MOVE \| EDIT_ASSIST） | 置顶/精华/删除/恢复/移出/编辑协助，批量操作由前端循环调用 |
+| `/api/v1/content/channel/governance/edit-assist/history/{contentId}` | GET | 获取编辑协助修订历史（后端待实现） | EditAssistDrawer |
+| `/api/v1/content/channel/governance/recycle-bin/list` | GET | 回收站列表 | RecycleBinTable 加载 |
+| `/api/v1/content/channel/governance/log/list` | GET | 治理日志列表（后端待实现） | GovernanceLogTable 加载 |
 
 ### 5.4 公告相关
 
 | API | 方法 | 说明 | 前端使用场景 |
 |-----|------|------|-------------|
-| `/content/channel/announcement/channel/{channelId}` | GET | 获取频道当前公告 | 频道页顶部展示 |
-| `/content/channel/announcement` | POST | 发布/更新公告 | 公告保存 |
-| `/content/channel/announcement/{id}` | DELETE | 删除公告 | 公告删除 |
-| `/content/channel/announcement/preview` | POST | 公告预览（安全过滤） | 预览功能 |
-| `/content/channel/announcement/history/{channelId}` | GET | 获取频道公告历史版本列表（最近 3 个） | 公告历史查看 |
-| `/content/channel/announcement/restore/{versionId}` | POST | 恢复历史版本为当前公告 | 公告版本恢复 |
+| `/api/v1/content/channel/announcement/channel/{channelId}` | GET | 获取频道当前公告 | 频道页顶部展示 |
+| `/api/v1/content/channel/announcement` | POST | 发布/更新公告 | 公告保存 |
+| `/api/v1/content/channel/announcement/{id}` | DELETE | 删除公告 | 公告删除 |
+| `/api/v1/content/channel/announcement/preview` | POST | 公告预览（安全过滤） | 预览功能 |
+| `/api/v1/content/channel/announcement/history/{channelId}` | GET | 获取频道公告历史版本列表（最近 3 个） | 公告历史查看 |
+| `/api/v1/content/channel/announcement/restore/{versionId}` | POST | 恢复历史版本为当前公告 | 公告版本恢复 |
 
 ### 5.5 添加已发布内容相关
 
 | API | 方法 | 说明 | 前端使用场景 |
 |-----|------|------|-------------|
-| `/content/channel/publish/add-existing` | POST | 添加已发布内容到频道 | AddContentDialog 提交 |
-| `/content/channel/publish/add-existing/search` | GET | 搜索可添加的已发布内容 | 内容搜索 |
-| `/content/channel/publish/content-channels/{contentId}` | GET | 查看内容所在频道列表 | 内容详情展示 |
+| `/api/v1/content/channel/publish/add-existing` | POST | 添加已发布内容到频道 | AddContentDialog 提交 |
+| `/api/v1/content/channel/publish/add-existing/search` | GET | 搜索可添加的已发布内容 | 内容搜索 |
+| `/api/v1/content/channel/publish/content-channels/{contentId}` | GET | 查看内容所在频道列表 | 内容详情展示 |
 
 ### 5.6 API 封装规范
 
