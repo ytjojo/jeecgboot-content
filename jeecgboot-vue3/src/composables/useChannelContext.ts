@@ -41,14 +41,15 @@ export function useChannelContext(channelId: Ref<string>) {
     return !!memberRole.value && !isMuted.value && !isBlacklisted.value;
   });
 
-  async function loadContext() {
+  async function loadContext(overrideId?: string) {
+    const id = overrideId ?? channelId.value;
     loading.value = true;
     channelNotFound.value = false;
     loadError.value = false;
     try {
       const [info, relation] = await Promise.all([
-        getChannelDetail(channelId.value),
-        getUserChannelRelation(channelId.value),
+        getChannelDetail(id),
+        getUserChannelRelation(id),
       ]);
       channelInfo.value = info;
       userRelation.value = relation;
