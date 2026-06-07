@@ -60,19 +60,16 @@ export interface LoginResult {
 }
 
 enum Api {
-  registerMobile = '/api/v1/auth/register/mobile',
-  registerEmail = '/api/v1/auth/register/email',
-  confirmEmail = '/api/v1/auth/email/confirm',
-  resendEmail = '/api/v1/auth/email/resend',
-  thirdParty = '/api/v1/auth/login/third-party',
-  smsCode = '/api/v1/auth/sms-code',
-  emailCode = '/api/v1/auth/email-code',
-  loginPassword = '/api/v1/auth/login/password',
-  loginSmsCode = '/api/v1/auth/login/sms-code',
-  refreshToken = '/api/v1/auth/token/refresh',
-  logout = '/api/v1/auth/logout',
-  sendSms = '/api/v1/auth/sms/send',
-  sendEmail = '/api/v1/auth/email/send',
+  registerMobile = '/api/v1/content/auth/register/mobile',
+  registerEmail = '/api/v1/content/auth/register/email',
+  confirmEmail = '/api/v1/content/auth/confirm-email',
+  thirdParty = '/api/v1/content/auth/login/third-party',
+  loginPassword = '/api/v1/content/auth/login/password',
+  loginSmsCode = '/api/v1/content/auth/login/sms',
+  refreshToken = '/api/v1/content/auth/token/refresh',
+  logout = '/api/v1/content/auth/logout',
+  sendSms = '/api/v1/content/auth/sms/send',
+  sendEmail = '/api/v1/content/auth/email/send',
 }
 
 export const registerMobile = (params: RegisterMobileParams) =>
@@ -83,9 +80,6 @@ export const registerEmail = (params: RegisterEmailParams) =>
 
 export const confirmEmail = (token: string) =>
   defHttp.post({ url: Api.confirmEmail, params: { token } });
-
-export const resendConfirmEmail = (email: string) =>
-  defHttp.post({ url: Api.resendEmail, params: { email } });
 
 export const thirdPartyLogin = (params: ThirdPartyLoginParams) =>
   defHttp.post<LoginResult>({ url: Api.thirdParty, params });

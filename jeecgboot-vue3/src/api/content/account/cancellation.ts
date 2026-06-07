@@ -15,10 +15,10 @@ export interface CancellationApplication {
 }
 
 enum Api {
-  checkEligibility = '/api/v1/account-cancellation/eligibility',
-  apply = '/api/v1/account-cancellation/apply',
-  status = '/api/v1/account-cancellation/status',
-  cancel = '/api/v1/account-cancellation/cancel',
+  checkEligibility = '/api/v1/content/account-cancellation/eligibility',
+  apply = '/api/v1/content/account-cancellation/apply',
+  status = '/api/v1/content/account-cancellation/status',
+  cancel = '/api/v1/content/account-cancellation/cancel',
 }
 
 export const checkCancellationEligibility = () =>
