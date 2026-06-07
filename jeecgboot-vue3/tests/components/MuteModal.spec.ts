@@ -71,4 +71,63 @@ describe('MuteModal', () => {
     const wrapper = mountComponent();
     expect(wrapper.emitted('muted')).toBeUndefined();
   });
+
+  it('handleConfirm with empty reason returns without calling API', async () => {
+    const wrapper = mountComponent();
+    wrapper.vm.open({ id: 'm1', nickname: 'testUser' });
+    await wrapper.vm.$nextTick();
+    const vm = wrapper.vm as any;
+    vm.reason = '';
+    await vm.handleConfirm();
+    await flushPromises();
+    expect(mockMuteMember).not.toHaveBeenCalled();
+  });
+
+  it('handleConfirm with whitespace-only reason returns without calling API', async () => {
+    const wrapper = mountComponent();
+    wrapper.vm.open({ id: 'm1', nickname: 'testUser' });
+    await wrapper.vm.$nextTick();
+    const vm = wrapper.vm as any;
+    vm.reason = '   ';
+    await vm.handleConfirm();
+    await flushPromises();
+    expect(mockMuteMember).not.toHaveBeenCalled();
+  });
+
+  it('handleConfirm success calls muteMember, closes modal, emits muted', async () => {
+    mockMuteMember.mockResolvedValue({} as any);
+    const wrapper = mountComponent();
+    wrapper.vm.open({ id: 'm1', nickname: 'testUser' });
+    await wrapper.vm.$nextTick();
+    const vm = wrapper.vm as any;
+    vm.reason = 'spamming';
+    vm.duration = '24h';
+    await vm.handleConfirm();
+    await flushPromises();
+    expect(mockMuteMember).toHaveBeenCalledWith({
+      channelId: 'ch1',
+      memberId: 'm1',
+      duration: '24h',
+      reason: 'spamming',
+    });
+    expect(vm.visible).toBe(false);
+    expect(wrapper.emitted('muted')).toBeTruthy();
+    expect(vm.loading).toBe(false);
+  });
+
+  it('handleConfirm API failure resets loading and keeps modal open', async () => {
+    mockMuteMember.mockRejectedValueOnce(new Error('fail'));
+    const wrapper = mountComponent();
+    wrapper.vm.open({ id: 'm1', nickname: 'testUser' });
+    await wrapper.vm.$nextTick();
+    const vm = wrapper.vm as any;
+    vm.reason = 'test reason';
+    // Suppress unhandled rejection (component has try/finally without catch)
+    const p = vm.handleConfirm();
+    p.catch(() => {});
+    await flushPromises();
+    expect(vm.loading).toBe(false);
+    // Modal should stay open (visible was not set to false)
+    expect(vm.visible).toBe(true);
+  });
 });
