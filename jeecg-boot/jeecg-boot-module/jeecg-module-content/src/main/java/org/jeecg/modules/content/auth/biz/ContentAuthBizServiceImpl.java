@@ -17,10 +17,12 @@ import org.jeecg.modules.content.auth.mapper.ContentUserAccountMapper;
 import org.jeecg.modules.content.auth.mapper.ContentUserCredentialMapper;
 import org.jeecg.modules.content.auth.mapper.ContentUserPasswordHistoryMapper;
 import org.jeecg.modules.content.auth.req.*;
+import org.jeecg.modules.content.auth.service.CaptchaVerifyPort;
 import org.jeecg.modules.content.auth.service.EmailSenderPort;
 import org.jeecg.modules.content.auth.service.IContentTokenService;
 import org.jeecg.modules.content.auth.service.IContentVerificationCodeService;
 import org.jeecg.modules.content.auth.service.LoginTokenGeneratorPort;
+import org.jeecg.modules.content.auth.service.SmsSenderPort;
 import org.jeecg.modules.content.auth.dto.ThirdPartyAuthResult;
 import org.jeecg.modules.content.user.entity.ContentUserNotificationSetting;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
@@ -40,7 +42,9 @@ import org.jeecg.modules.content.user.entity.ContentUserDeviceSession;
 
 import jakarta.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -86,6 +90,12 @@ public class ContentAuthBizServiceImpl implements ContentAuthBizService {
 
     @Resource
     private LoginTokenGeneratorPort loginTokenGeneratorPort;
+
+    @Resource
+    private SmsSenderPort smsSenderPort;
+
+    @Resource
+    private CaptchaVerifyPort captchaVerifyPort;
 
     @Resource
     private ContentUserThirdPartyAuthMapper thirdPartyAuthMapper;
@@ -887,5 +897,99 @@ public class ContentAuthBizServiceImpl implements ContentAuthBizService {
         if (failCount >= AuthRedisKeyConstant.LOGIN_FAIL_CAPTCHA_THRESHOLD) {
             throw new JeecgBootException("密码错误次数过多，请输入验证码");
         }
+    }
+
+    @Override
+    public void sendSmsCode(String phone, String countryCode, String captchaId, String captchaCode) {
+        // 1. 校验图形验证码(可选)
+        if (captchaId != null && captchaCode != null) {
+            boolean captchaValid = captchaVerifyPort.verify(captchaCode, null);
+            if (!captchaValid) {
+                throw new JeecgBootException("图形验证码错误");
+            }
+        }
+        // 2. 检查冷却期
+        if (codeService.isInCooldown(VerificationCodeSceneEnum.LOGIN, phone)) {
+            throw new JeecgBootException("验证码发送过于频繁，请稍后再试");
+        }
+        // 3. 生成验证码并存储
+        String code = codeService.generateCode(VerificationCodeSceneEnum.LOGIN, phone);
+        // 4. 发送短信
+        boolean sent = smsSenderPort.send(phone, "【内容社区】您的验证码是：" + code + "，5分钟内有效。");
+        if (!sent) {
+            throw new JeecgBootException("短信发送失败，请稍后再试");
+        }
+        log.info("短信验证码已发送, phone={}", phone);
+    }
+
+    @Override
+    public void sendEmailCode(String email, String captchaId, String captchaCode) {
+        // 1. 校验图形验证码(可选)
+        if (captchaId != null && captchaCode != null) {
+            boolean captchaValid = captchaVerifyPort.verify(captchaCode, null);
+            if (!captchaValid) {
+                throw new JeecgBootException("图形验证码错误");
+            }
+        }
+        // 2. 检查冷却期
+        if (codeService.isInCooldown(VerificationCodeSceneEnum.BIND_EMAIL, email)) {
+            throw new JeecgBootException("验证码发送过于频繁，请稍后再试");
+        }
+        // 3. 生成验证码并存储
+        String code = codeService.generateCode(VerificationCodeSceneEnum.BIND_EMAIL, email);
+        // 4. 发送邮件
+        String htmlContent = "<p>您的验证码是：<strong>" + code + "</strong>，5分钟内有效。</p>";
+        boolean sent = emailSenderPort.send(email, "内容社区验证码", htmlContent);
+        if (!sent) {
+            throw new JeecgBootException("邮件发送失败，请稍后再试");
+        }
+        log.info("邮箱验证码已发送, email={}", email);
+    }
+
+    @Override
+    public AuthLoginResult refreshToken(String refreshToken) {
+        // 校验 refreshToken 并签发新 token
+        // 当前实现：使用 LoginTokenGeneratorPort 生成新 token
+        String userId = tokenService.validateAndConsumeToken(refreshToken, "REFRESH_TOKEN");
+        if (userId == null) {
+            throw new JeecgBootException("refreshToken 无效或已过期");
+        }
+        return createLoginResult(userId, "PC");
+    }
+
+    @Override
+    public void logout(String userId) {
+        // 清除该用户的 Redis 会话数据
+        String sessionKey = AuthRedisKeyConstant.TOKEN_BLACKLIST_PREFIX + userId;
+        redisTemplate.delete(sessionKey);
+        log.info("用户已登出, userId={}", userId);
+    }
+
+    @Override
+    public Map<String, String> getCaptchaImage() {
+        // 代理调用系统模块获取验证码图片
+        // 当前返回空实现，实际应调用 ISysBaseAPI 或 CaptchaVerifyPort
+        Map<String, String> result = new HashMap<>();
+        result.put("captchaId", UUID.randomUUID().toString());
+        result.put("imageBase64", "");
+        return result;
+    }
+
+    @Override
+    public boolean verifyCaptcha(String captchaId, String captchaCode) {
+        return captchaVerifyPort.verify(captchaCode, null);
+    }
+
+    @Override
+    public Map<String, Object> getLockStatus(String account) {
+        Map<String, Object> status = new HashMap<>();
+        String failKey = AuthRedisKeyConstant.PWD_FAIL_PREFIX + account;
+        String failCountStr = redisTemplate.opsForValue().get(failKey);
+        int failCount = failCountStr != null ? Integer.parseInt(failCountStr) : 0;
+        boolean locked = failCount >= AuthRedisKeyConstant.LOGIN_FAIL_LOCK_THRESHOLD;
+        status.put("locked", locked);
+        status.put("attempts", failCount);
+        status.put("maxAttempts", AuthRedisKeyConstant.LOGIN_FAIL_LOCK_THRESHOLD);
+        return status;
     }
 }

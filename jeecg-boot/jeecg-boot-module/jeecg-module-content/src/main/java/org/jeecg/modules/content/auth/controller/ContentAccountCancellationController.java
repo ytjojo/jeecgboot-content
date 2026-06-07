@@ -11,6 +11,8 @@ import org.jeecg.modules.content.auth.req.ContentCancelApplyReq;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * 账号注销控制器。
  */
@@ -45,5 +47,13 @@ public class ContentAccountCancellationController {
         String userId = SecureUtil.currentUser().getId();
         cancellationBizService.revokeCancellation(userId);
         return Result.OK();
+    }
+
+    @Operation(summary = "检查注销资格", description = "检查积分余额、待处理订单、风控状态等注销前置条件")
+    @GetMapping("/eligibility")
+    public Result<?> checkEligibility() {
+        String userId = SecureUtil.currentUser().getId();
+        Map<String, Object> eligibility = cancellationBizService.checkEligibility(userId);
+        return Result.OK(eligibility);
     }
 }

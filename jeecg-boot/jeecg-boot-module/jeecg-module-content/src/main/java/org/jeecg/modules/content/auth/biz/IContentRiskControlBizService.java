@@ -3,6 +3,7 @@ package org.jeecg.modules.content.auth.biz;
 import org.jeecg.modules.content.auth.entity.ContentRiskEvent;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 风控与异常登录业务服务接口。
@@ -98,4 +99,54 @@ public interface IContentRiskControlBizService {
      * @param isSelf  是否本人操作
      */
     void confirmAbnormalLogin(String userId, String eventId, boolean isSelf);
+
+    /**
+     * 获取账户安全状态聚合。
+     *
+     * @param userId 用户ID
+     * @return 安全状态信息
+     */
+    Map<String, Object> getAccountSecurityStatus(String userId);
+
+    /**
+     * 信任设备。
+     *
+     * @param userId   用户ID
+     * @param deviceId 设备ID
+     */
+    void trustDevice(String userId, String deviceId);
+
+    /**
+     * 取消信任设备。
+     *
+     * @param userId   用户ID
+     * @param deviceId 设备ID
+     */
+    void untrustDevice(String userId, String deviceId);
+
+    /**
+     * 修改密码。
+     *
+     * @param userId      用户ID
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     */
+    void changePassword(String userId, String oldPassword, String newPassword);
+
+    /**
+     * 发送安全操作验证码。
+     *
+     * @param type    类型: sms/email
+     * @param target  目标: 手机号或邮箱
+     * @param purpose 用途
+     */
+    void sendSecurityCode(String type, String target, String purpose);
+
+    /**
+     * 否认异常登录。
+     *
+     * @param notificationId 通知ID
+     * @param revokeDeviceId 要踢出的设备ID(可选)
+     */
+    void denyAnomaly(String notificationId, String revokeDeviceId);
 }

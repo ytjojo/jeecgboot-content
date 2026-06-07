@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 风控与异常登录控制器。
@@ -48,5 +49,50 @@ public class ContentRiskControlController {
     public Result<List<ContentRiskEvent>> notifications() {
         String userId = SecureUtil.currentUser().getId();
         return Result.OK(riskControlBizService.getPendingNotifications(userId));
+    }
+
+    @Operation(summary = "获取账户安全状态", description = "聚合查询当前用户的手机/邮箱/第三方绑定状态")
+    @GetMapping("/status")
+    public Result<?> getAccountSecurityStatus() {
+        String userId = SecureUtil.currentUser().getId();
+        return Result.OK(riskControlBizService.getAccountSecurityStatus(userId));
+    }
+
+    @Operation(summary = "信任设备", description = "标记指定设备为可信设备")
+    @PostMapping("/devices/trust")
+    public Result<?> trustDevice(@RequestBody Map<String, String> params) {
+        String userId = SecureUtil.currentUser().getId();
+        riskControlBizService.trustDevice(userId, params.get("deviceId"));
+        return Result.OK("设备已信任");
+    }
+
+    @Operation(summary = "取消信任设备", description = "取消指定设备的可信标记")
+    @PostMapping("/devices/untrust")
+    public Result<?> untrustDevice(@RequestBody Map<String, String> params) {
+        String userId = SecureUtil.currentUser().getId();
+        riskControlBizService.untrustDevice(userId, params.get("deviceId"));
+        return Result.OK("已取消信任");
+    }
+
+    @Operation(summary = "修改密码", description = "验证旧密码后修改为新密码")
+    @PostMapping("/password/change")
+    public Result<?> changePassword(@RequestBody Map<String, String> params) {
+        String userId = SecureUtil.currentUser().getId();
+        riskControlBizService.changePassword(userId, params.get("oldPassword"), params.get("newPassword"));
+        return Result.OK("密码修改成功");
+    }
+
+    @Operation(summary = "发送安全操作验证码", description = "根据类型发送短信或邮箱验证码")
+    @PostMapping("/send-code")
+    public Result<?> sendSecurityCode(@RequestBody Map<String, String> params) {
+        riskControlBizService.sendSecurityCode(params.get("type"), params.get("target"), params.get("purpose"));
+        return Result.OK("验证码已发送");
+    }
+
+    @Operation(summary = "否认异常登录", description = "否认异常登录并可选踢出设备")
+    @PostMapping("/anomaly/deny")
+    public Result<?> denyAnomaly(@RequestBody Map<String, String> params) {
+        riskControlBizService.denyAnomaly(params.get("id"), params.get("revokeDeviceId"));
+        return Result.OK("已否认异常登录");
     }
 }

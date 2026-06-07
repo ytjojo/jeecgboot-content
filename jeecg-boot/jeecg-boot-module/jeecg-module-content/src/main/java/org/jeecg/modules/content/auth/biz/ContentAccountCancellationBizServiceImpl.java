@@ -12,7 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -194,5 +198,32 @@ public class ContentAccountCancellationBizServiceImpl implements IContentAccount
                         .eq(ContentCancellationRequest::getUserId, userId)
                         .eq(ContentCancellationRequest::getStatus, REQUEST_STATUS_PENDING)
         );
+    }
+
+    @Override
+    public Map<String, Object> checkEligibility(String userId) {
+        Map<String, Object> result = new HashMap<>();
+        List<Map<String, Object>> checks = new ArrayList<>();
+        boolean eligible = true;
+
+        // 检查账号状态
+        ContentUserAccount account = accountMapper.selectActiveByUserId(userId);
+        if (account == null) {
+            eligible = false;
+            Map<String, Object> check = new HashMap<>();
+            check.put("name", "账号状态");
+            check.put("passed", false);
+            check.put("reason", "账号不存在或已注销");
+            checks.add(check);
+        } else {
+            Map<String, Object> accountCheck = new HashMap<>();
+            accountCheck.put("name", "账号状态");
+            accountCheck.put("passed", true);
+            checks.add(accountCheck);
+        }
+
+        result.put("eligible", eligible);
+        result.put("checks", checks);
+        return result;
     }
 }

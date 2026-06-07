@@ -16,6 +16,7 @@ import org.jeecg.modules.content.auth.vo.DeviceSessionVO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 内容社区认证控制器。
@@ -177,5 +178,65 @@ public class ContentAuthController {
         req.setUserId(SecureUtil.currentUser().getId());
         contentAuthBizService.resetPassword(req);
         return Result.OK("密码重置成功");
+    }
+
+    @Operation(summary = "发送短信验证码", description = "发送手机验证码，支持图形验证码校验和60秒限频")
+    @PostMapping("/sms/send")
+    public Result<?> sendSmsCode(@RequestBody Map<String, String> params) {
+        String phone = params.get("phone");
+        String countryCode = params.getOrDefault("countryCode", "+86");
+        String captchaId = params.get("captchaId");
+        String captchaCode = params.get("captchaCode");
+        contentAuthBizService.sendSmsCode(phone, countryCode, captchaId, captchaCode);
+        return Result.OK("验证码已发送");
+    }
+
+    @Operation(summary = "发送邮箱验证码", description = "发送邮箱验证码，支持图形验证码校验和60秒限频")
+    @PostMapping("/email/send")
+    public Result<?> sendEmailCode(@RequestBody Map<String, String> params) {
+        String email = params.get("email");
+        String captchaId = params.get("captchaId");
+        String captchaCode = params.get("captchaCode");
+        contentAuthBizService.sendEmailCode(email, captchaId, captchaCode);
+        return Result.OK("验证码已发送");
+    }
+
+    @Operation(summary = "刷新Token", description = "使用refreshToken获取新的accessToken")
+    @PostMapping("/token/refresh")
+    public Result<?> refreshToken(@RequestBody Map<String, String> params) {
+        String refreshToken = params.get("refreshToken");
+        AuthLoginResult result = contentAuthBizService.refreshToken(refreshToken);
+        return Result.OK(result);
+    }
+
+    @Operation(summary = "登出", description = "清除当前用户的会话和token")
+    @PostMapping("/logout")
+    public Result<?> logout() {
+        String userId = SecureUtil.currentUser().getId();
+        contentAuthBizService.logout(userId);
+        return Result.OK("已登出");
+    }
+
+    @Operation(summary = "获取验证码图片", description = "获取图形验证码图片的base64编码")
+    @PostMapping("/captcha/image")
+    public Result<?> getCaptchaImage() {
+        Map<String, String> captcha = contentAuthBizService.getCaptchaImage();
+        return Result.OK(captcha);
+    }
+
+    @Operation(summary = "校验验证码", description = "校验用户输入的图形验证码")
+    @PostMapping("/captcha/verify")
+    public Result<?> verifyCaptcha(@RequestBody Map<String, String> params) {
+        String captchaId = params.get("captchaId");
+        String captchaCode = params.get("captchaCode");
+        boolean passed = contentAuthBizService.verifyCaptcha(captchaId, captchaCode);
+        return passed ? Result.OK("验证通过") : Result.error("验证码错误");
+    }
+
+    @Operation(summary = "查询锁定状态", description = "查询账号的登录失败次数和锁定状态")
+    @GetMapping("/captcha/lock-status")
+    public Result<?> getLockStatus(@RequestParam String account) {
+        Map<String, Object> status = contentAuthBizService.getLockStatus(account);
+        return Result.OK(status);
     }
 }

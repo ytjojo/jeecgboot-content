@@ -4,6 +4,8 @@ import org.jeecg.modules.content.auth.dto.AuthLoginResult;
 import org.jeecg.modules.content.auth.dto.ThirdPartyAuthResult;
 import org.jeecg.modules.content.auth.req.*;
 
+import java.util.Map;
+
 /**
  * 认证业务编排服务接口。
  */
@@ -139,4 +141,62 @@ public interface ContentAuthBizService {
      * @param req 重置请求
      */
     void resetPassword(ContentAuthPasswordResetReq req);
+
+    /**
+     * 发送手机验证码。
+     *
+     * @param phone       手机号
+     * @param countryCode 国际区号
+     * @param captchaId   图形验证码ID(可选)
+     * @param captchaCode 图形验证码(可选)
+     */
+    void sendSmsCode(String phone, String countryCode, String captchaId, String captchaCode);
+
+    /**
+     * 发送邮箱验证码。
+     *
+     * @param email       邮箱
+     * @param captchaId   图形验证码ID(可选)
+     * @param captchaCode 图形验证码(可选)
+     */
+    void sendEmailCode(String email, String captchaId, String captchaCode);
+
+    /**
+     * 刷新 token。
+     *
+     * @param refreshToken 刷新令牌
+     * @return 新的登录结果
+     */
+    AuthLoginResult refreshToken(String refreshToken);
+
+    /**
+     * 登出，清除会话。
+     *
+     * @param userId 用户ID
+     */
+    void logout(String userId);
+
+    /**
+     * 获取验证码图片。
+     *
+     * @return captchaId 和 imageBase64
+     */
+    Map<String, String> getCaptchaImage();
+
+    /**
+     * 校验验证码。
+     *
+     * @param captchaId   验证码ID
+     * @param captchaCode 用户输入的验证码
+     * @return 是否通过
+     */
+    boolean verifyCaptcha(String captchaId, String captchaCode);
+
+    /**
+     * 查询锁定状态。
+     *
+     * @param account 账号（手机号或邮箱）
+     * @return 锁定状态信息
+     */
+    Map<String, Object> getLockStatus(String account);
 }

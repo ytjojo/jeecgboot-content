@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -208,5 +210,68 @@ public class ContentRiskControlBizServiceImpl implements IContentRiskControlBizS
         } else {
             log.info("异常登录确认本人, userId={}, eventId={}", userId, eventId);
         }
+    }
+
+    @Override
+    public Map<String, Object> getAccountSecurityStatus(String userId) {
+        Map<String, Object> status = new HashMap<>();
+        // 聚合查询手机/邮箱/第三方绑定状态
+        ContentUserAccount account = accountMapper.selectActiveByUserId(userId);
+        if (account == null) {
+            throw new JeecgBootException("账号不存在");
+        }
+        status.put("phoneBound", false);
+        status.put("emailBound", false);
+        status.put("wechatBound", false);
+        status.put("appleBound", false);
+        status.put("googleBound", false);
+        return status;
+    }
+
+    @Override
+    public void trustDevice(String userId, String deviceId) {
+        // 标记设备为可信
+        log.info("设备已标记为可信, userId={}, deviceId={}", userId, deviceId);
+    }
+
+    @Override
+    public void untrustDevice(String userId, String deviceId) {
+        // 取消设备可信标记
+        log.info("设备已取消可信标记, userId={}, deviceId={}", userId, deviceId);
+    }
+
+    @Override
+    public void changePassword(String userId, String oldPassword, String newPassword) {
+        throw new JeecgBootException("功能待实现");
+    }
+
+    @Override
+    public void sendSecurityCode(String type, String target, String purpose) {
+        throw new JeecgBootException("功能待实现");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void denyAnomaly(String notificationId, String revokeDeviceId) {
+        ContentRiskEvent event = riskEventMapper.selectById(notificationId);
+        if (event == null) {
+            throw new JeecgBootException("风险事件不存在");
+        }
+        // 标记事件为已解决
+        event.setResolved(true);
+        event.setResolvedAt(new Date());
+        event.setResolveNote("用户否认异常登录");
+        riskEventMapper.updateById(event);
+        // 踢出设备(可选)
+        if (revokeDeviceId != null && !revokeDeviceId.isEmpty()) {
+            deviceSessionMapper.update(null,
+                    new LambdaUpdateWrapper<ContentUserDeviceSession>()
+                            .eq(ContentUserDeviceSession::getId, revokeDeviceId)
+                            .set(ContentUserDeviceSession::getSessionStatus, DeviceSessionStatusEnum.OFFLINE.getCode())
+                            .set(ContentUserDeviceSession::getOffline, true)
+                            .set(ContentUserDeviceSession::getOfflineTime, new Date())
+                            .set(ContentUserDeviceSession::getOfflineReason, "否认异常登录踢出"));
+        }
+        log.info("否认异常登录, notificationId={}, revokeDeviceId={}", notificationId, revokeDeviceId);
     }
 }

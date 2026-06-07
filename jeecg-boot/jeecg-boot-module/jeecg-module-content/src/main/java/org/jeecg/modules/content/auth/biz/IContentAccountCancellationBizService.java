@@ -2,6 +2,8 @@ package org.jeecg.modules.content.auth.biz;
 
 import org.jeecg.modules.content.auth.req.ContentCancelApplyReq;
 
+import java.util.Map;
+
 /**
  * 账号注销业务编排服务接口。
  */
@@ -42,4 +44,12 @@ public interface IContentAccountCancellationBizService {
      * @param days 冷静期天数
      */
     void validateCooldownDays(Integer days);
+
+    /**
+     * 检查注销资格。
+     *
+     * @param userId 用户ID
+     * @return 资格检查结果
+     */
+    Map<String, Object> checkEligibility(String userId);
 }
