@@ -18,19 +18,10 @@
 <script setup lang="ts">
   import { ref } from 'vue';
   import { Drawer, Descriptions, Tag } from 'ant-design-vue';
+  import { getActionColor, getActionText } from './constants';
 
   const visible = ref(false);
   const record = ref<any>(null);
-
-  function getActionColor(action: string) {
-    const map: Record<string, string> = { REMOVE: 'red', MUTE: 'orange', UNMUTE: 'green', BLACKLIST_ADD: 'default', BLACKLIST_REMOVE: 'blue' };
-    return map[action] || 'default';
-  }
-
-  function getActionText(action: string) {
-    const map: Record<string, string> = { REMOVE: '移除', MUTE: '禁言', UNMUTE: '解除禁言', BLACKLIST_ADD: '加入黑名单', BLACKLIST_REMOVE: '移出黑名单' };
-    return map[action] || action;
-  }
 
   function open(data: any) {
     record.value = data;

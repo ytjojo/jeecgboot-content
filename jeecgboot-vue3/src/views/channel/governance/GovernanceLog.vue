@@ -85,6 +85,7 @@
   import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
   import { sizeEnum } from '/@/enums/breakpointEnum';
   import { getGovernanceLog } from '/@/api/content/channelGovernance';
+  import { getActionColor, getActionText } from './constants';
 
   const { screenRef } = useBreakpoint();
   const isMobile = computed(() => {
@@ -112,16 +113,6 @@
     { title: '原因', dataIndex: 'reason', key: 'reason', ellipsis: true },
     { title: '详情', dataIndex: 'detail', key: 'detail', width: 80 },
   ];
-
-  function getActionColor(action: string) {
-    const map: Record<string, string> = { REMOVE: 'red', MUTE: 'orange', UNMUTE: 'green', BLACKLIST_ADD: 'default', BLACKLIST_REMOVE: 'blue' };
-    return map[action] || 'default';
-  }
-
-  function getActionText(action: string) {
-    const map: Record<string, string> = { REMOVE: '移除', MUTE: '禁言', UNMUTE: '解除禁言', BLACKLIST_ADD: '加入黑名单', BLACKLIST_REMOVE: '移出黑名单' };
-    return map[action] || action;
-  }
 
   async function loadData() {
     loading.value = true;
