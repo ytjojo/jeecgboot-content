@@ -5,15 +5,19 @@
 
 #### Scenario: 查看待处理申请
 - **WHEN** 管理员进入加入申请审核页
-- **THEN** 默认展示"待处理"标签页，按申请时间排序
+- **THEN** 调用 `GET /circle-join-review/list?circleId={circleId}&status=PENDING` 接口，默认展示"待处理"标签页，按申请时间排序
 
 #### Scenario: 筛选已处理申请
 - **WHEN** 管理员点击"已处理"标签
-- **THEN** 展示已批准和已拒绝的申请记录
+- **THEN** 调用 `GET /circle-join-review/list?circleId={circleId}&status=APPROVED,REJECTED` 接口，展示已批准和已拒绝的申请记录
 
 #### Scenario: 空状态
 - **WHEN** 无待处理申请
 - **THEN** 展示空状态"暂无待处理申请"
+
+#### Scenario: 列表加载失败
+- **WHEN** 申请列表接口请求失败
+- **THEN** 展示"加载失败"和"重试"按钮
 
 ### Requirement: 批准加入申请
 圈子管理员 SHALL 能够批准用户的加入申请。
@@ -25,6 +29,10 @@
 #### Scenario: 批量批准
 - **WHEN** 管理员勾选多条申请后点击"批量批准"
 - **THEN** 逐条调用批准 API，成功后所有已批准卡片从列表移除
+
+#### Scenario: 批量批准部分失败
+- **WHEN** 批量批准中部分申请处理失败
+- **THEN** 已成功的卡片从列表移除，失败的卡片保留并 Toast 提示"部分操作失败，请重试"
 
 ### Requirement: 拒绝加入申请
 圈子管理员 SHALL 能够拒绝用户的加入申请，拒绝原因为必填。
@@ -46,7 +54,7 @@
 
 #### Scenario: 管理入口角标
 - **WHEN** 有待处理的加入申请
-- **THEN** 圈子管理入口展示红点/角标，数字来源于 `pendingJoinRequestCount`。> **后端遗留**: 此查询接口后端尚未实现
+- **THEN** 调用 `GET /circle-join-review/pending/{circleId}` 获取待审核列表，角标数字取列表长度。后端无独立 count 接口，前端通过列表长度计算
 
 ### Requirement: 加入申请列表响应式设计
 加入申请列表 SHALL 在移动端展示为卡片列表。

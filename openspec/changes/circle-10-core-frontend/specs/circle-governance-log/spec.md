@@ -1,6 +1,8 @@
 ## ADDED Requirements
 
-### Requirement: 治理日志列表
+### Requirement: 治理日志列表 [MOCK]
+> **Mock 依赖**: `getGovernanceLogList`（governance-log）接口后端未实现，需使用 Mock 数据开发。
+
 系统 SHALL 提供治理日志页（`/circle/:id/governance-log`），以 Table 形式展示治理操作记录（时间、操作者、操作对象、操作类型、详情），按时间倒序排列，支持分页（每页 20 条）。
 
 #### Scenario: 查看治理日志

@@ -9,7 +9,7 @@
 - [ ] 2.1 实现 `CircleLevelBadge` 组件 — 圈子等级标识（L1-L5 图标 + 名称 + 颜色映射）
 - [ ] 2.2 实现 `CircleLevelProgress` 组件 — 等级进度条（当前等级 → 下一等级 + 百分比 + 分项指标展开）
 - [ ] 2.3 在圈子详情页嵌入等级与成长区块（等级标识 + 进度条 + 已解锁权益）
-- [ ] 2.4 对接 GET `/content/circle/{circleId}/level` 接口，处理加载态、成功态、失败态
+- [ ] 2.4 对接 GET `/content/user/growth/level/info?circleId={circleId}` 接口，处理加载态、成功态、失败态
 
 ## 3. 成员个人成长信息页
 
@@ -17,7 +17,7 @@
 - [ ] 3.2 实现 `ParticipationStreak` 组件 — 连续参与进度（7 天时间轴，实心圆/空心圆/横线三种状态）
 - [ ] 3.3 实现 `DailyExpBar` 组件 — 今日经验进度条（当前/100 上限，满格状态）
 - [ ] 3.4 创建个人成长信息页 `src/views/circle/growth/index.vue`，组合上述组件 + 徽章摘要区域
-- [ ] 3.5 对接 GET `/content/circle/{circleId}/growth/me` 接口，使用 `Promise.all` 并行请求等级和成长信息
+- [ ] 3.5 对接 GET `/content/user/growth/info?circleId={circleId}&userId={userId}` 接口，使用 `Promise.all` 并行请求等级和成长信息
 - [ ] 3.6 配置路由 `/circle/:id/growth` 挂载到圈子详情页子路由
 
 ## 4. 徽章系统
@@ -26,7 +26,7 @@
 - [ ] 4.2 实现 `BadgeWall` 组件 — 徽章墙（分组展示已获得/未获得徽章）
 - [ ] 4.3 实现 `BadgeDetailModal` 组件 — 徽章详情弹窗（Modal + 条件说明 + 进度 + 获得时间）
 - [ ] 4.4 创建徽章墙页 `src/views/circle/badges/index.vue`
-- [ ] 4.5 对接 GET `/content/circle/{circleId}/badges` 接口
+- [ ] 4.5 对接 GET `/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` 接口
 - [ ] 4.6 配置路由 `/circle/:id/badges` 挂载到圈子详情页子路由
 
 ## 5. 排行榜
@@ -34,7 +34,7 @@
 - [ ] 5.1 实现 `LeaderboardTabs` 组件 — 维度切换（经验值/贡献值/发帖数 Tab）+ 周期切换（本周/本月/累计 Segmented）
 - [ ] 5.2 实现 `LeaderboardList` 组件 — 排行榜列表（Top 50 列表 + 前三名金银铜色 + 当前用户高亮 + 底部我的排名）
 - [ ] 5.3 创建排行榜页 `src/views/circle/leaderboard/index.vue`
-- [ ] 5.4 对接 GET `/content/circle/{circleId}/leaderboard` 接口，支持 dimension 和 period 参数切换
+- [ ] 5.4 对接 GET `/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` 接口，支持 dimension 和 period 参数切换
 - [ ] 5.5 配置路由 `/circle/:id/leaderboard` 挂载到圈子详情页子路由
 
 ## 6. 通知与实时刷新

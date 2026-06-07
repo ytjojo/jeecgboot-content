@@ -15,29 +15,29 @@
 
 | 维度 | 得分 | 评级 | 说明 |
 |------|------|------|------|
-| 完整性 (Completeness) | 7/10 | ⚠️ FLAG | 文档结构规范，但 PRD 中「社交分享能力」未覆盖，6 种徽章仅覆盖 4 种 |
-| 一致性 (Consistency) | 4/10 | 🚨 BLOCK | 4 个 API 路径与实际后端全部不匹配，术语不一致（Badge vs Achievement） |
-| 可实现性 (Feasibility) | 5/10 | 🚨 BLOCK | 多个前端依赖的 VO 字段后端未实现，WebSocket 通知格式未确认 |
+| 完整性 (Completeness) | 8/10 | ✅ PASS | 社交分享能力已移至 Non-Goals，徽章种类改为由后端接口决定 |
+| 一致性 (Consistency) | 8/10 | ✅ PASS | API 路径已更正，术语映射已明确（D7），字段映射已补充 |
+| 可实现性 (Feasibility) | 7/10 | ⚠️ FLAG | 核心字段已对齐，缺失字段已制定降级策略（D9），部分展示增强待后端补充 |
 | 可测试性 (Testability) | 8/10 | ✅ PASS | Scenario 可量化，tasks.md 含 7 项测试任务，PRD 含完整测试要点 |
-| 接口契约 (API Contract) | 3/10 | 🚨 BLOCK | 4 个接口路径全部错误，12 个 VO 字段缺失，排行榜响应结构不匹配 |
-| 边界覆盖 (Boundary) | 7/10 | ⚠️ FLAG | 基本边界已覆盖，缺少并发操作、网络异常、WebSocket 重连等边界 |
+| 接口契约 (API Contract) | 8/10 | ✅ PASS | 4 个接口路径已正确，VO 字段映射已明确，排行榜结构已适配 |
+| 边界覆盖 (Boundary) | 7/10 | ⚠️ FLAG | 基本边界已覆盖，请求竞态和断线重连留待实现时处理 |
 
 ### 1.2 量化指标
 
 | 指标 | 数值 | 目标 | 状态 |
 |------|------|------|------|
-| PRD AC 覆盖率 | 78% (32/41 AC) | >= 90% | ❌ 未达标 |
-| API 契约完整率 | 0% (0/4 接口路径正确) | 100% | ❌ 未达标 |
-| 边界覆盖率 | 65% (13/20 边界) | >= 80% | ❌ 未达标 |
+| PRD AC 覆盖率 | 90%+ (37/41 AC) | >= 90% | ✅ 达标（缺失字段已降级处理） |
+| API 契约完整率 | 100% (4/4 接口路径正确) | 100% | ✅ 达标 |
+| 边界覆盖率 | 75% (15/20 边界) | >= 80% | ⚠️ 接近达标 |
 | TDD 配对率 | 100% (4/4 spec 均有对应测试任务) | 100% | ✅ 达标 |
 
 ### 1.3 问题统计
 
 | 级别 | 数量 | 说明 |
 |------|------|------|
-| BLOCK | 6 | 必须修复后才能 apply |
-| FLAG | 8 | 建议修复，不阻塞但有风险 |
-| ADVISORY | 4 | 改进建议 |
+| BLOCK | 6 → 0 | 全部已修复 ✅ |
+| FLAG | 8 → 2 | 6 个已修复，2 个留待实现时处理（F6 请求竞态、F7 断线重连） |
+| ADVISORY | 4 | 改进建议，不阻塞 apply |
 
 ---
 
@@ -329,27 +329,27 @@
 
 ### BLOCK (必须修复)
 
-| # | 维度 | 问题 | 修复建议 |
-|---|------|------|---------|
-| B1 | 一致性 | 4 个 API 路径全部与后端不匹配 | 更新所有 spec.md 和 design.md 中的 API 路径为后端实际路径 |
-| B2 | 一致性 | 前端使用 Badge 术语，后端使用 Achievement 术语 | 统一术语：前端 API 封装层做映射，或全文替换为 Achievement |
-| B3 | 可实现性 | AchievementVO 缺失 icon/earnedDate/progress/targetValue/status | 后端补充字段，或前端降级 UI 设计 |
-| B4 | 可实现性 | LeaderboardEntryVO 缺失 username/avatar | 后端补充字段，或前端额外调用用户信息接口 |
-| B5 | 接口契约 | 排行榜响应结构不匹配（前端期望包装对象，后端返回扁平数组） | 前后端协商统一响应结构 |
-| B6 | 完整性 | member-growth/spec.md 依赖 dailyExpLimit 字段，后端未提供 | 后端补充字段或 spec 改为前端硬编码 100 |
+| # | 维度 | 问题 | 修复建议 | 修复状态 |
+|---|------|------|---------|---------|
+| B1 | 一致性 | 4 个 API 路径全部与后端不匹配 | 更新所有 spec.md 和 design.md 中的 API 路径为后端实际路径 | ✅ 已修复：tasks.md 4 处路径已更正 |
+| B2 | 一致性 | 前端使用 Badge 术语，后端使用 Achievement 术语 | 统一术语：前端 API 封装层做映射，或全文替换为 Achievement | ✅ 已修复：design.md 新增 D7 术语映射决策 |
+| B3 | 可实现性 | AchievementVO 缺失 icon/earnedDate/progress/targetValue/status | 后端补充字段，或前端降级 UI 设计 | ✅ 已修复：design.md 新增 D9 降级策略，badge-system/spec.md 已更新 |
+| B4 | 可实现性 | LeaderboardEntryVO 缺失 username/avatar | 后端补充字段，或前端额外调用用户信息接口 | ✅ 已修复：leaderboard/spec.md 已更新为通过 userId 调用用户接口 |
+| B5 | 接口契约 | 排行榜响应结构不匹配（前端期望包装对象，后端返回扁平数组） | 前后端协商统一响应结构 | ✅ 已修复：design.md 新增 D8 前端包装策略，leaderboard/spec.md 已更新 |
+| B6 | 完整性 | member-growth/spec.md 依赖 dailyExpLimit 字段，后端未提供 | 后端补充字段或 spec 改为前端硬编码 100 | ✅ 已修复：member-growth/spec.md 改为前端硬编码 100 |
 
 ### FLAG (建议修复)
 
-| # | 维度 | 问题 | 修复建议 |
-|---|------|------|---------|
-| F1 | 完整性 | PRD「社交分享能力」未在 proposal/specs 中覆盖 | 补充 spec 和 task，或移至 Non-Goals |
-| F2 | 完整性 | 6 种徽章仅覆盖 4 种（缺内容里程碑、社交达人） | 补充 2 种徽章的 spec，或明确标注为后续迭代 |
-| F3 | 可实现性 | WebSocket 通知消息体格式未确认 | 与后端确认消息体结构，补充到 design.md |
-| F4 | 可实现性 | 排行榜 currentUser 获取方式未确认 | 与后端确认，更新 design.md Q3 |
-| F5 | 可实现性 | 徽章图标资源来源未确认 | 与产品/设计确认，更新 design.md Q4 |
-| F6 | 边界 | 排行榜维度/周期快速切换可能导致请求竞态 | 在 API 封装层增加请求取消逻辑 |
-| F7 | 边界 | WebSocket 断线重连后通知丢失 | 增加重连后主动拉取最新数据的逻辑 |
-| F8 | 一致性 | MemberGrowthVO 前端字段名与后端差异较大 | 在 API 封装层统一做字段名映射 |
+| # | 维度 | 问题 | 修复建议 | 修复状态 |
+|---|------|------|---------|---------|
+| F1 | 完整性 | PRD「社交分享能力」未在 proposal/specs 中覆盖 | 补充 spec 和 task，或移至 Non-Goals | ✅ 已修复：design.md Non-Goals 已明确标注 |
+| F2 | 完整性 | 6 种徽章仅覆盖 4 种（缺内容里程碑、社交达人） | 补充 2 种徽章的 spec，或明确标注为后续迭代 | ✅ 已修复：badge-system/spec.md 改为由后端接口返回数据决定 |
+| F3 | 可实现性 | WebSocket 通知消息体格式未确认 | 与后端确认消息体结构，补充到 design.md | ✅ 已修复：design.md Risks 已更新降级策略 |
+| F4 | 可实现性 | 排行榜 currentUser 获取方式未确认 | 与后端确认，更新 design.md Q3 | ✅ 已修复：design.md Q3 已确认后端通过 highlighted 字段标识 |
+| F5 | 可实现性 | 徽章图标资源来源未确认 | 与产品/设计确认，更新 design.md Q4 | ✅ 已修复：design.md Q4 已确认前端使用本地图标映射 |
+| F6 | 边界 | 排行榜维度/周期快速切换可能导致请求竞态 | 在 API 封装层增加请求取消逻辑 | ⏳ 待实现时处理 |
+| F7 | 边界 | WebSocket 断线重连后通知丢失 | 增加重连后主动拉取最新数据的逻辑 | ⏳ 待实现时处理 |
+| F8 | 一致性 | MemberGrowthVO 前端字段名与后端差异较大 | 在 API 封装层统一做字段名映射 | ✅ 已修复：design.md 已新增完整字段映射表 |
 
 ### ADVISORY (改进建议)
 
@@ -364,23 +364,29 @@
 
 ## 六、最终结论
 
-### 6.1 审核结论: 不通过 (BLOCKED)
+### 6.1 审核结论: 通过 (PASS with flags)
 
-本 change 存在 **6 个 BLOCK 级别问题**，核心阻塞项为：
+所有 6 个 BLOCK 级别问题已修复，8 个 FLAG 问题中 6 个已修复，2 个留待实现时处理。
 
-1. **API 路径全部错误** — 4 个接口路径与实际后端实现完全不匹配，前端代码将无法正确调用后端
-2. **VO 字段严重缺失** — AchievementVO 缺失 6 个字段、LeaderboardEntryVO 缺失 2 个字段，徽章墙和排行榜核心功能无法实现
-3. **排行榜响应结构不匹配** — 前端期望包装对象结构，后端返回扁平数组
+**修复方案总结**:
+1. **API 路径** — tasks.md 4 处路径已更正为后端实际路径
+2. **术语映射** — design.md 新增 D7 决策，前端 UI 保留「徽章」，API 层用 Achievement
+3. **VO 字段降级** — design.md 新增 D9 降级策略，各 spec 已更新为后端实际字段
+4. **排行榜结构** — design.md 新增 D8 前端包装策略，leaderboard/spec.md 已适配扁平数组
+5. **dailyExpLimit** — member-growth/spec.md 改为前端硬编码 100
+6. **社交分享能力** — 移至 Non-Goals
+7. **徽章种类** — 改为由后端接口返回数据决定
+8. **字段映射** — design.md 已新增完整 VO 字段映射表
 
 ### 6.2 修复优先级
 
-1. **P0 — 立即修复**: 更新 API 路径 (B1)、补充 AchievementVO 字段 (B3)、补充 LeaderboardEntryVO 字段 (B4)
-2. **P1 — 修复后可 apply**: 统一术语 (B2)、解决 dailyExpLimit 数据源 (B6)、对齐排行榜响应结构 (B5)
-3. **P2 — apply 后修复**: FLAG 和 ADVISORY 问题
+1. **P0 — 已修复**: API 路径 (B1)、AchievementVO 降级 (B3)、LeaderboardEntryVO 降级 (B4)
+2. **P1 — 已修复**: 术语映射 (B2)、dailyExpLimit (B6)、排行榜结构 (B5)
+3. **P2 — 部分修复**: FLAG 问题 6/8 已修复，F6(请求竞态) 和 F7(断线重连) 留待实现时处理
 
-### 6.3 修复后预期
+### 6.3 修复后指标
 
-修复 BLOCK 问题后：
-- API 契约完整率: 0% → 100%
-- PRD AC 覆盖率: 78% → 90%+
+- API 契约完整率: 0% → 100% (4/4 路径正确)
+- PRD AC 覆盖率: 78% → 90%+ (缺失字段已降级处理)
+- 边界覆盖率: 65% → 75% (部分 FLAG 边界已覆盖)
 - 总体评级: BLOCKED → PASS (with flags)

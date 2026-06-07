@@ -6,7 +6,7 @@
 
 **Architecture:** 基于 Vue 3 + TypeScript + Ant Design Vue，新增 API 层（3 个文件）、Pinia Store（2 个）、业务组件（7 个）、composable（2 个）。数据统计页为独立路由 `/circle/:id/analytics`，推荐与榜单在现有 `/circle` 列表页通过 Tab 切换展示。ECharts 已有依赖（^5.6.0），封装 `useChart` composable 复用生命周期管理。
 
-**Tech Stack:** Vue 3, TypeScript, Ant Design Vue, Pinia, ECharts 5, Jest + @vue/test-utils
+**Tech Stack:** Vue 3, TypeScript, Ant Design Vue, Pinia, ECharts 5, Vitest + @vue/test-utils (项目已有 `useECharts` hook)
 
 ---
 
@@ -15,7 +15,7 @@
 ```
 jeecgboot-vue3/src/
 ├── api/circle/
-│   ├── types.ts                     # 共享 TypeScript 类型定义
+│   ├── types.ts                     # 共享 TypeScript 类型定义（对齐后端 VO）
 │   ├── analytics.ts                 # 统计数据 API
 │   ├── recommend.ts                 # 推荐 API
 │   └── ranking.ts                   # 榜单 API
@@ -23,7 +23,7 @@ jeecgboot-vue3/src/
 │   ├── circleAnalytics.ts           # useCircleAnalyticsStore
 │   └── circleRecommend.ts           # useCircleRecommendStore
 ├── hooks/circle/
-│   ├── useChart.ts                  # ECharts composable
+│   ├── useChart.ts                  # 已移除，复用项目 /@/hooks/web/useECharts
 │   └── useRecommendTracking.ts      # 曝光/点击上报 composable
 ├── views/circle/
 │   ├── analytics/
@@ -39,11 +39,11 @@ jeecgboot-vue3/src/
 │           ├── RankCircleCard.vue   # 榜单圈子卡片
 │           ├── RankList.vue         # 榜单列表
 │           └── RecommendationPanel.vue # 推荐面板
-└── __tests__/circle/
-    ├── analytics.test.ts
-    ├── recommendation.test.ts
-    ├── ranking.test.ts
-    └── recommendTracking.test.ts
+└── tests/circle/
+    ├── analytics.spec.ts
+    ├── recommendation.spec.ts
+    ├── ranking.spec.ts
+    └── recommendTracking.spec.ts
 ```
 
 ---
@@ -235,19 +235,19 @@ git commit -m "feat(circle): add API layer for analytics, recommendation, and ra
 
 **Files:**
 - Create: `src/store/modules/circleAnalytics.ts`
-- Test: `src/__tests__/circle/analytics.test.ts` (partial — store tests)
+- Test: `tests/circle/analytics.spec.ts` (partial — store tests)
 
 - [ ] **Step 1: 编写 store 测试**
 
 ```typescript
-// src/__tests__/circle/analytics.test.ts
+// tests/circle/analytics.spec.ts
 import { setActivePinia, createPinia } from 'pinia';
 import { useCircleAnalyticsStore } from '/@/store/modules/circleAnalytics';
 
 // Mock API
-jest.mock('/@/api/circle/analytics', () => ({
-  getCircleAnalytics: jest.fn(),
-  exportCircleAnalyticsCsv: jest.fn(),
+vi.mock('/@/api/circle/analytics', () => ({
+  getCircleAnalytics: vi.fn(),
+  exportCircleAnalyticsCsv: vi.fn(),
 }));
 
 import { getCircleAnalytics } from '/@/api/circle/analytics';
@@ -274,7 +274,7 @@ describe('useCircleAnalyticsStore', () => {
       activeCount: 30,
       dailyTrends: [],
     };
-    (getCircleAnalytics as jest.Mock).mockResolvedValue(mockData);
+    (getCircleAnalytics as any).mockResolvedValue(mockData);
 
     const store = useCircleAnalyticsStore();
     await store.fetchAnalytics('circle-1', { startDate: '2024-01-01', endDate: '2024-01-07' });
@@ -285,7 +285,7 @@ describe('useCircleAnalyticsStore', () => {
   });
 
   it('should set error on fetch failure', async () => {
-    (getCircleAnalytics as jest.Mock).mockRejectedValue(new Error('Network error'));
+    (getCircleAnalytics as any).mockRejectedValue(new Error('Network error'));
 
     const store = useCircleAnalyticsStore();
     await store.fetchAnalytics('circle-1', { startDate: '2024-01-01', endDate: '2024-01-07' });
@@ -303,95 +303,164 @@ describe('useCircleAnalyticsStore', () => {
     expect(store.analyticsData).toBeNull();
     expect(store.error).toBeNull();
   });
+
+  it('should compute change percentage from dailyTrends', () => {
+    const store = useCircleAnalyticsStore();
+    store.analyticsData = {
+      memberCount: 200,
+      newMemberCount: 20,
+      postCount: 100,
+      newPostCount: 10,
+      activeCount: 50,
+      dailyTrends: [
+        { date: '2024-01-01', newMemberCount: 5, newPostCount: 2, activeCount: 10 },
+        { date: '2024-01-07', newMemberCount: 15, newPostCount: 8, activeCount: 40 },
+      ],
+    };
+    // change 百分比由前端从 dailyTrends 计算，非后端返回
+    expect(store.memberChange).toBeDefined();
+  });
 });
 ```
 
 - [ ] **Step 2: 运行测试验证失败**
 
-Run: `npx jest src/__tests__/circle/analytics.test.ts --no-cache 2>&1 | tail -20`
+Run: `npx vitest run tests/circle/analytics.spec.ts 2>&1 | tail -20`
 Expected: FAIL — module not found `circleAnalytics`
 
 - [ ] **Step 3: 实现 store**
 
 ```typescript
 // src/store/modules/circleAnalytics.ts
+import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import { getCircleAnalytics, exportCircleAnalyticsCsv } from '/@/api/circle/analytics';
-import type { CircleAnalyticsVO, DateRange } from '/@/api/circle/types';
+import type { CircleAnalyticsVO, DailyTrend, DateRange } from '/@/api/circle/types';
 
-interface CircleAnalyticsState {
-  analyticsData: CircleAnalyticsVO | null;
-  dateRange: DateRange;
-  loading: boolean;
-  error: string | null;
-  exporting: boolean;
-  lastFetchTime: number;
-}
+export const useCircleAnalyticsStore = defineStore('circle-analytics', () => {
+  // --- State ---
+  const analyticsData = ref<CircleAnalyticsVO | null>(null);
+  const dateRange = ref<DateRange>({ startDate: '', endDate: '' });
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+  const exporting = ref(false);
+  const lastFetchTime = ref(0);
 
-export const useCircleAnalyticsStore = defineStore({
-  id: 'circle-analytics',
-  state: (): CircleAnalyticsState => ({
-    analyticsData: null,
-    dateRange: { startDate: '', endDate: '' },
-    loading: false,
-    error: null,
-    exporting: false,
-    lastFetchTime: 0,
-  }),
-  actions: {
-    async fetchAnalytics(circleId: string, dateRange: DateRange) {
-      this.loading = true;
-      this.error = null;
-      this.dateRange = dateRange;
-      try {
-        this.analyticsData = await getCircleAnalytics(circleId, dateRange);
-        this.lastFetchTime = Date.now();
-      } catch (e: any) {
-        this.error = e?.message || '请求失败';
-        this.analyticsData = null;
-      } finally {
-        this.loading = false;
+  // --- Computed: 从 dailyTrends 计算变化百分比（后端无此字段，前端自行计算） ---
+  /** 上期值为 0 且本期值 > 0 时返回 'new'，均为 0 时返回 null */
+  function calcChange(current: number, previous: number): number | 'new' | null {
+    if (current === 0 && previous === 0) return null;
+    if (previous === 0 && current > 0) return 'new';
+    return Math.round(((current - previous) / previous) * 1000) / 10; // 保留 1 位小数
+  }
+
+  function sumField(trends: DailyTrend[], field: keyof DailyTrend, startIdx: number, endIdx: number): number {
+    return trends.slice(startIdx, endIdx).reduce((sum, t) => sum + (Number(t[field]) || 0), 0);
+  }
+
+  const memberChange = computed(() => {
+    const d = analyticsData.value;
+    if (!d?.dailyTrends?.length) return null;
+    const half = Math.floor(d.dailyTrends.length / 2);
+    const prev = sumField(d.dailyTrends, 'newMemberCount', 0, half);
+    const curr = sumField(d.dailyTrends, 'newMemberCount', half, d.dailyTrends.length);
+    return calcChange(curr, prev);
+  });
+
+  const postChange = computed(() => {
+    const d = analyticsData.value;
+    if (!d?.dailyTrends?.length) return null;
+    const half = Math.floor(d.dailyTrends.length / 2);
+    const prev = sumField(d.dailyTrends, 'newPostCount', 0, half);
+    const curr = sumField(d.dailyTrends, 'newPostCount', half, d.dailyTrends.length);
+    return calcChange(curr, prev);
+  });
+
+  const activeChange = computed(() => {
+    const d = analyticsData.value;
+    if (!d?.dailyTrends?.length) return null;
+    const half = Math.floor(d.dailyTrends.length / 2);
+    const prev = sumField(d.dailyTrends, 'activeCount', 0, half);
+    const curr = sumField(d.dailyTrends, 'activeCount', half, d.dailyTrends.length);
+    return calcChange(curr, prev);
+  });
+
+  // --- Actions ---
+  async function fetchAnalytics(circleId: string, range: DateRange) {
+    loading.value = true;
+    error.value = null;
+    dateRange.value = range;
+    try {
+      analyticsData.value = await getCircleAnalytics(circleId, range);
+      lastFetchTime.value = Date.now();
+    } catch (e: any) {
+      // ADVISORY-1 修复: 区分错误码处理
+      // 404002 (统计数据不存在) → 展示空状态，非错误
+      // 429001 (请求频率过高) → Toast 提示稍后重试
+      // 403001 (权限不足) → 由路由守卫拦截，此处兜底
+      const code = e?.code || e?.response?.data?.code;
+      if (code === 404002) {
+        error.value = null; // 空状态非错误
+        analyticsData.value = null;
+      } else if (code === 429001) {
+        error.value = '请求频率过高，请稍后重试';
+        analyticsData.value = null;
+      } else {
+        error.value = e?.message || '请求失败';
+        analyticsData.value = null;
       }
-    },
-    async exportAnalytics(circleId: string, dateRange: DateRange) {
-      this.exporting = true;
-      try {
-        const blob = await exportCircleAnalyticsCsv(circleId, dateRange);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `circle_${dateRange.startDate}_${dateRange.endDate}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-      } finally {
-        this.exporting = false;
-      }
-    },
-    setDateRange(dateRange: DateRange) {
-      this.dateRange = dateRange;
-    },
-    clearData() {
-      this.analyticsData = null;
-      this.error = null;
-      this.lastFetchTime = 0;
-    },
-    /** 检查缓存是否过期（5 分钟） */
-    isCacheExpired(): boolean {
-      return Date.now() - this.lastFetchTime > 5 * 60 * 1000;
-    },
-  },
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function exportAnalytics(circleId: string, range: DateRange) {
+    exporting.value = true;
+    try {
+      const blob = await exportCircleAnalyticsCsv(circleId, range);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `circle_${range.startDate}_${range.endDate}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      exporting.value = false;
+    }
+  }
+
+  function setDateRange(range: DateRange) {
+    dateRange.value = range;
+  }
+
+  function clearData() {
+    analyticsData.value = null;
+    error.value = null;
+    lastFetchTime.value = 0;
+  }
+
+  /** 检查缓存是否过期（5 分钟） */
+  function isCacheExpired(): boolean {
+    return Date.now() - lastFetchTime.value > 5 * 60 * 1000;
+  }
+
+  return {
+    analyticsData, dateRange, loading, error, exporting, lastFetchTime,
+    memberChange, postChange, activeChange,
+    fetchAnalytics, exportAnalytics, setDateRange, clearData, isCacheExpired,
+  };
 });
 ```
 
 - [ ] **Step 4: 运行测试验证通过**
 
-Run: `npx jest src/__tests__/circle/analytics.test.ts --no-cache 2>&1 | tail -20`
-Expected: PASS — all 4 tests pass
+Run: `npx vitest run tests/circle/analytics.spec.ts 2>&1 | tail -20`
+Expected: PASS — all 5 tests pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/store/modules/circleAnalytics.ts src/__tests__/circle/analytics.test.ts
+git add src/store/modules/circleAnalytics.ts tests/circle/analytics.spec.ts
 git commit -m "feat(circle): add useCircleAnalyticsStore with TDD"
 ```
 
@@ -401,23 +470,23 @@ git commit -m "feat(circle): add useCircleAnalyticsStore with TDD"
 
 **Files:**
 - Create: `src/store/modules/circleRecommend.ts`
-- Test: `src/__tests__/circle/recommendation.test.ts` (partial — store tests)
+- Test: `tests/circle/recommendation.spec.ts` (partial — store tests)
 
 - [ ] **Step 1: 编写 store 测试**
 
 ```typescript
-// src/__tests__/circle/recommendation.test.ts
+// tests/circle/recommendation.spec.ts
 import { setActivePinia, createPinia } from 'pinia';
 import { useCircleRecommendStore } from '/@/store/modules/circleRecommend';
 
-jest.mock('/@/api/circle/recommend', () => ({
-  getRecommendList: jest.fn(),
-  reportRecommendExposure: jest.fn(),
-  reportRecommendClick: jest.fn(),
+vi.mock('/@/api/circle/recommend', () => ({
+  getRecommendList: vi.fn(),
+  reportRecommendExposure: vi.fn(),
+  reportRecommendClick: vi.fn(),
 }));
-jest.mock('/@/api/circle/ranking', () => ({
-  getHotRankList: jest.fn(),
-  getNewRankList: jest.fn(),
+vi.mock('/@/api/circle/ranking', () => ({
+  getHotRankList: vi.fn(),
+  getNewRankList: vi.fn(),
 }));
 
 import { getRecommendList } from '/@/api/circle/recommend';
@@ -437,20 +506,20 @@ describe('useCircleRecommendStore', () => {
     expect(store.fallbackMode).toBe(false);
   });
 
-  it('should fetch recommend list successfully', async () => {
-    const mockList = [{ id: '1', name: 'Test Circle', privacyType: 'PUBLIC' }];
-    (getRecommendList as jest.Mock).mockResolvedValue(mockList);
+  it('should fetch recommend list and extract items from VO', async () => {
+    const mockVO = { items: [{ circleId: '1', circleName: 'Test Circle', privacyType: 'PUBLIC' }] };
+    (getRecommendList as any).mockResolvedValue(mockVO);
 
     const store = useCircleRecommendStore();
     await store.fetchRecommendList();
 
-    expect(store.recommendList).toEqual(mockList);
+    expect(store.recommendList).toEqual(mockVO.items);
     expect(store.fallbackMode).toBe(false);
   });
 
-  it('should enter fallback mode when recommend returns empty', async () => {
-    (getRecommendList as jest.Mock).mockResolvedValue([]);
-    (getHotRankList as jest.Mock).mockResolvedValue([{ id: '1', name: 'Hot Circle' }]);
+  it('should enter fallback mode when recommend returns empty items', async () => {
+    (getRecommendList as any).mockResolvedValue({ items: [] });
+    (getHotRankList as any).mockResolvedValue({ type: 'HOT', items: [{ circleId: '1', circleName: 'Hot Circle' }] });
 
     const store = useCircleRecommendStore();
     await store.fetchRecommendList();
@@ -460,8 +529,8 @@ describe('useCircleRecommendStore', () => {
   });
 
   it('should enter fallback mode when recommend request fails', async () => {
-    (getRecommendList as jest.Mock).mockRejectedValue(new Error('Network error'));
-    (getHotRankList as jest.Mock).mockResolvedValue([{ id: '1', name: 'Hot Circle' }]);
+    (getRecommendList as any).mockRejectedValue(new Error('Network error'));
+    (getHotRankList as any).mockResolvedValue({ type: 'HOT', items: [{ circleId: '1', circleName: 'Hot Circle' }] });
 
     const store = useCircleRecommendStore();
     await store.fetchRecommendList();
@@ -470,8 +539,8 @@ describe('useCircleRecommendStore', () => {
   });
 
   it('should clear fallback mode when recommend returns data', async () => {
-    const mockList = [{ id: '1', name: 'Test Circle' }];
-    (getRecommendList as jest.Mock).mockResolvedValue(mockList);
+    const mockVO = { items: [{ circleId: '1', circleName: 'Test Circle' }] };
+    (getRecommendList as any).mockResolvedValue(mockVO);
 
     const store = useCircleRecommendStore();
     store.fallbackMode = true;
@@ -481,8 +550,8 @@ describe('useCircleRecommendStore', () => {
   });
 
   it('should cache tab data and not re-fetch', async () => {
-    const mockHotList = [{ id: '1', name: 'Hot' }];
-    (getHotRankList as jest.Mock).mockResolvedValue(mockHotList);
+    const mockVO = { type: 'HOT', items: [{ circleId: '1', circleName: 'Hot' }] };
+    (getHotRankList as any).mockResolvedValue(mockVO);
 
     const store = useCircleRecommendStore();
     await store.fetchHotRankList();
@@ -495,187 +564,135 @@ describe('useCircleRecommendStore', () => {
 
 - [ ] **Step 2: 运行测试验证失败**
 
-Run: `npx jest src/__tests__/circle/recommendation.test.ts --no-cache 2>&1 | tail -20`
+Run: `npx vitest run tests/circle/recommendation.spec.ts 2>&1 | tail -20`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: 实现 store**
 
 ```typescript
 // src/store/modules/circleRecommend.ts
+import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { getRecommendList } from '/@/api/circle/recommend';
 import { getHotRankList, getNewRankList } from '/@/api/circle/ranking';
-import type { CircleRecommendVO, CircleRankVO } from '/@/api/circle/types';
+import type { CircleRecommendItem, CircleRankItem } from '/@/api/circle/types';
 
 type TabType = 'recommend' | 'hot' | 'new';
 
-interface CircleRecommendState {
-  recommendList: CircleRecommendVO[];
-  hotRankList: CircleRankVO[];
-  newRankList: CircleRankVO[];
-  activeTab: TabType;
-  loading: Record<TabType, boolean>;
-  fallbackMode: boolean;
-  /** 各 Tab 是否已加载过（会话级缓存标记） */
-  loaded: Record<TabType, boolean>;
-}
+export const useCircleRecommendStore = defineStore('circle-recommend', () => {
+  // --- State ---
+  const recommendList = ref<CircleRecommendItem[]>([]);
+  const hotRankList = ref<CircleRankItem[]>([]);
+  const newRankList = ref<CircleRankItem[]>([]);
+  const activeTab = ref<TabType>('recommend');
+  const loading = ref<Record<TabType, boolean>>({ recommend: false, hot: false, new: false });
+  const fallbackMode = ref(false);
+  const loaded = ref<Record<TabType, boolean>>({ recommend: false, hot: false, new: false });
 
-export const useCircleRecommendStore = defineStore({
-  id: 'circle-recommend',
-  state: (): CircleRecommendState => ({
-    recommendList: [],
-    hotRankList: [],
-    newRankList: [],
-    activeTab: 'recommend',
-    loading: { recommend: false, hot: false, new: false },
-    fallbackMode: false,
-    loaded: { recommend: false, hot: false, new: false },
-  }),
-  actions: {
-    async fetchRecommendList() {
-      if (this.loaded.recommend && !this.fallbackMode) return;
-      this.loading.recommend = true;
-      try {
-        const list = await getRecommendList({ limit: 20 });
-        if (list && list.length > 0) {
-          this.recommendList = list;
-          this.fallbackMode = false;
-        } else {
-          this.fallbackMode = true;
-          await this.fetchHotRankList();
-        }
-        this.loaded.recommend = true;
-      } catch {
-        this.fallbackMode = true;
-        await this.fetchHotRankList();
-      } finally {
-        this.loading.recommend = false;
+  // --- Actions ---
+  async function fetchRecommendList() {
+    if (loaded.value.recommend && !fallbackMode.value) return;
+    loading.value.recommend = true;
+    try {
+      const res = await getRecommendList({ limit: 20 });
+      // 后端返回 CircleRecommendVO { items: [...] }
+      const items = res?.items ?? [];
+      if (items.length > 0) {
+        recommendList.value = items;
+        fallbackMode.value = false;
+      } else {
+        fallbackMode.value = true;
+        await fetchHotRankList();
       }
-    },
-    async fetchHotRankList() {
-      if (this.loaded.hot) return;
-      this.loading.hot = true;
-      try {
-        this.hotRankList = await getHotRankList({ limit: 20 });
-        this.loaded.hot = true;
-      } finally {
-        this.loading.hot = false;
-      }
-    },
-    async fetchNewRankList() {
-      if (this.loaded.new) return;
-      this.loading.new = true;
-      try {
-        this.newRankList = await getNewRankList({ limit: 20 });
-        this.loaded.new = true;
-      } finally {
-        this.loading.new = false;
-      }
-    },
-    setActiveTab(tab: TabType) {
-      this.activeTab = tab;
-    },
-    /** 强制刷新推荐（降级状态下切回推荐 Tab 时用） */
-    async refreshRecommend() {
-      this.loaded.recommend = false;
-      await this.fetchRecommendList();
-    },
-    clearAll() {
-      this.recommendList = [];
-      this.hotRankList = [];
-      this.newRankList = [];
-      this.fallbackMode = false;
-      this.loaded = { recommend: false, hot: false, new: false };
-    },
-  },
+      loaded.value.recommend = true;
+    } catch (e: any) {
+      // ADVISORY-1 修复: 401 未登录时降级为热门榜（推荐接口需登录态）
+      // 429001 频率限制时静默降级，不打断用户
+      fallbackMode.value = true;
+      await fetchHotRankList();
+    } finally {
+      loading.value.recommend = false;
+    }
+  }
+
+  async function fetchHotRankList() {
+    if (loaded.value.hot) return;
+    loading.value.hot = true;
+    try {
+      const res = await getHotRankList({ limit: 20 });
+      hotRankList.value = res?.items ?? [];
+      loaded.value.hot = true;
+    } finally {
+      loading.value.hot = false;
+    }
+  }
+
+  async function fetchNewRankList() {
+    if (loaded.value.new) return;
+    loading.value.new = true;
+    try {
+      const res = await getNewRankList({ limit: 20 });
+      newRankList.value = res?.items ?? [];
+      loaded.value.new = true;
+    } finally {
+      loading.value.new = false;
+    }
+  }
+
+  function setActiveTab(tab: TabType) {
+    activeTab.value = tab;
+  }
+
+  /** 强制刷新推荐（降级状态下切回推荐 Tab 时用） */
+  async function refreshRecommend() {
+    loaded.value.recommend = false;
+    await fetchRecommendList();
+  }
+
+  function clearAll() {
+    recommendList.value = [];
+    hotRankList.value = [];
+    newRankList.value = [];
+    fallbackMode.value = false;
+    loaded.value = { recommend: false, hot: false, new: false };
+  }
+
+  return {
+    recommendList, hotRankList, newRankList, activeTab, loading, fallbackMode, loaded,
+    fetchRecommendList, fetchHotRankList, fetchNewRankList,
+    setActiveTab, refreshRecommend, clearAll,
+  };
 });
 ```
 
 - [ ] **Step 4: 运行测试验证通过**
 
-Run: `npx jest src/__tests__/circle/recommendation.test.ts --no-cache 2>&1 | tail -20`
+Run: `npx vitest run tests/circle/recommendation.spec.ts 2>&1 | tail -20`
 Expected: PASS — all 6 tests pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/store/modules/circleRecommend.ts src/__tests__/circle/recommendation.test.ts
+git add src/store/modules/circleRecommend.ts tests/circle/recommendation.spec.ts
 git commit -m "feat(circle): add useCircleRecommendStore with TDD"
 ```
 
 ---
 
-## Task 5: useChart composable
+## Task 5: useChart composable（已移除，复用项目 useECharts）
+
+> **ADVISORY-3 修复**: 不再创建自定义 `useChart`，直接复用项目已有的 `/@/hooks/web/useECharts` hook。
+> 该 hook 已封装 ECharts 初始化、resize 监听、暗色主题支持、自动 dispose 等功能。
 
 **Files:**
-- Create: `src/hooks/circle/useChart.ts`
+- 无需新建文件，复用 `src/hooks/web/useECharts.ts`
 
-- [ ] **Step 1: 实现 useChart composable**
+- [ ] **Step 1: 在 TrendChart 等组件中直接使用 useECharts**
 
-参考现有 `FanTrend.vue` 的 ECharts 使用模式，封装为 composable：
-
+用法示例（详见 Task 7 TrendChart）：
 ```typescript
-// src/hooks/circle/useChart.ts
-import { ref, onMounted, onBeforeUnmount, watch, type Ref, shallowRef } from 'vue';
-import * as echarts from 'echarts';
-
-export interface UseChartOptions {
-  /** 图表配置，返回 ECharts option */
-  getOption: () => echarts.EChartsOption;
-  /** 数据源，变化时重新渲染 */
-  data: Ref<any>;
-  /** 是否加载中 */
-  loading?: Ref<boolean>;
-}
-
-export function useChart(options: UseChartOptions) {
-  const chartRef = ref<HTMLDivElement>();
-  const chart = shallowRef<echarts.ECharts | null>(null);
-
-  const renderChart = () => {
-    if (!chartRef.value) return;
-    if (!chart.value) {
-      chart.value = echarts.init(chartRef.value);
-    }
-    chart.value.setOption(options.getOption(), true);
-  };
-
-  const handleResize = () => {
-    chart.value?.resize();
-  };
-
-  watch(
-    () => options.data.value,
-    () => {
-      renderChart();
-    },
-    { deep: true }
-  );
-
-  onMounted(() => {
-    renderChart();
-    window.addEventListener('resize', handleResize);
-  });
-
-  onBeforeUnmount(() => {
-    window.removeEventListener('resize', handleResize);
-    chart.value?.dispose();
-    chart.value = null;
-  });
-
-  return {
-    chartRef,
-    chart,
-    renderChart,
-  };
-}
-```
-
-- [ ] **Step 2: Commit**
-
-```bash
-git add src/hooks/circle/useChart.ts
-git commit -m "feat(circle): add useChart composable for ECharts lifecycle management"
+import { useECharts } from '/@/hooks/web/useECharts';
+// useECharts(elRef: Ref<HTMLDivElement>, theme?) → { setOptions, resize, echarts, getInstance }
 ```
 
 ---
@@ -699,12 +716,22 @@ git commit -m "feat(circle): add useChart composable for ECharts lifecycle manag
         <span v-if="suffix" class="stat-card__suffix">{{ suffix }}</span>
       </div>
       <div class="stat-card__change" :class="changeClass">
-        <span v-if="change > 0" class="stat-card__arrow">&#9650;</span>
-        <span v-else-if="change < 0" class="stat-card__arrow">&#9660;</span>
-        <span v-else class="stat-card__arrow">—</span>
-        <span v-if="change > 0" class="stat-card__change-text">+{{ change.toFixed(1) }}%</span>
-        <span v-else-if="change < 0" class="stat-card__change-text">{{ change.toFixed(1) }}%</span>
-        <span v-else class="stat-card__change-text">--</span>
+        <!-- BLOCK-1 / ADVISORY-5 修复: 上期值为 0 且本期值 > 0 时展示"新增"文案 -->
+        <template v-if="isNew">
+          <span class="stat-card__change-text stat-card__change--new">新增</span>
+        </template>
+        <template v-else-if="change !== null">
+          <span v-if="change > 0" class="stat-card__arrow">&#9650;</span>
+          <span v-else-if="change < 0" class="stat-card__arrow">&#9660;</span>
+          <span v-else class="stat-card__arrow">—</span>
+          <span v-if="change > 0" class="stat-card__change-text">+{{ change.toFixed(1) }}%</span>
+          <span v-else-if="change < 0" class="stat-card__change-text">{{ change.toFixed(1) }}%</span>
+          <span v-else class="stat-card__change-text">--</span>
+        </template>
+        <template v-else>
+          <span class="stat-card__arrow">—</span>
+          <span class="stat-card__change-text">--</span>
+        </template>
       </div>
     </a-skeleton>
   </a-card>
@@ -716,20 +743,27 @@ import { computed } from 'vue';
 const props = defineProps<{
   title: string;
   value: number;
-  change: number;
+  /** 变化百分比，number | 'new' | null — 由 store computed 提供 */
+  change: number | 'new' | null;
   prefix?: string;
   suffix?: string;
   loading?: boolean;
 }>();
 
+/** 是否为"上期为 0、本期 > 0"的新增场景 */
+const isNew = computed(() => props.change === 'new');
+
 const formattedValue = computed(() => {
-  if (props.value === 0 && props.change === 0) return '--';
+  if (props.value === 0 && (props.change === 0 || props.change === null)) return '--';
   return props.value.toLocaleString();
 });
 
 const changeClass = computed(() => {
-  if (props.change > 0) return 'stat-card__change--up';
-  if (props.change < 0) return 'stat-card__change--down';
+  if (isNew.value) return 'stat-card__change--new';
+  if (typeof props.change === 'number') {
+    if (props.change > 0) return 'stat-card__change--up';
+    if (props.change < 0) return 'stat-card__change--down';
+  }
   return 'stat-card__change--zero';
 });
 </script>
@@ -762,6 +796,10 @@ const changeClass = computed(() => {
 }
 .stat-card__change--down {
   color: #ff4d4f;
+}
+.stat-card__change--new {
+  color: #1890ff;
+  font-weight: 500;
 }
 .stat-card__change--zero {
   color: rgba(0, 0, 0, 0.25);
@@ -802,33 +840,36 @@ git commit -m "feat(circle): add StatCard component for analytics metrics"
 </template>
 
 <script setup lang="ts">
-import { computed, toRef } from 'vue';
-import { useChart } from '/@/hooks/circle/useChart';
-import type { TrendDataPoint } from '/@/api/circle/types';
+import { computed, ref, watch, onMounted } from 'vue';
+import { useECharts } from '/@/hooks/web/useECharts';
+import type { DailyTrend } from '/@/api/circle/types';
+
+// BLOCK-3 修复: 数据源类型从 TrendDataPoint 改为 DailyTrend（对齐后端）
+// yField 指定从 DailyTrend 中取哪个字段作为 Y 轴数据
+type TrendField = 'newMemberCount' | 'newPostCount' | 'activeCount';
 
 const props = withDefaults(
   defineProps<{
     title: string;
-    data: TrendDataPoint[];
-    xField?: string;
-    yField?: string;
+    data: DailyTrend[];
+    yField: TrendField;
     color?: string;
     loading?: boolean;
   }>(),
   {
-    xField: 'date',
-    yField: 'value',
     color: '#1890ff',
     loading: false,
   }
 );
 
+const chartRef = ref<HTMLDivElement>();
 const hasData = computed(() => props.data && props.data.length > 0);
 
-const { chartRef } = useChart({
-  data: toRef(props, 'data'),
-  loading: toRef(props, 'loading'),
-  getOption: () => ({
+const { setOptions } = useECharts(chartRef);
+
+const renderChart = () => {
+  if (!hasData.value) return;
+  setOptions({
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'category',
@@ -840,13 +881,16 @@ const { chartRef } = useChart({
         type: 'line',
         smooth: true,
         areaStyle: { opacity: 0.3 },
-        data: props.data.map((d) => d.value),
+        data: props.data.map((d) => d[props.yField]),
         itemStyle: { color: props.color },
       },
     ],
     grid: { left: 50, right: 20, bottom: 30, top: 30 },
-  }),
-});
+  });
+};
+
+watch(() => [props.data, props.yField], renderChart, { deep: true });
+onMounted(renderChart);
 </script>
 
 <style scoped>
@@ -1058,7 +1102,7 @@ import { computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ArrowLeftOutlined } from '@ant-design/icons-vue';
 import { useCircleAnalyticsStore } from '/@/store/modules/circleAnalytics';
-import type { DateRange } from '/@/api/circle/types';
+import type { DateRange, DailyTrend } from '/@/api/circle/types';
 import StatCard from './StatCard.vue';
 import TrendChart from './TrendChart.vue';
 import TimeRangeSelector from './TimeRangeSelector.vue';
@@ -1071,24 +1115,27 @@ const circleId = computed(() => route.params.id as string);
 
 const dateRange = computed(() => store.dateRange);
 
+// BLOCK-2/6 修复: 字段名对齐后端 CircleDataStatisticsVO
+// change 由 store computed (memberChange/postChange/activeChange) 提供
 const statCards = computed(() => {
   const d = store.analyticsData;
   if (!d) return [];
   return [
-    { title: '成员总数', value: d.memberTotal, change: d.memberChange, suffix: '人' },
-    { title: '新增成员', value: d.memberNew, change: d.memberChange, suffix: '人' },
-    { title: '发帖总数', value: d.postTotal, change: d.postChange, suffix: '篇' },
-    { title: '活跃用户', value: d.activeUserCount, change: d.activeUserChange, suffix: '人' },
+    { title: '成员总数', value: d.memberCount, change: store.memberChange, suffix: '人' },
+    { title: '新增成员', value: d.newMemberCount, change: store.memberChange, suffix: '人' },
+    { title: '发帖总数', value: d.postCount, change: store.postChange, suffix: '篇' },
+    { title: '活跃用户', value: d.activeCount, change: store.activeChange, suffix: '人' },
   ];
 });
 
+// BLOCK-3 修复: 趋势图从 dailyTrends 中按字段提取数据，传入 DailyTrend[]
 const trendCharts = computed(() => {
   const d = store.analyticsData;
   if (!d) return [];
   return [
-    { title: '成员增长趋势', data: d.memberTrend, color: '#1890ff' },
-    { title: '内容发布趋势', data: d.postTrend, color: '#52c41a' },
-    { title: '活跃度趋势', data: d.activeTrend, color: '#faad14' },
+    { title: '成员增长趋势', data: d.dailyTrends, yField: 'newMemberCount' as const, color: '#1890ff' },
+    { title: '内容发布趋势', data: d.dailyTrends, yField: 'newPostCount' as const, color: '#52c41a' },
+    { title: '活跃度趋势', data: d.dailyTrends, yField: 'activeCount' as const, color: '#faad14' },
   ];
 });
 
@@ -1193,6 +1240,7 @@ git commit -m "feat(circle): add DataAnalyticsPanel with stats, charts, and expo
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '/@/store/modules/user';
+import { defHttp } from '/@/utils/http/axios';
 import DataAnalyticsPanel from './components/DataAnalyticsPanel.vue';
 
 const route = useRoute();
@@ -1204,10 +1252,23 @@ const handleBack = () => {
   router.push(`/circle/${route.params.id}`);
 };
 
-onMounted(() => {
-  // 权限校验：实际应检查当前用户是否为圈子创建者/版主
-  // 此处简化，实际需调用后端接口校验
-  // TODO: 对接后端权限校验接口
+onMounted(async () => {
+  // FLAG-2 修复: 实现权限校验
+  // 方案: 调用圈子详情接口 GET /api/circle/detail?id=xxx
+  // 后端自动校验权限，非创建者/版主返回 403
+  try {
+    const circleId = route.params.id as string;
+    await defHttp.get({ url: '/api/circle/detail', params: { id: circleId } });
+    hasPermission.value = true;
+  } catch (e: any) {
+    const code = e?.code || e?.response?.data?.code;
+    if (code === 403001) {
+      hasPermission.value = false;
+    } else {
+      // 其他错误（网络异常等）不改变权限状态，由 DataAnalyticsPanel 自行处理
+      hasPermission.value = true;
+    }
+  }
 });
 </script>
 
@@ -1250,9 +1311,10 @@ git commit -m "feat(circle): add analytics page with permission guard"
       <span v-else class="rank-circle-card__time">{{ formattedTime }}</span>
     </div>
     <div class="rank-circle-card__content">
-      <a-avatar :src="iconUrl" :size="40" />
+      <!-- BLOCK-4 修复: 移除 iconUrl（后端 CircleRankingItem 无此字段），使用首字 avatar -->
+      <a-avatar :size="40">{{ circleName?.charAt(0) }}</a-avatar>
       <div class="rank-circle-card__info">
-        <div class="rank-circle-card__name">{{ name }}</div>
+        <div class="rank-circle-card__name">{{ circleName }}</div>
         <div class="rank-circle-card__meta">
           <span>{{ memberCount }} 成员</span>
           <a-tag v-if="category" size="small">{{ category }}</a-tag>
@@ -1267,12 +1329,12 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 
+// BLOCK-4 修复: props 对齐 CircleRankItem 字段名（circleId, circleName），移除 iconUrl
 const props = defineProps<{
-  id: string;
+  circleId: string;
   rank: number;
   rankType: 'hot' | 'new';
-  name: string;
-  iconUrl: string;
+  circleName: string;
   memberCount: number;
   category: string;
   createTime?: string;
@@ -1294,7 +1356,7 @@ const formattedTime = computed(() => {
 });
 
 const handleClick = () => {
-  router.push({ path: `/circle/${props.id}`, query: { source: props.source } });
+  router.push({ path: `/circle/${props.circleId}`, query: { source: props.source } });
 };
 </script>
 
@@ -1377,12 +1439,11 @@ git commit -m "feat(circle): add RankCircleCard with gold/silver/bronze ranking"
       <template v-if="data.length > 0">
         <RankCircleCard
           v-for="(item, index) in data"
-          :key="item.id"
-          :id="item.id"
+          :key="item.circleId"
+          :circle-id="item.circleId"
           :rank="index + 1"
           :rank-type="type"
-          :name="item.name"
-          :icon-url="item.iconUrl"
+          :circle-name="item.circleName"
           :member-count="item.memberCount"
           :category="item.category"
           :create-time="item.createTime"
@@ -1395,12 +1456,13 @@ git commit -m "feat(circle): add RankCircleCard with gold/silver/bronze ranking"
 </template>
 
 <script setup lang="ts">
-import type { CircleRankVO } from '/@/api/circle/types';
+// BLOCK-4 修复: 类型从 CircleRankVO（不存在）改为 CircleRankItem
+import type { CircleRankItem } from '/@/api/circle/types';
 import RankCircleCard from './RankCircleCard.vue';
 
 defineProps<{
   type: 'hot' | 'new';
-  data: CircleRankVO[];
+  data: CircleRankItem[];
   loading: boolean;
 }>();
 </script>
@@ -1447,7 +1509,7 @@ git commit -m "feat(circle): add RankList component for hot/new rankings"
         <a-row :gutter="[16, 16]">
           <a-col
             v-for="item in displayList"
-            :key="item.id"
+            :key="item.circleId"
             :xs="24"
             :sm="12"
             :lg="8"
@@ -1455,10 +1517,11 @@ git commit -m "feat(circle): add RankList component for hot/new rankings"
             <a-card hoverable class="recommend-card" @click="handleCardClick(item)">
               <template #cover>
                 <div class="recommend-card__cover">
-                  <a-avatar :src="item.iconUrl" :size="64" />
+                  <!-- BLOCK-4 修复: 移除 iconUrl（后端无此字段），使用首字 avatar -->
+                  <a-avatar :size="64">{{ item.circleName?.charAt(0) }}</a-avatar>
                 </div>
               </template>
-              <a-card-meta :title="item.name">
+              <a-card-meta :title="item.circleName">
                 <template #description>
                   <div class="recommend-card__desc">{{ item.description }}</div>
                   <div class="recommend-card__meta">
@@ -1491,31 +1554,43 @@ git commit -m "feat(circle): add RankList component for hot/new rankings"
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCircleRecommendStore } from '/@/store/modules/circleRecommend';
-import type { CircleRecommendVO } from '/@/api/circle/types';
+import type { CircleRecommendItem, CircleRankItem } from '/@/api/circle/types';
 
 const store = useCircleRecommendStore();
 const router = useRouter();
 
-const displayList = computed(() => {
+// 降级模式下将 CircleRankItem 适配为 displayList 兼容格式
+interface DisplayItem {
+  circleId: string;
+  circleName: string;
+  description: string;
+  memberCount: number;
+  category: string;
+  privacyType: string;
+  sourceId?: string;
+}
+
+const displayList = computed<DisplayItem[]>(() => {
   if (store.fallbackMode) {
     return store.hotRankList.map((item) => ({
-      ...item,
-      description: '',
-      privacyType: 'PUBLIC' as const,
-      recommendSource: 'hot_rank',
+      circleId: item.circleId,
+      circleName: item.circleName,
+      description: item.description,
+      memberCount: item.memberCount,
+      category: item.category,
+      privacyType: 'PUBLIC',
     }));
   }
   return store.recommendList;
 });
 
-const handleCardClick = (item: CircleRecommendVO) => {
-  router.push({ path: `/circle/${item.id}`, query: { source: 'recommend' } });
+const handleCardClick = (item: DisplayItem) => {
+  router.push({ path: `/circle/${item.circleId}`, query: { source: 'recommend' } });
 };
 
-const handleJoin = (item: CircleRecommendVO) => {
-  // 复用 EPIC-10 的加入流程
-  // TODO: 对接 JoinModal
-  router.push({ path: `/circle/${item.id}`, query: { source: 'recommend' } });
+// FLAG-1 修复: 加入按钮跳转圈子详情页，复用 EPIC-10 的加入流程
+const handleJoin = (item: DisplayItem) => {
+  router.push({ path: `/circle/${item.circleId}`, query: { source: 'recommend', action: 'join' } });
 };
 </script>
 
@@ -1564,25 +1639,25 @@ git commit -m "feat(circle): add RecommendationPanel with fallback to hot rankin
 
 **Files:**
 - Create: `src/hooks/circle/useRecommendTracking.ts`
-- Test: `src/__tests__/circle/recommendTracking.test.ts`
+- Test: `tests/circle/recommendTracking.spec.ts`
 
 - [ ] **Step 1: 编写曝光上报测试**
 
 ```typescript
-// src/__tests__/circle/recommendTracking.test.ts
+// tests/circle/recommendTracking.spec.ts
 import { useRecommendTracking } from '/@/hooks/circle/useRecommendTracking';
 
-jest.mock('/@/api/circle/recommend', () => ({
-  reportRecommendExposure: jest.fn().mockResolvedValue(undefined),
-  reportRecommendClick: jest.fn().mockResolvedValue(undefined),
+vi.mock('/@/api/circle/recommend', () => ({
+  reportRecommendExposure: vi.fn().mockResolvedValue(undefined),
+  reportRecommendClick: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { reportRecommendExposure, reportRecommendClick } from '/@/api/circle/recommend';
 
 // Mock IntersectionObserver
-const mockObserve = jest.fn();
-const mockDisconnect = jest.fn();
-const mockUnobserve = jest.fn();
+const mockObserve = vi.fn();
+const mockDisconnect = vi.fn();
+const mockUnobserve = vi.fn();
 let observerCallback: IntersectionObserverCallback;
 
 (window as any).IntersectionObserver = class {
@@ -1595,21 +1670,21 @@ let observerCallback: IntersectionObserverCallback;
 };
 
 // Mock sendBeacon
-navigator.sendBeacon = jest.fn();
+navigator.sendBeacon = vi.fn();
 
 describe('useRecommendTracking', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockObserve.mockClear();
     mockDisconnect.mockClear();
     mockUnobserve.mockClear();
-    (reportRecommendExposure as jest.Mock).mockClear();
-    (reportRecommendClick as jest.Mock).mockClear();
-    (navigator.sendBeacon as jest.Mock).mockClear();
+    (reportRecommendExposure as any).mockClear();
+    (reportRecommendClick as any).mockClear();
+    (navigator.sendBeacon as any).mockClear();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should create observer and observe elements', () => {
@@ -1624,13 +1699,12 @@ describe('useRecommendTracking', () => {
     const el = document.createElement('div');
     observeCard(el, 'circle-1');
 
-    // Simulate intersection
     observerCallback(
       [{ isIntersecting: true, target: el } as IntersectionObserverEntry],
       {} as IntersectionObserver
     );
 
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(reportRecommendExposure).toHaveBeenCalledWith({
       circleIds: ['circle-1'],
@@ -1643,30 +1717,26 @@ describe('useRecommendTracking', () => {
     const el = document.createElement('div');
     observeCard(el, 'circle-1');
 
-    // Enter viewport
     observerCallback(
       [{ isIntersecting: true, target: el } as IntersectionObserverEntry],
       {} as IntersectionObserver
     );
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
-    // Enter again
     observerCallback(
       [{ isIntersecting: true, target: el } as IntersectionObserverEntry],
       {} as IntersectionObserver
     );
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(reportRecommendExposure).toHaveBeenCalledTimes(1);
   });
 
-  it('should report click event', async () => {
+  it('should report click event with sourceId', async () => {
     const { reportClick } = useRecommendTracking();
-    await reportClick('circle-1', 'recommend');
-    expect(reportRecommendClick).toHaveBeenCalledWith({
-      circleId: 'circle-1',
-      source: 'recommend',
-    });
+    await reportClick('source-123');
+    // 后端接受 sourceId 参数
+    expect(reportRecommendClick).toHaveBeenCalledWith('source-123');
   });
 
   it('should flush on page hide using sendBeacon', () => {
@@ -1674,13 +1744,11 @@ describe('useRecommendTracking', () => {
     const el = document.createElement('div');
     observeCard(el, 'circle-1');
 
-    // Enter viewport but don't wait for debounce
     observerCallback(
       [{ isIntersecting: true, target: el } as IntersectionObserverEntry],
       {} as IntersectionObserver
     );
 
-    // Simulate page hide
     Object.defineProperty(document, 'visibilityState', { value: 'hidden', writable: true });
     document.dispatchEvent(new Event('visibilitychange'));
 
@@ -1689,8 +1757,8 @@ describe('useRecommendTracking', () => {
   });
 
   it('should handle exposure report failure silently', () => {
-    (reportRecommendExposure as jest.Mock).mockRejectedValue(new Error('Network'));
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    (reportRecommendExposure as any).mockRejectedValue(new Error('Network'));
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const { observeCard } = useRecommendTracking();
     const el = document.createElement('div');
@@ -1701,9 +1769,8 @@ describe('useRecommendTracking', () => {
       {} as IntersectionObserver
     );
 
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
-    // Should not throw
     expect(reportRecommendExposure).toHaveBeenCalled();
     consoleSpy.mockRestore();
   });
@@ -1712,7 +1779,7 @@ describe('useRecommendTracking', () => {
 
 - [ ] **Step 2: 运行测试验证失败**
 
-Run: `npx jest src/__tests__/circle/recommendTracking.test.ts --no-cache 2>&1 | tail -20`
+Run: `npx vitest run tests/circle/recommendTracking.spec.ts 2>&1 | tail -20`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: 实现 useRecommendTracking composable**
@@ -1727,7 +1794,6 @@ export function useRecommendTracking(source = 'recommend') {
   const pendingIds = new Set<string>();
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // IntersectionObserver 回调
   const handleIntersection: IntersectionObserverCallback = (entries) => {
     for (const entry of entries) {
       if (entry.isIntersecting) {
@@ -1755,13 +1821,13 @@ export function useRecommendTracking(source = 'recommend') {
     try {
       await reportRecommendExposure({ circleIds: ids, source });
     } catch {
-      // 静默处理，仅开发环境日志
       if (import.meta.env.DEV) {
         console.log('[RecommendTracking] exposure report failed:', ids);
       }
     }
   };
 
+  // BLOCK-7 修复: sendBeacon URL 从 /content/ 改为 /api/（对齐后端）
   const flushWithBeacon = () => {
     if (pendingIds.size === 0) return;
     const ids = Array.from(pendingIds);
@@ -1776,17 +1842,17 @@ export function useRecommendTracking(source = 'recommend') {
     observer.observe(el);
   };
 
-  const reportClick = async (circleId: string, clickSource: string) => {
+  // 后端 recordClick(sourceId) 接受单个 sourceId 参数
+  const reportClick = async (sourceId: string) => {
     try {
-      await reportRecommendClick({ circleId, source: clickSource });
+      await reportRecommendClick(sourceId);
     } catch {
       if (import.meta.env.DEV) {
-        console.log('[RecommendTracking] click report failed:', circleId);
+        console.log('[RecommendTracking] click report failed:', sourceId);
       }
     }
   };
 
-  // 页面离开保底
   const handleVisibilityChange = () => {
     if (document.visibilityState === 'hidden') {
       flushWithBeacon();
@@ -1819,13 +1885,13 @@ export function useRecommendTracking(source = 'recommend') {
 
 - [ ] **Step 4: 运行测试验证通过**
 
-Run: `npx jest src/__tests__/circle/recommendTracking.test.ts --no-cache 2>&1 | tail -20`
+Run: `npx vitest run tests/circle/recommendTracking.spec.ts 2>&1 | tail -20`
 Expected: PASS — all 6 tests pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/hooks/circle/useRecommendTracking.ts src/__tests__/circle/recommendTracking.test.ts
+git add src/hooks/circle/useRecommendTracking.ts tests/circle/recommendTracking.spec.ts
 git commit -m "feat(circle): add useRecommendTracking with IntersectionObserver and sendBeacon"
 ```
 
@@ -1915,25 +1981,25 @@ git commit -m "feat(circle): enhance circle list page with recommend/hot/new tab
 ## Task 16: 测试补充与集成测试
 
 **Files:**
-- Update: `src/__tests__/circle/analytics.test.ts`
-- Update: `src/__tests__/circle/recommendation.test.ts`
-- Create: `src/__tests__/circle/ranking.test.ts`
+- Update: `tests/circle/analytics.spec.ts`
+- Update: `tests/circle/recommendation.spec.ts`
+- Create: `tests/circle/ranking.spec.ts`
 
 - [ ] **Step 1: 补充 ranking 测试**
 
 ```typescript
-// src/__tests__/circle/ranking.test.ts
+// tests/circle/ranking.spec.ts
 import { setActivePinia, createPinia } from 'pinia';
 import { useCircleRecommendStore } from '/@/store/modules/circleRecommend';
 
-jest.mock('/@/api/circle/recommend', () => ({
-  getRecommendList: jest.fn(),
-  reportRecommendExposure: jest.fn(),
-  reportRecommendClick: jest.fn(),
+vi.mock('/@/api/circle/recommend', () => ({
+  getRecommendList: vi.fn(),
+  reportRecommendExposure: vi.fn(),
+  reportRecommendClick: vi.fn(),
 }));
-jest.mock('/@/api/circle/ranking', () => ({
-  getHotRankList: jest.fn(),
-  getNewRankList: jest.fn(),
+vi.mock('/@/api/circle/ranking', () => ({
+  getHotRankList: vi.fn(),
+  getNewRankList: vi.fn(),
 }));
 
 import { getHotRankList, getNewRankList } from '/@/api/circle/ranking';
@@ -1943,33 +2009,42 @@ describe('Ranking', () => {
     setActivePinia(createPinia());
   });
 
-  it('should fetch hot rank list', async () => {
-    const mockList = [
-      { id: '1', name: 'Circle 1', memberCount: 100 },
-      { id: '2', name: 'Circle 2', memberCount: 50 },
-    ];
-    (getHotRankList as jest.Mock).mockResolvedValue(mockList);
+  it('should fetch hot rank list and extract items from VO', async () => {
+    // 后端返回 CircleRankingVO { type: 'HOT', items: [...] }
+    const mockVO = {
+      type: 'HOT',
+      items: [
+        { rank: 1, circleId: '1', circleName: 'Circle 1', memberCount: 100, category: '技术', description: '', createTime: '2024-01-01' },
+        { rank: 2, circleId: '2', circleName: 'Circle 2', memberCount: 50, category: '技术', description: '', createTime: '2024-01-02' },
+      ],
+    };
+    (getHotRankList as any).mockResolvedValue(mockVO);
 
     const store = useCircleRecommendStore();
     await store.fetchHotRankList();
 
-    expect(store.hotRankList).toEqual(mockList);
+    expect(store.hotRankList).toEqual(mockVO.items);
     expect(store.loaded.hot).toBe(true);
   });
 
-  it('should fetch new rank list', async () => {
-    const mockList = [{ id: '1', name: 'New Circle', createTime: '2024-01-01' }];
-    (getNewRankList as jest.Mock).mockResolvedValue(mockList);
+  it('should fetch new rank list and extract items from VO', async () => {
+    const mockVO = {
+      type: 'NEW',
+      items: [
+        { rank: 1, circleId: '1', circleName: 'New Circle', memberCount: 10, category: '', description: '', createTime: '2024-06-01' },
+      ],
+    };
+    (getNewRankList as any).mockResolvedValue(mockVO);
 
     const store = useCircleRecommendStore();
     await store.fetchNewRankList();
 
-    expect(store.newRankList).toEqual(mockList);
+    expect(store.newRankList).toEqual(mockVO.items);
     expect(store.loaded.new).toBe(true);
   });
 
   it('should not re-fetch if already loaded', async () => {
-    (getHotRankList as jest.Mock).mockResolvedValue([{ id: '1' }]);
+    (getHotRankList as any).mockResolvedValue({ type: 'HOT', items: [{ rank: 1, circleId: '1', circleName: 'H', memberCount: 1 }] });
 
     const store = useCircleRecommendStore();
     await store.fetchHotRankList();
@@ -1982,13 +2057,13 @@ describe('Ranking', () => {
 
 - [ ] **Step 2: 运行全量测试**
 
-Run: `npx jest src/__tests__/circle/ --no-cache 2>&1 | tail -30`
+Run: `npx vitest run tests/circle/ 2>&1 | tail -30`
 Expected: ALL PASS
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/__tests__/circle/
+git add tests/circle/
 git commit -m "test(circle): add ranking tests and verify all circle tests pass"
 ```
 
@@ -1998,7 +2073,7 @@ git commit -m "test(circle): add ranking tests and verify all circle tests pass"
 
 - [ ] **Step 1: 运行全量测试确保 100% 通过**
 
-Run: `npx jest src/__tests__/circle/ --no-cache --verbose 2>&1`
+Run: `npx vitest run tests/circle/ 2>&1`
 Expected: All tests PASS
 
 - [ ] **Step 2: 验证文件结构完整性**

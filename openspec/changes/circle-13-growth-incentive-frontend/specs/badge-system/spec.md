@@ -2,19 +2,19 @@
 
 ### Requirement: 徽章墙页面展示
 
-系统 SHALL 提供徽章墙页面，分组展示已获得和未获得徽章，已获得徽章图标点亮展示获得日期，未获得徽章图标灰色展示达成条件和当前进度。
+系统 SHALL 提供徽章墙页面，分组展示已获得和未获得徽章，已获得徽章图标点亮，未获得徽章图标灰色展示达成条件描述。后端 AchievementVO 提供 `achievementType`、`name`、`description`、`earned`、`conditionDesc` 字段，前端 API 封装层做字段映射（`achievementType` → `badgeId`、`name` → `badgeName`）。徽章图标使用前端本地按 `achievementType` 映射的兜底图标。
 
 #### Scenario: 展示已获得徽章
 - **WHEN** 用户进入徽章墙页
-- **THEN** 「已获得」区域展示已点亮的徽章卡片，包含徽章图标、名称、获得日期
+- **THEN** 「已获得」区域展示已点亮的徽章卡片，包含徽章图标（本地映射）、名称（`name` 字段）
 
 #### Scenario: 展示未获得徽章
 - **WHEN** 用户进入徽章墙页
-- **THEN** 「未获得」区域展示灰色徽章卡片，包含徽章图标、名称、达成条件描述、当前进度（如 7/10）
+- **THEN** 「未获得」区域展示灰色徽章卡片，包含徽章图标（本地映射）、名称（`name` 字段）、达成条件描述（`conditionDesc` 字段）
 
 #### Scenario: 即将达成徽章高亮
-- **WHEN** 未获得徽章的进度 >= 80%
-- **THEN** 该徽章卡片加橙色边框高亮显示
+- **WHEN** 未获得徽章的 `conditionDesc` 包含进度信息且接近达成
+- **THEN** 该徽章卡片加橙色边框高亮显示（注：后端未提供结构化进度字段，需前端解析 conditionDesc 文本或由产品确认降级方案）
 
 #### Scenario: 徽章按圈子展示
 - **WHEN** 用户进入徽章墙页
@@ -22,23 +22,23 @@
 
 ### Requirement: 徽章详情弹窗
 
-系统 SHALL 支持点击单个徽章弹出详情弹窗（Modal），展示完整条件说明、当前进度、获得时间（已获得时）。
+系统 SHALL 支持点击单个徽章弹出详情弹窗（Modal），展示完整条件说明。后端 AchievementVO 未提供 `earnedDate`、`progress`、`targetValue` 字段，已获得徽章暂不展示获得时间，未获得徽章使用 `conditionDesc` 文本描述替代进度条。
 
 #### Scenario: 查看已获得徽章详情
 - **WHEN** 用户点击已获得的徽章卡片
-- **THEN** 弹出 Modal 展示徽章名称、图标、完整条件说明、获得时间
+- **THEN** 弹出 Modal 展示徽章名称（`name`）、图标（本地映射）、完整条件说明（`description`）
 
 #### Scenario: 查看未获得徽章详情
 - **WHEN** 用户点击未获得的徽章卡片
-- **THEN** 弹出 Modal 展示徽章名称、图标、完整条件说明、当前进度和目标值
+- **THEN** 弹出 Modal 展示徽章名称（`name`）、图标（本地映射）、达成条件描述（`conditionDesc`）
 
 ### Requirement: 徽章种类定义
 
-系统 SHALL 支持展示 6 种徽章：持续创作者（内容型）、优质贡献者（质量型）、活跃参与者（活跃型）、圈内新星（活跃型）、内容里程碑（里程碑型）、社交达人（社交型）。
+系统 SHALL 支持展示后端已定义的徽章种类。PRD 定义 6 种徽章（持续创作者、优质贡献者、活跃参与者、圈内新星、内容里程碑、社交达人），实际展示种类由后端 `GET /content/user/growth/achievement/list` 接口返回的数据决定。后端还提供 `GET /content/user/growth/badge/catalog` 接口可查询完整徽章分类目录。
 
-#### Scenario: 展示全部 6 种徽章
+#### Scenario: 展示全部徽章
 - **WHEN** 用户进入徽章墙页
-- **THEN** 展示该圈子定义的全部徽章种类，已获得和未获得分组展示
+- **THEN** 调用成就徽章列表接口，展示该圈子定义的全部徽章种类，已获得和未获得分组展示
 
 ### Requirement: 徽章自动获得通知
 

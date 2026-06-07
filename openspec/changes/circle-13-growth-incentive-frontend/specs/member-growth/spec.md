@@ -2,11 +2,11 @@
 
 ### Requirement: 成长概览卡片展示
 
-系统 SHALL 在个人成长信息页顶部展示成长概览卡片，包含经验值、贡献值、圈内排名三个指标，数值使用 CountTo 数字动画组件。
+系统 SHALL 在个人成长信息页顶部展示成长概览卡片，包含经验值、贡献值、圈内排名三个指标，数值使用 CountTo 数字动画组件。后端 MemberGrowthVO 字段映射：`expPoints` → 经验值、`contributionPoints` → 贡献值、`rank` → 圈内排名。
 
 #### Scenario: 展示成长概览数据
 - **WHEN** 用户进入个人成长信息页
-- **THEN** 顶部展示三列等宽卡片，分别显示经验值、贡献值、圈内排名，数值有 CountTo 动画过渡
+- **THEN** 顶部展示三列等宽卡片，分别显示经验值（`expPoints`）、贡献值（`contributionPoints`）、圈内排名（`rank`），数值有 CountTo 动画过渡
 
 #### Scenario: 数值变化动画
 - **WHEN** 经验值或贡献值发生变化
@@ -26,11 +26,11 @@
 
 ### Requirement: 连续参与进度展示
 
-系统 SHALL 在个人成长信息页展示近 7 天连续参与进度，已完成天数用实心圆标记（主题色），当日未完成用空心圆，非统计日用横线。
+系统 SHALL 在个人成长信息页展示近 7 天连续参与进度，已完成天数用实心圆标记（主题色），当日未完成用空心圆，非统计日用横线。后端 MemberGrowthVO 提供 `participationDays` 字段（连续参与天数），也可通过 `GET /content/user/growth/participation?circleId=&userId=` 接口单独查询。
 
 #### Scenario: 展示连续参与进度
 - **WHEN** 用户进入个人成长信息页
-- **THEN** 展示 7 天时间轴，已完成天数用实心圆标记，当日未完成用空心圆，并展示「已连续参与 X 天」文案。连续参与天数可从 `MemberGrowthVO.participationDays` 字段获取，也可通过 `GET /content/user/growth/participation` 接口单独查询。
+- **THEN** 展示 7 天时间轴，已完成天数用实心圆标记，当日未完成用空心圆，并展示「已连续参与 X 天」文案。连续参与天数从 `MemberGrowthVO.participationDays` 字段获取。
 
 #### Scenario: 近 7 天有参与行为
 - **WHEN** 近 7 天内至少 3 天完成有效参与行为
@@ -46,23 +46,23 @@
 
 ### Requirement: 每日经验上限展示
 
-系统 SHALL 在个人成长信息页展示今日已获经验值和每日上限（100 点）。
+系统 SHALL 在个人成长信息页展示今日已获经验值和每日上限。后端 MemberGrowthVO 未提供 `todayExp` 和 `dailyExpLimit` 字段，每日上限 100 点为前端硬编码（PRD 定义），今日经验值暂不展示（后续后端补充 `todayExp` 字段后启用）。
 
 #### Scenario: 展示今日经验进度
 - **WHEN** 用户进入个人成长信息页
-- **THEN** 展示今日经验进度条（当前/100），如「今日经验 78/100」
+- **THEN** 展示每日经验上限提示「每日上限 100 点」（注：后端未提供 `todayExp` 字段，今日已获经验值暂不展示，待后端补充后启用进度条）
 
 #### Scenario: 达到每日上限
 - **WHEN** 今日经验值达到 100 点上限
-- **THEN** 进度条变为满格，显示「已达今日上限」
+- **THEN** 进度条变为满格，显示「已达今日上限」（注：后端未提供 `todayExp` 字段，此场景待后端补充后启用）
 
 ### Requirement: 徽章摘要展示
 
-系统 SHALL 在个人成长信息页展示最近获得的 3 枚徽章摘要，并提供「查看全部徽章」入口。
+系统 SHALL 在个人成长信息页展示最近获得的徽章摘要，并提供「查看全部徽章」入口。后端 MemberGrowthVO 未提供 `recentBadges` 字段，需单独调用 `GET /content/user/growth/achievement/list` 接口获取徽章列表并筛选已获得的徽章。
 
 #### Scenario: 展示徽章摘要
 - **WHEN** 用户进入个人成长信息页
-- **THEN** 展示最近获得的 3 枚徽章卡片，点击「查看全部徽章」跳转徽章墙页
+- **THEN** 调用成就徽章列表接口获取已获得徽章，展示最近获得的 3 枚徽章卡片，点击「查看全部徽章」跳转徽章墙页
 
 #### Scenario: 无已获得徽章
 - **WHEN** 用户未获得任何徽章

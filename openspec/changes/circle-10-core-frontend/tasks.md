@@ -61,6 +61,13 @@
 - [ ] 6.10 实现 404 状态：圈子不存在时展示 404 页面
 - [ ] 6.11 实现响应式：PC 两栏布局，移动端单栏堆叠+操作栏底部固定
 
+## 6.5 圈子编辑
+
+- [ ] 6.12 注册编辑页面路由 `/circle/:id/edit`，路由守卫校验创建者权限
+- [ ] 6.13 实现编辑页面：复用 CircleForm 组件，名称字段只读展示，预填充当前圈子信息（简介、图标、封面图、分类）
+- [ ] 6.14 实现编辑提交：调用 updateCircle 接口，Loading+防重复提交，成功后 Toast 提示并跳转详情页
+- [ ] 6.15 实现编辑入口权限：仅创建者可见「编辑」按钮（详情页操作栏），非创建者访问编辑页展示 403
+
 ## 7. 成员管理页
 
 - [ ] 7.1 实现成员管理页布局：筛选区（角色/状态/搜索）+ 成员 Table + 分页
@@ -109,6 +116,14 @@
 ## 12. 埋点与测试
 
 - [ ] 12.1 实现关键操作埋点：创建成功、加入成功、退出、搜索点击
-- [ ] 12.2 编写单元测试：核心组件（CircleCard、JoinStatusButton、CircleForm）和 Store
-- [ ] 12.3 编写集成测试：创建流程、加入流程、成员管理操作
+- [ ] 12.2 编写单元测试：核心组件（CircleCard、JoinStatusButton、CircleForm、JoinCircleModal、MuteMemberModal、GovernanceConfirmModal）和 Store（覆盖 specs 中所有 Given-When-Then scenario）
+- [ ] 12.3 编写集成测试：创建流程（circle-crud: 创建流程 scenario）、加入流程（circle-member-management: 直接加入/申请审核/密码加入/邀请限制 scenario）、成员管理操作（角色管理/禁言/移除 scenario）
 - [ ] 12.4 响应式测试：验证 PC/平板/移动端三端布局
+
+## 13. 无障碍（a11y）
+
+- [ ] 13.1 所有图片添加 alt 文本：圈子图标、封面图、空状态插图
+- [ ] 13.2 表单控件添加 aria-label：名称输入、简介输入、密码输入、隐私类型选择
+- [ ] 13.3 操作按钮添加 aria-label：加入/退出/编辑/禁言/移除等按钮
+- [ ] 13.4 键盘导航支持：Tab 顺序、Enter 触发操作、Escape 关闭 Modal
+- [ ] 13.5 颜色对比度校验：确保文字与背景对比度符合 WCAG 2.1 AA 标准（>= 4.5:1）

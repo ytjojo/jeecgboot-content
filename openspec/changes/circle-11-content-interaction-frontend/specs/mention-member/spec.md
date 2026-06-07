@@ -53,14 +53,18 @@
 - **THEN** 前端解析标签并渲染为可点击链接，点击跳转用户主页
 
 ### Requirement: @成员列表懒加载
-> **后端遗留**: `GET /circle/{circleId}/mentionable-members` 接口后端尚未实现（Service 层 `ICircleMentionService.getMentionCandidates()` 已存在，需补充 Controller 端点）。
+> **后端现状**: 无独立的 @成员查询 Controller 端点。前端复用 `GET /content/circle/member/list?circleId={circleId}&current=1&size=100` 获取圈子成员列表作为 @提及候选列表。
 
 @成员列表 SHALL 采用懒加载策略，首次打开浮层时请求。
 
 #### Scenario: 首次打开浮层
 - **WHEN** 用户首次打开 @成员浮层
-- **THEN** 调用 `GET /circle/{circleId}/mentionable-members` 接口加载成员列表（后端待实现）
+- **THEN** 调用 `GET /content/circle/member/list?circleId={circleId}` 接口加载成员列表
 
 #### Scenario: 后续打开浮层
 - **WHEN** 用户再次打开 @成员浮层
 - **THEN** 使用缓存数据，不重复请求
+
+#### Scenario: 成员列表加载失败
+- **WHEN** 成员列表接口请求失败（网络错误或服务端错误）
+- **THEN** 浮层显示"加载失败"和"重试"按钮

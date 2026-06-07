@@ -56,7 +56,8 @@
 
 #### Scenario: 创建者禁言用户
 - **WHEN** 创建者点击"禁言用户"，选择禁言时长，确认
-- **THEN** 调用 `POST /circle-report/{reportId}/mute?circleId={circleId}`，卡片状态更新，Toast 提示"已禁言"。> **后端遗留**: 禁言时长参数（1小时/1天/7天/30天/永久）后端尚未实现，当前接口不接受时长参数
+- **THEN** 调用 `POST /circle-report/{reportId}/mute?circleId={circleId}`，卡片状态更新，Toast 提示"已禁言"
+- **后端现状**: `POST /circle-report/{reportId}/mute` 不接受禁言时长参数。后端 `CircleMemberUpdateReq` 支持 `muteDuration`（1h/24h/7d/PERMANENT），但举报禁言接口未透传。降级方案：前端禁言弹窗仍展示时长选择 UI，但提交时不传 duration 参数（后端忽略），待后端对齐后再对接
 
 #### Scenario: 版主无禁言权限
 - **WHEN** 版主查看举报处理页
@@ -75,3 +76,18 @@
 #### Scenario: 移动端展示
 - **WHEN** 屏幕宽度小于 768px
 - **THEN** 列表改为卡片列表，操作按钮收进"更多"菜单
+
+### Requirement: 举报操作 loading/error 反馈
+举报处理操作 SHALL 提供明确的 loading 和错误反馈。
+
+#### Scenario: 删除/忽略/禁言操作中 loading
+- **WHEN** 管理员点击删除内容/忽略举报/禁言用户
+- **THEN** 操作按钮显示 loading 状态，防止重复点击
+
+#### Scenario: 删除/忽略/禁言操作失败
+- **WHEN** 操作 API 调用失败
+- **THEN** Toast 提示"操作失败，请重试"，按钮恢复可点击状态
+
+#### Scenario: 举报列表加载失败
+- **WHEN** 举报列表接口请求失败
+- **THEN** 展示"加载失败"和"重试"按钮

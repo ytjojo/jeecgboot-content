@@ -94,6 +94,36 @@
 |------|------|------|
 | `category` | `String` | 圈子分类标签 |
 
+### 成员上限默认值对齐
+
+**问题**: 前端 PRD 定义成员上限默认值为 500 人，后端 circle-member-management spec 场景中提到"圈子成员数已达到上限（10,000 人）"。前后端默认值不一致。
+
+**影响**: 前端展示"成员数/上限"时可能显示错误的上限值，满员判断可能出错。
+
+**建议**: 成员上限由后端 `maxMemberCount` 字段驱动，前端不做默认值假设。后端确认：
+1. `maxMemberCount` 的默认值是多少？
+2. 是否允许创建时自定义上限？
+3. `maxMemberCount` 是否等同于 PRD 中的 `memberLimit`？
+
+### 前端需处理的错误消息
+
+后端使用 `JeecgBootException` + 中文消息字符串返回错误（非错误码枚举）。前端需根据 `message` 字段匹配并做对应处理：
+
+| 错误场景 | 后端返回消息 | 前端处理 |
+|---------|------------|---------|
+| 圈子不存在 | "圈子不存在" | 展示 404 页面 |
+| 名称已存在 | 创建时抛异常 | 行内提示 "该圈子名称已存在" |
+| 已是成员 | "您已是圈子成员" | Toast 提示，按钮变为「已加入」 |
+| 申请已提交 | "申请已提交，请等待审核" | Toast 提示，按钮变为「申请中」 |
+| 仅邀请加入 | "该圈子仅限邀请加入" | 展示禁用按钮 + 提示 |
+| 密码错误 | "密码错误" | Modal 内提示，清空输入框 |
+| 圈子满员 | 满员错误（待后端定义） | Toast 提示 "圈子已满员" |
+| 创建者不可退出 | "创建者不可退出圈子" | Toast 提示 |
+| 非成员退出 | "您不是该圈子成员" | Toast 提示 |
+| 权限不足 | "仅创建者可修改圈子信息" 等 | Toast 提示 + 403 页面 |
+| 目标非成员 | "目标用户不是圈子成员" | Toast 提示 + 刷新列表 |
+| 角色不可变更 | "创建者角色不可变更" | Toast 提示 |
+
 ---
 
 ## 已有但设计文档未引用的接口
@@ -121,14 +151,14 @@
 |-------------|-------------|------|--------|
 | createCircle | /content/circle/create | POST | 一致 |
 | updateCircle | /content/circle/update | PUT | 一致 |
-| getCircleDetail | **不存在** | - | 需新增 |
+| getCircleDetail | `GET /content/circle/{id}` | GET | 需新增（建议 path param 风格） |
 | getMyCircleList | **不存在** | - | 需新增 |
 | getPublicCircleList | **不存在** | - | 需新增 |
 | checkCircleName | **不存在** | - | 需新增（service 已有） |
 | joinCircle | /content/circle/join | POST | 一致 |
-| quitCircle | /content/circle/leave | POST | 命名不同（quit vs leave） |
+| leaveCircle | /content/circle/leave | POST | 一致（已对齐为 leaveCircle） |
 | getMemberList | **不存在** | - | 需新增 |
-| setModerator | /content/circle/member/change-role | POST | 命名不同 |
+| changeRole | /content/circle/member/change-role | POST | 一致（已对齐为 changeRole） |
 | muteMember | /content/circle/member/mute | POST | 一致 |
 | unmuteMember | /content/circle/member/unmute | POST | 一致 |
 | removeMember | /content/circle/member/remove | POST | 一致 |
