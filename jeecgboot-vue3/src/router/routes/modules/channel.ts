@@ -13,6 +13,14 @@ const channel: AppRouteModule = {
   },
   children: [
     {
+      path: 'governance',
+      name: 'ChannelGovernanceHome',
+      component: () => import('/@/views/channel/governance/index.vue'),
+      meta: {
+        title: '内容治理',
+      },
+    },
+    {
       path: 'subscriptions',
       name: 'ChannelSubscriptions',
       component: () => import('/@/views/channel/subscription/SubscriptionList.vue'),

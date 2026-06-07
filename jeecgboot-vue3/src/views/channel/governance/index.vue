@@ -32,6 +32,6 @@ import GovernanceLog from './GovernanceLog.vue';
 import AnnouncementManage from './AnnouncementManage.vue';
 
 const route = useRoute();
-const channelId = computed(() => (route.params.channelId as string) || (route.query.channelId as string) || '');
+const channelId = computed(() => (route.params.id as string) || (route.params.channelId as string) || (route.query.channelId as string) || '');
 const activeTab = ref('review');
 </script>
