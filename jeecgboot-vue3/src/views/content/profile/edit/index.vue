@@ -34,10 +34,9 @@
               <a-select
                 v-model:value="form.gender"
                 :options="[
-                  { label: '男', value: 'MALE' },
-                  { label: '女', value: 'FEMALE' },
-                  { label: '其他', value: 'OTHER' },
-                  { label: '不显示', value: 'UNKNOWN' },
+                  { label: '男', value: 1 },
+                  { label: '女', value: 2 },
+                  { label: '不显示', value: 0 },
                 ]"
                 allow-clear
               />

@@ -25,13 +25,13 @@
               </template>
             </template>
             <template #description>
-              修改于 {{ formatTime(item.changedAt) }} · 过期于 {{ formatTime(item.expiresAt) }}
+              修改于 {{ formatTime(item.createTime) }} · 过期于 {{ formatTime(item.expiresAt) }}
             </template>
           </a-list-item-meta>
           <a-button
             size="small"
             type="link"
-            :loading="restoringId === item.historyId"
+            :loading="restoringId === item.id"
             @click="onRestore(item)"
           >
             恢复
@@ -99,9 +99,9 @@ async function onRestore(item: ContentUserProfileHistoryVO) {
   Modal.confirm({
     ...opts,
     onOk: async () => {
-      restoringId.value = item.historyId;
+      restoringId.value = item.id;
       try {
-        await restoreHistory(userId.value, item.historyId);
+        await restoreHistory(userId.value, item.id);
         message.success('已恢复');
         await load();
       } catch (e: any) {

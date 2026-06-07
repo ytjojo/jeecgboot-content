@@ -19,7 +19,11 @@ export type OnlineStatusVisibilityLiteral =
   | 'HIDDEN'
   | 'MUTUAL_ONLY';
 
-export type Gender = 'MALE' | 'FEMALE' | 'OTHER' | 'UNKNOWN';
+/**
+ * 性别枚举（后端 ContentUserProfileUpdateReq.gender 为 Integer）
+ * 0=未设置, 1=男, 2=女
+ */
+export type Gender = 0 | 1 | 2;
 export type ProfileReviewStatus = 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED';
 export type HistoryType = 'NICKNAME' | 'AVATAR';
 export type BadgeType =
@@ -63,13 +67,12 @@ export interface ContentUserHomepageModuleVO {
 
 /** 资料历史记录 VO — `ContentUserProfileHistoryVO` */
 export interface ContentUserProfileHistoryVO {
-  historyId: string;
+  id: string;
   historyType: HistoryType;
   historyValue: string;
-  changedAt: string;
+  createTime: string;
   /** 过期时间（180 天 TTL） */
   expiresAt: string;
-  sourceProfileUpdateId?: string;
 }
 
 // ============================================================
@@ -148,37 +151,31 @@ export interface ContentUserProfileUpdateReq {
 
 /** 隐私设置更新 Req — `ContentUserPrivacyUpdateReq`
  *
- * 覆盖 15 个 *Visibility 字段 + 2 个 Boolean；
- * onlineStatusVisibility 是特殊枚举（PUBLIC|HIDDEN|MUTUAL_ONLY）。
+ * 对齐后端实际 16 字段：14 个 *Visibility + onlineStatusVisible(Boolean) + onlineStatusVisibility(特殊枚举)
+ * + allowSearchEngineIndex(Boolean) + allowUserSearch(Boolean)。
  */
 export interface ContentUserPrivacyUpdateReq {
-  // 基础资料 (5)
-  bioVisibility?: PrivacyVisibilityLiteral;
-  genderVisibility?: PrivacyVisibilityLiteral;
+  // 基础资料 (4)
   birthdayVisibility?: PrivacyVisibilityLiteral;
+  genderVisibility?: PrivacyVisibilityLiteral;
   regionVisibility?: PrivacyVisibilityLiteral;
   professionVisibility?: PrivacyVisibilityLiteral;
   // 扩展资料 (1)
   personalLinkVisibility?: PrivacyVisibilityLiteral;
-  // 主页 (3)
-  homepageBackgroundVisibility?: PrivacyVisibilityLiteral;
-  themeColorVisibility?: PrivacyVisibilityLiteral;
-  homepageModuleVisibility?: PrivacyVisibilityLiteral;
-  // 认证 (2)
-  certificationVisibility?: PrivacyVisibilityLiteral;
-  verificationBadgesVisibility?: PrivacyVisibilityLiteral;
-  // 活动 (3)
-  profileCompletionVisibility?: PrivacyVisibilityLiteral;
-  profileReviewStatusVisibility?: PrivacyVisibilityLiteral;
-  recentActivityVisibility?: PrivacyVisibilityLiteral;
-  // 在线状态 (1) — 特殊枚举
+  // 认证标识 (2)
+  verificationBadgeVisibility?: PrivacyVisibilityLiteral;
+  contactBadgeVisibility?: PrivacyVisibilityLiteral;
+  // 主页 (2)
+  homepageVisibility?: PrivacyVisibilityLiteral;
+  dynamicVisibility?: PrivacyVisibilityLiteral;
+  // 在线状态 (2) — onlineStatusVisible 为旧字段兼容保留
+  onlineStatusVisible?: boolean;
   onlineStatusVisibility?: OnlineStatusVisibilityLiteral;
-  // 布尔开关 (2)
-  showMutualFollowersCount?: boolean;
-  showRecentActivityHighlight?: boolean;
-}
-
-/** 隐私设置 VO（GET /detail 返回的隐私子集） */
-export interface ContentUserPrivacySettingVO extends ContentUserPrivacyUpdateReq {
-  userId: string;
+  // 活动 (3)
+  browseHistoryVisibility?: PrivacyVisibilityLiteral;
+  likeActivityVisibility?: PrivacyVisibilityLiteral;
+  favoriteVisibility?: PrivacyVisibilityLiteral;
+  // 搜索与发现 (2)
+  allowSearchEngineIndex?: boolean;
+  allowUserSearch?: boolean;
 }

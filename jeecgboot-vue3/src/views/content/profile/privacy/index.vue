@@ -41,9 +41,9 @@
         </a-row>
       </a-card>
 
-      <a-card title="主页" :bordered="false" class="profile-privacy__card">
+      <a-card title="认证标识" :bordered="false" class="profile-privacy__card">
         <a-row :gutter="16">
-          <a-col v-for="f in homepageFields" :key="f" :span="isMobile ? 24 : 12">
+          <a-col v-for="f in badgeFields" :key="f" :span="isMobile ? 24 : 12">
             <a-form-item :label="fieldLabels[f]">
               <a-select v-if="!isMobile" v-model:value="form[f]" :options="options" />
               <a-button v-else block @click="openActionSheet(f, options)">
@@ -54,9 +54,9 @@
         </a-row>
       </a-card>
 
-      <a-card title="认证" :bordered="false" class="profile-privacy__card">
+      <a-card title="主页" :bordered="false" class="profile-privacy__card">
         <a-row :gutter="16">
-          <a-col v-for="f in certificationFields" :key="f" :span="isMobile ? 24 : 12">
+          <a-col v-for="f in homepageFields" :key="f" :span="isMobile ? 24 : 12">
             <a-form-item :label="fieldLabels[f]">
               <a-select v-if="!isMobile" v-model:value="form[f]" :options="options" />
               <a-button v-else block @click="openActionSheet(f, options)">
@@ -115,12 +115,12 @@
         </div>
       </a-drawer>
 
-      <a-card title="展示偏好" :bordered="false" class="profile-privacy__card">
-        <a-form-item label="显示互关数">
-          <a-switch v-model:checked="form.showMutualFollowersCount" />
+      <a-card title="搜索与发现" :bordered="false" class="profile-privacy__card">
+        <a-form-item label="允许搜索引擎收录">
+          <a-switch v-model:checked="form.allowSearchEngineIndex" />
         </a-form-item>
-        <a-form-item label="高亮显示近期活动">
-          <a-switch v-model:checked="form.showRecentActivityHighlight" />
+        <a-form-item label="允许用户搜索">
+          <a-switch v-model:checked="form.allowUserSearch" />
         </a-form-item>
       </a-card>
 
@@ -153,7 +153,6 @@ const options = PRIVACY_VISIBILITY_OPTIONS;
 const onlineStatusOptions = ONLINE_STATUS_VISIBILITY_OPTIONS;
 
 const baseFields = [
-  'bioVisibility',
   'genderVisibility',
   'birthdayVisibility',
   'regionVisibility',
@@ -162,60 +161,55 @@ const baseFields = [
 
 const extensionFields = ['personalLinkVisibility'] as const;
 
-const homepageFields = [
-  'homepageBackgroundVisibility',
-  'themeColorVisibility',
-  'homepageModuleVisibility',
+const badgeFields = [
+  'verificationBadgeVisibility',
+  'contactBadgeVisibility',
 ] as const;
 
-const certificationFields = [
-  'certificationVisibility',
-  'verificationBadgesVisibility',
+const homepageFields = [
+  'homepageVisibility',
+  'dynamicVisibility',
 ] as const;
 
 const activityFields = [
-  'profileCompletionVisibility',
-  'profileReviewStatusVisibility',
-  'recentActivityVisibility',
+  'browseHistoryVisibility',
+  'likeActivityVisibility',
+  'favoriteVisibility',
 ] as const;
 
 const fieldLabels: Record<string, string> = {
-  bioVisibility: '个人简介',
   genderVisibility: '性别',
   birthdayVisibility: '生日',
   regionVisibility: '地区',
   professionVisibility: '职业',
   personalLinkVisibility: '个人链接',
-  homepageBackgroundVisibility: '主页背景',
-  themeColorVisibility: '主题色',
-  homepageModuleVisibility: '主页模块',
-  certificationVisibility: '认证信息',
-  verificationBadgesVisibility: '认证徽章',
-  profileCompletionVisibility: '资料完善度',
-  profileReviewStatusVisibility: '审核状态',
-  recentActivityVisibility: '近期活动',
+  verificationBadgeVisibility: '认证标识',
+  contactBadgeVisibility: '绑定标识',
+  homepageVisibility: '主页',
+  dynamicVisibility: '动态',
+  browseHistoryVisibility: '浏览历史',
+  likeActivityVisibility: '点赞活动',
+  favoriteVisibility: '收藏',
   onlineStatusVisibility: '在线状态',
 };
 
 function defaultForm(): ContentUserPrivacyUpdateReq {
   return {
-    bioVisibility: PrivacyVisibility.PUBLIC,
     genderVisibility: PrivacyVisibility.PUBLIC,
     birthdayVisibility: PrivacyVisibility.FOLLOWERS_ONLY,
     regionVisibility: PrivacyVisibility.PUBLIC,
     professionVisibility: PrivacyVisibility.PUBLIC,
     personalLinkVisibility: PrivacyVisibility.PUBLIC,
-    homepageBackgroundVisibility: PrivacyVisibility.PUBLIC,
-    themeColorVisibility: PrivacyVisibility.PUBLIC,
-    homepageModuleVisibility: PrivacyVisibility.PUBLIC,
-    certificationVisibility: PrivacyVisibility.PUBLIC,
-    verificationBadgesVisibility: PrivacyVisibility.PUBLIC,
-    profileCompletionVisibility: PrivacyVisibility.PRIVATE,
-    profileReviewStatusVisibility: PrivacyVisibility.PRIVATE,
-    recentActivityVisibility: PrivacyVisibility.FOLLOWERS_ONLY,
+    verificationBadgeVisibility: PrivacyVisibility.PUBLIC,
+    contactBadgeVisibility: PrivacyVisibility.PUBLIC,
+    homepageVisibility: PrivacyVisibility.PUBLIC,
+    dynamicVisibility: PrivacyVisibility.PUBLIC,
     onlineStatusVisibility: OnlineStatusVisibility.PUBLIC,
-    showMutualFollowersCount: true,
-    showRecentActivityHighlight: true,
+    browseHistoryVisibility: PrivacyVisibility.PRIVATE,
+    likeActivityVisibility: PrivacyVisibility.PRIVATE,
+    favoriteVisibility: PrivacyVisibility.PRIVATE,
+    allowSearchEngineIndex: true,
+    allowUserSearch: true,
   };
 }
 
@@ -279,23 +273,21 @@ onMounted(async () => {
 
 function hydrateFromVo(detail: ContentUserProfileVO) {
   const keys: (keyof ContentUserPrivacyUpdateReq)[] = [
-    'bioVisibility',
     'genderVisibility',
     'birthdayVisibility',
     'regionVisibility',
     'professionVisibility',
     'personalLinkVisibility',
-    'homepageBackgroundVisibility',
-    'themeColorVisibility',
-    'homepageModuleVisibility',
-    'certificationVisibility',
-    'verificationBadgesVisibility',
-    'profileCompletionVisibility',
-    'profileReviewStatusVisibility',
-    'recentActivityVisibility',
+    'verificationBadgeVisibility',
+    'contactBadgeVisibility',
+    'homepageVisibility',
+    'dynamicVisibility',
     'onlineStatusVisibility',
-    'showMutualFollowersCount',
-    'showRecentActivityHighlight',
+    'browseHistoryVisibility',
+    'likeActivityVisibility',
+    'favoriteVisibility',
+    'allowSearchEngineIndex',
+    'allowUserSearch',
   ];
   for (const k of keys) {
     const v = (detail as any)[k];

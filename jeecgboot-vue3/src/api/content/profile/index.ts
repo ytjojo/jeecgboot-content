@@ -5,7 +5,6 @@ import type {
   ContentUserHomepageUpdateReq,
   ContentUserHomepageModuleVO,
   ContentUserPrivacyUpdateReq,
-  ContentUserPrivacySettingVO,
   ContentUserVerificationBadgeVO,
   ContentUserProfileHistoryVO,
   HistoryType,
@@ -54,9 +53,9 @@ export const getHomepageModules = (userId: string) =>
     params: { userId },
   });
 
-/** 更新隐私设置（覆盖 15 个 visibility + 2 个 boolean） */
+/** 更新隐私设置（覆盖 14 个 visibility + 2 个特殊字段 + 2 个 boolean） */
 export const updatePrivacy = (userId: string, data: ContentUserPrivacyUpdateReq) =>
-  defHttp.post<ContentUserPrivacySettingVO>({
+  defHttp.post<string>({
     url: Api.privacyUpdate,
     params: { userId },
     data,
