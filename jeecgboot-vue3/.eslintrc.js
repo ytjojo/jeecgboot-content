@@ -22,7 +22,6 @@ module.exports = defineConfig({
     'plugin:@typescript-eslint/recommended',
     'prettier',
     'plugin:prettier/recommended',
-    'plugin:jest/recommended',
   ],
   rules: {
     'prettier/prettier': 'off', // 彻底关闭 prettier 校验规则
