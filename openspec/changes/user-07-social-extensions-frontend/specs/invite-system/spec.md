@@ -24,7 +24,7 @@ The system SHALL display invite statistics on the invite page including total in
 
 #### Scenario: View invite statistics
 - **WHEN** user visits the invite page
-- **THEN** the system SHALL display CountTo animated numbers for total invite count, successful registration count, and total reward points via `GET /content/invite/stats`
+- **THEN** the system SHALL display CountTo animated numbers for total invite count, successful registration count, and total reward points via `GET /content/user/invite/stats`
 
 ### Requirement: Invite records list
 The system SHALL display a paginated table of invite records on the invite page.
@@ -98,3 +98,14 @@ The system SHALL create a Pinia store (`useInviteStore`) to cache invite code an
 #### Scenario: Cache invite code
 - **WHEN** the invite code is fetched for the first time
 - **THEN** the system SHALL store it in `useInviteStore` and reuse it on subsequent visits within the session
+
+## API 封装
+
+API 文件: `src/api/content/invite.ts`
+
+| 端点 | 方法 | 参数 | 响应关键字段 | 状态 |
+|------|------|------|------------|------|
+| `/content/user/invite/generate` | POST | 无参数 | inviteCode, inviteLink | ✅ 后端已实现 |
+| `/content/user/invite/info/{inviteCode}` | GET | @PathVariable: inviteCode | inviterNickname, inviterAvatar, inviteCode, expired, maxReached, registerRewardPoints | ❌ 后端待补充 |
+| `/content/user/invite/records` | GET | @RequestParam: page, pageSize | records[{inviteeNickname, registerTime, rewardPoints}], total | ✅ 后端已实现 |
+| `/content/user/invite/stats` | GET | 无参数 | totalInviteCount, successRegisterCount, totalRewardPoints | ✅ 后端已实现 |

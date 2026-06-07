@@ -47,3 +47,11 @@ The system SHALL use the `communityRole` field from the comment list API respons
 #### Scenario: Comment list includes role data
 - **WHEN** the comment list API returns comment data
 - **THEN** each comment object SHALL include a `communityRole` field that the frontend uses directly for badge rendering
+
+## API 封装
+
+社区角色标签无独立 API 端点，数据来源为评论列表接口的附带字段：
+
+| 端点 | 方法 | 变更说明 | 状态 |
+|------|------|---------|------|
+| 评论列表接口 | GET | 响应中每条评论增加 `communityRole` 字段: `'NORMAL' \| 'CREATOR' \| 'MODERATOR' \| 'ADMIN'` | ✅ 复用已有接口 |

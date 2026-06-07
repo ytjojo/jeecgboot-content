@@ -271,3 +271,35 @@
 | C-1 | FLAG | Completeness | 粉丝画像降级至二期但 design.md 和 PRD 测试表仍包含 | 开发者认知 |
 | C-2 | ADVISORY | Completeness | 二维码生成无 spec 场景覆盖 | 邀请分享页 |
 | F-1 | ADVISORY | Feasibility | design.md 文件结构包含已降级的 FanProfile.vue | 文件创建 |
+
+---
+
+## 8. 修复记录
+
+**修复日期**: 2026-06-07
+
+### 已修复问题
+
+| # | 级别 | 修复内容 | 关联文件 |
+|---|------|---------|---------|
+| S-1 | FLAG | **已验证无需修复** — PRD Section 5 当前已使用正确路径 `/content/user/...`，与 specs 一致。审核时基于旧版 PRD | PRD |
+| S-2 | FLAG | **已验证无需修复** — PRD 当前已使用 `POST /content/user/invite/generate`，与 spec 一致 | PRD |
+| S-3 | FLAG | **已验证无需修复** — design.md 当前版本（93 行）无文件结构章节，不存在命名不一致问题 | design.md |
+| A-2 | FLAG | **已修复** — 为 7 个 spec 文件补充 `## API 封装` 章节，包含端点路径、方法、参数注解、响应关键字段和后端实现状态 | 所有 spec 文件 |
+| B-1 | FLAG | **已修复** — moderation spec 中删除原因和警告原因 textarea 增加 `maxLength: 200` 约束 | specs/moderation/spec.md |
+| T-1 | FLAG | **已修复** — tasks.md 新增第 11 节"前端自动化测试"，包含 8 个 Vitest 测试任务（3 组件 + 2 Store + 3 API） | tasks.md |
+| T-2 | FLAG | **已修复** — mutual-follow spec 搜索场景增加防抖 300ms ± 50ms 验收标准；fan-analytics spec 列表加载 < 1s、图表渲染 < 2s 验收标准 | specs/mutual-follow/spec.md, specs/fan-analytics/spec.md |
+| C-1 | FLAG | **已验证无需修复** — design.md 当前版本无文件结构章节，粉丝画像已在 Non-Goals 中标注降级 | design.md |
+| F-1 | ADVISORY | **已验证无需修复** — 同 C-1 | design.md |
+| invite-stats 路径 | — | **已修复** — invite-system spec 中 `GET /content/invite/stats` 修正为 `GET /content/user/invite/stats` | specs/invite-system/spec.md |
+
+### 仍未修复（后端依赖）
+
+| # | 级别 | 问题 | 说明 |
+|---|------|------|------|
+| A-1 | BLOCK | 3 个后端端点缺失 | 互关状态查询、邀请码校验、审计日志查询 — 需后端补充，详见 backend-issues.md |
+| C-2 | ADVISORY | 二维码生成无 spec 覆盖 | 组件选型表已列出 Qrcode 组件，实现时按需集成即可 |
+
+### 更新后评估结论
+
+**CONDITIONAL PASS** → A-1 BLOCK 仍需后端补充 3 个端点。前端侧所有 FLAG 问题已修复。待后端端点就绪后可 Apply。

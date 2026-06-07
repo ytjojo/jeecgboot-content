@@ -6,6 +6,7 @@ The system SHALL provide a fan management page at `/content/fan` with a tabbed i
 #### Scenario: View fan list
 - **WHEN** user navigates to the fan management page
 - **THEN** the system SHALL display the "列表" tab by default, showing fan statistics (total fans, today's new), a search bar, and a paginated table with columns: avatar, nickname, follow time, interaction count
+  - **验收标准**: 列表加载 < 1s（分页每页 20 条）
 
 #### Scenario: Search fans by nickname
 - **WHEN** user types a keyword in the fan list search bar
@@ -21,6 +22,7 @@ The system SHALL provide a fan trend tab with ECharts line chart supporting day/
 #### Scenario: View fan trend by day
 - **WHEN** user switches to the "趋势" tab and selects "日" dimension
 - **THEN** the system SHALL display a line chart showing daily new fan counts for the last 30 days
+  - **验收标准**: 图表首次渲染 < 2s（ECharts 按需加载）
 
 #### Scenario: Switch trend dimension
 - **WHEN** user switches between day/week/month dimensions using Radio.Group
@@ -51,3 +53,14 @@ The system SHALL use `echarts/core` with on-demand chart type registration to mi
 #### Scenario: ECharts bundle optimization
 - **WHEN** the application builds
 - **THEN** the echarts bundle SHALL only include the line chart type and required components (not the full echarts library)
+
+## API 封装
+
+API 文件: `src/api/content/fan-analytics.ts`
+
+| 端点 | 方法 | 参数 | 响应关键字段 | 状态 |
+|------|------|------|------------|------|
+| `/content/user/fan/list` | GET | @RequestParam: page, pageSize, keyword? | records[{avatar, nickname, followTime, interactionCount}], total, totalFans, todayNew | ✅ 后端已实现 |
+| `/content/user/fan/trend` | GET | @RequestParam: dimension(day/week/month), startDate?, endDate? | [{date, count}] | ✅ 后端已实现 |
+| `/content/user/fan/profile` | GET | 无参数（基于当前用户） | interests[], regions[], activeHours[], totalFans | ⏸️ 降级至二期 |
+| `/content/user/fan/export` | POST | 无参数 | CSV 文件流 | ⏸️ 降级至二期 |

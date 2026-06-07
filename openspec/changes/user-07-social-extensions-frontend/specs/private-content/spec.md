@@ -69,3 +69,14 @@ The system SHALL handle private content access when mutual follow relationship i
 #### Scenario: Opened private content detail after unfollow
 - **WHEN** user A has already opened user B's private content detail page, then unfollows B and refreshes
 - **THEN** the page SHALL display "该内容仅对互关好友可见" permission prompt
+
+## API 封装
+
+私密内容功能复用已有内容发布/展示 API，无独立端点。核心变更在请求/响应字段层面：
+
+| 端点 | 方法 | 变更说明 | 状态 |
+|------|------|---------|------|
+| 内容发布接口 | POST | 新增 `visibility` 字段: `'PUBLIC' \| 'MUTUAL_FOLLOW_ONLY'` | ✅ 复用已有接口 |
+| 内容列表/Feed 接口 | GET | 后端根据当前用户与作者互关状态过滤，响应中内容项增加 `visibility` 字段 | ✅ 后端过滤 |
+| 用户主页内容列表 | GET | 后端根据互关状态返回是否包含私密内容 | ✅ 后端过滤 |
+| 搜索接口 | GET | 后端过滤非互关用户的私密内容 | ✅ 后端过滤 |

@@ -80,3 +80,14 @@
 - [x] 10.4 集成角色标签埋点事件（community_role_badge_show/click）
 - [x] 10.5 集成管理操作埋点事件（moderator_action_execute）
 - [x] 10.6 集成私密内容埋点事件（private_content_publish、private_content_access_denied）
+
+## 11. 前端自动化测试（Vitest）
+
+- [ ] 11.1 编写 `MutualFollowBadge` 组件测试（渲染互关/非互关/评论区内嵌模式）
+- [ ] 11.2 编写 `CommunityRoleBadge` 组件测试（NORMAL/CREATOR/MODERATOR/ADMIN 角色渲染、Popover 触发）
+- [ ] 11.3 编写 `ModeratorActionModal` 组件测试（deleteComment/warnUser 两种模式、表单验证、success 事件）
+- [ ] 11.4 编写 `useMutualFollowStore` 测试（缓存读写、缓存清除、批量查询）
+- [ ] 11.5 编写 `useInviteStore` 测试（邀请码缓存、统计信息缓存）
+- [ ] 11.6 编写 `invite.ts` API 封装测试（generate/records/stats 端点调用验证）
+- [ ] 11.7 编写 `fan-analytics.ts` API 封装测试（fan/list、fan/trend 端点调用验证）
+- [ ] 11.8 编写 `governance.ts` API 封装测试（delete-comment、warn-user 端点调用验证）

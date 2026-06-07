@@ -25,6 +25,7 @@ The system SHALL provide a mutual follow friend list page at `/content/mutual-fo
 #### Scenario: Search mutual follow friends
 - **WHEN** user types a keyword in the search input
 - **THEN** the system SHALL filter the list by nickname or username with 300ms debounce, and restore the full list when input is cleared
+  - **验收标准**: 防抖延迟 300ms ± 50ms；列表刷新响应 < 1s
 
 #### Scenario: Unfollow a mutual friend
 - **WHEN** user clicks "取消关注" button on a mutual friend and confirms in the confirmation dialog
@@ -60,3 +61,12 @@ The system SHALL provide API endpoints for mutual follow list and mutual status 
 - **WHEN** incremental comment loading requires mutual status for a list of userIds
 - **THEN** the system SHALL call the mutual status batch query API with userId list and cache results in `useMutualFollowStore`
 - **NOTE**: 后端需补充 `GET /content/user/relation/mutual-status` 端点，详见 backend-issues.md
+
+## API 封装
+
+API 文件: `src/api/content/mutual-follow.ts`（如已有 relation 相关封装则复用）
+
+| 端点 | 方法 | 参数 | 响应关键字段 | 状态 |
+|------|------|------|------------|------|
+| `/content/user/relation/mutual-follow-list` | GET | @RequestParam: page, pageSize, keyword? | records[{userId, nickname, avatar, mutualFollowTime}], total | ✅ 后端已实现 |
+| `/content/user/relation/mutual-status` | GET | @RequestParam: userIds (逗号分隔) | Map<userId, boolean> | ❌ 后端待补充 |

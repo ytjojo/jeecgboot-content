@@ -9,7 +9,7 @@ The system SHALL provide a "删除评论" (delete comment) action in the comment
 
 #### Scenario: Delete comment confirmation
 - **WHEN** moderator clicks "删除评论"
-- **THEN** the system SHALL display a Modal with a textarea for deletion reason (required) and a confirm button
+- **THEN** the system SHALL display a Modal with a textarea for deletion reason (required, maxLength: 200) and a confirm button
 
 #### Scenario: Successful comment deletion
 - **WHEN** moderator submits the deletion form with a valid reason
@@ -28,7 +28,7 @@ The system SHALL provide a "警告用户" (warn user) action in the comment oper
 
 #### Scenario: Warn user confirmation
 - **WHEN** moderator clicks "警告用户"
-- **THEN** the system SHALL display a Modal with a textarea for warning reason (required) and a confirm button
+- **THEN** the system SHALL display a Modal with a textarea for warning reason (required, maxLength: 200) and a confirm button
 
 #### Scenario: Successful user warning
 - **WHEN** moderator submits the warning form with a valid reason
@@ -81,3 +81,12 @@ The system SHALL integrate governance APIs using `defHttp` encapsulation in `src
 #### Scenario: Call warn user API
 - **WHEN** moderator confirms user warning
 - **THEN** the system SHALL call `POST /content/user/governance/moderator/user/warn` with `{ userId, reason }`
+
+## API 封装
+
+API 文件: `src/api/content/governance.ts`
+
+| 端点 | 方法 | 参数 | 响应 | 状态 |
+|------|------|------|------|------|
+| `/content/user/governance/moderator/comment/delete` | POST | @RequestBody: { commentId: string, reason: string (必填, maxLength: 200) } | 成功/失败 | ✅ 后端已实现 |
+| `/content/user/governance/moderator/user/warn` | POST | @RequestBody: { userId: string, reason: string (必填, maxLength: 200) } | 成功/失败 | ✅ 后端已实现 |
