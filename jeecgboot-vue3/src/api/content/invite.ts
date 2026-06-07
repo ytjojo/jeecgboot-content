@@ -1,11 +1,11 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  generate = '/content/user/invite/generate',
-  bind = '/content/user/invite/bind',
-  validate = '/content/user/invite/validate',
-  records = '/content/user/invite/records',
-  stats = '/content/user/invite/stats',
+  generate = '/api/v1/content/user/invite/generate',
+  bind = '/api/v1/content/user/invite/bind',
+  validate = '/api/v1/content/user/invite/validate',
+  records = '/api/v1/content/user/invite/records',
+  stats = '/api/v1/content/user/invite/stats',
 }
 
 /** 生成或获取邀请码 */

@@ -1,11 +1,11 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  block = '/content/user/relation/block',
-  unblock = '/content/user/relation/unblock',
-  blacklist = '/content/user/relation/blacklist',
-  detail = '/content/user/relation/detail',
-  help = '/content/user/relation/block-mute/help',
+  block = '/api/v1/content/user/relation/block',
+  unblock = '/api/v1/content/user/relation/unblock',
+  blacklist = '/api/v1/content/user/relation/blacklist',
+  detail = '/api/v1/content/user/relation/detail',
+  help = '/api/v1/content/user/relation/block-mute/help',
 }
 
 /** 拉黑用户 */

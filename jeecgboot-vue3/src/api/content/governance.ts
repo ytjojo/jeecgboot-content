@@ -1,9 +1,9 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  deleteComment = '/content/user/governance/moderator/comment/delete',
-  warnUser = '/content/user/governance/moderator/user/warn',
-  auditLog = '/content/user/governance/audit-log',
+  deleteComment = '/api/v1/content/user/governance/moderator/comment/delete',
+  warnUser = '/api/v1/content/user/governance/moderator/user/warn',
+  auditLog = '/api/v1/content/user/governance/audit-log',
 }
 
 /** 版主删除评论 */

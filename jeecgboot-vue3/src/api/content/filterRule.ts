@@ -1,11 +1,11 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  addRule = '/content/user/filter-rule',
-  deleteRule = '/content/user/filter-rule/delete',
-  batchDelete = '/content/user/filter-rule/batch-delete',
-  ruleList = '/content/user/filter-rule/list',
-  notInterested = '/content/user/not-interested',
+  addRule = '/api/v1/content/user/filter-rule',
+  deleteRule = '/api/v1/content/user/filter-rule/delete',
+  batchDelete = '/api/v1/content/user/filter-rule/batch-delete',
+  ruleList = '/api/v1/content/user/filter-rule/list',
+  notInterested = '/api/v1/content/user/not-interested',
 }
 
 /** 添加屏蔽规则 */

@@ -8,11 +8,11 @@ import type {
 } from './types';
 
 enum Api {
-  summary = '/content/user/growth/summary',
-  levelConfig = '/content/user/growth/level/config',
-  levelBenefit = '/content/user/growth/level/benefit',
-  decayRule = '/content/user/growth/decay/rule',
-  decayStatus = '/content/user/growth/decay/status',
+  summary = '/api/v1/content/user/growth/summary',
+  levelConfig = '/api/v1/content/user/growth/level/config',
+  levelBenefit = '/api/v1/content/user/growth/level/benefit',
+  decayRule = '/api/v1/content/user/growth/decay/rule',
+  decayStatus = '/api/v1/content/user/growth/decay/status',
 }
 
 /** 查询成长汇总（积分 + 成长值 + 等级） */

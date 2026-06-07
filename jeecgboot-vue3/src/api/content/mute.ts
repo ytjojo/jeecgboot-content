@@ -1,9 +1,9 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  mute = '/content/user/relation/mute',
-  unmute = '/content/user/relation/mute/cancel',
-  muteList = '/content/user/relation/mute-list',
+  mute = '/api/v1/content/user/relation/mute',
+  unmute = '/api/v1/content/user/relation/mute/cancel',
+  muteList = '/api/v1/content/user/relation/mute-list',
 }
 
 /** 屏蔽用户 */

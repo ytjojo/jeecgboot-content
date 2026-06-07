@@ -15,16 +15,16 @@ import type {
 
 enum Api {
   // 用户端
-  create = '/api/v1/channels/create',
-  detail = '/api/v1/channels/',
-  list = '/api/v1/channels/list',
-  checkName = '/api/v1/channels/check-name',
+  create = '/api/v1/content/channels/create',
+  detail = '/api/v1/content/channels/',
+  list = '/api/v1/content/channels/list',
+  checkName = '/api/v1/content/channels/check-name',
   // 管理端
-  adminCreateSystem = '/api/v1/admin/channels/create-system',
-  adminReview = '/api/v1/admin/channels/',
+  adminCreateSystem = '/api/v1/content/admin/channels/create-system',
+  adminReview = '/api/v1/content/admin/channels/',
   // 审核
-  reviewList = '/jeecg-boot/api/v1/content/channel/review/list',
-  reviewAction = '/jeecg-boot/api/v1/content/channel/review/action',
+  reviewList = '/api/v1/content/channel/review/list',
+  reviewAction = '/api/v1/content/channel/review/action',
 }
 
 /** 获取频道分页列表 */

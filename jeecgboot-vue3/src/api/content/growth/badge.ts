@@ -9,12 +9,12 @@ import type {
 } from './badge-types';
 
 enum Api {
-  catalog = '/content/user/growth/badge/catalog',
-  detail = '/content/user/growth/badge/detail',
-  worn = '/content/user/growth/badge/worn',
-  wear = '/content/user/growth/badge/wear',
-  recycle = '/content/user/growth/badge/recycle',
-  adminList = '/content/user/growth/badge/admin/list',
+  catalog = '/api/v1/content/user/growth/badge/catalog',
+  detail = '/api/v1/content/user/growth/badge/detail',
+  worn = '/api/v1/content/user/growth/badge/worn',
+  wear = '/api/v1/content/user/growth/badge/wear',
+  recycle = '/api/v1/content/user/growth/badge/recycle',
+  adminList = '/api/v1/content/user/growth/badge/admin/list',
 }
 
 /** 查询勋章分类目录 */

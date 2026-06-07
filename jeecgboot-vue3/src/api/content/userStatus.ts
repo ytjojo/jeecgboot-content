@@ -12,15 +12,15 @@ import type {
 } from './model/userStatusModel';
 
 enum Api {
-  current = '/api/content/user-status/current',
-  base = '/api/content/user-status',
-  transitions = '/api/content/user-status/transitions',
-  list = '/api/content/user-status/list',
-  batchRelease = '/api/content/user-status/batch-release',
-  auditLogs = '/api/content/user-status/audit-logs',
-  auditLogExport = '/api/content/user-status/audit-logs/export',
-  verifySecurity = '/api/content/user-status/verify-security',
-  sendVerifyCode = '/api/content/user-status/send-verify-code',
+  current = '/api/v1/content/user-status/current',
+  base = '/api/v1/content/user-status',
+  transitions = '/api/v1/content/user-status/transitions',
+  list = '/api/v1/content/user-status/list',
+  batchRelease = '/api/v1/content/user-status/batch-release',
+  auditLogs = '/api/v1/content/user-status/audit-logs',
+  auditLogExport = '/api/v1/content/user-status/audit-logs/export',
+  verifySecurity = '/api/v1/content/user-status/verify-security',
+  sendVerifyCode = '/api/v1/content/user-status/send-verify-code',
 }
 
 /** 获取当前用户状态 */

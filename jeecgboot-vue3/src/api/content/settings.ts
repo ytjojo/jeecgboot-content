@@ -12,16 +12,16 @@ import type {
 } from './settings-types';
 
 enum Api {
-  notification = '/content/user/settings/notification',
-  notificationUpdate = '/content/user/settings/notification/update',
-  dndUpdate = '/content/user/settings/notification/dnd/update',
-  privacy = '/content/user/settings/privacy',
-  privacyUpdate = '/content/user/settings/privacy/update',
-  security = '/content/user/settings/security',
-  securityUpdate = '/content/user/settings/security/update',
-  thirdPartyList = '/content/user/auth/third-party',
-  thirdPartyDetail = '/content/user/auth/third-party/',
-  thirdPartyRevoke = '/content/user/auth/third-party/',
+  notification = '/api/v1/content/user/settings/notification',
+  notificationUpdate = '/api/v1/content/user/settings/notification/update',
+  dndUpdate = '/api/v1/content/user/settings/notification/dnd/update',
+  privacy = '/api/v1/content/user/settings/privacy',
+  privacyUpdate = '/api/v1/content/user/settings/privacy/update',
+  security = '/api/v1/content/user/settings/security',
+  securityUpdate = '/api/v1/content/user/settings/security/update',
+  thirdPartyList = '/api/v1/content/user/auth/third-party',
+  thirdPartyDetail = '/api/v1/content/user/auth/third-party/',
+  thirdPartyRevoke = '/api/v1/content/user/auth/third-party/',
 }
 
 /** 获取通知设置 */

@@ -11,17 +11,17 @@ import type {
 } from './types';
 
 enum Api {
-  detail = '/content/user/profile/detail',
-  update = '/content/user/profile/update',
-  reviewHandle = '/content/user/profile/review/handle',
-  privacyUpdate = '/content/user/profile/privacy/update',
-  homepageUpdate = '/content/user/profile/homepage/update',
-  homepageDefaultsRestore = '/content/user/profile/homepage/defaults/restore',
-  homepageModules = '/content/user/profile/homepage/modules',
-  badgeList = '/content/user/profile/badge/list',
-  badgeDetail = '/content/user/profile/badge/detail',
-  historyList = '/content/user/profile/history/list',
-  historyRestore = '/content/user/profile/history/restore',
+  detail = '/api/v1/content/user/profile/detail',
+  update = '/api/v1/content/user/profile/update',
+  reviewHandle = '/api/v1/content/user/profile/review/handle',
+  privacyUpdate = '/api/v1/content/user/profile/privacy/update',
+  homepageUpdate = '/api/v1/content/user/profile/homepage/update',
+  homepageDefaultsRestore = '/api/v1/content/user/profile/homepage/defaults/restore',
+  homepageModules = '/api/v1/content/user/profile/homepage/modules',
+  badgeList = '/api/v1/content/user/profile/badge/list',
+  badgeDetail = '/api/v1/content/user/profile/badge/detail',
+  historyList = '/api/v1/content/user/profile/history/list',
+  historyRestore = '/api/v1/content/user/profile/history/restore',
 }
 
 /** 查询资料详情（owner + viewer 视角裁剪） */

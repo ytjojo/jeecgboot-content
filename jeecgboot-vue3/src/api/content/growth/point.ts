@@ -10,11 +10,11 @@ import type {
 } from './point-types';
 
 enum Api {
-  ledger = '/content/user/growth/point/ledger',
-  exchangeGoods = '/content/user/growth/point/exchange/goods',
-  exchange = '/content/user/growth/point/exchange',
-  featureUnlock = '/content/user/growth/point/feature/unlock',
-  giftSend = '/content/user/growth/point/gift/send',
+  ledger = '/api/v1/content/user/growth/point/ledger',
+  exchangeGoods = '/api/v1/content/user/growth/point/exchange/goods',
+  exchange = '/api/v1/content/user/growth/point/exchange',
+  featureUnlock = '/api/v1/content/user/growth/point/feature/unlock',
+  giftSend = '/api/v1/content/user/growth/point/gift/send',
 }
 
 /** 查询积分明细 */

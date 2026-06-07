@@ -1,19 +1,19 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  subscribe = '/content/user/subscription/subscribe',
-  cancel = '/content/user/subscription/cancel',
-  pause = '/content/user/subscription/pause',
-  resume = '/content/user/subscription/resume',
-  list = '/content/user/subscription/list',
-  feed = '/content/user/subscription/feed',
-  plaza = '/content/user/subscription/plaza',
-  sourceDetail = '/content/user/subscription/source/detail',
-  sourceSubscribe = '/content/user/subscription/source/subscribe',
-  batchPause = '/content/user/subscription/batch/pause',
-  batchResume = '/content/user/subscription/batch/resume',
-  batchCancel = '/content/user/subscription/batch/cancel',
-  notificationPreference = '/content/user/subscription/notification/preference',
+  subscribe = '/api/v1/content/user/subscription/subscribe',
+  cancel = '/api/v1/content/user/subscription/cancel',
+  pause = '/api/v1/content/user/subscription/pause',
+  resume = '/api/v1/content/user/subscription/resume',
+  list = '/api/v1/content/user/subscription/list',
+  feed = '/api/v1/content/user/subscription/feed',
+  plaza = '/api/v1/content/user/subscription/plaza',
+  sourceDetail = '/api/v1/content/user/subscription/source/detail',
+  sourceSubscribe = '/api/v1/content/user/subscription/source/subscribe',
+  batchPause = '/api/v1/content/user/subscription/batch/pause',
+  batchResume = '/api/v1/content/user/subscription/batch/resume',
+  batchCancel = '/api/v1/content/user/subscription/batch/cancel',
+  notificationPreference = '/api/v1/content/user/subscription/notification/preference',
 }
 
 /** 订阅来源 */

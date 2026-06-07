@@ -1,10 +1,10 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  list = '/content/user/fan/list',
-  trend = '/content/user/fan/trend',
-  profile = '/content/user/fan/profile',
-  exportCsv = '/content/user/fan/export',
+  list = '/api/v1/content/user/fan/list',
+  trend = '/api/v1/content/user/fan/trend',
+  profile = '/api/v1/content/user/fan/profile',
+  exportCsv = '/api/v1/content/user/fan/export',
 }
 
 /** 查询粉丝列表 */
