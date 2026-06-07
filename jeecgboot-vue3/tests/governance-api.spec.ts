@@ -19,7 +19,7 @@ describe('api/content/governance', () => {
   it('POSTs moderator comment delete with commentId and reason', () => {
     deleteComment('comment-1', '违规内容');
     expect(defHttp.post).toHaveBeenCalledWith({
-      url: '/content/user/governance/moderator/comment/delete',
+      url: '/api/v1/content/user/governance/moderator/comment/delete',
       data: { commentId: 'comment-1', reason: '违规内容' },
     });
   });
@@ -27,7 +27,7 @@ describe('api/content/governance', () => {
   it('POSTs moderator user warn with userId and reason', () => {
     warnUser('user-2', '恶意评论');
     expect(defHttp.post).toHaveBeenCalledWith({
-      url: '/content/user/governance/moderator/user/warn',
+      url: '/api/v1/content/user/governance/moderator/user/warn',
       data: { userId: 'user-2', reason: '恶意评论' },
     });
   });
@@ -35,7 +35,7 @@ describe('api/content/governance', () => {
   it('GETs audit log with pagination and filters', () => {
     listAuditLog({ pageNo: 2, pageSize: 20, operatorUserId: 'op-1', eventType: 'DELETE_COMMENT' });
     expect(defHttp.get).toHaveBeenCalledWith({
-      url: '/content/user/governance/audit-log',
+      url: '/api/v1/content/user/governance/audit-log',
       params: { pageNo: 2, pageSize: 20, operatorUserId: 'op-1', eventType: 'DELETE_COMMENT' },
     });
   });
@@ -43,7 +43,7 @@ describe('api/content/governance', () => {
   it('GETs audit log with no filters', () => {
     listAuditLog();
     expect(defHttp.get).toHaveBeenCalledWith({
-      url: '/content/user/governance/audit-log',
+      url: '/api/v1/content/user/governance/audit-log',
       params: {},
     });
   });

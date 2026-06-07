@@ -32,10 +32,10 @@ describe('api/content/subscribe', () => {
   });
 
   describe('subscribeSource', () => {
-    it('POSTs to /content/user/subscription/subscribe with userId + data', () => {
+    it('POSTs to /api/v1/content/user/subscription/subscribe with userId + data', () => {
       subscribeSource('user-1', { sourceId: 'src-1', sourceType: 'RSS' });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/subscription/subscribe',
+        url: '/api/v1/content/user/subscription/subscribe',
         params: { userId: 'user-1' },
         data: { sourceId: 'src-1', sourceType: 'RSS' },
       });
@@ -43,10 +43,10 @@ describe('api/content/subscribe', () => {
   });
 
   describe('cancelSubscription', () => {
-    it('POSTs to /content/user/subscription/cancel with userId + sourceId', () => {
+    it('POSTs to /api/v1/content/user/subscription/cancel with userId + sourceId', () => {
       cancelSubscription('user-1', 'src-1');
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/subscription/cancel',
+        url: '/api/v1/content/user/subscription/cancel',
         params: { userId: 'user-1', sourceId: 'src-1' },
       });
     });
@@ -56,7 +56,7 @@ describe('api/content/subscribe', () => {
     it('POSTs to /pause', () => {
       pauseSubscription('user-1', 'src-1');
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/subscription/pause',
+        url: '/api/v1/content/user/subscription/pause',
         params: { userId: 'user-1', sourceId: 'src-1' },
       });
     });
@@ -64,7 +64,7 @@ describe('api/content/subscribe', () => {
     it('POSTs to /resume', () => {
       resumeSubscription('user-1', 'src-1');
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/subscription/resume',
+        url: '/api/v1/content/user/subscription/resume',
         params: { userId: 'user-1', sourceId: 'src-1' },
       });
     });
@@ -74,7 +74,7 @@ describe('api/content/subscribe', () => {
     it('GETs /list with userId + filters', () => {
       getSubscribeList('user-1', { keyword: 'tech', sourceType: 'RSS', pageNo: 1, pageSize: 20 });
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/subscription/list',
+        url: '/api/v1/content/user/subscription/list',
         params: { userId: 'user-1', keyword: 'tech', sourceType: 'RSS', pageNo: 1, pageSize: 20 },
       });
     });
@@ -82,7 +82,7 @@ describe('api/content/subscribe', () => {
     it('works without optional params', () => {
       getSubscribeList('user-1');
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/subscription/list',
+        url: '/api/v1/content/user/subscription/list',
         params: { userId: 'user-1' },
       });
     });
@@ -92,7 +92,7 @@ describe('api/content/subscribe', () => {
     it('GETs /feed with pagination + sourceType', () => {
       getSubscribeFeed({ page: 1, size: 20, sourceType: 'RSS' });
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/subscription/feed',
+        url: '/api/v1/content/user/subscription/feed',
         params: { page: 1, size: 20, sourceType: 'RSS' },
       });
     });
@@ -102,7 +102,7 @@ describe('api/content/subscribe', () => {
     it('GETs /plaza with keyword + category + pagination', () => {
       getSubscribePlaza({ keyword: 'tech', category: '科技', page: 1, size: 20, sort: 'popularity' });
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/subscription/plaza',
+        url: '/api/v1/content/user/subscription/plaza',
         params: { keyword: 'tech', category: '科技', page: 1, size: 20, sort: 'popularity' },
       });
     });
@@ -112,7 +112,7 @@ describe('api/content/subscribe', () => {
     it('GETs /source/detail with sourceId', () => {
       getSubscribeSourceDetail('src-1');
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/subscription/source/detail',
+        url: '/api/v1/content/user/subscription/source/detail',
         params: { sourceId: 'src-1' },
       });
     });
@@ -122,7 +122,7 @@ describe('api/content/subscribe', () => {
     it('POSTs to /source/subscribe', () => {
       subscribeFromPlaza('user-1', { sourceId: 'src-1', sourceType: 'RSS' });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/subscription/source/subscribe',
+        url: '/api/v1/content/user/subscription/source/subscribe',
         params: { userId: 'user-1' },
         data: { sourceId: 'src-1', sourceType: 'RSS' },
       });
@@ -133,7 +133,7 @@ describe('api/content/subscribe', () => {
     it('batchPauseSubscribe POSTs to /batch/pause', () => {
       batchPauseSubscribe('user-1', { sourceIds: ['s-1', 's-2'] });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/subscription/batch/pause',
+        url: '/api/v1/content/user/subscription/batch/pause',
         params: { userId: 'user-1' },
         data: { sourceIds: ['s-1', 's-2'] },
       });
@@ -142,7 +142,7 @@ describe('api/content/subscribe', () => {
     it('batchResumeSubscribe POSTs to /batch/resume', () => {
       batchResumeSubscribe('user-1', { sourceIds: ['s-1'] });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/subscription/batch/resume',
+        url: '/api/v1/content/user/subscription/batch/resume',
         params: { userId: 'user-1' },
         data: { sourceIds: ['s-1'] },
       });
@@ -151,7 +151,7 @@ describe('api/content/subscribe', () => {
     it('batchCancelSubscribe POSTs to /batch/cancel', () => {
       batchCancelSubscribe('user-1', { sourceIds: ['s-1'] });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/subscription/batch/cancel',
+        url: '/api/v1/content/user/subscription/batch/cancel',
         params: { userId: 'user-1' },
         data: { sourceIds: ['s-1'] },
       });
@@ -162,7 +162,7 @@ describe('api/content/subscribe', () => {
     it('getNotificationPreference GETs with userId + sourceId', () => {
       getNotificationPreference('user-1', 'src-1');
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/subscription/notification/preference',
+        url: '/api/v1/content/user/subscription/notification/preference',
         params: { userId: 'user-1', sourceId: 'src-1' },
       });
     });
@@ -171,7 +171,7 @@ describe('api/content/subscribe', () => {
       const config = { channelInApp: true, channelPush: false, channelEmail: true, frequency: 'daily', quietStart: '22:00', quietEnd: '08:00' };
       saveNotificationPreference('user-1', 'src-1', config);
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/subscription/notification/preference',
+        url: '/api/v1/content/user/subscription/notification/preference',
         params: { userId: 'user-1', sourceId: 'src-1' },
         data: config,
       });

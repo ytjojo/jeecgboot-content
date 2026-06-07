@@ -36,10 +36,10 @@ describe('api/content/relation', () => {
   });
 
   describe('getMutualFollowList', () => {
-    it('GETs /content/user/relation/mutual-follow-list with userId + params', () => {
+    it('GETs /api/v1/content/user/relation/mutual-follow-list with userId + params', () => {
       getMutualFollowList('user-1', { keyword: 'test', pageNo: 1, pageSize: 10 });
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/relation/mutual-follow-list',
+        url: '/api/v1/content/user/relation/mutual-follow-list',
         params: { userId: 'user-1', keyword: 'test', pageNo: 1, pageSize: 10 },
       });
     });
@@ -47,27 +47,27 @@ describe('api/content/relation', () => {
     it('works without optional params', () => {
       getMutualFollowList('user-1');
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/relation/mutual-follow-list',
+        url: '/api/v1/content/user/relation/mutual-follow-list',
         params: { userId: 'user-1' },
       });
     });
   });
 
   describe('getRelationDetail', () => {
-    it('GETs /content/user/relation/detail with userId + targetUserId', () => {
+    it('GETs /api/v1/content/user/relation/detail with userId + targetUserId', () => {
       getRelationDetail('user-1', 'target-1');
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/relation/detail',
+        url: '/api/v1/content/user/relation/detail',
         params: { userId: 'user-1', targetUserId: 'target-1' },
       });
     });
   });
 
   describe('followUser', () => {
-    it('POSTs to /content/user/relation/follow with userId and data', () => {
+    it('POSTs to /api/v1/content/user/relation/follow with userId and data', () => {
       followUser('user-1', { targetUserId: 'target-1', relationGroupId: 'group-1' });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/follow',
+        url: '/api/v1/content/user/relation/follow',
         params: { userId: 'user-1' },
         data: { targetUserId: 'target-1', relationGroupId: 'group-1' },
       });
@@ -76,7 +76,7 @@ describe('api/content/relation', () => {
     it('works without optional groupId', () => {
       followUser('user-1', { targetUserId: 'target-1' });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/follow',
+        url: '/api/v1/content/user/relation/follow',
         params: { userId: 'user-1' },
         data: { targetUserId: 'target-1' },
       });
@@ -84,28 +84,28 @@ describe('api/content/relation', () => {
   });
 
   describe('unfollowUser', () => {
-    it('POSTs to /content/user/relation/unfollow with userId + targetUserId', () => {
+    it('POSTs to /api/v1/content/user/relation/unfollow with userId + targetUserId', () => {
       unfollowUser('user-1', 'target-1');
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/unfollow',
+        url: '/api/v1/content/user/relation/unfollow',
         params: { userId: 'user-1', targetUserId: 'target-1' },
       });
     });
   });
 
   describe('setSpecialFollow / cancelSpecialFollow', () => {
-    it('POSTs to /content/user/relation/special-follow', () => {
+    it('POSTs to /api/v1/content/user/relation/special-follow', () => {
       setSpecialFollow('user-1', 'target-1');
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/special-follow',
+        url: '/api/v1/content/user/relation/special-follow',
         params: { userId: 'user-1', targetUserId: 'target-1' },
       });
     });
 
-    it('POSTs to /content/user/relation/special-follow/cancel', () => {
+    it('POSTs to /api/v1/content/user/relation/special-follow/cancel', () => {
       cancelSpecialFollow('user-1', 'target-1');
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/special-follow/cancel',
+        url: '/api/v1/content/user/relation/special-follow/cancel',
         params: { userId: 'user-1', targetUserId: 'target-1' },
       });
     });
@@ -115,7 +115,7 @@ describe('api/content/relation', () => {
     it('getFollowGroupList GETs /groups', () => {
       getFollowGroupList('user-1');
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/relation/groups',
+        url: '/api/v1/content/user/relation/groups',
         params: { userId: 'user-1' },
       });
     });
@@ -123,7 +123,7 @@ describe('api/content/relation', () => {
     it('createFollowGroup POSTs to /group/create', () => {
       createFollowGroup('user-1', { name: 'Friends', sortOrder: 1 });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/group/create',
+        url: '/api/v1/content/user/relation/group/create',
         params: { userId: 'user-1' },
         data: { name: 'Friends', sortOrder: 1 },
       });
@@ -132,7 +132,7 @@ describe('api/content/relation', () => {
     it('renameFollowGroup POSTs to /group/rename', () => {
       renameFollowGroup('user-1', { groupId: 'g-1', name: 'New Name' });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/group/rename',
+        url: '/api/v1/content/user/relation/group/rename',
         params: { userId: 'user-1' },
         data: { groupId: 'g-1', name: 'New Name' },
       });
@@ -141,7 +141,7 @@ describe('api/content/relation', () => {
     it('deleteFollowGroup POSTs to /group/delete', () => {
       deleteFollowGroup('user-1', 'g-1');
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/group/delete',
+        url: '/api/v1/content/user/relation/group/delete',
         params: { userId: 'user-1', groupId: 'g-1' },
       });
     });
@@ -149,7 +149,7 @@ describe('api/content/relation', () => {
     it('moveFollowGroup POSTs to /group/move', () => {
       moveFollowGroup('user-1', { targetUserId: 't-1', groupId: 'g-1' });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/group/move',
+        url: '/api/v1/content/user/relation/group/move',
         params: { userId: 'user-1' },
         data: { targetUserId: 't-1', groupId: 'g-1' },
       });
@@ -158,7 +158,7 @@ describe('api/content/relation', () => {
     it('removeFromGroup POSTs to /group/remove', () => {
       removeFromGroup('user-1', { targetUserId: 't-1', groupId: 'g-1' });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/group/remove',
+        url: '/api/v1/content/user/relation/group/remove',
         params: { userId: 'user-1' },
         data: { targetUserId: 't-1', groupId: 'g-1' },
       });
@@ -169,7 +169,7 @@ describe('api/content/relation', () => {
     it('getFollowList GETs /follow-list with filters', () => {
       getFollowList('user-1', { keyword: 'test', groupId: 'g-1', pageNo: 2, pageSize: 20 });
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/relation/follow-list',
+        url: '/api/v1/content/user/relation/follow-list',
         params: { userId: 'user-1', keyword: 'test', groupId: 'g-1', pageNo: 2, pageSize: 20 },
       });
     });
@@ -177,7 +177,7 @@ describe('api/content/relation', () => {
     it('getSpecialFollowList GETs /special-follow-list', () => {
       getSpecialFollowList('user-1', { pageNo: 1, pageSize: 10 });
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/relation/special-follow-list',
+        url: '/api/v1/content/user/relation/special-follow-list',
         params: { userId: 'user-1', pageNo: 1, pageSize: 10 },
       });
     });
@@ -185,7 +185,7 @@ describe('api/content/relation', () => {
     it('getRecommendations GETs /recommendations', () => {
       getRecommendations({ page: 1, size: 10 });
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/relation/recommendations',
+        url: '/api/v1/content/user/relation/recommendations',
         params: { page: 1, size: 10 },
       });
     });
@@ -195,7 +195,7 @@ describe('api/content/relation', () => {
     it('batchUnfollow POSTs to /batch/unfollow', () => {
       batchUnfollow('user-1', { targetUserIds: ['t-1', 't-2'] });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/batch/unfollow',
+        url: '/api/v1/content/user/relation/batch/unfollow',
         params: { userId: 'user-1' },
         data: { targetUserIds: ['t-1', 't-2'] },
       });
@@ -204,7 +204,7 @@ describe('api/content/relation', () => {
     it('batchCancelSpecial POSTs to /batch/special-follow/cancel', () => {
       batchCancelSpecial('user-1', { targetUserIds: ['t-1'] });
       expect(defHttp.post).toHaveBeenCalledWith({
-        url: '/content/user/relation/batch/special-follow/cancel',
+        url: '/api/v1/content/user/relation/batch/special-follow/cancel',
         params: { userId: 'user-1' },
         data: { targetUserIds: ['t-1'] },
       });
@@ -212,10 +212,10 @@ describe('api/content/relation', () => {
   });
 
   describe('getFollowingFeed', () => {
-    it('GETs /content/user/relation/feed with params', () => {
+    it('GETs /api/v1/content/user/relation/feed with params', () => {
       getFollowingFeed({ page: 1, size: 20, types: 'post,like' });
       expect(defHttp.get).toHaveBeenCalledWith({
-        url: '/content/user/relation/feed',
+        url: '/api/v1/content/user/relation/feed',
         params: { page: 1, size: 20, types: 'post,like' },
       });
     });
