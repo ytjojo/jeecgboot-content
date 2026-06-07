@@ -9,15 +9,15 @@
 ## 2. API 封装与类型定义
 
 - [x] 2.1 创建 `api/profile.ts`，封装资料管理接口（`detail`、`update`、`review/handle` 不对接）
-  - `update` 接口返回类型：`Result<ContentUserProfileVO>`（需后端改造）
+  - `update` 接口返回类型：`Result<ContentUserProfileVO>`（后端已改造完成）
 - [x] 2.2 创建 `api/homepage.ts`，封装主页设置接口（`homepage/update`、`homepage/defaults/restore`、`homepage/modules`）
-  - `homepage/update` 返回类型：`Result<ContentUserProfileVO>`（需后端改造）
-  - `homepage/defaults/restore` 返回类型：`Result<ContentUserProfileVO>`（需后端改造）
+  - `homepage/update` 返回类型：`Result<ContentUserProfileVO>`（后端已改造完成）
+  - `homepage/defaults/restore` 返回类型：`Result<ContentUserProfileVO>`（后端已改造完成）
 - [x] 2.3 创建 `api/verification.ts`，封装认证标识接口（`badge/list`、`badge/detail`）
 - [x] 2.4 创建 `api/privacy.ts`，封装隐私设置接口（`privacy/update`）
-  - `privacy/update` 返回类型：`Result<String>`（保持现状，无需改造）
+  - `privacy/update` 返回类型：`Result<String>`（返回"更新成功"）
 - [x] 2.5 创建 `api/profile-history.ts`，封装历史记录接口（`history/list?historyType=NICKNAME|AVATAR`、`history/restore`）
-  - `history/restore` 返回类型：`Result<ContentUserProfileVO>`（需后端改造）
+  - `history/restore` 返回类型：`Result<ContentUserProfileVO>`（后端已改造完成）
 - [x] 2.6 定义 TypeScript 类型：`ContentUserProfileVO`、`ContentUserProfileUpdateReq`、`ContentUserHomepageUpdateReq`、`ContentUserHomepageModuleVO`、`ContentUserPrivacyUpdateReq`、`ContentUserVerificationBadgeVO`、`ContentUserProfileHistoryVO`
 - [x] 2.7 定义 `PrivacyVisibility` 枚举类型：`PUBLIC | FOLLOWERS_ONLY | MUTUAL_ONLY | PRIVATE`
 - [x] 2.8 定义 `OnlineStatusVisibility` 枚举类型：`PUBLIC | HIDDEN | MUTUAL_ONLY`（用于 `onlineStatusVisibility` 字段）
@@ -32,7 +32,7 @@
 - [x] 4.1 实现编辑资料页表单，使用 Ant Design Vue Form 组件，包含 nickname、avatar、bio、gender、birthday、region、profession、personalLink 字段
 - [x] 4.2 实现表单校验逻辑：nickname 必填（≤30 字符）、bio 字数统计（≤500）、URL 格式校验（`^https?://.*$`）、birthday 禁用未来日期
 - [x] 4.3 实现保存/取消按钮行为：返回时 isDirty 检查
-- [x] 4.4 实现 OSS 客户端直传：选文件 → 客户端校验（格式 + 大小） → cropperjs 裁剪 → 上传 → 回填 CDN URL → 调用 `POST /profile/update`（后端改造后返回 `ContentUserProfileVO`，直接更新本地状态）
+- [x] 4.4 实现 OSS 客户端直传：选文件 → 客户端校验（格式 + 大小） → cropperjs 裁剪 → 上传 → 回填 CDN URL → 调用 `POST /profile/update`（返回 `ContentUserProfileVO`，直接更新本地状态）
 - [x] 4.5 实现审核状态交互：待审核时黄色 Alert + 字段不可编辑，审核不通过时红色 Alert + 重新编辑按钮（基于 `ContentUserProfileVO.profileReviewStatus`）
 - [x] 4.6 实现加载中骨架屏、网络错误提示、防重复提交
 
@@ -50,7 +50,7 @@
 - [x] 6.2 实现主题色选择：预设色板（8-12 个颜色）网格排列 + 自定义颜色输入
 - [x] 6.3 实现主题色对比度校验：WCAG AA 标准自动校验，对比度不足时警告
 - [x] 6.4 实时预览区：PC 端右侧固定预览，移动端 Drawer 全屏预览
-- [x] 6.5 实现保存（`POST /content/user/profile/homepage/update`，后端改造后返回 `ContentUserProfileVO`）和恢复默认（`POST /content/user/profile/homepage/defaults/restore`，后端改造后返回 `ContentUserProfileVO`）功能，直接使用返回值更新本地状态
+- [x] 6.5 实现保存（`POST /content/user/profile/homepage/update`，返回 `ContentUserProfileVO`）和恢复默认（`POST /content/user/profile/homepage/defaults/restore`，返回 `ContentUserProfileVO`）功能，直接使用返回值更新本地状态
 
 ## 7. 主页模块配置实现
 
@@ -90,7 +90,7 @@
 - [x] 10.2 切换 Tab 时调用 `GET /content/user/profile/history/list?userId=X&historyType=NICKNAME|AVATAR`
 - [x] 10.3 当前值展示区：当前昵称/头像 + 绿色"当前"标签
 - [x] 10.4 历史记录列表：倒序排列，每条显示历史值 + 修改时间 + "恢复"按钮
-- [x] 10.5 恢复操作：确认弹窗 → `POST /content/user/profile/history/restore?userId=X&historyId=Y`（后端改造后返回 `ContentUserProfileVO`） → 成功提示，直接使用返回值更新本地状态
+- [x] 10.5 恢复操作：确认弹窗 → `POST /content/user/profile/history/restore?userId=X&historyId=Y`（返回 `ContentUserProfileVO`） → 成功提示，直接使用返回值更新本地状态
 - [x] 10.6 列表底部说明"最多保留 20 条记录，保留期限 180 天"（由后端裁剪，前端展示说明文案）
 - [x] 10.7 空状态、加载中骨架屏、恢复中 loading 状态
 
@@ -118,5 +118,5 @@
 - [x] 13.4 隐私字段覆盖范围从 5 扩展到 15（含 `onlineStatusVisibility` 特殊枚举）
 - [x] 13.5 历史记录从"两个分页接口"改为单接口 + `historyType` 参数
 - [x] 13.6 头像/背景图从"复用后端上传"改为"OSS 客户端直传"
-- [x] 13.7 确认 4 个 POST 端点需后端改造为返回 VO（`/update`、`/homepage/update`、`/homepage/defaults/restore`、`/history/restore`），`/privacy/update` 保持返回 `Result<String>`
-- [x] 13.8 删除不存在的 `ContentUserPrivacySettingVO` 类型引用，隐私设置保存后返回 `Result<String>`
+- [x] 13.7 确认 4 个 POST 端点返回 `Result<ContentUserProfileVO>`（`/update`、`/homepage/update`、`/homepage/defaults/restore`、`/history/restore`），`/privacy/update` 返回 `Result<String>`
+- [x] 13.8 隐私设置保存后返回 `Result<String>`（"更新成功"）

@@ -87,6 +87,10 @@
 - **WHEN** 用户快速点击保存按钮多次
 - **THEN** 仅发送一次请求，按钮显示 loading 并禁用
 
+#### Scenario: Submit while review pending
+- **WHEN** 用户资料处于审核中状态（`profileReviewStatus=PENDING`）再次尝试修改保存
+- **THEN** 表单字段不可编辑，保存按钮禁用，顶部显示 Alert"资料审核中，通过后展示"
+
 ### Requirement: Frequency limit is not displayed
 系统 SHALL **不**展示"今日还可修改 X 次"提示；后端未暴露 update-count 接口。
 

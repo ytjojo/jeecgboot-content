@@ -10,7 +10,7 @@
 ### Requirement: Decay status warning
 系统 SHALL 根据用户当前衰减状态展示对应的警告提示。
 
-#### Scenario: User is in decay period **[阻塞: 后端缺少用户级衰减状态查询 API]**
+#### Scenario: User is in decay period
 - **WHEN** 用户处于衰减中状态
 - **THEN** 显示警告提示"您已 X 天未登录，经验值正在衰减"，使用警告色背景
 

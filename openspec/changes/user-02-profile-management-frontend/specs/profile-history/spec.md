@@ -16,7 +16,7 @@
 - **THEN** 显示空状态插图和文案"暂无历史记录"
 
 ### Requirement: Restore historical value
-系统 SHALL 支持恢复曾用昵称和头像，恢复操作调用 `POST /content/user/profile/history/restore?userId=X&historyId=Y`，后端返回 `Result<String>`（"恢复成功"），前端恢复成功后重新调用 `GET /detail` 获取最新数据。
+系统 SHALL 支持恢复曾用昵称和头像，恢复操作调用 `POST /content/user/profile/history/restore?userId=X&historyId=Y`，后端返回 `Result<ContentUserProfileVO>`，前端恢复成功后重新调用 `GET /detail` 获取最新数据。
 
 #### Scenario: Restore historical nickname
 - **WHEN** 用户点击某条昵称记录的"恢复"按钮

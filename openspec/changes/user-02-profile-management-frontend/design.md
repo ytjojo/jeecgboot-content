@@ -16,7 +16,7 @@
 **Goals:**
 - 对接后端 10 个端点（11 个端点中 `review/handle` 为后台审核端点，前端不对接），实现前端资料管理与主页个性化能力
 - 头像/背景图走 OSS 客户端直传方案，不引入内容社区上传端点
-- 15 个 `*Visibility` 字段全部覆盖前端隐私设置页；`onlineStatusVisibility` 特殊枚举
+- 14 个 `*Visibility` + 2 个特殊字段全部覆盖前端隐私设置页；`onlineStatusVisibility` 特殊枚举，`onlineStatusVisible`/`allowSearchEngineIndex`/`allowUserSearch` 为 Boolean
 - 历史记录通过 `historyType` 参数区分类型，前端用 Tabs 切换
 - 所有页面适配 PC/平板/移动端
 
@@ -84,17 +84,17 @@
 
 ### D7: 隐私字段全覆盖与特殊枚举处理
 
-**决策**: 隐私设置页必须覆盖 15 个 `*Visibility` 字段（不只 5 个基础字段），按以下分组组织：
+**决策**: 隐私设置页必须覆盖后端 `ContentUserPrivacyUpdateReq` 的全部 16 个字段（14 个 `*Visibility` + 2 个特殊字段），按以下分组组织：
 
-- **基础资料** (5): `bioVisibility` / `genderVisibility` / `birthdayVisibility` / `regionVisibility` / `professionVisibility`
+- **基础资料** (4): `genderVisibility` / `birthdayVisibility` / `regionVisibility` / `professionVisibility`
 - **扩展资料** (1): `personalLinkVisibility`
-- **主页** (3): `homepageBackgroundVisibility` / `themeColorVisibility` / `homepageModuleVisibility`
-- **认证** (2): `certificationVisibility` / `verificationBadgesVisibility`
-- **活动** (3): `profileCompletionVisibility` / `profileReviewStatusVisibility` / `recentActivityVisibility`
-- **在线状态** (1): `onlineStatusVisibility` ← 特殊枚举 `PUBLIC|HIDDEN|MUTUAL_ONLY`，表单 Select 选项需动态切换
-- **布尔开关** (2): `showMutualFollowersCount` / `showRecentActivityHighlight`
+- **认证标识** (2): `verificationBadgeVisibility` / `contactBadgeVisibility`
+- **主页** (2): `homepageVisibility` / `dynamicVisibility`
+- **在线状态** (2): `onlineStatusVisible`(Boolean) / `onlineStatusVisibility`(特殊枚举 `PUBLIC|HIDDEN|MUTUAL_ONLY`)
+- **活动** (3): `browseHistoryVisibility` / `likeActivityVisibility` / `favoriteVisibility`
+- **搜索与发现** (2): `allowSearchEngineIndex`(Boolean) / `allowUserSearch`(Boolean)
 
-**理由**: 与后端 `ContentUserPrivacyUpdateReq` 15 个 visibility + 2 个 Boolean 字段一一对应。
+**理由**: 与后端 `ContentUserPrivacyUpdateReq` 14 个 visibility + 2 个 Boolean 字段一一对应。
 
 ### D8: 历史记录按类型分 Tab
 

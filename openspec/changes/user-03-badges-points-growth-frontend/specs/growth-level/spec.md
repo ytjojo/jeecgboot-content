@@ -35,7 +35,7 @@
 ### Requirement: Level up congratulations
 系统 SHALL 在用户升级时弹出全局祝贺弹窗，展示新等级和解锁的权益。
 
-#### Scenario: Level up detected via API response **[阻塞: 后端未实现 levelChanged 字段]**
+#### Scenario: Level up detected via API response
 - **WHEN** 任意 API 响应携带 `levelChanged` 字段
 - **THEN** defHttp 拦截器检测到后通过 mitt 广播 `growth:level-up` 事件
 

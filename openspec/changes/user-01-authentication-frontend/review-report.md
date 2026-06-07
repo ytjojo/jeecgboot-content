@@ -65,11 +65,11 @@
 
 ### 1.3 完整性问题清单
 
-#### FLAG-001: design.md 缺少独立的 API 依赖清单章节
+#### ~~FLAG-001~~ [FIXED]: design.md 缺少独立的 API 依赖清单章节
 - **位置**: `design.md`
 - **描述**: design.md 的 Decisions 章节覆盖了路由、状态管理、表单、第三方登录、Token、埋点、响应式共 7 个决策，但未包含独立的 API 依赖清单章节。API 端点定义分散在 PRD 的"API 对接"章节中。
 - **影响**: 开发时需频繁查阅 PRD 获取 API 路径，增加跨文档跳转成本。
-- **建议修复**: 在 design.md 中新增"API 依赖清单"章节，从 PRD 中提取完整的 API 端点列表。
+- **修复措施**: 已在 design.md 中新增"API 依赖清单"章节，包含认证、账号安全、账号注销共 36 个端点。
 
 ---
 
@@ -94,17 +94,17 @@
 
 ### 2.3 一致性问题清单
 
-#### BLOCK-001: PRD 内部矛盾 -- 滑块验证在 Non-Goals 中排除但在功能描述中包含
+#### ~~BLOCK-001~~ [FIXED]: PRD 内部矛盾 -- 滑块验证在 Non-Goals 中排除但在功能描述中包含
 - **位置**: `EPIC-01-user-authentication-frontend-prd.md` 第 3.11 节 / API 对接 5.4 节 / Non-Goals
 - **描述**: 前端 PRD Non-Goals 明确声明"本期仅使用图形验证码，滑块验证作为后续增强"，但 F11 风控拦截交互详细描述中包含了滑块验证弹窗结构和交互要求，API 对接 5.4 节列出了滑块验证端点 (`GET /api/v1/auth/captcha/slider`、`POST /api/v1/auth/captcha/slider/verify`)。后端 design.md 中也未定义滑块验证接口。
 - **影响**: 若按 PRD 实现滑块验证，后端无对应接口；若不实现，PRD 描述与实际功能不符。proposal.md 的 Capabilities `risk-control` 也包含了"滑块验证"描述。
-- **建议修复**: 从 PRD F11 中移除滑块验证弹窗结构描述，从 API 对接 5.4 中移除滑块验证端点，同步更新 proposal.md 中 `risk-control` 的描述。或在 Non-Goals 中移除滑块验证排除项并更新后端 design.md。
+- **修复措施**: 已确认项目仅实现图片验证码，未实现滑块验证。PRD 5.4 节仅保留图片验证码端点，F11 仅描述图片验证码弹窗，proposal.md `risk-control` 已移除"滑块验证"，design.md Non-Goals 已移除滑块验证排除项，PRD 待确认问题 #4 已标记为已确认。
 
-#### FLAG-002: proposal.md Capabilities `risk-control` 描述包含 Non-Goals 功能
+#### ~~FLAG-002~~ [FIXED]: proposal.md Capabilities `risk-control` 描述包含 Non-Goals 功能
 - **位置**: `proposal.md` Capabilities `risk-control`
 - **描述**: `risk-control` 描述为"图形验证码、滑块验证、账号锁定提示、冷却倒计时"，其中"滑块验证"在 PRD Non-Goals 中被排除。
 - **影响**: apply 时可能误实现滑块验证功能，浪费开发资源。
-- **建议修复**: 移除 `risk-control` 描述中的"滑块验证"。
+- **修复措施**: proposal.md `risk-control` 已更新为"图形验证码、账号锁定提示、冷却倒计时"，移除了"滑块验证"。
 
 ---
 
@@ -193,16 +193,14 @@
 | POST /api/v1/account-cancellation/revoke | 有定义 | OK |
 | GET /api/v1/auth/captcha/image | 有定义 | OK |
 | POST /api/v1/auth/captcha/verify | 有定义 | OK |
-| GET /api/v1/auth/captcha/slider | **PRD 定义但后端未定义** | FLAG |
-| POST /api/v1/auth/captcha/slider/verify | **PRD 定义但后端未定义** | FLAG |
 
 ### 5.2 接口契约问题清单
 
-#### FLAG-004: 滑块验证 API 在前端 PRD 中定义但后端未定义
+#### ~~FLAG-004~~ [FIXED]: 滑块验证 API 在前端 PRD 中定义但后端未定义
 - **位置**: `EPIC-01-user-authentication-frontend-prd.md` 5.4 节
 - **描述**: 前端 PRD 列出了 `GET /api/v1/auth/captcha/slider` 和 `POST /api/v1/auth/captcha/slider/verify` 两个滑块验证端点，但后端 design.md 中未定义这两个接口。
 - **影响**: 与 BLOCK-001 同源。前端 specs 中未引用这两个端点，实际开发不受影响，但 PRD 文档不一致。
-- **建议修复**: 从前端 PRD 中移除滑块验证端点，或在后端 design.md 中补充定义。
+- **修复措施**: PRD 5.4 节已移除滑块验证端点，仅保留图片验证码端点（`GET /api/v1/auth/captcha/image`、`POST /api/v1/auth/captcha/verify`）。
 
 #### ADVISORY-001: 后端定义但前端未引用的 API
 - **位置**: 后端 design.md
@@ -256,9 +254,9 @@
 
 | 统计项 | 数量 |
 |--------|------|
-| 前端引用 API 总数 | 36 |
+| 前端引用 API 总数 | 34 |
 | 后端已定义 | 34 |
-| 前端引用但后端未定义 | 2 (滑块验证，与 BLOCK-001 同源) |
+| 前端引用但后端未定义 | 0 |
 | 后端定义但前端未引用 | 0 (核心接口) |
 
 ### 7.2 数据模型一致性
@@ -352,19 +350,19 @@
 
 ### BLOCK 问题汇总（必须修复才能 apply）
 
-| ID | 问题 | 位置 | 影响 |
+| ID | 问题 | 位置 | 状态 |
 |----|------|------|------|
-| BLOCK-001 | PRD 内部矛盾：滑块验证在 Non-Goals 中排除但在 F11 功能描述和 API 端点中包含 | PRD 3.11/5.4 + proposal.md | proposal.md 和 PRD 不一致，可能导致实现范围歧义 |
+| ~~BLOCK-001~~ | PRD 内部矛盾：滑块验证在 Non-Goals 中排除但在 F11 功能描述和 API 端点中包含 | PRD 3.11/5.4 + proposal.md | **FIXED** |
 
 ### FLAG 问题汇总（应该修复）
 
-| ID | 问题 | 位置 | 建议 |
+| ID | 问题 | 位置 | 状态 |
 |----|------|------|------|
-| FLAG-001 | design.md 缺少独立 API 依赖清单章节 | design.md | 补充 API 清单章节 |
-| FLAG-002 | proposal.md risk-control 描述包含 Non-Goals 功能（滑块验证） | proposal.md Capabilities | 移除"滑块验证"描述 |
-| FLAG-003 | 部分错误场景缺少具体 UI 反馈描述 | 多个 spec | 补充 UI 组件类型和文案 |
-| FLAG-004 | 滑块验证 API 在前端 PRD 中定义但后端未定义 | PRD 5.4 | 从 PRD 移除或后端补充 |
-| FLAG-005 | Token 过期自动刷新场景未在 specs 中显式覆盖 | specs/ 全局 | 补充 Token 过期 Scenario |
+| ~~FLAG-001~~ | design.md 缺少独立 API 依赖清单章节 | design.md | **FIXED** |
+| ~~FLAG-002~~ | proposal.md risk-control 描述包含 Non-Goals 功能（滑块验证） | proposal.md Capabilities | **FIXED** |
+| FLAG-003 | 部分错误场景缺少具体 UI 反馈描述 | 多个 spec | OPEN |
+| ~~FLAG-004~~ | 滑块验证 API 在前端 PRD 中定义但后端未定义 | PRD 5.4 | **FIXED** |
+| FLAG-005 | Token 过期自动刷新场景未在 specs 中显式覆盖 | specs/ 全局 | OPEN |
 
 ### ADVISORY 问题汇总（建议改进）
 
@@ -375,30 +373,33 @@
 ### 门禁判定
 
 ```
-Step 1 规范审核: BLOCK=1, FLAG=5 → REJECTED
+Step 1 规范审核: BLOCK=0, FLAG=2 → 需修复剩余 FLAG 后重新审核
 Step 2 依赖检查: P0 依赖阻塞=0 → PASS
-最终判定: REJECTED
+最终判定: BLOCK 已清零，剩余 2 个 FLAG 待修复
 ```
 
 ### 审核结论
 
-- BLOCK 问题: 1 个
-- FLAG 问题: 5 个
+- BLOCK 问题: 0 个（1 个已修复）
+- FLAG 问题: 2 个待修复（3 个已修复）
 - ADVISORY 问题: 1 个
 - 依赖阻塞 (P0): 0 项
 
-**结论文本**: 规范审核未通过。发现 1 个 BLOCK 问题（PRD 内部关于滑块验证的矛盾描述），必须修复后才能执行 apply。修复后重新运行 `/opsx:review`。
+**结论文本**: BLOCK 问题已全部修复。剩余 2 个 FLAG 问题（FLAG-003 UI 反馈描述、FLAG-005 Token 过期 Scenario）需补充后重新运行 `/opsx:review`。
 
-### 修复建议
+### 修复记录
 
-#### 需要修复的规范文档问题（共 6 项）
+#### 已修复问题（共 4 项）
 
-1. **[BLOCK]** PRD 内部矛盾：从 PRD F11 移除滑块验证弹窗描述，从 API 对接 5.4 移除滑块验证端点，同步更新 proposal.md `risk-control` 描述 → 建议启动 subagent 修复 PRD 和 proposal.md
-2. **[FLAG]** proposal.md `risk-control` 描述移除"滑块验证" → 随 BLOCK-001 一并修复
-3. **[FLAG]** design.md 补充 API 依赖清单章节 → 建议启动 subagent 修复 design.md
-4. **[FLAG]** specs 补充 Token 过期自动刷新 Scenario → 建议在 user-login/spec.md 中补充
-5. **[FLAG]** specs 补充具体 UI 反馈描述 → 建议逐个 spec 补充
-6. **[FLAG]** 前端 PRD 移除滑块验证 API 端点 → 随 BLOCK-001 一并修复
+1. **[BLOCK-001 FIXED]** PRD 内部矛盾：PRD 5.4 节仅保留图片验证码端点，F11 仅描述图片验证码弹窗，proposal.md `risk-control` 移除"滑块验证"，design.md Non-Goals 移除滑块验证排除项，PRD 待确认问题 #4 标记已确认
+2. **[FLAG-001 FIXED]** design.md 补充 API 依赖清单章节（认证 12 个 + 账号安全 19 个 + 注销 4 个 + 其他 1 个）
+3. **[FLAG-002 FIXED]** proposal.md `risk-control` 描述移除"滑块验证"
+4. **[FLAG-004 FIXED]** PRD 5.4 节移除滑块验证端点
+
+#### 待修复问题（共 2 项）
+
+1. **[FLAG-003]** specs 补充具体 UI 反馈描述 → 建议逐个 spec 补充
+2. **[FLAG-005]** specs 补充 Token 过期自动刷新 Scenario → 建议在 user-login/spec.md 中补充
 
 #### 需要完善的依赖模块（共 0 项）
 

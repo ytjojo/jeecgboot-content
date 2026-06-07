@@ -60,7 +60,7 @@
 - **WHEN** 用户快速连续点击"确认兑换"
 - **THEN** 仅触发一次 API 请求，按钮在请求期间完全禁用（disabled + loading）
 
-#### Scenario: Idempotent exchange request **[阻塞: 后端 ContentUserExchangeReq 缺少 requestId 字段]**
+#### Scenario: Idempotent exchange request
 - **WHEN** 前端发起兑换请求
 - **THEN** 请求携带唯一 requestId（前端生成 UUID），后端基于 requestId 做幂等校验
 

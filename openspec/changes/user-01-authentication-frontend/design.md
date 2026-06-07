@@ -23,8 +23,65 @@
 - 不实现企业组织通讯录
 - 不实现邀请码注册
 - 不实现高风险找回的安全问题和身份证明上传
-- 不实现滑块验证（本期仅图形验证码，滑块验证作为后续增强）
 - 不做多语言国际化（仅中文）
+
+## API 依赖清单
+
+### 认证接口（/api/v1/auth/*）
+
+| 接口 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| 手机号注册 | POST | `/api/v1/auth/register/mobile` | 手机号 + 验证码注册 |
+| 邮箱注册 | POST | `/api/v1/auth/register/email` | 邮箱 + 密码注册 |
+| 邮箱注册确认 | GET | `/api/v1/auth/register/email/confirm` | 邮箱验证链接确认 |
+| 第三方登录 | POST | `/api/v1/auth/login/third-party` | 第三方授权码登录 |
+| 验证码登录 | POST | `/api/v1/auth/login/sms-code` | 手机号 + 验证码登录 |
+| 密码登录 | POST | `/api/v1/auth/login/password` | 手机号/邮箱 + 密码登录 |
+| 发送短信验证码 | POST | `/api/v1/auth/sms/send` | 发送短信验证码 |
+| 发送邮箱验证邮件 | POST | `/api/v1/auth/email/send` | 发送邮箱验证邮件 |
+| 刷新 Token | POST | `/api/v1/auth/token/refresh` | 使用 refresh_token 刷新 |
+| 退出登录 | POST | `/api/v1/auth/logout` | 退出登录 |
+| 获取图形验证码 | GET | `/api/v1/auth/captcha/image` | 获取图形验证码图片 |
+| 校验图形验证码 | POST | `/api/v1/auth/captcha/verify` | 校验图形验证码 |
+
+### 账号安全接口（/api/v1/account-security/*）
+
+| 接口 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| 获取账号安全状态 | GET | `/api/v1/account-security/status` | 绑定状态、设备数等 |
+| 绑定手机号 | POST | `/api/v1/account-security/bind/mobile` | 绑定手机号 |
+| 绑定邮箱 | POST | `/api/v1/account-security/bind/email` | 绑定邮箱 |
+| 绑定第三方账号 | POST | `/api/v1/account-security/bind/third-party` | 绑定第三方账号 |
+| 换绑手机号 | POST | `/api/v1/account-security/rebind/mobile` | 换绑手机号 |
+| 换绑邮箱 | POST | `/api/v1/account-security/rebind/email` | 换绑邮箱 |
+| 解绑手机号 | POST | `/api/v1/account-security/unbind/mobile` | 解绑手机号 |
+| 解绑邮箱 | POST | `/api/v1/account-security/unbind/email` | 解绑邮箱 |
+| 解绑第三方账号 | POST | `/api/v1/account-security/unbind/third-party` | 解绑第三方账号 |
+| 获取设备列表 | GET | `/api/v1/account-security/devices` | 当前用户活跃设备 |
+| 下线设备 | POST | `/api/v1/account-security/devices/revoke` | 下线指定设备 |
+| 信任设备 | POST | `/api/v1/account-security/devices/trust` | 标记信任设备 |
+| 取消信任设备 | POST | `/api/v1/account-security/devices/untrust` | 取消信任状态 |
+| 重置密码 | POST | `/api/v1/account-security/password/reset` | 手机号/邮箱重置密码 |
+| 修改密码 | POST | `/api/v1/account-security/password/change` | 已登录状态修改密码 |
+| 获取异常登录通知 | GET | `/api/v1/account-security/anomaly-notifications` | 异常登录通知列表 |
+| 确认异常登录 | POST | `/api/v1/account-security/anomaly/confirm` | 确认本人操作 |
+| 否认异常登录 | POST | `/api/v1/account-security/anomaly/deny` | 否认操作，下线设备 |
+| 发送验证码（安全操作） | POST | `/api/v1/account-security/sms/send` | 安全操作场景验证码 |
+
+### 账号注销接口（/api/v1/account-cancellation/*）
+
+| 接口 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| 查询注销资格 | GET | `/api/v1/account-cancellation/eligibility` | 前置条件检查 |
+| 申请注销 | POST | `/api/v1/account-cancellation/apply` | 申请账号注销 |
+| 查询注销状态 | GET | `/api/v1/account-cancellation/status` | 注销状态和冷静期 |
+| 取消注销 | POST | `/api/v1/account-cancellation/revoke` | 冷静期内取消 |
+
+### 其他接口
+
+| 接口 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| 提交兴趣偏好 | POST | `/api/v1/user/preferences/topics` | 注册后兴趣标签 |
 
 ## Decisions
 
