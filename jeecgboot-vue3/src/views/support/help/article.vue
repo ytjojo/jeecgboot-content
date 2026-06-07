@@ -32,13 +32,15 @@ import { useRouter, useRoute } from 'vue-router';
 import { getHelpArticleDetail, type HelpArticle } from '/@/api/support/help';
 import ArticleFeedback from './components/ArticleFeedback.vue';
 import xss from 'xss';
+import MarkdownIt from 'markdown-it';
 
 const router = useRouter();
 const route = useRoute();
 const articleId = route.params.id as string;
 const article = ref<HelpArticle | null>(null);
 const loading = ref(true);
-const safeContent = computed(() => (article.value ? xss(article.value.content) : ''));
+const md = new MarkdownIt({ html: false, linkify: true });
+const safeContent = computed(() => (article.value ? xss(md.render(article.value.content)) : ''));
 
 const handleFeedback = (helpful: boolean) => {
   if (article.value) {
