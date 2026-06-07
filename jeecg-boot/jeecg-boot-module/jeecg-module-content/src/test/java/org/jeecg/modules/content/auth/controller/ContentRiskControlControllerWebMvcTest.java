@@ -89,7 +89,7 @@ class ContentRiskControlControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/auth/risk/appeal")
+            mockMvc.perform(post("/api/v1/content/account-security/anomaly/appeal")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"eventId":"evt_001","note":"误操作"}
@@ -104,7 +104,7 @@ class ContentRiskControlControllerWebMvcTest {
         @Test
         @DisplayName("blank eventId - returns 400")
         void blankEventId_returns400() throws Exception {
-            mockMvc.perform(post("/content/auth/risk/appeal")
+            mockMvc.perform(post("/api/v1/content/account-security/anomaly/appeal")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"eventId":""}
@@ -118,7 +118,7 @@ class ContentRiskControlControllerWebMvcTest {
             org.mockito.Mockito.doThrow(new JeecgBootException("风险事件不存在"))
                     .when(riskControlBizService).appealRiskEvent(eq("evt_not_exist"), eq("testUser"), any());
 
-            mockMvc.perform(post("/content/auth/risk/appeal")
+            mockMvc.perform(post("/api/v1/content/account-security/anomaly/appeal")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"eventId":"evt_not_exist","note":"test"}
@@ -136,7 +136,7 @@ class ContentRiskControlControllerWebMvcTest {
         @Test
         @DisplayName("valid request self - returns success")
         void validRequestSelf_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/auth/risk/confirm-login")
+            mockMvc.perform(post("/api/v1/content/account-security/anomaly/confirm")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"eventId":"evt_002","isSelf":true}
@@ -149,7 +149,7 @@ class ContentRiskControlControllerWebMvcTest {
         @Test
         @DisplayName("blank eventId - returns 400")
         void blankEventId_returns400() throws Exception {
-            mockMvc.perform(post("/content/auth/risk/confirm-login")
+            mockMvc.perform(post("/api/v1/content/account-security/anomaly/confirm")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"eventId":"","isSelf":true}
@@ -160,7 +160,7 @@ class ContentRiskControlControllerWebMvcTest {
         @Test
         @DisplayName("null isSelf - returns 400")
         void nullIsSelf_returns400() throws Exception {
-            mockMvc.perform(post("/content/auth/risk/confirm-login")
+            mockMvc.perform(post("/api/v1/content/account-security/anomaly/confirm")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"eventId":"evt_002"}
@@ -181,7 +181,7 @@ class ContentRiskControlControllerWebMvcTest {
             event.setUserId("testUser");
             when(riskControlBizService.getPendingNotifications("testUser")).thenReturn(List.of(event));
 
-            mockMvc.perform(get("/content/auth/risk/notifications"))
+            mockMvc.perform(get("/api/v1/content/account-security/anomaly/list"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.result[0].id").value("evt_001"));

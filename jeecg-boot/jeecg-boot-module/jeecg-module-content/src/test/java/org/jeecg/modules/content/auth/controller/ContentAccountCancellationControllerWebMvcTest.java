@@ -88,7 +88,7 @@ class ContentAccountCancellationControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/auth/cancellation/apply")
+            mockMvc.perform(post("/api/v1/content/account-cancellation/apply")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"reason":"不想用了","cooldownDays":14}
@@ -102,7 +102,7 @@ class ContentAccountCancellationControllerWebMvcTest {
         @Test
         @DisplayName("cooldownDays below 7 - returns 400")
         void cooldownDaysBelow7_returns400() throws Exception {
-            mockMvc.perform(post("/content/auth/cancellation/apply")
+            mockMvc.perform(post("/api/v1/content/account-cancellation/apply")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"cooldownDays":3}
@@ -113,7 +113,7 @@ class ContentAccountCancellationControllerWebMvcTest {
         @Test
         @DisplayName("cooldownDays above 30 - returns 400")
         void cooldownDaysAbove30_returns400() throws Exception {
-            mockMvc.perform(post("/content/auth/cancellation/apply")
+            mockMvc.perform(post("/api/v1/content/account-cancellation/apply")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"cooldownDays":60}
@@ -127,7 +127,7 @@ class ContentAccountCancellationControllerWebMvcTest {
             org.mockito.Mockito.doThrow(new JeecgBootException("已存在注销申请"))
                     .when(cancellationBizService).applyCancellation(any());
 
-            mockMvc.perform(post("/content/auth/cancellation/apply")
+            mockMvc.perform(post("/api/v1/content/account-cancellation/apply")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"cooldownDays":14}
@@ -147,7 +147,7 @@ class ContentAccountCancellationControllerWebMvcTest {
         void validRequest_returnsStatus() throws Exception {
             when(cancellationBizService.checkCooldownStatus("testUser")).thenReturn("PENDING");
 
-            mockMvc.perform(get("/content/auth/cancellation/status"))
+            mockMvc.perform(get("/api/v1/content/account-cancellation/status"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.result").value("PENDING"));
@@ -161,7 +161,7 @@ class ContentAccountCancellationControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/auth/cancellation/revoke"))
+            mockMvc.perform(post("/api/v1/content/account-cancellation/cancel"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
 
@@ -174,7 +174,7 @@ class ContentAccountCancellationControllerWebMvcTest {
             org.mockito.Mockito.doThrow(new JeecgBootException("无待取消的注销申请"))
                     .when(cancellationBizService).revokeCancellation(eq("testUser"));
 
-            mockMvc.perform(post("/content/auth/cancellation/revoke"))
+            mockMvc.perform(post("/api/v1/content/account-cancellation/cancel"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.message").value("无待取消的注销申请"));
