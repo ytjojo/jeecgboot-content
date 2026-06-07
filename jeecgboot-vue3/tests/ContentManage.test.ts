@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import ContentManage from '../src/views/channel/governance/ContentManage.vue';
@@ -5,16 +6,16 @@ import ContentManage from '../src/views/channel/governance/ContentManage.vue';
 const mockContentList = [
   { id: '1', title: 'Vue3最佳实践', contentType: 'article', author: '王五', publishTime: '2026-06-01 10:00', status: 'published', isPinned: true, isFeatured: false },
 ];
-const mockFetchList = jest.fn();
-const mockSetFilter = jest.fn();
-const mockPin = jest.fn().mockResolvedValue({});
-const mockFeature = jest.fn().mockResolvedValue({});
-const mockDeleteContent = jest.fn().mockResolvedValue({});
-const mockMoveContent = jest.fn().mockResolvedValue({});
-const mockEditAssist = jest.fn().mockResolvedValue({});
+const mockFetchList = vi.fn();
+const mockSetFilter = vi.fn();
+const mockPin = vi.fn().mockResolvedValue({});
+const mockFeature = vi.fn().mockResolvedValue({});
+const mockDeleteContent = vi.fn().mockResolvedValue({});
+const mockMoveContent = vi.fn().mockResolvedValue({});
+const mockEditAssist = vi.fn().mockResolvedValue({});
 
-jest.mock('/@/store/modules/channelGovernance', () => ({
-  useChannelGovernanceStore: jest.fn(() => ({
+vi.mock('/@/store/modules/channelGovernance', () => ({
+  useChannelGovernanceStore: vi.fn(() => ({
     contentList: mockContentList,
     loading: false,
     fetchList: mockFetchList,
@@ -27,12 +28,12 @@ jest.mock('/@/store/modules/channelGovernance', () => ({
   })),
 }));
 
-jest.mock('pinia', () => {
-  const actual = jest.requireActual('pinia');
-  const { ref } = require('vue');
+vi.mock('pinia', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('pinia')>();
+  const { ref } = await import('vue');
   return {
     ...actual,
-    storeToRefs: jest.fn((store: any) => {
+    storeToRefs: vi.fn((store: any) => {
       const result: any = {};
       Object.keys(store).forEach((key) => {
         if (typeof store[key] === 'function') {
@@ -46,8 +47,8 @@ jest.mock('pinia', () => {
   };
 });
 
-jest.mock('ant-design-vue', () => {
-  const { defineComponent, h } = require('vue');
+vi.mock('ant-design-vue', async () => {
+  const { defineComponent, h } = await import('vue');
   return {
     Table: defineComponent({
       name: 'Table',
@@ -116,38 +117,44 @@ jest.mock('ant-design-vue', () => {
         emits: ['update:modelValue', 'ok', 'cancel'],
         setup(_p: any, { slots }: any) { return () => h('div', { class: 'modal' }, slots.default?.()); },
       }),
-      { confirm: jest.fn() }
+      { confirm: vi.fn() }
     ),
-    message: { success: jest.fn(), error: jest.fn(), info: jest.fn(), warning: jest.fn() },
+    message: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() },
   };
 });
 
-jest.mock('@ant-design/icons-vue', () => ({
+vi.mock('@ant-design/icons-vue', () => ({
   CheckCircleOutlined: { name: 'CheckCircleOutlined', template: '<span />' },
   ClockCircleOutlined: { name: 'ClockCircleOutlined', template: '<span />' },
   CloseCircleOutlined: { name: 'CloseCircleOutlined', template: '<span />' },
 }));
 
-jest.mock('../src/views/channel/components/GovernanceActionMenu.vue', () => ({
-  name: 'GovernanceActionMenu',
-  template: '<div class="governance-action-menu-stub"></div>',
-  props: ['isPinned', 'isFeatured'],
+vi.mock('../src/views/channel/components/GovernanceActionMenu.vue', () => ({
+  default: {
+    name: 'GovernanceActionMenu',
+    template: '<div class="governance-action-menu-stub"></div>',
+    props: ['isPinned', 'isFeatured'],
+  },
 }));
-jest.mock('../src/views/channel/components/MoveChannelDialog.vue', () => ({
-  name: 'MoveChannelDialog',
-  template: '<div class="move-channel-dialog-stub"></div>',
-  props: ['visible', 'contentId', 'sourceChannelId'],
+vi.mock('../src/views/channel/components/MoveChannelDialog.vue', () => ({
+  default: {
+    name: 'MoveChannelDialog',
+    template: '<div class="move-channel-dialog-stub"></div>',
+    props: ['visible', 'contentId', 'sourceChannelId'],
+  },
 }));
-jest.mock('../src/views/channel/components/EditAssistDrawer.vue', () => ({
-  name: 'EditAssistDrawer',
-  template: '<div class="edit-assist-drawer-stub"></div>',
-  props: ['visible', 'contentId', 'channelId', 'content'],
+vi.mock('../src/views/channel/components/EditAssistDrawer.vue', () => ({
+  default: {
+    name: 'EditAssistDrawer',
+    template: '<div class="edit-assist-drawer-stub"></div>',
+    props: ['visible', 'contentId', 'channelId', 'content'],
+  },
 }));
 
 describe('ContentManage', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('应加载内容列表', async () => {

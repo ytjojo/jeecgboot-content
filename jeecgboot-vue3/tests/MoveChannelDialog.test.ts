@@ -1,19 +1,20 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import MoveChannelDialog from '../src/views/channel/components/MoveChannelDialog.vue';
 
-jest.mock('/@/api/content/channel/publish', () => ({
-  getAvailableChannels: jest.fn().mockResolvedValue([]),
+vi.mock('/@/api/content/channel/publish', () => ({
+  getAvailableChannels: vi.fn().mockResolvedValue([]),
 }));
 
-jest.mock('/@/store/modules/channelGovernance', () => ({
-  useChannelGovernanceStore: jest.fn(() => ({
-    moveContent: jest.fn().mockResolvedValue({}),
+vi.mock('/@/store/modules/channelGovernance', () => ({
+  useChannelGovernanceStore: vi.fn(() => ({
+    moveContent: vi.fn().mockResolvedValue({}),
   })),
 }));
 
-jest.mock('ant-design-vue', () => {
-  const { defineComponent, h } = require('vue');
+vi.mock('ant-design-vue', async () => {
+  const { defineComponent, h } = await import('vue');
   return {
     Modal: defineComponent({
       name: 'Modal',
@@ -57,11 +58,11 @@ jest.mock('ant-design-vue', () => {
           }, slots.default?.());
       },
     }),
-    message: { success: jest.fn(), error: jest.fn(), info: jest.fn(), warning: jest.fn() },
+    message: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() },
   };
 });
 
-jest.mock('@ant-design/icons-vue', () => ({
+vi.mock('@ant-design/icons-vue', () => ({
   InfoCircleOutlined: { name: 'InfoCircleOutlined', template: '<span />' },
 }));
 

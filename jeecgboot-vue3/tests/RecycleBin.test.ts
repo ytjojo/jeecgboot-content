@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import RecycleBin from '../src/views/channel/governance/RecycleBin.vue';
@@ -6,11 +7,11 @@ const mockRecycleBinList = [
   { id: '1', title: '已删文章', contentType: 'article', originalAuthor: '张三', deletedBy: '管理员', deleteTime: '2026-06-01', deleteReason: '违规', remainingDays: 25 },
   { id: '2', title: '过期内容', contentType: 'post', originalAuthor: '李四', deletedBy: '管理员', deleteTime: '2026-05-01', deleteReason: '重复', remainingDays: 0 },
 ];
-const mockFetchRecycleBin = jest.fn();
-const mockRestore = jest.fn().mockResolvedValue({});
+const mockFetchRecycleBin = vi.fn();
+const mockRestore = vi.fn().mockResolvedValue({});
 
-jest.mock('/@/store/modules/channelGovernance', () => ({
-  useChannelGovernanceStore: jest.fn(() => ({
+vi.mock('/@/store/modules/channelGovernance', () => ({
+  useChannelGovernanceStore: vi.fn(() => ({
     recycleBinList: mockRecycleBinList,
     loading: false,
     fetchRecycleBin: mockFetchRecycleBin,
@@ -18,12 +19,12 @@ jest.mock('/@/store/modules/channelGovernance', () => ({
   })),
 }));
 
-jest.mock('pinia', () => {
-  const actual = jest.requireActual('pinia');
-  const { ref } = require('vue');
+vi.mock('pinia', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('pinia')>();
+  const { ref } = await import('vue');
   return {
     ...actual,
-    storeToRefs: jest.fn((store: any) => {
+    storeToRefs: vi.fn((store: any) => {
       const result: any = {};
       Object.keys(store).forEach((key) => {
         if (typeof store[key] === 'function') {
@@ -37,8 +38,8 @@ jest.mock('pinia', () => {
   };
 });
 
-jest.mock('ant-design-vue', () => {
-  const { defineComponent, h } = require('vue');
+vi.mock('ant-design-vue', async () => {
+  const { defineComponent, h } = await import('vue');
   return {
     Table: defineComponent({
       name: 'Table',
@@ -94,20 +95,20 @@ jest.mock('ant-design-vue', () => {
           return () => h('div', { class: 'modal' }, slots.default?.());
         },
       }),
-      { confirm: jest.fn() },
+      { confirm: vi.fn() },
     ),
-    message: { success: jest.fn(), error: jest.fn(), info: jest.fn(), warning: jest.fn() },
+    message: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() },
   };
 });
 
-jest.mock('@ant-design/icons-vue', () => ({
+vi.mock('@ant-design/icons-vue', () => ({
   UndoOutlined: { name: 'UndoOutlined', template: '<span />' },
 }));
 
 describe('RecycleBin', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('应加载回收站列表', async () => {
@@ -136,7 +137,6 @@ describe('RecycleBin', () => {
     const wrapper = mount(RecycleBin, { props: { channelId: '1' } });
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
-    // Find the table row for the expired item (id=2) and check its button
     const rows = wrapper.findAll('.table-row');
     const expiredRow = rows[1];
     const expiredButton = expiredRow.find('button.btn');

@@ -1,8 +1,9 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import GovernanceActionMenu from '../src/views/channel/components/GovernanceActionMenu.vue';
 
-jest.mock('ant-design-vue', () => {
-  const { defineComponent, h, getCurrentInstance } = require('vue');
+vi.mock('ant-design-vue', async () => {
+  const { defineComponent, h, getCurrentInstance } = await import('vue');
   return {
     Dropdown: defineComponent({
       name: 'Dropdown',
@@ -53,7 +54,7 @@ jest.mock('ant-design-vue', () => {
   };
 });
 
-jest.mock('@ant-design/icons-vue', () => ({}));
+vi.mock('@ant-design/icons-vue', () => ({}));
 
 describe('GovernanceActionMenu', () => {
   it('应渲染更多按钮', () => {
@@ -68,13 +69,9 @@ describe('GovernanceActionMenu', () => {
       props: { isPinned: false, isFeatured: false },
     });
     const menuItems = wrapper.findAll('.menu-item');
-    // Find the "pin" menu item
     const pinItem = menuItems.find(item => item.attributes('data-key') === 'pin');
     expect(pinItem).toBeTruthy();
-    // Click the pin menu item - the mock Menu emits click with the event
     await pinItem!.trigger('click');
-    // The Menu's click handler receives the DOM event, but our component expects { key }
-    // Since the mock emits the raw event, we need to check the emitted action
     expect(wrapper.emitted('action')).toBeTruthy();
     expect(wrapper.emitted('action')![0]).toEqual(['pin']);
   });
@@ -87,7 +84,6 @@ describe('GovernanceActionMenu', () => {
     const keys = menuItems.map(item => item.attributes('data-key'));
     expect(keys).toContain('unpin');
     expect(keys).not.toContain('pin');
-    // Check that the unpin menu item shows "取消置顶"
     const unpinItem = menuItems.find(item => item.attributes('data-key') === 'unpin');
     expect(unpinItem!.text()).toBe('取消置顶');
   });
@@ -100,7 +96,6 @@ describe('GovernanceActionMenu', () => {
     const keys = menuItems.map(item => item.attributes('data-key'));
     expect(keys).toContain('unfeature');
     expect(keys).not.toContain('feature');
-    // Check that the unfeature menu item shows "取消精华"
     const unfeatureItem = menuItems.find(item => item.attributes('data-key') === 'unfeature');
     expect(unfeatureItem!.text()).toBe('取消精华');
   });

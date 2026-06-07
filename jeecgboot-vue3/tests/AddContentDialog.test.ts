@@ -1,24 +1,25 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import AddContentDialog from '../src/views/channel/components/AddContentDialog.vue';
 
-jest.mock('/@/api/content/channel/addContent', () => ({
-  searchAddableContent: jest.fn().mockResolvedValue([
+vi.mock('/@/api/content/channel/addContent', () => ({
+  searchAddableContent: vi.fn().mockResolvedValue([
     { id: '1', title: '测试文章', contentType: 'article', author: '张三', publishTime: '2026-06-01', addable: true },
     { id: '2', title: '不可添加', contentType: 'article', author: '李四', publishTime: '2026-06-02', addable: false },
   ]),
-  addContentToChannel: jest.fn().mockResolvedValue({}),
+  addContentToChannel: vi.fn().mockResolvedValue({}),
 }));
 
-jest.mock('/@/api/content/channel/publish', () => ({
-  getAvailableChannels: jest.fn().mockResolvedValue([
+vi.mock('/@/api/content/channel/publish', () => ({
+  getAvailableChannels: vi.fn().mockResolvedValue([
     { id: 'ch1', name: '频道A', publishResult: 'direct' },
     { id: 'ch2', name: '频道B', publishResult: 'review' },
   ]),
 }));
 
-jest.mock('ant-design-vue', () => {
-  const { defineComponent, h } = require('vue');
+vi.mock('ant-design-vue', async () => {
+  const { defineComponent, h } = await import('vue');
   return {
     Modal: Object.assign(
       defineComponent({
@@ -33,7 +34,7 @@ jest.mock('ant-design-vue', () => {
           ]);
         },
       }),
-      { confirm: jest.fn(), info: jest.fn() }
+      { confirm: vi.fn(), info: vi.fn() }
     ),
     Button: defineComponent({
       name: 'Button',
@@ -137,11 +138,11 @@ jest.mock('ant-design-vue', () => {
         return () => h('span', { class: 'tag' }, slots.default?.());
       },
     }),
-    message: { success: jest.fn(), error: jest.fn(), info: jest.fn(), warning: jest.fn() },
+    message: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() },
   };
 });
 
-jest.mock('@ant-design/icons-vue', () => ({
+vi.mock('@ant-design/icons-vue', () => ({
   InfoCircleOutlined: { name: 'InfoCircleOutlined', template: '<span />' },
 }));
 
@@ -153,7 +154,7 @@ const mockSearchResults = [
 describe('AddContentDialog', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('打开弹窗应展示搜索框', () => {
@@ -168,20 +169,17 @@ describe('AddContentDialog', () => {
       props: { visible: true, entryType: 'system' },
     });
 
-    // 直接设置搜索结果
     const vm = wrapper.vm as any;
     vm.searchResults = [...mockSearchResults];
     await wrapper.vm.$nextTick();
 
-    // 点击不可添加项
     const items = wrapper.findAll('.result-item');
     expect(items.length).toBe(2);
 
-    const disabledItem = items[1]; // 第二个是不可添加的
+    const disabledItem = items[1];
     await disabledItem.trigger('click');
     await wrapper.vm.$nextTick();
 
-    // 验证未选中 — disabled 项不触发 handleSelectContent
     expect(wrapper.text()).not.toContain('已选内容');
   });
 
@@ -190,20 +188,17 @@ describe('AddContentDialog', () => {
       props: { visible: true, entryType: 'system' },
     });
 
-    // 直接设置搜索结果
     const vm = wrapper.vm as any;
     vm.searchResults = [...mockSearchResults];
     await wrapper.vm.$nextTick();
 
-    // 点击可添加项
     const items = wrapper.findAll('.result-item');
     expect(items.length).toBe(2);
 
-    const addableItem = items[0]; // 第一个是可添加的
+    const addableItem = items[0];
     await addableItem.trigger('click');
     await wrapper.vm.$nextTick();
 
-    // 验证显示预览
     expect(wrapper.text()).toContain('已选内容');
     expect(wrapper.text()).toContain('测试文章');
   });

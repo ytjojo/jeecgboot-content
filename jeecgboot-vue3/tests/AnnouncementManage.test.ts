@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import AnnouncementManage from '../src/views/channel/governance/AnnouncementManage.vue';
 
@@ -7,14 +8,14 @@ const mockHistory = [
   { id: 'h2', version: 2, title: '频道公告v2', operator: '管理员', createTime: '2026-06-05 14:00' },
 ];
 
-const mockGetAnnouncement = jest.fn().mockResolvedValue(mockAnnouncement);
-const mockSaveAnnouncement = jest.fn().mockResolvedValue({});
-const mockDeleteAnnouncement = jest.fn().mockResolvedValue({});
-const mockPreviewAnnouncement = jest.fn().mockResolvedValue({ preview: '<p>预览内容</p>' });
-const mockGetAnnouncementHistory = jest.fn().mockResolvedValue(mockHistory);
-const mockRestoreAnnouncementVersion = jest.fn().mockResolvedValue({});
+const mockGetAnnouncement = vi.fn().mockResolvedValue(mockAnnouncement);
+const mockSaveAnnouncement = vi.fn().mockResolvedValue({});
+const mockDeleteAnnouncement = vi.fn().mockResolvedValue({});
+const mockPreviewAnnouncement = vi.fn().mockResolvedValue({ preview: '<p>预览内容</p>' });
+const mockGetAnnouncementHistory = vi.fn().mockResolvedValue(mockHistory);
+const mockRestoreAnnouncementVersion = vi.fn().mockResolvedValue({});
 
-jest.mock('/@/api/content/channel/announcement', () => ({
+vi.mock('/@/api/content/channel/announcement', () => ({
   getAnnouncement: (...args: any[]) => mockGetAnnouncement(...args),
   saveAnnouncement: (...args: any[]) => mockSaveAnnouncement(...args),
   deleteAnnouncement: (...args: any[]) => mockDeleteAnnouncement(...args),
@@ -23,8 +24,8 @@ jest.mock('/@/api/content/channel/announcement', () => ({
   restoreAnnouncementVersion: (...args: any[]) => mockRestoreAnnouncementVersion(...args),
 }));
 
-jest.mock('/@/components/Tinymce', () => {
-  const { defineComponent, h } = require('vue');
+vi.mock('/@/components/Tinymce', async () => {
+  const { defineComponent, h } = await import('vue');
   const Tinymce = defineComponent({
     name: 'Tinymce',
     props: { modelValue: String, height: Number },
@@ -41,8 +42,8 @@ jest.mock('/@/components/Tinymce', () => {
   return { Tinymce };
 });
 
-jest.mock('ant-design-vue', () => {
-  const { defineComponent, h } = require('vue');
+vi.mock('ant-design-vue', async () => {
+  const { defineComponent, h } = await import('vue');
   return {
     Form: Object.assign(
       defineComponent({
@@ -141,17 +142,17 @@ jest.mock('ant-design-vue', () => {
           return () => h('div', { class: 'modal' }, slots.default?.());
         },
       }),
-      { confirm: jest.fn(), info: jest.fn() },
+      { confirm: vi.fn(), info: vi.fn() },
     ),
-    message: { success: jest.fn(), error: jest.fn(), info: jest.fn(), warning: jest.fn() },
+    message: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() },
   };
 });
 
-jest.mock('@ant-design/icons-vue', () => ({}));
+vi.mock('@ant-design/icons-vue', () => ({}));
 
 describe('AnnouncementManage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetAnnouncement.mockResolvedValue(mockAnnouncement);
     mockGetAnnouncementHistory.mockResolvedValue(mockHistory);
   });
@@ -178,7 +179,7 @@ describe('AnnouncementManage', () => {
   });
 
   it('点击发布应弹出确认框', async () => {
-    const { Modal } = require('ant-design-vue');
+    const { Modal } = await import('ant-design-vue');
     const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
@@ -197,7 +198,7 @@ describe('AnnouncementManage', () => {
   });
 
   it('点击删除应弹出确认框', async () => {
-    const { Modal } = require('ant-design-vue');
+    const { Modal } = await import('ant-design-vue');
     const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();

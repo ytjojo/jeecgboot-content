@@ -1,9 +1,10 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import RejectReasonModal from '../src/views/channel/components/RejectReasonModal.vue';
 
-jest.mock('ant-design-vue', () => {
-  const { defineComponent, h } = require('vue');
+vi.mock('ant-design-vue', async () => {
+  const { defineComponent, h } = await import('vue');
   return {
     Modal: defineComponent({
       name: 'Modal',
@@ -55,11 +56,11 @@ jest.mock('ant-design-vue', () => {
         return () => h('button', { class: ['btn', _p.type === 'primary' ? 'btn-primary' : '', _p.danger ? 'btn-danger' : ''].join(' '), onClick: () => emit('click') }, slots.default?.());
       },
     }),
-    message: { success: jest.fn(), error: jest.fn(), info: jest.fn(), warning: jest.fn() },
+    message: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() },
   };
 });
 
-jest.mock('@ant-design/icons-vue', () => ({
+vi.mock('@ant-design/icons-vue', () => ({
   CheckCircleOutlined: { name: 'CheckCircleOutlined', template: '<span />' },
   ClockCircleOutlined: { name: 'ClockCircleOutlined', template: '<span />' },
   CloseCircleOutlined: { name: 'CloseCircleOutlined', template: '<span />' },

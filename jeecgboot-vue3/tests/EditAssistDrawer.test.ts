@@ -1,24 +1,25 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import EditAssistDrawer from '../src/views/channel/components/EditAssistDrawer.vue';
 
-const mockEditAssist = jest.fn().mockResolvedValue({});
-const mockGetEditAssistHistory = jest.fn().mockResolvedValue([
+const mockEditAssist = vi.fn().mockResolvedValue({});
+const mockGetEditAssistHistory = vi.fn().mockResolvedValue([
   { id: '1', operator: '管理员', field: '标题', time: '2026-06-01 10:00', reason: '修正错别字' },
 ]);
 
-jest.mock('/@/api/content/channel/governance', () => ({
+vi.mock('/@/api/content/channel/governance', () => ({
   getEditAssistHistory: (...args: any[]) => mockGetEditAssistHistory(...args),
 }));
 
-jest.mock('/@/store/modules/channelGovernance', () => ({
-  useChannelGovernanceStore: jest.fn(() => ({
+vi.mock('/@/store/modules/channelGovernance', () => ({
+  useChannelGovernanceStore: vi.fn(() => ({
     editAssist: (...args: any[]) => mockEditAssist(...args),
   })),
 }));
 
-jest.mock('ant-design-vue', () => {
-  const { defineComponent, h } = require('vue');
+vi.mock('ant-design-vue', async () => {
+  const { defineComponent, h } = await import('vue');
   return {
     Drawer: defineComponent({
       name: 'Drawer',
@@ -152,11 +153,11 @@ jest.mock('ant-design-vue', () => {
         return () => h('div', { class: 'empty' }, _p.description || '暂无数据');
       },
     }),
-    message: { success: jest.fn(), error: jest.fn(), info: jest.fn(), warning: jest.fn() },
+    message: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() },
   };
 });
 
-jest.mock('@ant-design/icons-vue', () => ({}));
+vi.mock('@ant-design/icons-vue', () => ({}));
 
 describe('EditAssistDrawer', () => {
   const defaultProps = {
@@ -168,7 +169,7 @@ describe('EditAssistDrawer', () => {
 
   beforeEach(() => {
     setActivePinia(createPinia());
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('应展示原作者信息', () => {
@@ -182,9 +183,7 @@ describe('EditAssistDrawer', () => {
       { id: '1', operator: '管理员', field: '标题', time: '2026-06-01 10:00', reason: '修正错别字' },
     ]);
     const wrapper = mount(EditAssistDrawer, { props: { ...defaultProps, visible: false } });
-    // Toggle visible to trigger the watch
     await wrapper.setProps({ visible: true });
-    // Wait for the watch callback's async operation to complete
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
@@ -195,15 +194,13 @@ describe('EditAssistDrawer', () => {
 
   it('未填写修改原因应提示', async () => {
     const wrapper = mount(EditAssistDrawer, { props: defaultProps });
-    // Wait for initial load
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
-    // Click save without filling reason
     const buttons = wrapper.findAll('button');
     const saveBtn = buttons.find((b) => b.text() === '保存');
     expect(saveBtn).toBeTruthy();
     await saveBtn!.trigger('click');
-    const { message } = require('ant-design-vue');
+    const { message } = await import('ant-design-vue');
     expect(message.warning).toHaveBeenCalledWith('请填写修改原因');
   });
 
@@ -211,12 +208,9 @@ describe('EditAssistDrawer', () => {
     const wrapper = mount(EditAssistDrawer, { props: defaultProps });
     await new Promise((r) => setTimeout(r, 0));
     await wrapper.vm.$nextTick();
-    // Fill in the reason textarea
     const textareas = wrapper.findAll('textarea');
-    // The last textarea is the reason field
     const reasonTextarea = textareas[textareas.length - 1];
     await reasonTextarea.setValue('修正内容错误');
-    // Click save
     const buttons = wrapper.findAll('button');
     const saveBtn = buttons.find((b) => b.text() === '保存');
     await saveBtn!.trigger('click');

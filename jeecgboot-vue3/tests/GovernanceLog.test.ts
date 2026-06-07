@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import GovernanceLog from '../src/views/channel/governance/GovernanceLog.vue';
@@ -5,22 +6,22 @@ import GovernanceLog from '../src/views/channel/governance/GovernanceLog.vue';
 const mockGovernanceLogList = [
   { id: '1', time: '2026-06-01 10:00', operator: '管理员', actionType: 'pin', targetTitle: 'Vue3最佳实践', contentId: 'c1', result: '成功', reason: '优质内容' },
 ];
-const mockFetchGovernanceLog = jest.fn();
+const mockFetchGovernanceLog = vi.fn();
 
-jest.mock('/@/store/modules/channelGovernance', () => ({
-  useChannelGovernanceStore: jest.fn(() => ({
+vi.mock('/@/store/modules/channelGovernance', () => ({
+  useChannelGovernanceStore: vi.fn(() => ({
     governanceLogList: mockGovernanceLogList,
     loading: false,
     fetchGovernanceLog: mockFetchGovernanceLog,
   })),
 }));
 
-jest.mock('pinia', () => {
-  const actual = jest.requireActual('pinia');
-  const { ref } = require('vue');
+vi.mock('pinia', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('pinia')>();
+  const { ref } = await import('vue');
   return {
     ...actual,
-    storeToRefs: jest.fn((store: any) => {
+    storeToRefs: vi.fn((store: any) => {
       const result: any = {};
       Object.keys(store).forEach((key) => {
         if (typeof store[key] === 'function') {
@@ -34,8 +35,8 @@ jest.mock('pinia', () => {
   };
 });
 
-jest.mock('ant-design-vue', () => {
-  const { defineComponent, h } = require('vue');
+vi.mock('ant-design-vue', async () => {
+  const { defineComponent, h } = await import('vue');
   return {
     Table: defineComponent({
       name: 'Table',
@@ -89,12 +90,12 @@ jest.mock('ant-design-vue', () => {
   };
 });
 
-jest.mock('@ant-design/icons-vue', () => ({}));
+vi.mock('@ant-design/icons-vue', () => ({}));
 
 describe('GovernanceLog', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('应加载治理日志列表', async () => {
