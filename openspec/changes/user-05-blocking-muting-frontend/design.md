@@ -121,7 +121,10 @@ PC 端和移动端的布局差异（表格 vs 卡片列表、弹窗 vs 底部抽
 4. 新增不感兴趣气泡（NotInterestedPopover）和屏蔽词折叠卡片（FilteredContentCard）
 5. 新增被拉黑状态页（BlockedUserPage）
 6. 新增隐私设置聚合页和子管理页面
-7. 修改现有内容卡片、用户主页、评论区组件，嵌入 BlockMuteMenu
+7. 修改现有内容卡片、用户主页、评论区组件，嵌入 BlockMuteMenu（**依赖**: 目标组件需由其他 change 提供，当前 5 个 task 因目标组件不存在而阻塞，详见 tasks.md）
+   - **用户主页** (`FanProfile.vue`): 已存在，可嵌入 BlockMuteMenu
+   - **内容卡片**: 尚未创建，需等待 `circle-10-core-frontend` 或 `circle-11-content-interaction-frontend` 提供
+   - **评论区** (`CommentActions.vue`): 已存在，可嵌入 BlockMuteMenu
 8. 路由注册隐私设置相关页面
 
 **Rollback strategy:**
