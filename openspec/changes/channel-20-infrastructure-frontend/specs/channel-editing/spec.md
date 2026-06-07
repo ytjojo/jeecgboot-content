@@ -3,7 +3,7 @@
 > **API 路径**:
 > - 查询频道详情: `GET /api/v1/channels/{id}` (已存在)
 > - 编辑频道: `PUT /api/v1/channels/{id}` (已存在)
-> - 名称唯一性校验: `GET /api/v1/channels/check-name` (待后端实现)
+> - 名称唯一性校验: `GET /api/v1/channels/check-name` (已存在)
 > **Controller**: ChannelController
 > **前端封装**: `src/api/content/channel/index.ts` - `getChannelDetail()`, `updateChannel()`, `checkNameUnique()`
 

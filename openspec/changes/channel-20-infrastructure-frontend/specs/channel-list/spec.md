@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-> **API 路径**: `GET /api/v1/channels/list` (待后端实现)
+> **API 路径**: `GET /api/v1/channels/list` (已存在)
 > **Controller**: ChannelController
 > **前端封装**: `src/api/content/channel/index.ts` - `getChannelList()`
 

@@ -34,16 +34,19 @@
 - 新增 7 个页面组件（数据看板、数据导出、审核队列、治理后台、治理详情、审计日志、申诉管理）
 - 新增 9 个业务组件（StatsCard、StatsTrendChart、HotContentTable、UserAnalysisPanel、ExportConfigModal、ReviewDetailDrawer、LifecycleActionModal、AppealModal、StatusTag）
 - 新增 4 个 Store（channelStats、channelExport、channelReview、channelGovernance）
-- 新增 20+ 个 API 接口对接
+- 新增约 30 个 API 接口对接（含治理列表、详情、合并校验/执行）
 - 引入 ECharts 图表库依赖
 
 **API 对接**:
 - 统计看板 API（5 个接口）
 - 数据导出 API（4 个接口）
 - 审核管理 API（3 个接口）
-- 生命周期管理 API（11 个接口）
-- 审计日志 API（2 个接口）
+- 生命周期管理 API（8 个接口）
+- 治理频道 API（2 个接口：列表、详情）
+- 合并管理 API（2 个接口：校验、执行）
+- 审计日志 API（1 个接口）
 - 申诉管理 API（4 个接口）
+- 合计约 29 个接口
 
 **路由配置**:
 - 新增 7 个前端路由

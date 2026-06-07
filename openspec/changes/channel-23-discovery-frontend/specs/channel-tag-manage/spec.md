@@ -50,3 +50,9 @@
 #### Scenario: 移动端操作
 - **WHEN** 屏幕宽度 < 576px
 - **THEN** 内联列表展示，操作按钮转为长按或滑动操作
+
+> **NOTE**: 后端 API 状态（2026-06-07 更新）：
+> - `GET /content/channel/tag/list` — ✅ 已实现
+> - `POST /content/channel/tag/create` — ✅ 已实现
+> - `POST /content/channel/tag/update` — ✅ 已实现（`ContentChannelTagController.java:37`，参数: tagId, name）
+> - `POST /content/channel/tag/delete` — ✅ 已实现

@@ -134,7 +134,7 @@ enum Api {
   contentList = '/content/channel/governance/content/list',
   editAssistHistory = '/content/channel/governance/edit-assist/history',
   recycleBinList = '/content/channel/governance/recycle-bin/list',
-  logList = '/channel/governance/log',
+  logList = '/content/channel/governance/log',
 }
 
 /** 统一治理操作（后端使用 action 字段区分操作类型） */

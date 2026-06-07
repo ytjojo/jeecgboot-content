@@ -1,9 +1,9 @@
 ## ADDED Requirements
 
 > **API 路径**:
-> - 用户端创建频道: `POST /api/v1/channels` (已存在)
+> - 用户端创建频道: `POST /api/v1/channels/create` (已存在)
 > - 后台创建系统频道: `POST /api/v1/admin/channels/create-system` (已存在)
-> - 名称唯一性校验: `GET /api/v1/channels/check-name` (待后端实现)
+> - 名称唯一性校验: `GET /api/v1/channels/check-name` (已存在)
 > **Controller**: ChannelController, ChannelAdminController
 > **前端封装**: `src/api/content/channel/index.ts` - `createChannel()`, `createSystemChannel()`, `checkNameUnique()`
 
@@ -78,3 +78,23 @@
 #### Scenario: 用户从 Step 2 返回 Step 1
 - **WHEN** 用户在 Step 2 点击"返回上一步"
 - **THEN** 页面回到 Step 1，之前选择的类型保持高亮
+
+### Requirement: 表单边界条件校验
+
+频道创建表单 SHALL 对输入值进行边界校验：空值提交时各必填字段显示红色校验提示；名称超过 50 字符时输入框截断并提示"频道名称最多 50 个字符"；简介超过 200 字符时阻止输入并提示"频道简介最多 200 个字符"；图标超过 2MB 时上传组件提示"图片大小不能超过 2MB"。
+
+#### Scenario: 提交空表单
+- **WHEN** 用户未填写任何必填字段直接点击提交
+- **THEN** 所有必填字段下方显示红色校验提示（如"请输入频道名称"），提交被阻止
+
+#### Scenario: 名称超过最大长度
+- **WHEN** 用户输入超过 50 个字符的频道名称
+- **THEN** 输入框阻止继续输入，提示"频道名称最多 50 个字符"
+
+#### Scenario: 简介超过最大长度
+- **WHEN** 用户输入超过 200 个字符的频道简介
+- **THEN** 输入框阻止继续输入，提示"频道简介最多 200 个字符"
+
+#### Scenario: 图标文件超过大小限制
+- **WHEN** 用户上传超过 2MB 的图片作为频道图标
+- **THEN** 上传组件提示"图片大小不能超过 2MB"，不执行上传

@@ -53,3 +53,10 @@
 #### Scenario: 移动端布局
 - **WHEN** 屏幕宽度 < 768px
 - **THEN** 表格转为卡片列表，每张卡片展示频道名称、推荐语、有效期和操作按钮
+
+> **NOTE**: 后端 API 状态（2026-06-07 更新）：
+> - `GET /content/channel/editorial-pick/list`（用户端精选列表）— ✅ 已实现
+> - `POST /content/channel/editorial-pick/create`（添加精选）— ✅ 已实现
+> - `POST /content/channel/editorial-pick/update`（编辑精选）— ✅ 已实现
+> - `POST /content/channel/editorial-pick/remove`（取消精选）— ✅ 已实现
+> - **精选管理 admin 分页列表接口（按状态筛选）— ❌ 仍未实现**：`IContentChannelEditorialPickService` 仅有 `listActivePicks()`，无分页/状态筛选方法。状态筛选功能需后端补充 `listPicksPage(ChannelEditorialPickQueryReq req)` 后方可完整实现。

@@ -91,11 +91,11 @@
 - D5（表格转卡片）→ design.md 中有响应式策略描述 ✅
 - D6（路由结构）→ PRD 中有路由路径定义 ✅
 
-**BLOCK-1**: API 路径前缀不一致。design.md API 路径映射表中使用 `/channel/subscription/*`（无 `/api` 前缀），但前端 PRD 5.1-5.5 节使用 `/api/channel/subscription/*`（有 `/api` 前缀）。plan.md 中 Task 1 使用 `/channel/subscription/*`（无 `/api`）。三方不一致，联调时将导致 404。
+**BLOCK-1** ✅ 已修复: API 路径前缀已统一。design.md、plan.md、PRD 三方均使用 `/channel/subscription/*`（无 `/api` 前缀），与后端 ChannelSubscriptionController 路径一致。
 
-**FLAG-2**: plan.md 中 `channelSubscription.ts` 的 `groupRename` 使用 `POST /group/rename`（与后端一致），但 design.md API 路径映射表中写的是 `PUT /group/update`。design.md 描述与实际实现不一致。
+**FLAG-2** ✅ 已修复: design.md API 路径映射表中无 `PUT /group/update` 描述，plan.md 中 `groupRename` 使用 `POST /group/rename` 与后端一致。
 
-**FLAG-3**: frontend PRD 5.2 节中 `applyToJoin` 路径为 `/api/channel/member/apply`，但后端实际路径为 `/channel/member/join/apply`（多一层 `/join/`）。plan.md Task 2 中使用 `/channel/member/join/apply` 是正确的，但 PRD 描述不一致。
+**FLAG-3** ✅ 已修复: PRD 中 `applyToJoin` 路径已为 `/channel/member/join/apply`，与后端 ChannelMemberController 路径一致。
 
 **ADVISORY-3**: proposal.md 中"约 25 个 API 接口调用"的表述与实际 API 数量（plan.md 中定义的 ~22 个函数）略有出入，建议精确化。
 
@@ -115,17 +115,15 @@
 - 路由守卫配合 resetContext + loadContext 确保数据刷新 ✅
 - 响应式策略（表格转卡片）符合移动端最佳实践 ✅
 
-**FLAG-4**: 6 个 P0 后端 API 端点缺失（详见 backend-issues.md）：
-1. 订阅状态查询 `/status/{channelId}` — SubscribeButton 状态机核心依赖
-2. 黑名单列表 `/blacklist/list` — BlacklistPage 核心依赖
-3. 治理日志列表 `/governance/log` — GovernanceLog 核心依赖
-4. 隐私设置更新 `/privacy/update` — PrivacySettings 核心依赖
-5. 加入方式更新 `/join-method/update` — JoinMethodSettings 核心依赖
-6. 用户频道关系查询 `/relation` — useChannelContext 核心依赖
+**FLAG-4** ✅ 已修复: 6 个 P0 后端 API 端点已在后端实现：
+1. `GET /channel/subscription/status/{channelId}` — ChannelSubscriptionController ✅
+2. `GET /channel/governance/blacklist/list` — ChannelGovernanceController ✅
+3. `GET /channel/governance/log` — ChannelGovernanceController ✅
+4. `PUT /api/v1/channels/privacy` — ChannelController ✅
+5. `PUT /api/v1/channels/join-method` — ChannelController ✅
+6. `GET /channel/member/relation` — ChannelMemberController ✅
 
-backend-issues.md 已提供临时方案（组合已有 API），但建议在 apply 前确认后端排期。
-
-**ADVISORY-4**: plan.md Task 4 中 `useChannelContext` 导入了 `getChannelInfo` 和 `getUserChannelRelation` 两个函数，但这些函数在后端 API 中尚无独立端点。plan.md 中已标注 `TODO`，但实现时需先确认 API 路径或使用临时方案。
+**ADVISORY-4** ✅ 已修复: plan.md 中的 TODO 注释已移除。`useChannelContext` 可直接调用后端端点：`GET /api/v1/channels/{id}` 获取频道信息，`GET /channel/member/relation` 获取用户频道关系。
 
 ---
 
@@ -165,11 +163,11 @@ backend-issues.md 已提供临时方案（组合已有 API），但建议在 app
 |---------|---------|---------|------|
 | subscribeChannel | POST /channel/subscription/subscribe | POST /channel/subscription/subscribe | ✅ |
 | unsubscribeChannel | POST /channel/subscription/unsubscribe | POST /channel/subscription/unsubscribe | ✅ |
-| getSubscriptionStatus | GET /channel/subscription/status/{id} | ❌ 不存在 | **BLOCK-2** |
+| getSubscriptionStatus | GET /channel/subscription/status/{id} | GET /channel/subscription/status/{channelId} | ✅ |
 | getSubscriptionList | GET /channel/subscription/list | GET /channel/subscription/list | ✅ |
 | createSubscriptionGroup | POST /channel/subscription/group/create | POST /channel/subscription/group/create | ✅ |
 | renameSubscriptionGroup | POST /channel/subscription/group/rename | POST /channel/subscription/group/rename | ✅ |
-| deleteSubscriptionGroup | DELETE /channel/subscription/group/delete | POST /channel/subscription/group/delete | ⚠️ HTTP 方法不一致 |
+| deleteSubscriptionGroup | POST /channel/subscription/group/delete | POST /channel/subscription/group/delete | ✅ |
 | getSubscriptionGroupList | GET /channel/subscription/group/list | GET /channel/subscription/group/list | ✅ |
 | updateSubscriptionReminder | PUT /channel/subscription/reminder | ❌ 不存在 | FLAG-6 (P2) |
 | applyToJoin | POST /channel/member/join/apply | POST /channel/member/join/apply | ✅ |
@@ -177,30 +175,38 @@ backend-issues.md 已提供临时方案（组合已有 API），但建议在 app
 | approveApplications | POST /channel/member/applications/approve | POST /channel/member/applications/approve | ✅ |
 | rejectApplications | POST /channel/member/applications/reject | POST /channel/member/applications/reject | ✅ |
 | getMemberList | GET /channel/member/list | GET /channel/member/list | ✅ |
-| updateMemberRole | PUT /channel/member/assign-role | POST /channel/member/assign-role | ⚠️ HTTP 方法不一致 |
+| updateMemberRole | POST /channel/member/assign-role | POST /channel/member/assign-role | ✅ |
 | removeMembers | POST /channel/governance/remove | POST /channel/governance/remove | ✅ |
 | muteMember | POST /channel/governance/mute | POST /channel/governance/mute | ✅ |
 | unmuteMember | POST /channel/governance/unmute | POST /channel/governance/unmute | ✅ |
 | addToBlacklist | POST /channel/governance/blacklist/add | POST /channel/governance/blacklist/add | ✅ |
 | removeFromBlacklist | POST /channel/governance/blacklist/remove | POST /channel/governance/blacklist/remove | ✅ |
-| getBlacklist | GET /channel/governance/blacklist/list | ❌ 不存在 | **BLOCK-3** |
+| getBlacklist | GET /channel/governance/blacklist/list | GET /channel/governance/blacklist/list | ✅ |
 | createInvite | POST /channel/invite/create | POST /channel/invite/create | ✅ |
 | getInviteList | GET /channel/invite/list | GET /channel/invite/list | ✅ |
 | revokeInvite | POST /channel/invite/revoke | POST /channel/invite/revoke | ✅ |
 | joinByInvite | POST /channel/invite/use | POST /channel/invite/use | ✅ |
-| updateChannelPrivacy | PUT /channel/privacy/update | ❌ 不存在 | FLAG-7 (P0) |
-| updateJoinMethod | PUT /channel/join-method/update | ❌ 不存在 | FLAG-7 (P0) |
-| getGovernanceLog | GET /channel/governance/log | ❌ 不存在 | **BLOCK-2** |
+| updateChannelPrivacy | PUT /api/v1/channels/privacy | PUT /api/v1/channels/privacy | ✅ |
+| updateJoinMethod | PUT /api/v1/channels/join-method | PUT /api/v1/channels/join-method | ✅ |
+| getGovernanceLog | GET /channel/governance/log | GET /channel/governance/log | ✅ |
 
-**BLOCK-2**: 3 个核心 API 端点在后端完全缺失（订阅状态查询、治理日志列表、用户频道关系查询），且无临时替代方案。这些是 SubscribeButton 状态机、GovernanceLog、useChannelContext 的核心依赖，缺失将导致对应页面无法运行。
+**BLOCK-2** ✅ 已修复: 3 个核心 API 端点已在后端实现：
+- `GET /channel/subscription/status/{channelId}` — ChannelSubscriptionController
+- `GET /channel/governance/log` — ChannelGovernanceController
+- `GET /channel/member/relation` — ChannelMemberController
 
-**BLOCK-3**: getBlacklist 路径为 `/channel/governance/blacklist/list`，但后端 ChannelGovernanceController 中无此端点。Service 层有 `listBlacklistedUserIds()` 但未暴露为 API。
+**BLOCK-3** ✅ 已修复: `GET /channel/governance/blacklist/list` 已在 ChannelGovernanceController 中实现。
 
-**FLAG-6**: 更新提醒设置和移动频道到分组的后端 API 缺失，但 plan.md 中已将 `moveGroup` 标注为 P2 并注释，`reminder` 端点仍在代码中。建议在 plan.md 中明确标注 `reminder` 为 P2 或确认后端排期。
+**FLAG-6**: 更新提醒设置 API (`/channel/subscription/reminder`) 后端未实现。plan.md 中已标注为 P2，不影响核心功能。移动频道到分组 (`moveGroup`) 已注释为 P2。
 
-**FLAG-7**: 隐私设置更新和加入方式更新的后端 API 缺失。backend-issues.md 建议使用方案 C（通过 `PUT /{id}` 通用更新接口），但前端 plan.md 中仍使用独立路径。需在 apply 前确认最终方案。
+**FLAG-7** ✅ 已修复: 隐私设置更新和加入方式更新已在 ChannelController 中实现：
+- `PUT /api/v1/channels/privacy` — 使用 ChannelPrivacyService
+- `PUT /api/v1/channels/join-method` — 使用 ChannelJoinMethodService
+前端 plan.md 中 `channelPrivacy.ts` 的路径需同步更新为 `/api/v1/channels/privacy` 和 `/api/v1/channels/join-method`。
 
-**ADVISORY-7**: `deleteSubscriptionGroup` 前端使用 `defHttp.delete`（HTTP DELETE），后端实际为 `POST /group/delete`。`updateMemberRole` 前端使用 `defHttp.put`，后端实际为 `POST /assign-role`。HTTP 方法不一致可能导致联调问题。
+**ADVISORY-7** ✅ 已修复: plan.md 中 HTTP 方法已统一：
+- `deleteSubscriptionGroup`: `defHttp.delete` → `defHttp.post`（与后端 POST 一致）
+- `updateMemberRole`: `defHttp.put` → `defHttp.post`（与后端 POST 一致）
 
 ---
 
@@ -297,47 +303,56 @@ backend-issues.md 已提供临时方案（组合已有 API），但建议在 app
 
 ## 6. 最终结论
 
-### 评估: 有条件通过 (Conditional Pass)
+### 评估: 通过 (Pass)
 
-change 的文档质量整体良好，设计决策合理，6 个 spec 覆盖全部 capability，59 个任务与 plan.md 一一对应，11 个测试文件有完整 TDD 配对。
+change 的文档质量整体良好，设计决策合理，6 个 spec 覆盖全部 capability，59 个任务与 plan.md 一一对应，11 个测试文件有完整 TDD 配对。所有 BLOCK 问题已修复，后端 API 端点已全部实现。
 
-### 必须修复 (BLOCK) — 3 项
+### 必须修复 (BLOCK) — 3 项（全部已修复 ✅）
 
-| ID | 问题 | 修复建议 |
-|----|------|---------|
-| BLOCK-1 | API 路径前缀 `/api/channel/` vs `/channel/` 三方不一致 | 统一为 `/channel/`（与后端一致），在前端 HTTP 配置中添加代理或前缀映射 |
-| BLOCK-2 | 3 个 P0 API 端点缺失（订阅状态、治理日志、用户频道关系） | 确认后端排期，或在 plan.md 中实现 backend-issues.md 提供的临时方案 |
-| BLOCK-3 | 黑名单列表 API 路径与后端 Controller 不匹配 | 确认后端是否在 ChannelGovernanceController 中添加 `/blacklist/list` 端点 |
+| ID | 问题 | 状态 |
+|----|------|------|
+| BLOCK-1 | API 路径前缀不一致 | ✅ 已修复：三方路径已统一 |
+| BLOCK-2 | 3 个 P0 API 端点缺失 | ✅ 已修复：后端已实现订阅状态、治理日志、用户关系端点 |
+| BLOCK-3 | 黑名单列表 API 路径不匹配 | ✅ 已修复：后端已实现 `/channel/governance/blacklist/list` |
 
-### 建议修复 (FLAG) — 8 项
+### 建议修复 (FLAG) — 8 项（5 项已修复 ✅）
 
-| ID | 问题 | 优先级 |
-|----|------|-------|
-| FLAG-1 | 邀请管理列表页 spec 缺失 | P1 |
-| FLAG-2 | design.md groupUpdate 路径描述与 plan.md 不一致 | P1 |
-| FLAG-3 | PRD 中 applyToJoin 路径与后端不一致 | P1 |
-| FLAG-4 | 6 个 P0 后端 API 依赖未确认 | P0 |
-| FLAG-5 | spec scenario 缺少量化验收标准 | P2 |
-| FLAG-6 | reminder API 缺失，plan.md 未明确标注 P2 | P2 |
-| FLAG-7 | 隐私/加入方式更新 API 方案未确认 | P0 |
-| FLAG-8 | 交互组件离线态处理不完整 | P2 |
+| ID | 问题 | 优先级 | 状态 |
+|----|------|-------|------|
+| FLAG-1 | 邀请管理列表页 spec 缺失 | P1 | 待处理 |
+| FLAG-2 | design.md groupUpdate 路径不一致 | P1 | ✅ 已修复 |
+| FLAG-3 | PRD 中 applyToJoin 路径不一致 | P1 | ✅ 已修复 |
+| FLAG-4 | 6 个 P0 后端 API 依赖未确认 | P0 | ✅ 已修复：全部 6 个端点已实现 |
+| FLAG-5 | spec scenario 缺少量化验收标准 | P2 | 待处理 |
+| FLAG-6 | reminder API 缺失 | P2 | 已接受（P2，不影响核心功能） |
+| FLAG-7 | 隐私/加入方式更新 API 方案未确认 | P0 | ✅ 已修复：已实现为独立端点 |
+| FLAG-8 | 交互组件离线态处理不完整 | P2 | 待处理 |
 
-### 建议改进 (ADVISORY) — 8 项
+### 建议改进 (ADVISORY) — 8 项（2 项已修复 ✅）
 
-| ID | 建议 |
-|----|------|
-| ADVISORY-1 | 闭环 design.md 中 5 个 Open Questions |
-| ADVISORY-2 | 补充响应式和性能验证的自动化测试 |
-| ADVISORY-3 | 精确化 proposal.md 中的 API 数量表述 |
-| ADVISORY-4 | 确认 useChannelContext 依赖的 API 路径 |
-| ADVISORY-5 | 将集成测试场景纳入 tasks.md |
-| ADVISORY-6 | 明确 tasks.md 验证任务的描述 |
-| ADVISORY-7 | 统一 HTTP 方法（DELETE vs POST、PUT vs POST） |
-| ADVISORY-8 | 补充 SubscribeButton 状态转换矩阵 |
+| ID | 建议 | 状态 |
+|----|------|------|
+| ADVISORY-1 | 闭环 design.md 中 5 个 Open Questions | 待处理 |
+| ADVISORY-2 | 补充响应式和性能验证的自动化测试 | 待处理 |
+| ADVISORY-3 | 精确化 proposal.md 中的 API 数量表述 | 待处理 |
+| ADVISORY-4 | 确认 useChannelContext 依赖的 API 路径 | ✅ 已修复 |
+| ADVISORY-5 | 将集成测试场景纳入 tasks.md | 待处理 |
+| ADVISORY-6 | 明确 tasks.md 验证任务的描述 | 待处理 |
+| ADVISORY-7 | 统一 HTTP 方法 | ✅ 已修复 |
+| ADVISORY-8 | 补充 SubscribeButton 状态转换矩阵 | 待处理 |
 
-### 建议操作
+### 剩余待处理项
 
-1. **立即修复**: BLOCK-1（API 路径前缀统一），可在 plan.md 中一步修正
-2. **短期确认**: BLOCK-2/3、FLAG-4/7 — 与后端团队确认缺失 API 的实现计划或采用临时方案
-3. **apply 前完成**: FLAG-1/2/3 的文档修正
-4. **实现过程中**: 逐步处理 FLAG-5/6/8 和 ADVISORY 项
+1. **FLAG-1** (P1): 邀请管理列表页 spec 缺失 — 补充独立的邀请管理列表 spec scenario
+2. **FLAG-5** (P2): spec scenario 缺少量化验收标准 — 补充时间阈值和防抖参数
+3. **FLAG-8** (P2): 交互组件离线态处理不完整 — 补充 SubscribeButton 等组件的离线态 scenario
+4. **ADVISORY-1**: 闭环 design.md 中 5 个 Open Questions
+5. **ADVISORY-2/5/6**: 测试相关改进
+6. **ADVISORY-3**: proposal.md API 数量精确化
+7. **ADVISORY-8**: SubscribeButton 状态转换矩阵
+
+### plan.md 隐私设置路径同步 ✅ 已修复
+
+plan.md Task 3 中 `channelPrivacy.ts` 的路径已更新为实际后端路径：
+- `updatePrivacy` → `/api/v1/channels/privacy` ✅
+- `updateJoinMethod` → `/api/v1/channels/join-method` ✅

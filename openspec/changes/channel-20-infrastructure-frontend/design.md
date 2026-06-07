@@ -82,7 +82,7 @@ EPIC-20 后端 API 已定义 15 个频道相关接口，前端需要从零构建
 |----------|------------|----------|--------------|
 | 用户端频道 CRUD | ChannelController | `/api/v1/channels` | `/api/v1/channels/*` |
 | 后台频道管理 | ChannelAdminController | `/api/v1/admin/channels` | `/api/v1/admin/channels/*` |
-| 审核队列 | ChannelReviewController | `/jeecg-boot/api/v1/content/channel/review` | `/jeecg-boot/api/v1/content/channel/review/*` |
+| 审核队列 | ChannelReviewController | `/jeecg-boot/api/v1/content/channel/review` | `/jeecg-boot/api/v1/content/channel/review/*`（绝对路径，不经过 defHttp 前缀拼接） |
 | 生命周期管理 | ChannelLifecycleController | `/jeecg-boot/api/v1/content/channel/lifecycle` | `/jeecg-boot/api/v1/content/channel/lifecycle/*` |
 | 频道治理 | ChannelGovernanceController | `/channel/governance` | `/channel/governance/*` |
 | 内容发布 | ChannelPublishController | `/content/channel/publish` | `/content/channel/publish` |
@@ -90,7 +90,7 @@ EPIC-20 后端 API 已定义 15 个频道相关接口，前端需要从零构建
 **理由**: 后端 API 存在多个 Controller，路径前缀不一致，前端需统一管理避免混淆。
 
 **后端已实现的 API（ChannelController）**:
-- `POST /api/v1/channels` — 创建频道
+- `POST /api/v1/channels/create` — 创建频道
 - `GET /api/v1/channels/list` — 我的频道列表
 - `GET /api/v1/channels/{id}` — 频道详情
 - `PUT /api/v1/channels/{id}` — 更新频道
@@ -103,6 +103,17 @@ EPIC-20 后端 API 已定义 15 个频道相关接口，前端需要从零构建
 - `GET /api/v1/channels/{id}/transfers` — 转让历史查询
 - `GET /api/v1/channels/{id}/transfer/pending` — 待确认转让查询
 - `GET /api/v1/channels/check-name` — 名称唯一性校验
+- `PUT /api/v1/channels/privacy` — 更新隐私设置
+- `PUT /api/v1/channels/join-method` — 更新加入方式
+
+**后端已实现的 API（ChannelReviewController）**:
+- `GET /jeecg-boot/api/v1/content/channel/review/list` — 审核队列列表
+- `GET /jeecg-boot/api/v1/content/channel/review/detail/{id}` — 审核详情
+- `POST /jeecg-boot/api/v1/content/channel/review/action` — 审核操作
+
+**后端已实现的 API（ChannelAdminController）**:
+- `POST /api/v1/admin/channels/create-system` — 创建系统频道
+- `POST /api/v1/admin/channels/{id}/review` — 审核频道
 
 ## Risks / Trade-offs
 
@@ -111,3 +122,38 @@ EPIC-20 后端 API 已定义 15 个频道相关接口，前端需要从零构建
 - **[风险] 名称唯一性校验并发** → 使用 300ms 防抖 + 失焦触发策略，减少接口调用频率。后端做最终兜底校验。
 - **[权衡] 频道管理页 vs 独立子页面** → 选择 Tab 结构而非独立子页面，牺牲了一定的 URL 可分享性，但获得了更好的导航体验和上下文保持。
 - **[权衡] Store 缓存策略** → 选择在 Store 中缓存列表数据，页面切换时可能有短暂的数据陈旧，但减少了重复请求。通过关键操作后主动刷新解决。
+
+### 10. 错误码处理体系
+
+**决策**: 前端依赖项目全局 HTTP 拦截器统一处理后端错误码，频道模块不单独实现错误处理逻辑。
+
+**后端响应格式**: `{ code: number, result: any, message: string, success: boolean }`
+
+**前端处理策略**（由 `src/utils/http/axios/index.ts` 中 `transformRequestHook` 和 `checkStatus()` 统一处理）:
+
+| 场景 | 后端返回 | 前端处理 |
+|------|---------|---------|
+| 成功 | `code: 200` | 返回 `result` 字段 |
+| Token 过期 | `code: 401` 或 HTTP 401 | 清除 Token，跳转登录页（`userStore.logout(true)`） |
+| 权限不足 | HTTP 403 | 显示"暂无权限"提示 |
+| 资源不存在 | HTTP 404 | 显示"资源不存在"提示 |
+| 网络超时 | `ECONNABORTED` | 显示"请求超时"提示 |
+| 网络断开 | `Network Error` | 显示"网络异常"提示 |
+| 业务错误 | `code: 非200` | 直接显示后端 `message` 字段内容（toast/modal） |
+| 用户状态异常 | `message` 含状态标识 | 解析 message 中的状态码，显示对应提示 |
+
+**频道模块特殊错误场景**: 频道模块的业务错误（名称冲突、数量上限、前置条件不满足等）由后端通过 `code + message` 返回，前端直接展示后端 message，无需前端硬编码错误码映射。
+
+**理由**: 项目已有成熟的全局错误处理机制（`transformRequestHook` + `checkStatus.ts`），频道模块复用该机制即可，无需额外封装。
+
+### 11. Token 过期处理策略
+
+**决策**: 频道模块依赖项目全局 Token 过期处理机制，不做额外的 Token 刷新逻辑。
+
+**当前项目行为**（`src/utils/http/axios/index.ts`）:
+1. 响应拦截器检测 `code: 401`（`ResultEnum.TIMEOUT`）→ 清除 Token → `userStore.logout(true)` → 跳转登录页
+2. HTTP 状态码 401 → `checkStatus(401)` → 清除 Token → 跳转登录页或显示登录覆盖层（取决于 `sessionTimeoutProcessing` 配置）
+
+**注意**: 项目定义了 `refreshToken` API（`src/api/content/auth/index.ts`）但未在拦截器中接入自动刷新。Token 过期后用户需重新登录。如后续需要无感刷新，需在全局拦截器层面改造，不属于本 change 范围。
+
+**理由**: 保持与项目现有行为一致，不在频道模块引入特殊逻辑。

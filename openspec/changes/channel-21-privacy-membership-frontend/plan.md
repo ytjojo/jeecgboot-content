@@ -25,7 +25,7 @@ import { defHttp } from '/@/utils/http/axios';
 enum Api {
   subscribe = '/channel/subscription/subscribe',
   unsubscribe = '/channel/subscription/unsubscribe',
-  status = '/channel/subscription/status',  // TODO: 后端需添加此端点
+  status = '/channel/subscription/status',
   list = '/channel/subscription/list',
   groupCreate = '/channel/subscription/group/create',
   groupRename = '/channel/subscription/group/rename',  // 注意：后端使用 POST /group/rename
@@ -62,7 +62,7 @@ export const renameSubscriptionGroup = (groupId: string, newName: string) =>
 
 /** 删除分组 */
 export const deleteSubscriptionGroup = (groupId: string) =>
-  defHttp.delete({ url: Api.groupDelete, params: { groupId } });
+  defHttp.post({ url: Api.groupDelete, params: { groupId } });
 
 /** 分组列表 */
 export const getSubscriptionGroupList = () =>
@@ -105,7 +105,6 @@ import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
   joinApply = '/channel/member/join/apply',
-  // applicationStatus = '/channel/member/application/status',  // TODO: 后端需添加此端点
   applicationPending = '/channel/member/applications/pending',
   applicationApprove = '/channel/member/applications/approve',
   applicationReject = '/channel/member/applications/reject',
@@ -121,11 +120,6 @@ enum Api {
 /** 提交加入申请 */
 export const applyToJoin = (data: { channelId: string; reason: string }) =>
   defHttp.post({ url: Api.joinApply, data });
-
-// TODO: 后端需添加 applicationStatus 端点后再启用
-// /** 查询申请状态 */
-// export const getApplicationStatus = (channelId: string) =>
-//   defHttp.get({ url: `${Api.applicationStatus}/${channelId}` });
 
 /** 待审列表 */
 export const getPendingApplications = (params: { channelId: string; [key: string]: any }) =>
@@ -145,7 +139,7 @@ export const getMemberList = (params: { channelId: string; [key: string]: any })
 
 /** 修改角色 */
 export const updateMemberRole = (data: { channelId: string; memberId: string; role: string }) =>
-  defHttp.put({ url: Api.assignRole, data });
+  defHttp.post({ url: Api.assignRole, data });
 
 /** 移除成员（支持批量） */
 export const removeMembers = (data: { channelId: string; memberIds: string[]; reason: string }) =>
@@ -248,12 +242,8 @@ export const joinByInvite = (inviteCode: string) =>
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  // ADVISORY-8: RESTful 规范建议使用 HTTP 方法代替路径动词：
-  //   updatePrivacy → PUT /channel/privacy
-  //   updateJoinMethod → PUT /channel/join-method
-  // 当前后端路径需确认是否支持 RESTful 风格后再调整
-  updatePrivacy = '/channel/privacy/update',
-  updateJoinMethod = '/channel/join-method/update',
+  updatePrivacy = '/api/v1/channels/privacy',
+  updateJoinMethod = '/api/v1/channels/join-method',
 }
 
 /** 更新隐私设置 */

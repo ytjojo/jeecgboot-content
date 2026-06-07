@@ -46,6 +46,10 @@ JeecgBoot_sass 内容社区模块已有频道基础功能（EPIC-20 创建、EPI
 - `useChannelCategoryStore`: 分类树数据，会话级缓存，写操作后刷新
 - `useChannelSearchStore`: 搜索状态，不缓存结果，持久化搜索历史到 localStorage
 
+**缓存失效规则**: 详见 PRD Section 6.2.1 缓存失效规则表，包含各 Store 的缓存时长、失效条件和刷新方式。
+
+**userId 注入方式**: 推荐接口（`/content/channel/recommendation/list`）和搜索接口（`/content/channel/search/query`）需要 `userId` 参数。前端在 API 封装层通过 `useUserStore().getUserInfo.id` 获取当前用户 ID，作为请求参数自动注入。未登录用户调用冷启动接口（`/content/channel/recommendation/cold-start`），无需 userId。
+
 ### 3. 发现页数据加载：并行请求 vs 聚合 API
 
 **选择**: 聚合 API `GET /content/channel/discovery/home` 一次性获取推荐+榜单+精选
@@ -53,7 +57,7 @@ JeecgBoot_sass 内容社区模块已有频道基础功能（EPIC-20 创建、EPI
 **理由**: 减少 HTTP 请求数，后端可做聚合优化，前端只需一次 loading 状态管理。聚合失败时降级为并行请求各子接口。
 
 **降级策略**: 聚合接口超时或失败时，前端 fallback 为并行调用以下独立接口：
-- `GET /content/channel/recommendation/list`（推荐频道，需 userId 参数）
+- `GET /content/channel/recommendation/list`（推荐频道，需 userId 参数，从 useUserStore 自动注入）
 - `GET /content/channel/ranking/hot`（热门排行榜）
 - `GET /content/channel/editorial-pick/list`（编辑精选）
 
@@ -76,6 +80,48 @@ JeecgBoot_sass 内容社区模块已有频道基础功能（EPIC-20 创建、EPI
 **选择**: 输入防抖 300ms，搜索结果不缓存，搜索历史持久化到 localStorage
 
 **理由**: 搜索结果实时性要求高，缓存可能导致过期数据。搜索历史对用户体验有价值，持久化到 localStorage 跨会话保留。
+
+## Test Strategy
+
+### Store 测试策略
+
+| Store | 测试重点 | 覆盖场景 |
+|-------|---------|---------|
+| `useChannelDiscoveryStore` | 缓存命中/过期、聚合降级逻辑 | 5 分钟 TTL 过期判断、聚合接口失败 fallback 到独立接口、不感兴趣反馈后立即刷新推荐列表、订阅状态变更后缓存失效 |
+| `useChannelCategoryStore` | 分类树加载与写后刷新 | 首次加载分类树、写操作（新增/编辑/停用/删除）后自动重新拉取、会话级缓存不跨页面刷新 |
+| `useChannelSearchStore` | 搜索状态管理与历史持久化 | 关键词/筛选条件变更触发搜索、搜索历史 localStorage 读写/清除、分页状态管理 |
+
+**缓存测试要点**（详见 PRD Section 6.2.1 缓存失效规则表）：
+- `lastFetchTime` 过期判断：`Date.now() - lastFetchTime > 5 * 60 * 1000`
+- 不感兴趣反馈 → 立即刷新推荐列表
+- 订阅/取消订阅 → 推荐列表缓存失效
+- 分类写操作 → 完整分类树重新拉取
+
+### 组件测试策略
+
+| 组件 | 测试重点 | 关键断言 |
+|------|---------|---------|
+| `ChannelCard` | 四种 mode 渲染差异 | recommend 模式展示推荐理由、search 模式展示匹配原因、ranking 模式展示排名序号 |
+| `CategoryTreeNav` | 三种模式交互 | browse 模式点击展开、select 模式单选、manage 模式右键菜单 |
+| `SearchBar` | 防抖与历史 | 300ms 防抖触发、搜索历史展示/选择/清除 |
+| `FilterPanel` | 筛选交互 | 多选/单选回调、移动端折叠态 |
+| `RankingList` | 排名样式 | Top 3 金银铜样式、4-10 突出、11+ 普通 |
+| `CategoryManageTree` | 编辑交互 | 拖拽排序、搜索高亮、右键菜单 |
+
+### API 封装层测试策略
+
+- 验证 19 个接口的 `defHttp` 调用路径和方法（GET/POST）正确
+- 验证 `userId` 参数从 `useUserStore` 自动注入（推荐接口和搜索接口）
+- 验证分页参数格式（page/pageSize）和默认值
+- 验证响应类型转换
+
+### E2E 测试策略（可选，Apply 后补充）
+
+| 流程 | 测试场景 |
+|------|---------|
+| 搜索流程 | 输入关键词 → 防抖 → 结果展示 → 筛选 → 翻页 → 搜索历史记录 |
+| 分类管理 | 新增分类 → 编辑 → 停用（含影响范围确认）→ 启用 → 拖拽排序 |
+| 发现页 | 聚合接口成功 → 正常展示；聚合接口失败 → 降级到独立接口 |
 
 ## Risks / Trade-offs
 

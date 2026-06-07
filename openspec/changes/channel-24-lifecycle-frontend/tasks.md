@@ -93,3 +93,11 @@
 - [ ] 11.4 响应式测试：桌面端/平板端/移动端适配
 - [ ] 11.5 权限测试：各角色操作权限验证
 - [ ] 11.6 边界测试：空状态、网络异常、重复提交等
+
+## 12. DoD 收尾
+
+- [ ] 12.1 流程确认 — 确认使用了 /superpowers:subagent-driven-development 和 /superpowers:test-driven-development
+- [ ] 12.2 Code Review — subagent 执行代码质量审查
+- [ ] 12.3 测试覆盖率检查 — 变更代码行覆盖率 >= 90%
+- [ ] 12.4 全量单元测试 — 模块级 100% 通过
+- [ ] 12.5 合并回主分支 + 验证 + 清理 worktree

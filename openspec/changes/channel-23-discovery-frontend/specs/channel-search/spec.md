@@ -49,7 +49,7 @@
 #### Scenario: 用户反馈结果有帮助
 - **WHEN** 用户点击"结果有帮助"按钮
 - **THEN** 调用 `POST /content/channel/search/feedback` 接口记录反馈，按钮变为已反馈状态
-- **NOTE**: 该后端接口尚待实现（见 backend-issues.md）
+- **NOTE**: 该后端接口已实现（`ContentChannelSearchController.java:35`，2026-06-07 更新）
 
 ### Requirement: 搜索历史管理
 搜索 SHALL 支持搜索历史记录，持久化到 localStorage。

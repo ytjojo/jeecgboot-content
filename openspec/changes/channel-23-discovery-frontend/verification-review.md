@@ -53,27 +53,23 @@
 
 ## CRITICAL Issues
 
-### C1: 聚合接口 `/content/channel/discovery/home` 缺少 Controller 端点
-- **影响**: 发现页核心功能无法调用
-- **位置**: `ContentChannelDiscoveryBiz.java` 已有聚合逻辑，但无 `@RestController` 暴露
-- **建议**: 创建 `ContentChannelDiscoveryController`，映射 `GET /content/channel/discovery/home`，调用 `ContentChannelDiscoveryBiz.getDiscoveryData()`
+### ~~C1: 聚合接口 `/content/channel/discovery/home` 缺少 Controller 端点~~ [已解决]
+- **状态**: ✅ 已实现
+- **位置**: `ContentChannelDiscoveryController.java:24` — `@GetMapping("/home")`
 
-### C2: 分类启用接口缺失
-- **影响**: 运营后台无法启用已停用分类
-- **位置**: `ContentChannelCategoryController.java` 仅有 `disableCategory`
-- **建议**: 在 `IContentChannelCategoryService` 和 Controller 中添加 `enableCategory(String categoryId)` 方法
+### ~~C2: 分类启用接口缺失~~ [已解决]
+- **状态**: ✅ 已实现
+- **位置**: `ContentChannelCategoryController.java:53` — `enableCategory(@RequestParam String categoryId)`
 
-### C3: 标签编辑/更新接口缺失
-- **影响**: 频道管理员无法 inline edit 标签名称
-- **位置**: `ContentChannelTagController.java` 仅有 create/delete
-- **建议**: 在 `IContentChannelTagService` 和 Controller 中添加 `updateTag(ChannelTagUpdateReq req)` 方法
+### ~~C3: 标签编辑/更新接口缺失~~ [已解决]
+- **状态**: ✅ 已实现
+- **位置**: `ContentChannelTagController.java:37` — `@PostMapping("/update")`
 
-### C4: 搜索结果反馈接口缺失
-- **影响**: 搜索页"结果有帮助"功能无法实现
-- **位置**: `ContentChannelSearchController.java` 仅有 search 查询
-- **建议**: 添加 `POST /content/channel/search/feedback` 端点
+### ~~C4: 搜索结果反馈接口缺失~~ [已解决]
+- **状态**: ✅ 已实现
+- **位置**: `ContentChannelSearchController.java:35` — `@PostMapping("/feedback")`
 
-### C5: 精选管理 admin 分页列表接口缺失
+### C5: 精选管理 admin 分页列表接口缺失 [仍未解决]
 - **影响**: 运营后台精选管理页无法按状态筛选展示全部精选
 - **位置**: `IContentChannelEditorialPickService` 仅有 `listActivePicks()`
 - **建议**: 添加 `IPage<ChannelEditorialPickVO> listPicksPage(ChannelEditorialPickQueryReq req)` 支持状态筛选和分页
@@ -126,21 +122,21 @@
 
 ## 建议修复方案
 
-### 优先级 1（阻塞前端开发）
-1. 创建 `ContentChannelDiscoveryController` 暴露聚合接口
-2. 添加分类启用接口 `enableCategory`
-3. 添加标签更新接口 `updateTag`
-4. 修正 design.md 中的 API 路径（search 和 ranking）
+### 优先级 1（阻塞前端开发）— 更新于 2026-06-07
+1. ~~创建 `ContentChannelDiscoveryController` 暴露聚合接口~~ ✅ 已完成
+2. ~~添加分类启用接口 `enableCategory`~~ ✅ 已完成
+3. ~~添加标签更新接口 `updateTag`~~ ✅ 已完成
+4. 修正 design.md 和前端 PRD 中的 API 路径（search 和 ranking）
 
 ### 优先级 2（补充功能完整性）
-5. 添加搜索反馈接口
-6. 添加精选管理 admin 分页列表接口
+5. ~~添加搜索反馈接口~~ ✅ 已完成
+6. 添加精选管理 admin 分页列表接口（BI-5，仍未解决）
 7. 在 specs 中补充 API 参数说明（userId、dimension 枚举）
 
 ### 优先级 3（代码质量）
-8. 实现 BrowseController 方法体
+8. 实现 BrowseController 方法体（BI-6，仍未解决）
 9. 统一 API 路径命名风格
 
 ---
 
-**Final Assessment**: 6 个 CRITICAL 问题中，2 个文档路径不一致已修复（W1、W2）。剩余 4 个后端 API 缺失问题记录在 `backend-issues.md` 中，需后端优先补充聚合接口 Controller（BI-1）、分类启用（BI-2）、标签编辑（BI-3）后方可开始前端核心功能开发。搜索反馈（BI-4）和精选 admin 列表（BI-5）可后续补充。
+**Final Assessment**: 6 个 CRITICAL 问题中，C1-C4 已全部解决（聚合接口、分类启用、标签更新、搜索反馈均已实现），C5（精选 admin 分页）仍未解决但不阻塞核心功能。C6（所有任务未完成）仍有效。剩余后端待办：BI-5（精选 admin 分页列表）和 BI-6（BrowseController 实现）。

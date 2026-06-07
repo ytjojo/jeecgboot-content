@@ -65,3 +65,9 @@
 #### Scenario: 移动端布局
 - **WHEN** 屏幕宽度 < 576px
 - **THEN** 推荐区横向滚动单卡，分类区 2 列，搜索框全宽
+
+> **NOTE**: 后端 API 状态（2026-06-07 更新）：
+> - `GET /content/channel/discovery/home`（聚合接口）— ✅ 已实现（`ContentChannelDiscoveryController.java`）
+> - `GET /content/channel/recommendation/list`（推荐接口，需 userId 参数）— ✅ 已实现
+> - `GET /content/channel/recommendation/cold-start`（冷启动推荐）— ✅ 已实现
+> - 未登录用户查看发现页时，前端调用 cold-start 接口获取热门频道推荐，无需传递 userId
