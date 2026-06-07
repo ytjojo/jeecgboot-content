@@ -11,7 +11,7 @@ import jakarta.annotation.Resource;
 
 @Tag(name = "成员成长信息")
 @RestController
-@RequestMapping("/content/user/growth")
+@RequestMapping("/api/v1/content/user/growth")
 public class MemberGrowthController {
 
     @Resource

@@ -15,7 +15,7 @@ import java.util.List;
 
 @Tag(name = "频道订阅管理")
 @RestController
-@RequestMapping("/channel/subscription")
+@RequestMapping("/api/v1/content/channel/subscription")
 public class ChannelSubscriptionController {
 
     @Resource

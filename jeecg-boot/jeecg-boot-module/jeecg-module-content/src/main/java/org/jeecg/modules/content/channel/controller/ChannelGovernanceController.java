@@ -18,7 +18,7 @@ import java.util.List;
 
 @Tag(name = "频道治理管理")
 @RestController
-@RequestMapping("/channel/governance")
+@RequestMapping("/api/v1/content/channel/governance")
 public class ChannelGovernanceController {
 
     @Resource

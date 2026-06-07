@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "圈子加入审核", description = "圈子加入申请审核与查询")
 @RestController
-@RequestMapping("/circle-join-review")
+@RequestMapping("/api/v1/content/circle/join-review")
 public class CircleJoinReviewController {
 
     @Resource

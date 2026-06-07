@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Tag(name = "内容社区用户设置")
 @RestController
-@RequestMapping("/content/user/settings")
+@RequestMapping("/api/v1/content/user/settings")
 public class ContentUserSettingsController {
 
     @Resource

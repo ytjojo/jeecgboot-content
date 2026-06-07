@@ -16,7 +16,7 @@ import java.time.LocalDate;
 
 @Tag(name = "圈子数据统计")
 @RestController
-@RequestMapping("/api/circle")
+@RequestMapping("/api/v1/content/circle")
 public class CircleDataController {
 
     @Resource

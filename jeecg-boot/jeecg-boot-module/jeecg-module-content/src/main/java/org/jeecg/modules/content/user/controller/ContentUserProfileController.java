@@ -26,7 +26,7 @@ import java.util.List;
  */
 @Tag(name = "内容社区用户资料")
 @RestController
-@RequestMapping("/content/user/profile")
+@RequestMapping("/api/v1/content/user/profile")
 public class ContentUserProfileController {
 
     @Resource

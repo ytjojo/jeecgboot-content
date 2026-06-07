@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/channels")
+@RequestMapping("/api/v1/content/channels")
 @Slf4j
 @Tag(name = "频道管理", description = "用户端频道API")
 public class ChannelController {

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "频道内容治理", description = "频道内容置顶、精华、删除、恢复等治理操作接口")
 @Validated
 @RestController
-@RequestMapping("/content/channel/governance")
+@RequestMapping("/api/v1/content/channel/governance")
 public class ChannelContentGovernanceController {
 
     @Resource

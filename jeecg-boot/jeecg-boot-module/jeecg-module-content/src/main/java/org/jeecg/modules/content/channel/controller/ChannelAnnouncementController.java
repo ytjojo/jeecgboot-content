@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "频道公告", description = "频道公告管理接口")
 @Validated
 @RestController
-@RequestMapping("/content/channel/announcement")
+@RequestMapping("/api/v1/content/channel/announcement")
 public class ChannelAnnouncementController {
 
     @Resource

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Tag(name = "内容社区邀请")
 @RestController
-@RequestMapping("/content/user/invite")
+@RequestMapping("/api/v1/content/user/invite")
 public class ContentInviteController {
 
     @Resource

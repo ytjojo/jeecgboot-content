@@ -15,7 +15,7 @@ import java.util.List;
 
 @Tag(name = "频道邀请管理")
 @RestController
-@RequestMapping("/channel/invite")
+@RequestMapping("/api/v1/content/channel/invite")
 public class ChannelInviteController {
 
     @Resource

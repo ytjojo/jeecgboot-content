@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "内容社区用户订阅")
 @RestController
-@RequestMapping("/content/user/subscription")
+@RequestMapping("/api/v1/content/user/subscription")
 public class ContentUserSubscriptionController {
 
     @Resource

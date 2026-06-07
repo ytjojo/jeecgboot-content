@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -314,6 +316,42 @@ class ContentAccountCancellationBizServiceTest {
         @DisplayName("30天边界 - 校验通过")
         void validateCooldownDays_exactly30_noError() {
             service.validateCooldownDays(30);
+        }
+    }
+
+    // ==================== 注销资格检查测试 ====================
+
+    @Nested
+    @DisplayName("注销资格检查")
+    class CheckEligibility {
+
+        @Test
+        @DisplayName("账号存在 - 返回eligible=true")
+        void checkEligibility_accountActive_returnsEligible() {
+            when(accountMapper.selectActiveByUserId(TEST_USER_ID)).thenReturn(createActiveAccount());
+
+            Map<String, Object> result = service.checkEligibility(TEST_USER_ID);
+
+            assertThat(result.get("eligible")).isEqualTo(true);
+            List<Map<String, Object>> checks = (List<Map<String, Object>>) result.get("checks");
+            assertThat(checks).hasSize(1);
+            assertThat(checks.get(0).get("name")).isEqualTo("账号状态");
+            assertThat(checks.get(0).get("passed")).isEqualTo(true);
+        }
+
+        @Test
+        @DisplayName("账号不存在 - 返回eligible=false")
+        void checkEligibility_accountNotFound_returnsNotEligible() {
+            when(accountMapper.selectActiveByUserId(TEST_USER_ID)).thenReturn(null);
+
+            Map<String, Object> result = service.checkEligibility(TEST_USER_ID);
+
+            assertThat(result.get("eligible")).isEqualTo(false);
+            List<Map<String, Object>> checks = (List<Map<String, Object>>) result.get("checks");
+            assertThat(checks).hasSize(1);
+            assertThat(checks.get(0).get("name")).isEqualTo("账号状态");
+            assertThat(checks.get(0).get("passed")).isEqualTo(false);
+            assertThat(checks.get(0).get("reason")).isEqualTo("账号不存在或已注销");
         }
     }
 

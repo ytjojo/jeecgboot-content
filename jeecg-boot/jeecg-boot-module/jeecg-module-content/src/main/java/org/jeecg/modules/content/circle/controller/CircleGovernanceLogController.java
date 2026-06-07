@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "圈子治理日志")
 @RestController
-@RequestMapping("/content/circle/governance-log")
+@RequestMapping("/api/v1/content/circle/governance-log")
 public class CircleGovernanceLogController {
 
     @Resource

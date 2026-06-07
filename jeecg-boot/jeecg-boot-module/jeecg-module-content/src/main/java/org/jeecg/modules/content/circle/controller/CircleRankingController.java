@@ -11,7 +11,7 @@ import jakarta.annotation.Resource;
 
 @Tag(name = "圈子榜单")
 @RestController
-@RequestMapping("/api/circle/ranking")
+@RequestMapping("/api/v1/content/circle/ranking")
 public class CircleRankingController {
 
     @Resource

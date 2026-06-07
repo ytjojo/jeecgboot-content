@@ -13,7 +13,7 @@ import java.util.List;
 
 @Tag(name = "频道排行榜")
 @RestController
-@RequestMapping("/content/channel/ranking")
+@RequestMapping("/api/v1/content/channel/ranking")
 public class ContentChannelRankingController {
 
     @Resource

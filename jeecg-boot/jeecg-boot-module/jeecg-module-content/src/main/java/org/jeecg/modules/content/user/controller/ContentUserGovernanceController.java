@@ -28,7 +28,7 @@ import java.util.List;
  */
 @Tag(name = "内容社区用户治理")
 @RestController
-@RequestMapping("/content/user/governance")
+@RequestMapping("/api/v1/content/user/governance")
 public class ContentUserGovernanceController {
 
     @Resource

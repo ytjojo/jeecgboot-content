@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "频道内容审核", description = "频道待审区和审核相关接口")
 @Validated
 @RestController
-@RequestMapping("/content/channel/review")
+@RequestMapping("/api/v1/content/channel/review")
 public class ChannelContentReviewController {
 
     @Resource

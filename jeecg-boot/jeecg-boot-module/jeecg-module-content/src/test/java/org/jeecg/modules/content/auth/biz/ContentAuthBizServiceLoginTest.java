@@ -12,8 +12,13 @@ import org.jeecg.modules.content.auth.mapper.ContentUserAccountMapper;
 import org.jeecg.modules.content.auth.mapper.ContentUserCredentialMapper;
 import org.jeecg.modules.content.auth.req.ContentAuthLoginReq;
 import org.jeecg.modules.content.auth.req.ContentAuthSmsLoginReq;
+import org.jeecg.modules.content.auth.service.CaptchaVerifyPort;
+import org.jeecg.modules.content.auth.service.EmailSenderPort;
+import org.jeecg.modules.content.auth.service.IContentTokenService;
 import org.jeecg.modules.content.auth.service.IContentVerificationCodeService;
 import org.jeecg.modules.content.auth.service.LoginTokenGeneratorPort;
+import org.jeecg.modules.content.auth.service.SmsSenderPort;
+import org.jeecg.modules.content.user.entity.ContentUserDeviceSession;
 import org.jeecg.modules.content.user.mapper.ContentUserDeviceSessionMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +32,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.Date;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,6 +60,14 @@ class ContentAuthBizServiceLoginTest {
     private LoginTokenGeneratorPort loginTokenGeneratorPort;
     @Mock
     private ContentUserDeviceSessionMapper deviceSessionMapper;
+    @Mock
+    private SmsSenderPort smsSenderPort;
+    @Mock
+    private CaptchaVerifyPort captchaVerifyPort;
+    @Mock
+    private EmailSenderPort emailSenderPort;
+    @Mock
+    private IContentTokenService tokenService;
 
     @InjectMocks
     private ContentAuthBizServiceImpl bizService;
@@ -344,6 +358,255 @@ class ContentAuthBizServiceLoginTest {
             assertThatThrownBy(() -> bizService.loginBySms(req))
                     .isInstanceOf(JeecgBootException.class)
                     .hasMessage("账号已注销");
+        }
+    }
+
+    // ==================== 发送短信验证码测试 ====================
+
+    @Nested
+    @DisplayName("sendSmsCode - 发送短信验证码")
+    class SendSmsCode {
+
+        @Test
+        @DisplayName("发送成功 - 无图形验证码")
+        void sendSmsCode_success_noCaptcha() {
+            when(codeService.isInCooldown(VerificationCodeSceneEnum.LOGIN, TEST_MOBILE)).thenReturn(false);
+            when(codeService.generateCode(VerificationCodeSceneEnum.LOGIN, TEST_MOBILE)).thenReturn("123456");
+            when(smsSenderPort.send(eq(TEST_MOBILE), anyString())).thenReturn(true);
+
+            bizService.sendSmsCode(TEST_MOBILE, null, null, null);
+
+            verify(smsSenderPort).send(eq(TEST_MOBILE), contains("123456"));
+        }
+
+        @Test
+        @DisplayName("发送成功 - 图形验证码通过")
+        void sendSmsCode_success_withCaptcha() {
+            when(captchaVerifyPort.verify("captcha_code", null)).thenReturn(true);
+            when(codeService.isInCooldown(VerificationCodeSceneEnum.LOGIN, TEST_MOBILE)).thenReturn(false);
+            when(codeService.generateCode(VerificationCodeSceneEnum.LOGIN, TEST_MOBILE)).thenReturn("654321");
+            when(smsSenderPort.send(eq(TEST_MOBILE), anyString())).thenReturn(true);
+
+            bizService.sendSmsCode(TEST_MOBILE, null, "captcha_id", "captcha_code");
+
+            verify(captchaVerifyPort).verify("captcha_code", null);
+            verify(smsSenderPort).send(eq(TEST_MOBILE), contains("654321"));
+        }
+
+        @Test
+        @DisplayName("图形验证码错误 - 抛出异常")
+        void sendSmsCode_invalidCaptcha_throws() {
+            when(captchaVerifyPort.verify("wrong_code", null)).thenReturn(false);
+
+            assertThatThrownBy(() -> bizService.sendSmsCode(TEST_MOBILE, null, "captcha_id", "wrong_code"))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("图形验证码错误");
+        }
+
+        @Test
+        @DisplayName("冷却期内 - 抛出频率限制异常")
+        void sendSmsCode_inCooldown_throws() {
+            when(codeService.isInCooldown(VerificationCodeSceneEnum.LOGIN, TEST_MOBILE)).thenReturn(true);
+
+            assertThatThrownBy(() -> bizService.sendSmsCode(TEST_MOBILE, null, null, null))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("验证码发送过于频繁，请稍后再试");
+        }
+
+        @Test
+        @DisplayName("短信发送失败 - 抛出异常")
+        void sendSmsCode_sendFailed_throws() {
+            when(codeService.isInCooldown(VerificationCodeSceneEnum.LOGIN, TEST_MOBILE)).thenReturn(false);
+            when(codeService.generateCode(VerificationCodeSceneEnum.LOGIN, TEST_MOBILE)).thenReturn("123456");
+            when(smsSenderPort.send(eq(TEST_MOBILE), anyString())).thenReturn(false);
+
+            assertThatThrownBy(() -> bizService.sendSmsCode(TEST_MOBILE, null, null, null))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("短信发送失败，请稍后再试");
+        }
+    }
+
+    // ==================== 发送邮箱验证码测试 ====================
+
+    @Nested
+    @DisplayName("sendEmailCode - 发送邮箱验证码")
+    class SendEmailCode {
+
+        @Test
+        @DisplayName("发送成功 - 无图形验证码")
+        void sendEmailCode_success_noCaptcha() {
+            when(codeService.isInCooldown(VerificationCodeSceneEnum.BIND_EMAIL, TEST_EMAIL)).thenReturn(false);
+            when(codeService.generateCode(VerificationCodeSceneEnum.BIND_EMAIL, TEST_EMAIL)).thenReturn("123456");
+            when(emailSenderPort.send(eq(TEST_EMAIL), anyString(), anyString())).thenReturn(true);
+
+            bizService.sendEmailCode(TEST_EMAIL, null, null);
+
+            verify(emailSenderPort).send(eq(TEST_EMAIL), eq("内容社区验证码"), contains("123456"));
+        }
+
+        @Test
+        @DisplayName("图形验证码错误 - 抛出异常")
+        void sendEmailCode_invalidCaptcha_throws() {
+            when(captchaVerifyPort.verify("wrong", null)).thenReturn(false);
+
+            assertThatThrownBy(() -> bizService.sendEmailCode(TEST_EMAIL, "captcha_id", "wrong"))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("图形验证码错误");
+        }
+
+        @Test
+        @DisplayName("冷却期内 - 抛出频率限制异常")
+        void sendEmailCode_inCooldown_throws() {
+            when(codeService.isInCooldown(VerificationCodeSceneEnum.BIND_EMAIL, TEST_EMAIL)).thenReturn(true);
+
+            assertThatThrownBy(() -> bizService.sendEmailCode(TEST_EMAIL, null, null))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("验证码发送过于频繁，请稍后再试");
+        }
+
+        @Test
+        @DisplayName("邮件发送失败 - 抛出异常")
+        void sendEmailCode_sendFailed_throws() {
+            when(codeService.isInCooldown(VerificationCodeSceneEnum.BIND_EMAIL, TEST_EMAIL)).thenReturn(false);
+            when(codeService.generateCode(VerificationCodeSceneEnum.BIND_EMAIL, TEST_EMAIL)).thenReturn("123456");
+            when(emailSenderPort.send(eq(TEST_EMAIL), anyString(), anyString())).thenReturn(false);
+
+            assertThatThrownBy(() -> bizService.sendEmailCode(TEST_EMAIL, null, null))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("邮件发送失败，请稍后再试");
+        }
+    }
+
+    // ==================== 刷新Token测试 ====================
+
+    @Nested
+    @DisplayName("refreshToken - 刷新Token")
+    class RefreshToken {
+
+        @Test
+        @DisplayName("刷新成功 - 返回新token")
+        void refreshToken_success() {
+            when(tokenService.validateAndConsumeToken("valid_refresh_token", "REFRESH_TOKEN")).thenReturn(TEST_USER_ID);
+            when(loginTokenGeneratorPort.generateToken(TEST_USER_ID, "PC")).thenReturn("new-access-token");
+
+            AuthLoginResult result = bizService.refreshToken("valid_refresh_token");
+
+            assertThat(result).isNotNull();
+            assertThat(result.getUserId()).isEqualTo(TEST_USER_ID);
+            assertThat(result.getAccessToken()).isEqualTo("new-access-token");
+            assertThat(result.getTokenType()).isEqualTo("Bearer");
+            verify(deviceSessionMapper).insert(any(ContentUserDeviceSession.class));
+        }
+
+        @Test
+        @DisplayName("refreshToken无效 - 抛出异常")
+        void refreshToken_invalid_throws() {
+            when(tokenService.validateAndConsumeToken("invalid_token", "REFRESH_TOKEN")).thenReturn(null);
+
+            assertThatThrownBy(() -> bizService.refreshToken("invalid_token"))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("refreshToken 无效或已过期");
+        }
+    }
+
+    // ==================== 登出测试 ====================
+
+    @Nested
+    @DisplayName("logout - 用户登出")
+    class Logout {
+
+        @Test
+        @DisplayName("登出成功 - 清除Redis会话")
+        void logout_success() {
+            when(redisTemplate.delete(AuthRedisKeyConstant.TOKEN_BLACKLIST_PREFIX + TEST_USER_ID)).thenReturn(true);
+
+            bizService.logout(TEST_USER_ID);
+
+            verify(redisTemplate).delete(AuthRedisKeyConstant.TOKEN_BLACKLIST_PREFIX + TEST_USER_ID);
+        }
+    }
+
+    // ==================== 获取验证码图片测试 ====================
+
+    @Nested
+    @DisplayName("getCaptchaImage - 获取验证码图片")
+    class GetCaptchaImage {
+
+        @Test
+        @DisplayName("返回captchaId和imageBase64")
+        void getCaptchaImage_returnsMap() {
+            Map<String, String> result = bizService.getCaptchaImage();
+
+            assertThat(result).isNotNull();
+            assertThat(result.get("captchaId")).isNotNull().isNotEmpty();
+            assertThat(result.get("imageBase64")).isEqualTo("");
+        }
+    }
+
+    // ==================== 验证验证码测试 ====================
+
+    @Nested
+    @DisplayName("verifyCaptcha - 验证验证码")
+    class VerifyCaptcha {
+
+        @Test
+        @DisplayName("验证通过 - 返回true")
+        void verifyCaptcha_valid_returnsTrue() {
+            when(captchaVerifyPort.verify("code", null)).thenReturn(true);
+
+            assertThat(bizService.verifyCaptcha("id", "code")).isTrue();
+        }
+
+        @Test
+        @DisplayName("验证失败 - 返回false")
+        void verifyCaptcha_invalid_returnsFalse() {
+            when(captchaVerifyPort.verify("wrong", null)).thenReturn(false);
+
+            assertThat(bizService.verifyCaptcha("id", "wrong")).isFalse();
+        }
+    }
+
+    // ==================== 锁定状态查询测试 ====================
+
+    @Nested
+    @DisplayName("getLockStatus - 锁定状态查询")
+    class GetLockStatus {
+
+        @Test
+        @DisplayName("未锁定 - 返回locked=false")
+        void getLockStatus_notLocked() {
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.get(AuthRedisKeyConstant.PWD_FAIL_PREFIX + TEST_MOBILE)).thenReturn("3");
+
+            Map<String, Object> status = bizService.getLockStatus(TEST_MOBILE);
+
+            assertThat(status.get("locked")).isEqualTo(false);
+            assertThat(status.get("attempts")).isEqualTo(3);
+            assertThat(status.get("maxAttempts")).isEqualTo(AuthRedisKeyConstant.LOGIN_FAIL_LOCK_THRESHOLD);
+        }
+
+        @Test
+        @DisplayName("已锁定 - 返回locked=true")
+        void getLockStatus_locked() {
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.get(AuthRedisKeyConstant.PWD_FAIL_PREFIX + TEST_MOBILE)).thenReturn("20");
+
+            Map<String, Object> status = bizService.getLockStatus(TEST_MOBILE);
+
+            assertThat(status.get("locked")).isEqualTo(true);
+            assertThat(status.get("attempts")).isEqualTo(20);
+        }
+
+        @Test
+        @DisplayName("无失败记录 - 返回attempts=0")
+        void getLockStatus_noRecord() {
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.get(AuthRedisKeyConstant.PWD_FAIL_PREFIX + TEST_MOBILE)).thenReturn(null);
+
+            Map<String, Object> status = bizService.getLockStatus(TEST_MOBILE);
+
+            assertThat(status.get("locked")).isEqualTo(false);
+            assertThat(status.get("attempts")).isEqualTo(0);
         }
     }
 }

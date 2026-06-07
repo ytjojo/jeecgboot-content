@@ -12,7 +12,7 @@ import java.util.List;
 
 @Tag(name = "成就徽章")
 @RestController
-@RequestMapping("/content/user/growth/achievement")
+@RequestMapping("/api/v1/content/user/growth/achievement")
 public class AchievementController {
 
     @Resource

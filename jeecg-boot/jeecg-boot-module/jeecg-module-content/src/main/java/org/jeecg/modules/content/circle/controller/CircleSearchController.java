@@ -21,7 +21,7 @@ import java.util.List;
 @Tag(name = "圈子搜索", description = "圈子搜索接口")
 @Validated
 @RestController
-@RequestMapping("/content/circle")
+@RequestMapping("/api/v1/content/circle")
 public class CircleSearchController {
 
     @Resource

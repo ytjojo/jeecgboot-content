@@ -54,7 +54,7 @@ import java.util.Map;
 @Tag(name = "内容社区用户成长")
 @Validated
 @RestController
-@RequestMapping("/content/user/growth")
+@RequestMapping("/api/v1/content/user/growth")
 public class ContentUserGrowthController {
 
     @Resource

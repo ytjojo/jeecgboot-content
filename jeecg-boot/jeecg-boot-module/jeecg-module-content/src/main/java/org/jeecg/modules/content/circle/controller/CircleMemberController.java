@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "圈子成员管理", description = "成员角色变更、禁言、移除等接口")
 @Validated
 @RestController
-@RequestMapping("/content/circle/member")
+@RequestMapping("/api/v1/content/circle/member")
 public class CircleMemberController {
 
     @Resource

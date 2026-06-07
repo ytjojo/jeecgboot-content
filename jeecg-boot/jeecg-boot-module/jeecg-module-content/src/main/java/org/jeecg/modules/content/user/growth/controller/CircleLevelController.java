@@ -11,7 +11,7 @@ import jakarta.annotation.Resource;
 
 @Tag(name = "圈子等级信息")
 @RestController
-@RequestMapping("/content/user/growth/level")
+@RequestMapping("/api/v1/content/user/growth/level")
 public class CircleLevelController {
 
     @Resource

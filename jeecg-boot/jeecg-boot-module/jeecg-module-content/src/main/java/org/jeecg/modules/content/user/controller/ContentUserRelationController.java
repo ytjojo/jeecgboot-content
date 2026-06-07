@@ -30,7 +30,7 @@ import java.util.Map;
  */
 @Tag(name = "内容社区用户关系")
 @RestController
-@RequestMapping("/content/user/relation")
+@RequestMapping("/api/v1/content/user/relation")
 public class ContentUserRelationController {
 
     @Resource

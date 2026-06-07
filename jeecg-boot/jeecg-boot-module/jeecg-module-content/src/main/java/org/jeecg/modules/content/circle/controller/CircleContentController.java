@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Tag(name = "圈子内容", description = "帖子列表与详情查询")
 @RestController
-@RequestMapping("/content/circle")
+@RequestMapping("/api/v1/content/circle")
 public class CircleContentController {
 
     @Resource

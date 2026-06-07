@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "内容社区用户支持管理")
 @RestController
-@RequestMapping("/content/user/support/admin")
+@RequestMapping("/api/v1/content/user/support/admin")
 public class ContentUserSupportAdminController {
 
     @Resource

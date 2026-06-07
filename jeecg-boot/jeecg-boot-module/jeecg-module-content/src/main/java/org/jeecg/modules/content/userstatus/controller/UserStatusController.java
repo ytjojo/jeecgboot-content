@@ -48,7 +48,7 @@ import java.util.Set;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/api/content/user-status")
+@RequestMapping("/api/v1/content/user-status")
 @Tag(name = "用户状态管理", description = "用户状态查询和管理接口")
 public class UserStatusController {
 

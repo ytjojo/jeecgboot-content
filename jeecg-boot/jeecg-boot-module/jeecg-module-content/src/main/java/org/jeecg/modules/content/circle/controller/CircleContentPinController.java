@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @Tag(name = "圈子内容置顶与精华", description = "内容置顶、精华标记管理")
 @RestController
-@RequestMapping("/circle-content")
+@RequestMapping("/api/v1/content/circle/content")
 public class CircleContentPinController {
 
     @Resource

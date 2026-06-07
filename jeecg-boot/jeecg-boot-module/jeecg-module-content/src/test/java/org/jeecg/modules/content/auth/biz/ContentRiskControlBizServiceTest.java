@@ -26,6 +26,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.mockito.ArgumentCaptor;
 
@@ -433,6 +434,143 @@ class ContentRiskControlBizServiceTest {
             assertThatThrownBy(() -> riskControlService.confirmAbnormalLogin(TEST_USER_ID, "evt_005", true))
                     .isInstanceOf(JeecgBootException.class)
                     .hasMessage("无权操作该风险事件");
+        }
+    }
+
+    // ==================== 账号安全状态查询 ====================
+
+    @Nested
+    @DisplayName("getAccountSecurityStatus - 账号安全状态")
+    class GetAccountSecurityStatus {
+
+        @Test
+        @DisplayName("账号存在 - 返回绑定状态Map")
+        void returnsBindingStatus() {
+            ContentUserAccount account = new ContentUserAccount();
+            account.setId(TEST_ACCOUNT_ID);
+            account.setUserId(TEST_USER_ID);
+            account.setAccountStatus("ACTIVE");
+            when(accountMapper.selectActiveByUserId(TEST_USER_ID)).thenReturn(account);
+
+            Map<String, Object> status = riskControlService.getAccountSecurityStatus(TEST_USER_ID);
+
+            assertThat(status).isNotNull();
+            assertThat(status.get("phoneBound")).isEqualTo(false);
+            assertThat(status.get("emailBound")).isEqualTo(false);
+            assertThat(status.get("wechatBound")).isEqualTo(false);
+            assertThat(status.get("appleBound")).isEqualTo(false);
+            assertThat(status.get("googleBound")).isEqualTo(false);
+        }
+
+        @Test
+        @DisplayName("账号不存在 - 抛出异常")
+        void accountNotFound_throws() {
+            when(accountMapper.selectActiveByUserId(TEST_USER_ID)).thenReturn(null);
+
+            assertThatThrownBy(() -> riskControlService.getAccountSecurityStatus(TEST_USER_ID))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("账号不存在");
+        }
+    }
+
+    // ==================== 设备信任管理 ====================
+
+    @Nested
+    @DisplayName("trustDevice/untrustDevice - 设备信任管理")
+    class DeviceTrust {
+
+        @Test
+        @DisplayName("标记设备可信 - 不抛异常")
+        void trustDevice_success() {
+            riskControlService.trustDevice(TEST_USER_ID, "device_001");
+            // 日志桩方法，不抛异常即通过
+        }
+
+        @Test
+        @DisplayName("取消设备可信 - 不抛异常")
+        void untrustDevice_success() {
+            riskControlService.untrustDevice(TEST_USER_ID, "device_001");
+            // 日志桩方法，不抛异常即通过
+        }
+    }
+
+    // ==================== 修改密码 ====================
+
+    @Nested
+    @DisplayName("changePassword - 修改密码")
+    class ChangePassword {
+
+        @Test
+        @DisplayName("功能待实现 - 抛出异常")
+        void changePassword_throwsNotImplemented() {
+            assertThatThrownBy(() -> riskControlService.changePassword(TEST_USER_ID, "old", "new"))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("功能待实现");
+        }
+    }
+
+    // ==================== 发送安全验证码 ====================
+
+    @Nested
+    @DisplayName("sendSecurityCode - 发送安全验证码")
+    class SendSecurityCode {
+
+        @Test
+        @DisplayName("功能待实现 - 抛出异常")
+        void sendSecurityCode_throwsNotImplemented() {
+            assertThatThrownBy(() -> riskControlService.sendSecurityCode("sms", "13800138000", "bind"))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("功能待实现");
+        }
+    }
+
+    // ==================== 否认异常登录 ====================
+
+    @Nested
+    @DisplayName("denyAnomaly - 否认异常登录")
+    class DenyAnomaly {
+
+        @Test
+        @DisplayName("否认成功 - 无踢出设备")
+        void denyAnomaly_noRevoke_success() {
+            ContentRiskEvent event = new ContentRiskEvent();
+            event.setId("evt_deny_001");
+            event.setUserId(TEST_USER_ID);
+            event.setResolved(false);
+            when(riskEventMapper.selectById("evt_deny_001")).thenReturn(event);
+
+            riskControlService.denyAnomaly("evt_deny_001", null);
+
+            ArgumentCaptor<ContentRiskEvent> captor = ArgumentCaptor.forClass(ContentRiskEvent.class);
+            verify(riskEventMapper).updateById(captor.capture());
+            assertThat(captor.getValue().getResolved()).isTrue();
+            assertThat(captor.getValue().getResolveNote()).isEqualTo("用户否认异常登录");
+            verify(deviceSessionMapper, never()).update(isNull(), any(LambdaUpdateWrapper.class));
+        }
+
+        @Test
+        @DisplayName("否认成功 - 踢出指定设备")
+        void denyAnomaly_withRevoke_success() {
+            ContentRiskEvent event = new ContentRiskEvent();
+            event.setId("evt_deny_002");
+            event.setUserId(TEST_USER_ID);
+            event.setResolved(false);
+            when(riskEventMapper.selectById("evt_deny_002")).thenReturn(event);
+
+            riskControlService.denyAnomaly("evt_deny_002", "session_001");
+
+            verify(riskEventMapper).updateById(any(ContentRiskEvent.class));
+            verify(deviceSessionMapper).update(isNull(), any(LambdaUpdateWrapper.class));
+        }
+
+        @Test
+        @DisplayName("事件不存在 - 抛出异常")
+        void denyAnomaly_eventNotFound_throws() {
+            when(riskEventMapper.selectById("evt_not_exist")).thenReturn(null);
+
+            assertThatThrownBy(() -> riskControlService.denyAnomaly("evt_not_exist", null))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("风险事件不存在");
         }
     }
 }

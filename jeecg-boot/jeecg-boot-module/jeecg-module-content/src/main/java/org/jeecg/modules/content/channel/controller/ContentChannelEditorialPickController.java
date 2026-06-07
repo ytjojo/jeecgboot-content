@@ -18,7 +18,7 @@ import java.util.List;
 
 @Tag(name = "频道编辑精选")
 @RestController
-@RequestMapping("/content/channel/editorial-pick")
+@RequestMapping("/api/v1/content/channel/editorial-pick")
 public class ContentChannelEditorialPickController {
 
     @Resource

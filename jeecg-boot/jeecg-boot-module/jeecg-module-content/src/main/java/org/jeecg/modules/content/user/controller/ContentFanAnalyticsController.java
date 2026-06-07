@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Tag(name = "内容社区粉丝分析")
 @RestController
-@RequestMapping("/content/user/fan")
+@RequestMapping("/api/v1/content/user/fan")
 public class ContentFanAnalyticsController {
 
     @Resource

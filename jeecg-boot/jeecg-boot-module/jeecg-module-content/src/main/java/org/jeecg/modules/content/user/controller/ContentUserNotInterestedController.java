@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "内容社区不感兴趣反馈")
 @RestController
-@RequestMapping("/content/user")
+@RequestMapping("/api/v1/content/user")
 public class ContentUserNotInterestedController {
 
     @Resource

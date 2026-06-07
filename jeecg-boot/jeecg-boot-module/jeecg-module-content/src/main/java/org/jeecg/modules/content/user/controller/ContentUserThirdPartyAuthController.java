@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Tag(name = "内容社区用户第三方授权")
 @RestController
-@RequestMapping("/content/user/auth/third-party")
+@RequestMapping("/api/v1/content/user/auth/third-party")
 public class ContentUserThirdPartyAuthController {
 
     @Resource

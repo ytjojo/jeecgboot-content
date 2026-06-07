@@ -22,7 +22,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/admin/channels")
+@RequestMapping("/api/v1/content/admin/channels")
 @Slf4j
 @Tag(name = "频道后台管理", description = "后台频道管理API")
 public class ChannelAdminController {

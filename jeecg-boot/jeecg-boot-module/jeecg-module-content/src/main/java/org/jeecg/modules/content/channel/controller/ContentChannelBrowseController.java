@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "频道分类浏览")
 @RestController
-@RequestMapping("/content/channel/browse")
+@RequestMapping("/api/v1/content/channel/browse")
 public class ContentChannelBrowseController {
 
     @Resource

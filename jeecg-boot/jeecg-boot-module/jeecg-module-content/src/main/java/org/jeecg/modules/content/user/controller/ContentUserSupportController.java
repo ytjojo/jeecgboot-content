@@ -36,7 +36,7 @@ import java.util.List;
  */
 @Tag(name = "内容社区用户支持")
 @RestController
-@RequestMapping("/content/user/support")
+@RequestMapping("/api/v1/content/user/support")
 public class ContentUserSupportController {
 
     @Resource

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "圈子内容举报", description = "内容举报提交与处理")
 @RestController
-@RequestMapping("/circle-report")
+@RequestMapping("/api/v1/content/circle/report")
 public class CircleReportController {
 
     @Resource

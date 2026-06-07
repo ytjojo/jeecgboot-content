@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "内容社区账号编排")
 @Validated
 @RestController
-@RequestMapping("/content/user/account")
+@RequestMapping("/api/v1/content/user/account")
 public class ContentAccountController {
 
     @Resource

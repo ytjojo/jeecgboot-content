@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "内容社区用户屏蔽规则")
 @RestController
-@RequestMapping("/content/user/filter-rule")
+@RequestMapping("/api/v1/content/user/filter-rule")
 public class ContentUserFilterRuleController {
 
     @Resource

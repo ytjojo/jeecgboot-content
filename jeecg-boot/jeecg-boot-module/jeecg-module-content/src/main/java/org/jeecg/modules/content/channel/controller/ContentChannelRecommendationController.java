@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "频道推荐")
 @RestController
-@RequestMapping("/content/channel/recommendation")
+@RequestMapping("/api/v1/content/channel/recommendation")
 public class ContentChannelRecommendationController {
 
     @Resource

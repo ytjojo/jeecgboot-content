@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "圈子管理", description = "圈子创建、更新、查询等接口")
 @Validated
 @RestController
-@RequestMapping("/content/circle")
+@RequestMapping("/api/v1/content/circle")
 public class CircleController {
 
     @Resource

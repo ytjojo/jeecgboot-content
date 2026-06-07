@@ -16,7 +16,7 @@ import java.util.List;
 
 @Tag(name = "频道分类管理")
 @RestController
-@RequestMapping("/content/channel/category")
+@RequestMapping("/api/v1/content/channel/category")
 public class ContentChannelCategoryController {
 
     @Resource

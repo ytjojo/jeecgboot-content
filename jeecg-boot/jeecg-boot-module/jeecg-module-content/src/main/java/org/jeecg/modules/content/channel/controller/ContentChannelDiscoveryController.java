@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Tag(name = "频道发现", description = "频道发现首页数据接口")
 @RestController
-@RequestMapping("/content/channel/discovery")
+@RequestMapping("/api/v1/content/channel/discovery")
 public class ContentChannelDiscoveryController {
 
     @Resource

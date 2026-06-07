@@ -18,7 +18,7 @@ import java.util.List;
 @Tag(name = "频道内容发布", description = "频道内容发布相关接口")
 @Validated
 @RestController
-@RequestMapping("/content/channel/publish")
+@RequestMapping("/api/v1/content/channel/publish")
 public class ChannelPublishController {
 
     @Resource

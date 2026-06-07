@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "频道搜索")
 @RestController
-@RequestMapping("/content/channel/search")
+@RequestMapping("/api/v1/content/channel/search")
 public class ContentChannelSearchController {
 
     @Resource

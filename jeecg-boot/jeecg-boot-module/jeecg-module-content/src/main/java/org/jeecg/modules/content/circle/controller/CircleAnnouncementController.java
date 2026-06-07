@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Tag(name = "圈子公告", description = "圈子公告发布与查询")
 @RestController
-@RequestMapping("/circle-announcement")
+@RequestMapping("/api/v1/content/circle/announcement")
 public class CircleAnnouncementController {
 
     @Resource

@@ -22,7 +22,7 @@ import java.util.List;
 
 @Tag(name = "频道成员管理")
 @RestController
-@RequestMapping("/channel/member")
+@RequestMapping("/api/v1/content/channel/member")
 public class ChannelMemberController {
 
     @Resource
