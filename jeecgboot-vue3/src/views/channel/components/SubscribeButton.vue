@@ -110,10 +110,10 @@
       apiCall: () => unsubscribeChannel(props.channelId),
       onOptimistic: () => emit('subscribeChange', false),
       onRollback: () => emit('subscribeChange', true),
+      onSuccess: () => { unsubscribeModalVisible.value = false; },
       successMessage: '已取消订阅',
       errorMessage: '取消订阅失败，请重试',
     });
-    unsubscribeModalVisible.value = false;
   }
 </script>
 

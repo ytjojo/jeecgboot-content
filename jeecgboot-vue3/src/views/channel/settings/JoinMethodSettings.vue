@@ -97,7 +97,7 @@
   });
   import { updateJoinMethod } from '/@/api/content/channelPrivacy';
   import { createInvite, getInviteList, revokeInvite } from '/@/api/content/channelInvite';
-  import { copyToClipboard } from '/@/hooks/web/useCopyToClipboard';
+  import { copyTextToClipboard } from '/@/hooks/web/useCopyToClipboard';
 
   const props = defineProps<{
     channelId: string;
@@ -143,7 +143,7 @@
       await updateJoinMethod({ channelId: props.channelId, joinMethod: currentMethod.value });
       createMessage.success('加入方式已更新');
     } catch {
-      // 保留当前选择
+      createMessage.error('加入方式更新失败');
     } finally {
       saving.value = false;
     }
@@ -171,7 +171,7 @@
   }
 
   function handleCopyInvite(record: any) {
-    copyToClipboard(record.code || record.link);
+    copyTextToClipboard(record.code || record.link);
     createMessage.success('已复制到剪贴板');
   }
 

@@ -2,24 +2,22 @@
 <template>
   <div class="privacy-settings">
     <div class="setting-label">频道隐私</div>
-    <Skeleton :loading="loading" active :paragraph="{ rows: 2 }">
-      <div>
-        <Radio.Group v-model:value="currentPrivacy" :disabled="isSystem || saving" @change="handlePrivacyChange">
-          <Radio value="PUBLIC">公开</Radio>
-          <Radio value="PRIVATE">私有</Radio>
-        </Radio.Group>
-        <Alert
-          v-if="isSystem"
-          type="info"
-          message="系统频道必须公开，不允许设置为私有"
-          show-icon
-          :style="{ marginTop: '8px' }"
-        />
-        <div class="privacy-desc">
-          {{ currentPrivacy === 'PUBLIC' ? '频道内容对所有人可见，可被搜索和推荐' : '仅频道成员可浏览受限内容' }}
-        </div>
+    <div>
+      <Radio.Group v-model:value="currentPrivacy" :disabled="isSystem || saving" @change="handlePrivacyChange">
+        <Radio value="PUBLIC">公开</Radio>
+        <Radio value="PRIVATE">私有</Radio>
+      </Radio.Group>
+      <Alert
+        v-if="isSystem"
+        type="info"
+        message="系统频道必须公开，不允许设置为私有"
+        show-icon
+        :style="{ marginTop: '8px' }"
+      />
+      <div class="privacy-desc">
+        {{ currentPrivacy === 'PUBLIC' ? '频道内容对所有人可见，可被搜索和推荐' : '仅频道成员可浏览受限内容' }}
       </div>
-    </Skeleton>
+    </div>
 
     <Modal
       v-model:open="confirmModalVisible"
@@ -39,7 +37,7 @@
 
 <script setup lang="ts">
   import { ref, computed, watch } from 'vue';
-  import { Radio, Alert, Modal, Button, Skeleton } from 'ant-design-vue';
+  import { Radio, Alert, Modal, Button } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { updateChannelPrivacy } from '/@/api/content/channelPrivacy';
 
@@ -58,7 +56,6 @@
   const pendingPrivacy = ref<'PUBLIC' | 'PRIVATE'>('PUBLIC');
   const confirmModalVisible = ref(false);
   const saving = ref(false);
-  const loading = ref(false);
 
   const confirmTitle = computed(() =>
     pendingPrivacy.value === 'PRIVATE' ? '确认设为私有频道？' : '确认设为公开频道？',
@@ -87,7 +84,7 @@
       createMessage.success('隐私设置已更新');
       emit('updated', currentPrivacy.value);
     } catch {
-      // 保留用户选择，不回滚 currentPrivacy
+      createMessage.error('隐私设置更新失败');
     } finally {
       saving.value = false;
     }
