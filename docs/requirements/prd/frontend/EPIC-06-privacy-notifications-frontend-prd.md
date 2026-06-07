@@ -414,6 +414,7 @@ Page
 > 注意：后端字段 `favoriteVisibility` 与前端展示字段 `favoritesVisibility` 存在命名差异（无 `s`），前端需在接口响应处理时做映射转换。其余后端字段（生日/性别/地区/职业等）前端忽略。
 
 | 获取安全设置 | GET | `/content/user/settings/security` | 加载安全功能状态 | 账户安全页 |
+| 更新安全设置 | POST | `/content/user/settings/security/update` | 更新登录提醒等安全开关 | 账户安全页 |
 | 获取授权列表 | GET | `/content/user/auth/third-party` | 加载已授权应用列表 | 第三方授权页 |
 | 查看授权详情 | GET | `/content/user/auth/third-party/{authId}` | 获取单个应用授权详情 | 第三方授权页 |
 | 撤销授权 | DELETE | `/content/user/auth/third-party/{authId}` | 撤销指定应用授权 | 第三方授权页 |

@@ -302,6 +302,11 @@ Page (屏蔽词设置)
 
 ### 5.1 接口清单
 
+> **注意**: 本表为初版设计，实际实现以 `design.md` 和后端代码为准。主要差异：
+> - 所有写操作统一使用 POST（非 DELETE），参数通过 @RequestParam 查询参数传递
+> - API 路径已按领域拆分：拉黑 `/content/user/relation/block`，屏蔽 `/content/user/relation/mute`，规则 `/content/user/filter-rule`
+> - 详见 [design.md Decision 3](../../openspec/changes/user-05-blocking-muting-frontend/design.md)
+
 | 接口 | 方法 | 路径 | 用途 | 调用时机 |
 |------|------|------|------|---------|
 | 拉黑用户 | POST | `/api/content/user/block` | 拉黑指定用户 | 确认拉黑弹窗 |
