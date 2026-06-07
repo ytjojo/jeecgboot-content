@@ -37,22 +37,22 @@
 - **新增 API 调用**: 15 个接口封装（创建、列表、详情、编辑、删除、转让、审核、校验等），全部后端已实现：
   | 接口 | 方法 | 路径 | Controller |
   |------|------|------|-----------|
-  | 创建频道 | POST | `/api/v1/channels/create` | ChannelController |
-  | 创建系统频道 | POST | `/api/v1/admin/channels/create-system` | ChannelAdminController |
-  | 我的频道列表 | GET | `/api/v1/channels/list` | ChannelController |
-  | 频道详情 | GET | `/api/v1/channels/{id}` | ChannelController |
-  | 更新频道 | PUT | `/api/v1/channels/{id}` | ChannelController |
-  | 删除频道 | DELETE | `/api/v1/channels/{id}` | ChannelController |
-  | 撤销删除 | POST | `/api/v1/channels/{id}/cancel-delete` | ChannelController |
-  | 发起转让 | POST | `/api/v1/channels/{id}/transfer` | ChannelController |
-  | 确认转让 | POST | `/api/v1/channels/transfer/{transferId}/confirm` | ChannelController |
-  | 拒绝转让 | POST | `/api/v1/channels/transfer/{transferId}/reject` | ChannelController |
-  | 删除前置校验 | GET | `/api/v1/channels/{id}/delete-check` | ChannelController |
-  | 转让历史查询 | GET | `/api/v1/channels/{id}/transfers` | ChannelController |
-  | 待确认转让查询 | GET | `/api/v1/channels/{id}/transfer/pending` | ChannelController |
-  | 名称唯一性校验 | GET | `/api/v1/channels/check-name` | ChannelController |
-  | 审核队列列表 | GET | `/jeecg-boot/api/v1/content/channel/review/list` | ChannelReviewController |
-  | 审核操作 | POST | `/jeecg-boot/api/v1/content/channel/review/action` | ChannelReviewController |
+  | 创建频道 | POST | `/api/v1/content/channels/create` | ChannelController |
+  | 创建系统频道 | POST | `/api/v1/content/admin/channels/create-system` | ChannelAdminController |
+  | 我的频道列表 | GET | `/api/v1/content/channels/list` | ChannelController |
+  | 频道详情 | GET | `/api/v1/content/channels/{id}` | ChannelController |
+  | 更新频道 | PUT | `/api/v1/content/channels/{id}` | ChannelController |
+  | 删除频道 | DELETE | `/api/v1/content/channels/{id}` | ChannelController |
+  | 撤销删除 | POST | `/api/v1/content/channels/{id}/cancel-delete` | ChannelController |
+  | 发起转让 | POST | `/api/v1/content/channels/{id}/transfer` | ChannelController |
+  | 确认转让 | POST | `/api/v1/content/channels/transfer/{transferId}/confirm` | ChannelController |
+  | 拒绝转让 | POST | `/api/v1/content/channels/transfer/{transferId}/reject` | ChannelController |
+  | 删除前置校验 | GET | `/api/v1/content/channels/{id}/delete-check` | ChannelController |
+  | 转让历史查询 | GET | `/api/v1/content/channels/{id}/transfers` | ChannelController |
+  | 待确认转让查询 | GET | `/api/v1/content/channels/{id}/transfer/pending` | ChannelController |
+  | 名称唯一性校验 | GET | `/api/v1/content/channels/check-name` | ChannelController |
+  | 审核队列列表 | GET | `/api/v1/content/channel/review/list` | ChannelReviewController |
+  | 审核操作 | POST | `/api/v1/content/channel/review/action` | ChannelReviewController |
 - **新增 Store**: Pinia channel store 管理频道相关状态
 - **新增组件**: 10 个共用组件（ChannelForm、ChannelTypeTag、ChannelStatusTag、ReviewDiffViewer 等）
 - **依赖**: 复用项目现有 JVxeTable、Form、Modal、Drawer、Upload、useTable、useModal 等基础组件

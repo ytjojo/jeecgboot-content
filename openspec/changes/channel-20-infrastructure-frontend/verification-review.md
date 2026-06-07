@@ -41,13 +41,13 @@
 | `/create-system` | POST | 创建系统频道 | ✅ 存在 |
 | `/{id}/review` | POST | 审核频道 | ✅ 存在 |
 
-#### ChannelReviewController (`/jeecg-boot/api/v1/content/channel/review`)
+#### ChannelReviewController (`/api/v1/content/channel/review`)
 | 端点 | 方法 | 功能 | 状态 |
 |------|------|------|------|
 | `/list` | GET | 审核队列列表 | ✅ 存在 |
 | `/action` | POST | 审核操作（通过/拒绝/退回） | ✅ 存在 |
 
-#### ChannelLifecycleController (`/jeecg-boot/api/v1/content/channel/lifecycle`)
+#### ChannelLifecycleController (`/api/v1/content/channel/lifecycle`)
 | 端点 | 方法 | 功能 | 状态 |
 |------|------|------|------|
 | `/freeze` | POST | 冻结频道 | ✅ 存在 |
@@ -70,7 +70,7 @@
 | `/blacklist/add` | POST | 加入黑名单 | ✅ 存在 |
 | `/blacklist/remove` | POST | 移出黑名单 | ✅ 存在 |
 
-#### ChannelPublishController (`/content/channel/publish`)
+#### ChannelPublishController (`/api/v1/content/channel/publish`)
 | 端点 | 方法 | 功能 | 状态 |
 |------|------|------|------|
 | `/` | POST | 发布内容到频道 | ✅ 存在 |
@@ -80,18 +80,18 @@
 
 | 序号 | 缺失接口 | 用途 | 优先级 |
 |------|----------|------|--------|
-| 1 | `GET /api/v1/channels/list` 或 `GET /api/v1/channels` | 用户端频道列表查询（我的频道） | **CRITICAL** |
-| 2 | `GET /api/v1/channels/{id}/delete-check` | 删除前置条件校验 | **CRITICAL** |
-| 3 | `GET /api/v1/channels/{id}/transfers` | 转让历史记录查询 | HIGH |
-| 4 | `GET /api/v1/channels/transfer/pending` | 查询待确认的转让请求 | MEDIUM |
-| 5 | `GET /api/v1/channels/check-name` | 频道名称唯一性校验 | HIGH |
+| 1 | `GET /api/v1/content/channels/list` 或 `GET /api/v1/channels` | 用户端频道列表查询（我的频道） | **CRITICAL** |
+| 2 | `GET /api/v1/content/channels/{id}/delete-check` | 删除前置条件校验 | **CRITICAL** |
+| 3 | `GET /api/v1/content/channels/{id}/transfers` | 转让历史记录查询 | HIGH |
+| 4 | `GET /api/v1/content/channels/transfer/pending` | 查询待确认的转让请求 | MEDIUM |
+| 5 | `GET /api/v1/content/channels/check-name` | 频道名称唯一性校验 | HIGH |
 
 ### 2.3 API 路径不一致问题
 
 | 问题 | 文档中 | 代码中 | 建议 |
 |------|--------|--------|------|
-| 审核队列 API 路径 | 未明确指定 | `/jeecg-boot/api/v1/content/channel/review` | 前端封装时使用代码中的路径 |
-| 生命周期 API 路径 | 未明确指定 | `/jeecg-boot/api/v1/content/channel/lifecycle` | 前端封装时使用代码中的路径 |
+| 审核队列 API 路径 | 未明确指定 | `/api/v1/content/channel/review` | 前端封装时使用代码中的路径 |
+| 生命周期 API 路径 | 未明确指定 | `/api/v1/content/channel/lifecycle` | 前端封装时使用代码中的路径 |
 | 治理 API 路径 | 未明确指定 | `/channel/governance` | 需确认是否需要统一前缀 |
 
 ---
@@ -109,15 +109,15 @@
 | 序号 | 问题 | 位置 | 建议修复 |
 |------|------|------|----------|
 | 1 | 未提供后端 API 的完整路径映射 | Decision 7 | 补充 API 路径对照表 |
-| 2 | 未说明 API 路径前缀不一致问题 | Decision 7 | 说明 `/api/v1/channels` vs `/jeecg-boot/api/v1/content/channel` 的使用场景 |
+| 2 | 未说明 API 路径前缀不一致问题 | Decision 7 | 说明 `/api/v1/channels` vs `/api/v1/content/channels` 的使用场景 |
 
 ### 3.3 specs 文档问题
 
 | 序号 | 问题 | 位置 | 建议修复 |
 |------|------|------|----------|
 | 1 | channel-list/spec.md 未明确 API 路径 | Requirement: 我的频道列表展示 | 补充 API 路径说明 |
-| 2 | channel-deletion/spec.md 未明确 delete-check 接口路径 | Requirement: 发起频道删除 | 补充 `/api/v1/channels/{id}/delete-check` 路径 |
-| 3 | channel-transfer/spec.md 未明确转让历史查询接口 | Requirement: 转让历史记录 | 补充 `/api/v1/channels/{id}/transfers` 路径 |
+| 2 | channel-deletion/spec.md 未明确 delete-check 接口路径 | Requirement: 发起频道删除 | 补充 `/api/v1/content/channels/{id}/delete-check` 路径 |
+| 3 | channel-transfer/spec.md 未明确转让历史查询接口 | Requirement: 转让历史记录 | 补充 `/api/v1/content/channels/{id}/transfers` 路径 |
 
 ### 3.4 tasks.md 问题
 
@@ -194,8 +194,8 @@ public Result<Boolean> checkNameUnique(
    - 建议定义常量统一管理 API 路径
 
 2. **路由设计**:
-   - 用户端: `/content/channel/create`、`/content/channel/list`、`/content/channel/manage/:id`
-   - 后台端: `/content/channel/admin`、`/content/channel/review`
+   - 用户端: `/api/v1/content/channel/create`、`/api/v1/content/channel/list`、`/api/v1/content/channel/manage/:id`
+   - 后台端: `/api/v1/content/channel/admin`、`/api/v1/content/channel/review`
 
 3. **状态管理** (`src/store/modules/channel.ts`):
    - 缓存当前频道详情

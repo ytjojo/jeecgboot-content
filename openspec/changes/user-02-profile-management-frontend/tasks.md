@@ -25,7 +25,7 @@
 ## 3. 状态管理扩展
 
 - [x] 3.1 扩展 `useUserStore`，新增 `profileCompletionRate`、`reviewStatus`、`reviewReason`、`lastUpdatedAt` 状态字段
-- [x] 3.2 实现 useUserStore 中资料数据的刷新方法（隐私设置保存后调用 `GET /content/user/profile/detail`）
+- [x] 3.2 实现 useUserStore 中资料数据的刷新方法（隐私设置保存后调用 `GET /api/v1/content/user/profile/detail`）
 
 ## 4. 编辑资料页实现
 
@@ -50,15 +50,15 @@
 - [x] 6.2 实现主题色选择：预设色板（8-12 个颜色）网格排列 + 自定义颜色输入
 - [x] 6.3 实现主题色对比度校验：WCAG AA 标准自动校验，对比度不足时警告
 - [x] 6.4 实时预览区：PC 端右侧固定预览，移动端 Drawer 全屏预览
-- [x] 6.5 实现保存（`POST /content/user/profile/homepage/update`，返回 `ContentUserProfileVO`）和恢复默认（`POST /content/user/profile/homepage/defaults/restore`，返回 `ContentUserProfileVO`）功能，直接使用返回值更新本地状态
+- [x] 6.5 实现保存（`POST /api/v1/content/user/profile/homepage/update`，返回 `ContentUserProfileVO`）和恢复默认（`POST /api/v1/content/user/profile/homepage/defaults/restore`，返回 `ContentUserProfileVO`）功能，直接使用返回值更新本地状态
 
 ## 7. 主页模块配置实现
 
 - [x] 7.1 安装 `vuedraggable` 依赖，创建模块排序列表组件
-- [x] 7.2 模块列表数据源：`GET /content/user/profile/homepage/modules?userId=X` 读取 `List<ContentUserHomepageModuleVO>`
+- [x] 7.2 模块列表数据源：`GET /api/v1/content/user/profile/homepage/modules?userId=X` 读取 `List<ContentUserHomepageModuleVO>`
 - [x] 7.3 实现模块显隐 Switch 开关
 - [x] 7.4 实现拖拽排序，PC 端拖拽手柄，移动端长按（300ms）触发拖拽模式
-- [x] 7.5 实现保存（提交到 `POST /content/user/profile/update` 的 `moduleOrderJson` 字段）
+- [x] 7.5 实现保存（提交到 `POST /api/v1/content/user/profile/update` 的 `moduleOrderJson` 字段）
 - [x] 7.6 实现"至少保留一个模块"校验、恢复默认排序
 
 ## 8. 认证标识组件实现
@@ -68,7 +68,7 @@
 - [x] 8.3 实现 `DEFAULT` 兜底样式（灰对勾）覆盖未知 key
 - [x] 8.4 实现认证详情弹窗：PC 端 Modal（400px），移动端全屏 Drawer
 - [x] 8.5 实现折叠交互：最多 2 个 + "+N" 徽标，按 OFFICIAL > ENTERPRISE > CREATOR > INDIVIDUAL > REAL_NAME > MOBILE > EMAIL 优先级排序
-- [x] 8.6 列表数据源：`GET /content/user/profile/badge/list?userId=X`；详情：`GET /content/user/profile/badge/detail?badgeId=Y`
+- [x] 8.6 列表数据源：`GET /api/v1/content/user/profile/badge/list?userId=X`；详情：`GET /api/v1/content/user/profile/badge/detail?badgeId=Y`
 
 ## 9. 隐私设置页实现
 
@@ -80,17 +80,17 @@
 - [x] 9.6 活动组 (3)：`profileCompletionVisibility` / `profileReviewStatusVisibility` / `recentActivityVisibility`
 - [x] 9.7 在线状态组 (1)：`onlineStatusVisibility` ← 特殊枚举 `PUBLIC|HIDDEN|MUTUAL_ONLY`
 - [x] 9.8 布尔开关组 (2)：`showMutualFollowersCount` / `showRecentActivityHighlight`（Switch 组件）
-- [x] 9.9 调用 `POST /content/user/profile/privacy/update?userId=X` 提交
-- [x] 9.10 保存成功后主动调用 `GET /content/user/profile/detail?ownerUserId=X&viewerUserId=X` 刷新本地缓存
+- [x] 9.9 调用 `POST /api/v1/content/user/profile/privacy/update?userId=X` 提交
+- [x] 9.10 保存成功后主动调用 `GET /api/v1/content/user/profile/detail?ownerUserId=X&viewerUserId=X` 刷新本地缓存
 - [x] 9.11 移动端 Select 改为 ActionSheet 底部选择器
 
 ## 10. 历史记录页实现
 
 - [x] 10.1 Tabs 组件：昵称历史 / 头像历史
-- [x] 10.2 切换 Tab 时调用 `GET /content/user/profile/history/list?userId=X&historyType=NICKNAME|AVATAR`
+- [x] 10.2 切换 Tab 时调用 `GET /api/v1/content/user/profile/history/list?userId=X&historyType=NICKNAME|AVATAR`
 - [x] 10.3 当前值展示区：当前昵称/头像 + 绿色"当前"标签
 - [x] 10.4 历史记录列表：倒序排列，每条显示历史值 + 修改时间 + "恢复"按钮
-- [x] 10.5 恢复操作：确认弹窗 → `POST /content/user/profile/history/restore?userId=X&historyId=Y`（返回 `ContentUserProfileVO`） → 成功提示，直接使用返回值更新本地状态
+- [x] 10.5 恢复操作：确认弹窗 → `POST /api/v1/content/user/profile/history/restore?userId=X&historyId=Y`（返回 `ContentUserProfileVO`） → 成功提示，直接使用返回值更新本地状态
 - [x] 10.6 列表底部说明"最多保留 20 条记录，保留期限 180 天"（由后端裁剪，前端展示说明文案）
 - [x] 10.7 空状态、加载中骨架屏、恢复中 loading 状态
 
@@ -114,7 +114,7 @@
 
 - [x] 13.1 删除与后端 change 重复的 `specs/profile-management/spec.md`（后端 change 已持有该 spec）
 - [x] 13.2 删除前端 change 中假设的、不存在的端点（独立 upload、update-count、隐私 settings update）
-- [x] 13.3 调整为对接后端实际 12 个端点（`/content/user/profile/*`）
+- [x] 13.3 调整为对接后端实际 12 个端点（`/api/v1/content/user/profile/*`）
 - [x] 13.4 隐私字段覆盖范围从 5 扩展到 15（含 `onlineStatusVisibility` 特殊枚举）
 - [x] 13.5 历史记录从"两个分页接口"改为单接口 + `historyType` 参数
 - [x] 13.6 头像/背景图从"复用后端上传"改为"OSS 客户端直传"

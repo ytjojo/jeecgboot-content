@@ -119,7 +119,7 @@
 
 **FLAG-3**: 成员上限数值不一致。后端 design.md 圈子表定义 `max_member_count` 字段，后端 circle-member-management spec 场景中提到"圈子成员数已达到上限（10,000 人）"。前端 design.md 提到"默认 500 人"。PRD 提到"成员上限默认值为 500 人（所有隐私类型统一），可由后端配置覆盖"。前后端对默认值理解不同，需对齐。
 
-**FLAG-4**: 接口命名不一致。design.md 使用 `quitCircle`，后端实际路径为 `/content/circle/leave`。verification-review.md 已指出此问题并建议前端封装使用 `leaveCircle`。但 design.md 和 specs 中仍使用 `quitCircle` 命名，未修正。
+**FLAG-4**: 接口命名不一致。design.md 使用 `quitCircle`，后端实际路径为 `/api/v1/content/circle/leave`。verification-review.md 已指出此问题并建议前端封装使用 `leaveCircle`。但 design.md 和 specs 中仍使用 `quitCircle` 命名，未修正。
 
 ### 2.3 可实现性 (Feasibility) — 85/100
 
@@ -173,26 +173,26 @@
 
 | 接口 | 前端定义 | 后端实际 | 一致性 |
 |------|---------|---------|--------|
-| 创建圈子 | POST `/content/circle/create` | POST `/content/circle/create` | ✅ |
-| 更新圈子 | PUT `/content/circle/update` | PUT `/content/circle/update` | ✅ |
-| 圈子详情 | GET `/content/circle/detail?id={id}` | **不存在** | ❌ 缺失 |
-| 已加入列表 | GET `/content/circle/my-list` | **不存在** | ❌ 缺失 |
-| 公开列表 | GET `/content/circle/public-list` | **不存在** | ❌ 缺失 |
-| 名称校验 | GET `/content/circle/check-name` | **不存在** | ❌ 缺失 |
-| 加入圈子 | POST `/content/circle/member/join` | POST `/content/circle/join` | ⚠️ 路径不同 |
-| 退出圈子 | POST `/content/circle/member/quit` | POST `/content/circle/leave` | ⚠️ 路径+命名不同 |
-| 成员列表 | GET `/content/circle/member/list` | **不存在** | ❌ 缺失 |
-| 设置版主 | POST `/content/circle/member/set-moderator` | POST `/content/circle/member/change-role` | ⚠️ 命名不同 |
-| 禁言 | POST `/content/circle/member/mute` | POST `/content/circle/member/mute` | ✅ |
-| 解除禁言 | POST `/content/circle/member/unmute` | POST `/content/circle/member/unmute` | ✅ |
-| 移除成员 | POST `/content/circle/member/remove` | POST `/content/circle/member/remove` | ✅ |
-| 搜索 | GET `/content/circle/search` | GET `/content/circle/search` | ✅ |
-| 治理日志 | GET `/content/circle/governance-log/list` | **不存在** | ❌ 缺失 |
+| 创建圈子 | POST `/api/v1/content/circle/create` | POST `/api/v1/content/circle/create` | ✅ |
+| 更新圈子 | PUT `/api/v1/content/circle/update` | PUT `/api/v1/content/circle/update` | ✅ |
+| 圈子详情 | GET `/api/v1/content/circle/detail?id={id}` | **不存在** | ❌ 缺失 |
+| 已加入列表 | GET `/api/v1/content/circle/my-list` | **不存在** | ❌ 缺失 |
+| 公开列表 | GET `/api/v1/content/circle/public-list` | **不存在** | ❌ 缺失 |
+| 名称校验 | GET `/api/v1/content/circle/check-name` | **不存在** | ❌ 缺失 |
+| 加入圈子 | POST `/api/v1/content/circle/member/join` | POST `/api/v1/content/circle/join` | ⚠️ 路径不同 |
+| 退出圈子 | POST `/api/v1/content/circle/member/quit` | POST `/api/v1/content/circle/leave` | ⚠️ 路径+命名不同 |
+| 成员列表 | GET `/api/v1/content/circle/member/list` | **不存在** | ❌ 缺失 |
+| 设置版主 | POST `/api/v1/content/circle/member/set-moderator` | POST `/api/v1/content/circle/member/change-role` | ⚠️ 命名不同 |
+| 禁言 | POST `/api/v1/content/circle/member/mute` | POST `/api/v1/content/circle/member/mute` | ✅ |
+| 解除禁言 | POST `/api/v1/content/circle/member/unmute` | POST `/api/v1/content/circle/member/unmute` | ✅ |
+| 移除成员 | POST `/api/v1/content/circle/member/remove` | POST `/api/v1/content/circle/member/remove` | ✅ |
+| 搜索 | GET `/api/v1/content/circle/search` | GET `/api/v1/content/circle/search` | ✅ |
+| 治理日志 | GET `/api/v1/content/circle/governance-log/list` | **不存在** | ❌ 缺失 |
 
 **BLOCK-4**: 前后端接口路径存在 3 处不一致：
-1. 加入圈子：前端 `/content/circle/member/join` vs 后端 `/content/circle/join`
-2. 退出圈子：前端 `/content/circle/member/quit` vs 后端 `/content/circle/leave`
-3. 设置版主：前端 `/content/circle/member/set-moderator` vs 后端 `/content/circle/member/change-role`
+1. 加入圈子：前端 `/api/v1/content/circle/member/join` vs 后端 `/api/v1/content/circle/join`
+2. 退出圈子：前端 `/api/v1/content/circle/member/quit` vs 后端 `/api/v1/content/circle/leave`
+3. 设置版主：前端 `/api/v1/content/circle/member/set-moderator` vs 后端 `/api/v1/content/circle/member/change-role`
 
 这些不一致会导致前端封装的 API 调用在对接后端时 404。必须在实现前统一。
 
@@ -200,7 +200,7 @@
 
 **FLAG-6**: 前端 design.md D4 和 specs circle-member-management 依赖 `applyStatus`（String: PENDING/APPROVED/REJECTED）和 `isInvited`（Boolean）字段，但后端 CircleVO 当前不包含这两个字段。后端 verification-review.md 已确认此缺口。前端加入按钮的核心交互逻辑完全依赖这两个字段，若后端不补充，前端需降级为默认状态。
 
-**ADVISORY-3**: 前端 PRD 接口定义中圈子详情路径为 `/content/circle/detail?id={id}`，但 backend-issues.md 建议实现为 `GET /content/circle/{id}`。路径风格不一致（query param vs path param），需统一。
+**ADVISORY-3**: 前端 PRD 接口定义中圈子详情路径为 `/api/v1/content/circle/detail?id={id}`，但 backend-issues.md 建议实现为 `GET /api/v1/content/circle/{id}`。路径风格不一致（query param vs path param），需统一。
 
 #### 分页契约
 
@@ -346,7 +346,7 @@
 |---|------|------|
 | ADVISORY-1 | specs scenario 无 TDD 配对映射 | 在 tasks 测试部分标注对应 scenario 编号 |
 | ADVISORY-2 | 交互组件（Modal 类）测试计划缺失 | 补充 JoinCircleModal/MuteMemberModal/GovernanceConfirmModal 测试 |
-| ADVISORY-3 | 详情接口路径风格不一致（query vs path param） | 统一为 `GET /content/circle/{id}` |
+| ADVISORY-3 | 详情接口路径风格不一致（query vs path param） | 统一为 `GET /api/v1/content/circle/{id}` |
 | ADVISORY-4 | 分页参数格式未统一（page/size vs pageNum/pageSize） | 定义统一分页契约 |
 | ADVISORY-5 | 错误码未定义枚举 | 在 API 封装层定义错误码常量 |
 | ADVISORY-6 | 已禁言用户提示条和密码倒计时恢复未在 spec 中覆盖 | 补充 spec scenario |

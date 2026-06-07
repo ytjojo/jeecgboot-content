@@ -22,30 +22,30 @@
 
 | 端点 | Controller 文件 | 状态 |
 |------|----------------|------|
-| `POST /content/user/relation/block` | ContentUserRelationController:78 | ✅ 存在，参数: @RequestParam userId, targetUserId |
-| `POST /content/user/relation/unblock` | ContentUserRelationController:89 | ✅ 存在，参数: @RequestParam userId, targetUserId |
-| `GET /content/user/relation/blacklist` | ContentUserRelationController:248 | ✅ 存在，参数: @RequestParam userId, pageNo, pageSize |
-| `GET /content/user/relation/detail` | ContentUserRelationController:133 | ✅ 存在，参数: @RequestParam userId, targetUserId |
-| `GET /content/user/relation/block-mute/help` | ContentUserRelationController:269 | ✅ 存在，无参数，返回 ContentBlockMuteHelpVO |
-| `POST /content/user/relation/mute` | ContentUserRelationController:100 | ✅ 存在，参数: @RequestParam userId, targetUserId |
-| `POST /content/user/relation/mute/cancel` | ContentUserRelationController:111 | ✅ 存在，参数: @RequestParam userId, targetUserId |
-| `POST /content/user/filter-rule` | ContentUserFilterRuleController:39 | ✅ 存在，参数: @RequestParam userId, ruleType, value, daysValid? |
-| `POST /content/user/filter-rule/delete` | ContentUserFilterRuleController:71 | ✅ 存在，参数: @RequestParam userId, ruleId |
-| `POST /content/user/filter-rule/batch-delete` | ContentUserFilterRuleController:82 | ✅ 存在，参数: @RequestParam userId, @RequestBody List<String> ruleIds |
-| `GET /content/user/filter-rule/list` | ContentUserFilterRuleController:93 | ✅ 存在，参数: @RequestParam userId, ruleType?, pageNo, pageSize |
-| `POST /content/user/not-interested` | ContentUserNotInterestedController:29 | ✅ 存在，参数: @RequestParam userId, contentId, contentType |
+| `POST /api/v1/content/user/relation/block` | ContentUserRelationController:78 | ✅ 存在，参数: @RequestParam userId, targetUserId |
+| `POST /api/v1/content/user/relation/unblock` | ContentUserRelationController:89 | ✅ 存在，参数: @RequestParam userId, targetUserId |
+| `GET /api/v1/content/user/relation/blacklist` | ContentUserRelationController:248 | ✅ 存在，参数: @RequestParam userId, pageNo, pageSize |
+| `GET /api/v1/content/user/relation/detail` | ContentUserRelationController:133 | ✅ 存在，参数: @RequestParam userId, targetUserId |
+| `GET /api/v1/content/user/relation/block-mute/help` | ContentUserRelationController:269 | ✅ 存在，无参数，返回 ContentBlockMuteHelpVO |
+| `POST /api/v1/content/user/relation/mute` | ContentUserRelationController:100 | ✅ 存在，参数: @RequestParam userId, targetUserId |
+| `POST /api/v1/content/user/relation/mute/cancel` | ContentUserRelationController:111 | ✅ 存在，参数: @RequestParam userId, targetUserId |
+| `POST /api/v1/content/user/filter-rule` | ContentUserFilterRuleController:39 | ✅ 存在，参数: @RequestParam userId, ruleType, value, daysValid? |
+| `POST /api/v1/content/user/filter-rule/delete` | ContentUserFilterRuleController:71 | ✅ 存在，参数: @RequestParam userId, ruleId |
+| `POST /api/v1/content/user/filter-rule/batch-delete` | ContentUserFilterRuleController:82 | ✅ 存在，参数: @RequestParam userId, @RequestBody List<String> ruleIds |
+| `GET /api/v1/content/user/filter-rule/list` | ContentUserFilterRuleController:93 | ✅ 存在，参数: @RequestParam userId, ruleType?, pageNo, pageSize |
+| `POST /api/v1/content/user/not-interested` | ContentUserNotInterestedController:29 | ✅ 存在，参数: @RequestParam userId, contentId, contentType |
 
 ### 缺失的端点（1/13）
 
 | 端点 | 优先级 | 影响范围 |
 |------|--------|----------|
-| `GET /content/user/relation/mute-list` | WARNING | 阻塞任务 6.5-6.6（屏蔽列表管理页 - 屏蔽用户 Tab） |
+| `GET /api/v1/content/user/relation/mute-list` | WARNING | 阻塞任务 6.5-6.6（屏蔽列表管理页 - 屏蔽用户 Tab） |
 
 **详情**: `IContentUserRelationService` 接口仅有 `mute()` 和 `unmute()` 方法，无 `listMutedUsers()` 或类似分页查询方法。`ContentUserRelationController` 中无 `/mute-list` 端点。
 
 **建议**: 在后端补充以下端点:
 ```
-GET /content/user/relation/mute-list
+GET /api/v1/content/user/relation/mute-list
 参数: @RequestParam userId, @RequestParam pageNo, @RequestParam pageSize
 返回: Result<ContentUserMuteListPageVO>
 ```
@@ -72,15 +72,15 @@ GET /content/user/relation/mute-list
 #### W2: spec.md 中 not-interested 参数风格描述不精确
 
 **问题**: spec.md 第 55 行写道:
-> 静默调用 `POST /content/user/not-interested`（@RequestParam: userId, contentId, contentType）
+> 静默调用 `POST /api/v1/content/user/not-interested`（@RequestParam: userId, contentId, contentType）
 
 虽然参数名称正确，但 spec 中同时存在另一处（第 167-180 行 API 对齐表）未提及 not-interested 端点的参数风格。设计文档 design.md 第 70 行统一声明"所有写操作使用 POST，参数通过 @RequestParam 传递"，与实际一致。
 
-**建议**: 在 spec.md 的 API 对齐表（第 167-180 行）中补充 `POST /content/user/not-interested` 条目，保持完整性。
+**建议**: 在 spec.md 的 API 对齐表（第 167-180 行）中补充 `POST /api/v1/content/user/not-interested` 条目，保持完整性。
 
 #### W3: tasks.md 中 mute-list 端点假设可能无法实现
 
-**问题**: tasks.md 第 65 行（任务 6.5-6.6）假设 `GET /content/user/relation/mute-list` 端点存在，但后端尚未实现。
+**问题**: tasks.md 第 65 行（任务 6.5-6.6）假设 `GET /api/v1/content/user/relation/mute-list` 端点存在，但后端尚未实现。
 
 **建议**: 任务 6.5-6.6 标记为"依赖后端补充 mute-list 端点"，或在实现时先用 filter-rule/list（ruleType=USER_MUTE）作为替代方案。
 
@@ -97,13 +97,13 @@ GET /content/user/relation/mute-list
 
 #### S1: spec.md 中批量删除屏蔽规则参数风格需注意
 
-**问题**: `POST /content/user/filter-rule/batch-delete` 的后端实现使用 `@RequestBody List<String> ruleIds`（JSON 数组），而非 @RequestParam。这与其他端点的 @RequestParam 风格不一致。
+**问题**: `POST /api/v1/content/user/filter-rule/batch-delete` 的后端实现使用 `@RequestBody List<String> ruleIds`（JSON 数组），而非 @RequestParam。这与其他端点的 @RequestParam 风格不一致。
 
 **建议**: 前端 API 封装时，此端点使用 `defHttp.post(url, ruleIds)` 传递 JSON body，而非查询参数。
 
 #### S2: ContentBlockMuteHelpVO 返回结构可作为前端文案来源
 
-**问题**: `GET /content/user/relation/block-mute/help` 返回的 `ContentBlockMuteHelpVO` 包含:
+**问题**: `GET /api/v1/content/user/relation/block-mute/help` 返回的 `ContentBlockMuteHelpVO` 包含:
 - `blockConfirmation` — 拉黑确认文案
 - `muteConfirmation` — 屏蔽确认文案
 - `unblockConfirmation` — 解除拉黑文案

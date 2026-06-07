@@ -51,4 +51,4 @@ API 文件: `src/api/content/governance.ts`（复用已有 governance 封装）
 
 | 端点 | 方法 | 参数 | 响应关键字段 | 状态 |
 |------|------|------|------------|------|
-| `/content/user/governance/audit-log` | GET | @RequestParam: page, pageSize, operatorName?, operationType?, startTime?, endTime? | records[{operator, operationTime, operationType, targetUser, reason, ipAddress}], total | ❌ 后端待补充 |
+| `/api/v1/content/user/governance/audit-log` | GET | @RequestParam: page, pageSize, operatorName?, operationType?, startTime?, endTime? | records[{operator, operationTime, operationType, targetUser, reason, ipAddress}], total | ❌ 后端待补充 |

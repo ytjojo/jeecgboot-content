@@ -10,11 +10,11 @@
 
 ## 2. API 层封装
 
-- [x] 2.1 封装认证 API（`/api/v1/auth/*`）：手机号注册、邮箱注册、邮箱确认、第三方登录、验证码登录、密码登录、发送短信验证码、发送邮箱验证邮件、刷新 Token、退出登录
-- [x] 2.2 封装账号安全 API（`/api/v1/account-security/*`）：获取安全状态、绑定/换绑/解绑手机号/邮箱/第三方账号、设备列表/下线/信任/取消信任、重置密码/修改密码、异常登录通知/确认/否认、发送安全验证码
-- [x] 2.3 封装账号注销 API（`/api/v1/account-cancellation/*`）：查询资格、申请注销、查询状态、取消注销
-- [x] 2.4 封装风控验证 API（`/api/v1/auth/captcha/*`）：获取图形验证码、校验图形验证码
-- [x] 2.5 封装用户偏好 API（`POST /api/v1/user/preferences/topics`）
+- [x] 2.1 封装认证 API（`/api/v1/content/auth/*`）：手机号注册、邮箱注册、邮箱确认、第三方登录、验证码登录、密码登录、发送短信验证码、发送邮箱验证邮件、刷新 Token、退出登录
+- [x] 2.2 封装账号安全 API（`/api/v1/content/account-security/*`）：获取安全状态、绑定/换绑/解绑手机号/邮箱/第三方账号、设备列表/下线/信任/取消信任、重置密码/修改密码、异常登录通知/确认/否认、发送安全验证码
+- [x] 2.3 封装账号注销 API（`/api/v1/content/account-cancellation/*`）：查询资格、申请注销、查询状态、取消注销
+- [x] 2.4 封装风控验证 API（`/api/v1/content/auth/captcha/*`）：获取图形验证码、校验图形验证码
+- [x] 2.5 封装用户偏好 API（`POST /api/v1/content/user/preferences/topics`）
 
 ## 3. Store 扩展
 

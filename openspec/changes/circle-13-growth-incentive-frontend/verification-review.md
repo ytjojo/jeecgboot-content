@@ -22,21 +22,21 @@
 
 | # | 前端文档引用的路径 | 实际后端路径 | 状态 |
 |---|-------------------|-------------|------|
-| 1 | `GET /content/circle/{circleId}/level` | `GET /content/user/growth/level/info?circleId={circleId}` | 不匹配 |
-| 2 | `GET /content/circle/{circleId}/growth/me` | `GET /content/user/growth/info?circleId={circleId}&userId={userId}` | 不匹配 |
-| 3 | `GET /content/circle/{circleId}/badges` | `GET /content/user/growth/achievement/list?circleId={circleId}&userId={userId}` | 不匹配 |
-| 4 | `GET /content/circle/{circleId}/leaderboard` | `GET /content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | 不匹配 |
+| 1 | `GET /api/v1/content/circle/{circleId}/level` | `GET /api/v1/content/user/growth/level/info?circleId={circleId}` | 不匹配 |
+| 2 | `GET /api/v1/content/circle/{circleId}/growth/me` | `GET /api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` | 不匹配 |
+| 3 | `GET /api/v1/content/circle/{circleId}/badges` | `GET /api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` | 不匹配 |
+| 4 | `GET /api/v1/content/circle/{circleId}/leaderboard` | `GET /api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | 不匹配 |
 
 ### 2.2 后端 Controller 位置
 
 | 功能 | Controller 类 | 基础路径 |
 |------|--------------|---------|
-| 圈子等级 | `CircleLevelController` | `/content/user/growth/level` |
-| 成员成长 | `MemberGrowthController` | `/content/user/growth` |
-| 成就徽章 | `AchievementController` | `/content/user/growth/achievement` |
-| 排行榜 | `LeaderboardController` | `/content/user/growth/leaderboard` |
+| 圈子等级 | `CircleLevelController` | `/api/v1/content/user/growth/level` |
+| 成员成长 | `MemberGrowthController` | `/api/v1/content/user/growth` |
+| 成就徽章 | `AchievementController` | `/api/v1/content/user/growth/achievement` |
+| 排行榜 | `LeaderboardController` | `/api/v1/content/user/growth/leaderboard` |
 
-所有 Controller 均位于: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/controller/`
+所有 Controller 均位于: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/user/growth/controller/`
 
 ### 2.3 补充发现的额外 API
 
@@ -44,14 +44,14 @@
 
 | 接口 | 路径 | 说明 |
 |------|------|------|
-| 连续参与天数 | `GET /content/user/growth/participation?circleId=&userId=` | MemberGrowthController |
-| 成长汇总 | `GET /content/user/growth/summary?userId=` | ContentUserGrowthController |
-| 勋章分类目录 | `GET /content/user/growth/badge/catalog?userId=` | ContentUserGrowthController |
-| 勋章详情 | `GET /content/user/growth/badge/detail?userId=&badgeCode=` | ContentUserGrowthController |
-| 佩戴勋章 | `POST /content/user/growth/badge/wear` | ContentUserGrowthController |
-| 查询佩戴勋章 | `GET /content/user/growth/badge/worn?userId=` | ContentUserGrowthController |
-| 等级权益摘要 | `GET /content/user/growth/level/benefit?userId=` | ContentUserGrowthController |
-| 等级配置 | `GET /content/user/growth/level/config` | ContentUserGrowthController |
+| 连续参与天数 | `GET /api/v1/content/user/growth/participation?circleId=&userId=` | MemberGrowthController |
+| 成长汇总 | `GET /api/v1/content/user/growth/summary?userId=` | ContentUserGrowthController |
+| 勋章分类目录 | `GET /api/v1/content/user/growth/badge/catalog?userId=` | ContentUserGrowthController |
+| 勋章详情 | `GET /api/v1/content/user/growth/badge/detail?userId=&badgeCode=` | ContentUserGrowthController |
+| 佩戴勋章 | `POST /api/v1/content/user/growth/badge/wear` | ContentUserGrowthController |
+| 查询佩戴勋章 | `GET /api/v1/content/user/growth/badge/worn?userId=` | ContentUserGrowthController |
+| 等级权益摘要 | `GET /api/v1/content/user/growth/level/benefit?userId=` | ContentUserGrowthController |
+| 等级配置 | `GET /api/v1/content/user/growth/level/config` | ContentUserGrowthController |
 
 ---
 
@@ -141,7 +141,7 @@ private Boolean highlighted;
 
 | 编号 | 问题 | 严重度 | 位置 |
 |------|------|--------|------|
-| D1 | API 路径全部使用 RESTful 风格 `/content/circle/{circleId}/xxx`，与实际后端 `/content/user/growth/xxx?circleId=` 不一致 | 高 | Risks / Trade-offs 第1条 |
+| D1 | API 路径全部使用 RESTful 风格 `/api/v1/content/circle/{circleId}/xxx`，与实际后端 `/api/v1/content/user/growth/xxx?circleId=` 不一致 | 高 | Risks / Trade-offs 第1条 |
 | D2 | 未提及后端已有 `participation` 接口可直接获取连续参与天数 | 中 | Decisions D3 |
 | D3 | 未区分「圈子等级」(CircleLevel) 和「用户成长」(ContentUserGrowth) 两套独立体系 | 中 | Context |
 
@@ -156,7 +156,7 @@ private Boolean highlighted;
 
 | 编号 | 问题 | 严重度 | 位置 |
 |------|------|--------|------|
-| S1 | API 路径 `GET /content/circle/{circleId}/level` 应为 `GET /content/user/growth/level/info?circleId=` | 高 | Requirement: 圈子等级信息 API 对接 |
+| S1 | API 路径 `GET /api/v1/content/circle/{circleId}/level` 应为 `GET /api/v1/content/user/growth/level/info?circleId=` | 高 | Requirement: 圈子等级信息 API 对接 |
 | S2 | 期望 `CircleLevelVO` 包含 `nextLevelConditions` 和 `benefits`，后端 VO 缺失 | 高 | Scenario: 展示差距条件 / 展示已解锁权益 |
 | S3 | 进度条「分项指标展开」功能后端无对应数据支撑 | 中 | Scenario: 点击进度条展开分项指标 |
 
@@ -164,7 +164,7 @@ private Boolean highlighted;
 
 | 编号 | 问题 | 严重度 | 位置 |
 |------|------|--------|------|
-| S4 | API 路径 `GET /content/circle/{circleId}/growth/me` 应为 `GET /content/user/growth/info?circleId=&userId=` | 高 | Requirement: 成员成长信息 API 对接 |
+| S4 | API 路径 `GET /api/v1/content/circle/{circleId}/growth/me` 应为 `GET /api/v1/content/user/growth/info?circleId=&userId=` | 高 | Requirement: 成员成长信息 API 对接 |
 | S5 | 期望 `MemberGrowthVO` 包含 `dailyExpLimit`, `todayExp`，后端 VO 缺失 | 高 | Requirement: 每日经验上限展示 |
 | S6 | 期望包含 `recentBadges`，后端 VO 缺失 | 中 | Requirement: 徽章摘要展示 |
 | S7 | 后端已有 `participationDays` 字段，但文档仍描述为需前端计算 | 低 | Requirement: 连续参与进度展示 |
@@ -173,7 +173,7 @@ private Boolean highlighted;
 
 | 编号 | 问题 | 严重度 | 位置 |
 |------|------|--------|------|
-| S8 | API 路径 `GET /content/circle/{circleId}/badges` 应为 `GET /content/user/growth/achievement/list?circleId=&userId=` | 高 | Requirement: 徽章列表 API 对接 |
+| S8 | API 路径 `GET /api/v1/content/circle/{circleId}/badges` 应为 `GET /api/v1/content/user/growth/achievement/list?circleId=&userId=` | 高 | Requirement: 徽章列表 API 对接 |
 | S9 | 期望 `BadgeVO` 包含 `icon`, `earnedDate`, `progress`, `targetValue`, `status`，后端 `AchievementVO` 缺失 | 高 | 多个 Scenario |
 | S10 | 后端使用 `Achievement` 命名而非 `Badge`，文档术语不一致 | 中 | 全文 |
 
@@ -181,7 +181,7 @@ private Boolean highlighted;
 
 | 编号 | 问题 | 严重度 | 位置 |
 |------|------|--------|------|
-| S11 | API 路径 `GET /content/circle/{circleId}/leaderboard` 应为 `GET /content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | 高 | Requirement: 排行榜样 API 对接 |
+| S11 | API 路径 `GET /api/v1/content/circle/{circleId}/leaderboard` 应为 `GET /api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | 高 | Requirement: 排行榜样 API 对接 |
 | S12 | 期望 `LeaderboardVO` 包含 `username`, `avatar`，后端 `LeaderboardEntryVO` 缺失 | 高 | Scenario: 展示 Top 50 列表 |
 | S13 | 排行榜样接口需传 `currentUserId` 参数，文档未提及 | 中 | Requirement: 排行榜样 API 对接 |
 
@@ -195,10 +195,10 @@ private Boolean highlighted;
 
 | 文档 | 旧路径 | 新路径 |
 |------|--------|--------|
-| circle-level/spec.md | `GET /content/circle/{circleId}/level` | `GET /content/user/growth/level/info?circleId={circleId}` |
-| member-growth/spec.md | `GET /content/circle/{circleId}/growth/me` | `GET /content/user/growth/info?circleId={circleId}&userId={userId}` |
-| badge-system/spec.md | `GET /content/circle/{circleId}/badges` | `GET /content/user/growth/achievement/list?circleId={circleId}&userId={userId}` |
-| leaderboard/spec.md | `GET /content/circle/{circleId}/leaderboard` | `GET /content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` |
+| circle-level/spec.md | `GET /api/v1/content/circle/{circleId}/level` | `GET /api/v1/content/user/growth/level/info?circleId={circleId}` |
+| member-growth/spec.md | `GET /api/v1/content/circle/{circleId}/growth/me` | `GET /api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` |
+| badge-system/spec.md | `GET /api/v1/content/circle/{circleId}/badges` | `GET /api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` |
+| leaderboard/spec.md | `GET /api/v1/content/circle/{circleId}/leaderboard` | `GET /api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` |
 
 ### 5.2 高优先级修复 (VO 字段)
 

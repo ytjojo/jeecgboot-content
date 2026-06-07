@@ -60,7 +60,7 @@
 
 #### Scenario: 点击不感兴趣
 - **WHEN** 用户在内容卡片点击「···」→「不感兴趣」
-- **THEN** 内容卡片立即从视图移除（乐观更新），同时静默调用 `POST /content/user/not-interested`（@RequestParam: userId, contentId, contentType）
+- **THEN** 内容卡片立即从视图移除（乐观更新），同时静默调用 `POST /api/v1/content/user/not-interested`（@RequestParam: userId, contentId, contentType）
 
 #### Scenario: 气泡选项展示
 - **WHEN** 不感兴趣接口返回成功
@@ -71,11 +71,11 @@
 
 #### Scenario: 选择屏蔽此类内容
 - **WHEN** 用户点击「屏蔽此类内容」
-- **THEN** 调用 `POST /content/user/filter-rule`（userId, ruleType=CONTENT_TYPE, value=category），成功后显示"已屏蔽该类型内容"
+- **THEN** 调用 `POST /api/v1/content/user/filter-rule`（userId, ruleType=CONTENT_TYPE, value=category），成功后显示"已屏蔽该类型内容"
 
 #### Scenario: 选择屏蔽该话题
 - **WHEN** 用户点击「屏蔽该话题」
-- **THEN** 调用 `POST /content/user/filter-rule`（userId, ruleType=TOPIC, value=topic），成功后显示"已屏蔽该话题"
+- **THEN** 调用 `POST /api/v1/content/user/filter-rule`（userId, ruleType=TOPIC, value=topic），成功后显示"已屏蔽该话题"
 
 #### Scenario: 乐观更新视觉表现
 - **WHEN** 用户点击「不感兴趣」
@@ -88,7 +88,7 @@
 - **THEN** 气泡仅显示「知道了」选项，不显示屏蔽类选项
 
 #### Scenario: 不感兴趣操作失败
-- **WHEN** `POST /content/user/not-interested` 接口返回失败
+- **WHEN** `POST /api/v1/content/user/not-interested` 接口返回失败
 - **THEN** 显示全局错误消息"操作失败"，内容卡片不从信息流移除（回滚乐观更新）
 
 ### Requirement: 黑名单管理页
@@ -126,11 +126,11 @@
 
 #### Scenario: 添加关键词
 - **WHEN** 用户输入关键词并点击添加（或按回车）
-- **THEN** 调用 `POST /content/user/filter-rule`（userId, ruleType=KEYWORD, value=keyword），成功后添加到列表
+- **THEN** 调用 `POST /api/v1/content/user/filter-rule`（userId, ruleType=KEYWORD, value=keyword），成功后添加到列表
 
 #### Scenario: 添加正则表达式
 - **WHEN** 用户输入以 `/` 开头和结尾的正则表达式
-- **THEN** 前端校验格式，有效则调用 `POST /content/user/filter-rule`（userId, ruleType=REGEX, value=regex），无效则提示"正则表达式格式错误，请检查"
+- **THEN** 前端校验格式，有效则调用 `POST /api/v1/content/user/filter-rule`（userId, ruleType=REGEX, value=regex），无效则提示"正则表达式格式错误，请检查"
 
 #### Scenario: 重复屏蔽词
 - **WHEN** 用户添加已存在的屏蔽词
@@ -142,7 +142,7 @@
 
 #### Scenario: 删除屏蔽词
 - **WHEN** 用户点击删除按钮
-- **THEN** 调用 `POST /content/user/filter-rule/delete`（userId, ruleId），立即删除，3 秒内显示撤销提示条
+- **THEN** 调用 `POST /api/v1/content/user/filter-rule/delete`（userId, ruleId），立即删除，3 秒内显示撤销提示条
 
 ### Requirement: 隐私设置聚合页
 系统 SHALL 提供隐私设置聚合页，统一管理黑名单、屏蔽列表和屏蔽词入口。
@@ -198,27 +198,27 @@
 #### Scenario: API 路径对齐后端
 - **WHEN** 前端调用 API
 - **THEN** 路径、HTTP 方法、参数风格与后端一致：
-  - `POST /content/user/relation/block` — 拉黑（@RequestParam: userId, targetUserId）
-  - `POST /content/user/relation/unblock` — 解除拉黑
-  - `POST /content/user/relation/mute` — 屏蔽
-  - `POST /content/user/relation/mute/cancel` — 解除屏蔽
-  - `GET /content/user/relation/detail` — 查询关系
-  - `GET /content/user/relation/blacklist` — 黑名单分页
-  - `GET /content/user/relation/mute-list` — 屏蔽列表分页
-  - `GET /content/user/relation/block-mute/help` — 帮助说明（无参数）
-  - `GET /content/user/relation/mute-list` — 屏蔽列表分页（@RequestParam: userId, pageNo, pageSize）
-  - `POST /content/user/filter-rule` — 添加屏蔽规则（@RequestParam: userId, ruleType, value, daysValid?）
-  - `POST /content/user/filter-rule/delete` — 删除屏蔽规则（@RequestParam: userId, ruleId）
-  - `POST /content/user/filter-rule/batch-delete` — 批量删除屏蔽规则（@RequestParam: userId, @RequestBody: ruleIds[]）
-  - `GET /content/user/filter-rule/list` — 查询屏蔽规则列表（@RequestParam: userId, ruleType?, pageNo, pageSize）
-  - `POST /content/user/not-interested` — 不感兴趣反馈（@RequestParam: userId, contentId, contentType）
+  - `POST /api/v1/content/user/relation/block` — 拉黑（@RequestParam: userId, targetUserId）
+  - `POST /api/v1/content/user/relation/unblock` — 解除拉黑
+  - `POST /api/v1/content/user/relation/mute` — 屏蔽
+  - `POST /api/v1/content/user/relation/mute/cancel` — 解除屏蔽
+  - `GET /api/v1/content/user/relation/detail` — 查询关系
+  - `GET /api/v1/content/user/relation/blacklist` — 黑名单分页
+  - `GET /api/v1/content/user/relation/mute-list` — 屏蔽列表分页
+  - `GET /api/v1/content/user/relation/block-mute/help` — 帮助说明（无参数）
+  - `GET /api/v1/content/user/relation/mute-list` — 屏蔽列表分页（@RequestParam: userId, pageNo, pageSize）
+  - `POST /api/v1/content/user/filter-rule` — 添加屏蔽规则（@RequestParam: userId, ruleType, value, daysValid?）
+  - `POST /api/v1/content/user/filter-rule/delete` — 删除屏蔽规则（@RequestParam: userId, ruleId）
+  - `POST /api/v1/content/user/filter-rule/batch-delete` — 批量删除屏蔽规则（@RequestParam: userId, @RequestBody: ruleIds[]）
+  - `GET /api/v1/content/user/filter-rule/list` — 查询屏蔽规则列表（@RequestParam: userId, ruleType?, pageNo, pageSize）
+  - `POST /api/v1/content/user/not-interested` — 不感兴趣反馈（@RequestParam: userId, contentId, contentType）
 
 ### Requirement: 关系状态缓存
 系统 SHALL 使用 Pinia Store 缓存用户关系状态，减少重复请求。
 
 #### Scenario: 关系状态查询缓存
 - **WHEN** 组件查询与目标用户的关系状态
-- **THEN** 优先从 Store 缓存读取，缓存未命中时调用 `GET /content/user/relation/detail`（userId, targetUserId）并写入缓存
+- **THEN** 优先从 Store 缓存读取，缓存未命中时调用 `GET /api/v1/content/user/relation/detail`（userId, targetUserId）并写入缓存
 
 #### Scenario: 操作后更新缓存
 - **WHEN** 拉黑/屏蔽/解除操作成功

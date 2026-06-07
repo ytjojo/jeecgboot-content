@@ -84,8 +84,8 @@
 - **THEN** 分类树全宽展示，点击节点后跳转到详情页而非分栏展示
 
 > **NOTE**: 后端 API 状态（2026-06-07 更新）：
-> - `GET /content/channel/category/tree` — ✅ 已实现
-> - `POST /content/channel/category/create` — ✅ 已实现
-> - `POST /content/channel/category/update` — ✅ 已实现
-> - `POST /content/channel/category/disable` — ✅ 已实现
-> - `POST /content/channel/category/enable` — ✅ 已实现（`ContentChannelCategoryController.java:53`）
+> - `GET /api/v1/content/channel/category/tree` — ✅ 已实现
+> - `POST /api/v1/content/channel/category/create` — ✅ 已实现
+> - `POST /api/v1/content/channel/category/update` — ✅ 已实现
+> - `POST /api/v1/content/channel/category/disable` — ✅ 已实现
+> - `POST /api/v1/content/channel/category/enable` — ✅ 已实现（`ContentChannelCategoryController.java:53`）

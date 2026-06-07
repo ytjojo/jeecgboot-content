@@ -25,10 +25,10 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  create = '/content/user/support/report/create', // 后端实际路径含 /create
-  withdraw = '/content/user/support/report/{id}/withdraw', // 待后端实现
-  list = '/content/user/support/report/list', // 待后端实现（用户端）
-  detail = '/content/user/support/report/{id}', // 待后端实现（用户端）
+  create = '/api/v1/content/user/support/report/create', // 后端实际路径含 /create
+  withdraw = '/api/v1/content/user/support/report/{id}/withdraw', // 待后端实现
+  list = '/api/v1/content/user/support/report/list', // 待后端实现（用户端）
+  detail = '/api/v1/content/user/support/report/{id}', // 待后端实现（用户端）
 }
 
 export interface ReportCreateParams {
@@ -106,10 +106,10 @@ git commit -m "feat(support): add report API layer"
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  create = '/content/user/support/appeal/create', // 后端实际路径含 /create
-  withdraw = '/content/user/support/appeal/{id}/withdraw', // 待后端实现
-  list = '/content/user/support/appeal/list', // 后端已存在
-  detail = '/content/user/support/appeal/{id}', // 待后端实现（仅有 /appeal/progress）
+  create = '/api/v1/content/user/support/appeal/create', // 后端实际路径含 /create
+  withdraw = '/api/v1/content/user/support/appeal/{id}/withdraw', // 待后端实现
+  list = '/api/v1/content/user/support/appeal/list', // 后端已存在
+  detail = '/api/v1/content/user/support/appeal/{id}', // 待后端实现（仅有 /appeal/progress）
 }
 
 export interface AppealCreateParams {
@@ -182,10 +182,10 @@ git commit -m "feat(support): add appeal API layer"
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  search = '/content/user/support/help/search',
-  categories = '/content/user/support/help/categories',
-  article = '/content/user/support/help/article/{id}',
-  feedback = '/content/user/support/help/article/{id}/feedback',
+  search = '/api/v1/content/user/support/help/search',
+  categories = '/api/v1/content/user/support/help/categories',
+  article = '/api/v1/content/user/support/help/article/{id}',
+  feedback = '/api/v1/content/user/support/help/article/{id}/feedback',
 }
 
 export interface HelpSearchParams {
@@ -259,7 +259,7 @@ git commit -m "feat(support): add help center API layer"
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  list = '/content/user/support/changelog/list',
+  list = '/api/v1/content/user/support/changelog/list',
 }
 
 export interface ChangelogQueryParams {
@@ -305,13 +305,13 @@ git commit -m "feat(support): add changelog API layer"
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  createSession = '/content/user/support/customer-service/session',
-  transfer = '/content/user/support/customer-service/session/{id}/transfer',
-  sendMessage = '/content/user/support/customer-service/session/{id}/message',
-  closeSession = '/content/user/support/customer-service/session/{id}/close',
-  submitRating = '/content/user/support/customer-service/session/{id}/rating',
-  sessionList = '/content/user/support/customer-service/sessions',
-  sessionDetail = '/content/user/support/customer-service/session/{id}',
+  createSession = '/api/v1/content/user/support/customer-service/session',
+  transfer = '/api/v1/content/user/support/customer-service/session/{id}/transfer',
+  sendMessage = '/api/v1/content/user/support/customer-service/session/{id}/message',
+  closeSession = '/api/v1/content/user/support/customer-service/session/{id}/close',
+  submitRating = '/api/v1/content/user/support/customer-service/session/{id}/rating',
+  sessionList = '/api/v1/content/user/support/customer-service/sessions',
+  sessionDetail = '/api/v1/content/user/support/customer-service/session/{id}',
 }
 
 // 注意：后端 ContentServiceSessionVO 字段为 sessionType/status/rating/ratingComment/startTime/endTime/expired

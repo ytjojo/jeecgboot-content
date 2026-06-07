@@ -29,4 +29,4 @@
 - 影响数据库：新增或扩展用户认证主体、登录凭证、第三方绑定、设备会话、验证码、密码历史、风险事件、账号注销申请等表结构，并配套 Flyway migration。
 - 影响 Redis：新增验证码、登录失败计数、账号锁定、Token 黑名单、风控限流等缓存键。
 - 影响外部依赖与配置：短信服务、邮件服务、微信/Apple/Google 第三方登录配置、IP 地理位置解析、人机验证服务。
-- 影响 API：新增 `/api/v1/auth/*`、`/api/v1/account-security/*`、`/api/v1/account-cancellation/*` 等内容社区用户认证相关接口。
+- 影响 API：新增 `/api/v1/content/auth/*`、`/api/v1/content/account-security/*`、`/api/v1/content/account-cancellation/*` 等内容社区用户认证相关接口。

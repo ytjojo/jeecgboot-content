@@ -70,7 +70,7 @@
 
 | API | 路径 | 用途 | 状态 |
 |-----|------|------|------|
-| getAuditLogList | GET /api/content/user-status/audit-logs | 审计日志分页查询 | ✅ 已实现 |
-| getAuditLogDetail | GET /api/content/user-status/audit-logs/{logId} | 审计日志详情 | ✅ 已实现 |
-| getUserAuditLogs | GET /api/content/user-status/users/{userId}/audit-logs | 用户审计日志 | ✅ 已实现 |
-| exportAuditLogs | GET /api/content/user-status/audit-logs/export | 导出审计日志 | ✅ 已实现 |
+| getAuditLogList | GET /api/v1/content/user-status/audit-logs | 审计日志分页查询 | ✅ 已实现 |
+| getAuditLogDetail | GET /api/v1/content/user-status/audit-logs/{logId} | 审计日志详情 | ✅ 已实现 |
+| getUserAuditLogs | GET /api/v1/content/user-status/users/{userId}/audit-logs | 用户审计日志 | ✅ 已实现 |
+| exportAuditLogs | GET /api/v1/content/user-status/audit-logs/export | 导出审计日志 | ✅ 已实现 |

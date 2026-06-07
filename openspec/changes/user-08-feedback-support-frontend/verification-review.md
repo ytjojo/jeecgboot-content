@@ -22,7 +22,7 @@
 
 ### 2.1 已存在的后端端点
 
-**用户端控制器** (`ContentUserSupportController`, base: `/content/user/support`):
+**用户端控制器** (`ContentUserSupportController`, base: `/api/v1/content/user/support`):
 
 | # | HTTP 方法 | 路径 | 功能 | 对应前端 API |
 |---|-----------|------|------|-------------|
@@ -34,7 +34,7 @@
 | 6 | GET | `/help-center` | 查询帮助中心 | 无直接对应（前端拆分为 categories + search） |
 | 7 | GET | `/customer-service` | 查询客服入口 | 无直接对应（前端用 createSession） |
 
-**管理端控制器** (`ContentUserSupportAdminController`, base: `/content/user/support/admin`):
+**管理端控制器** (`ContentUserSupportAdminController`, base: `/api/v1/content/user/support/admin`):
 - `POST /appeal/handle` - 处理申诉
 - `POST /report/handle` - 处理举报
 - `GET /report/list` - 查询举报列表（管理端）
@@ -83,25 +83,25 @@
 
 | 前端 plan.md 路径 | 后端实际路径 | 差异说明 |
 |-------------------|-------------|---------|
-| `POST /content/user/support/report` | `POST /content/user/support/report/create` | 路径不同 |
-| `POST /content/user/support/report/{id}/withdraw` | ✅ `POST /content/user/support/report/{id}/withdraw` | ✅ 已实现 |
-| `GET /content/user/support/report/list` | ✅ `GET /content/user/support/report/list` | ✅ 已实现（用户端） |
-| `GET /content/user/support/report/{id}` | ✅ `GET /content/user/support/report/{id}` | ✅ 已实现（用户端） |
-| `POST /content/user/support/appeal` | `POST /content/user/support/appeal/create` | 路径不同 |
-| `POST /content/user/support/appeal/{id}/withdraw` | ✅ `POST /content/user/support/appeal/{id}/withdraw` | ✅ 已实现 |
-| `GET /content/user/support/appeal/list` | `GET /content/user/support/appeal/list` | 一致 |
-| `GET /content/user/support/appeal/{id}` | ✅ `GET /content/user/support/appeal/{id}` | ✅ 已实现 |
-| `GET /content/user/support/help/search` | ✅ `GET /content/user/support/help/search` | ✅ 已实现 |
-| `GET /content/user/support/help/categories` | ✅ `GET /content/user/support/help/categories` | ✅ 已实现 |
-| `GET /content/user/support/help/article/{id}` | ✅ `GET /content/user/support/help/article/{id}` | ✅ 已实现 |
-| `POST /content/user/support/help/article/{id}/feedback` | ✅ `POST /content/user/support/help/article/{id}/feedback` | ✅ 已实现 |
-| `GET /content/user/support/changelog/list` | ✅ `GET /content/user/support/changelog/list` | ✅ 已实现 |
-| `POST /content/user/support/customer-service/session` | ✅ `POST /content/user/support/customer-service/session` | ✅ 已实现 |
+| `POST /api/v1/content/user/support/report` | `POST /api/v1/content/user/support/report/create` | 路径不同 |
+| `POST /api/v1/content/user/support/report/{id}/withdraw` | ✅ `POST /api/v1/content/user/support/report/{id}/withdraw` | ✅ 已实现 |
+| `GET /api/v1/content/user/support/report/list` | ✅ `GET /api/v1/content/user/support/report/list` | ✅ 已实现（用户端） |
+| `GET /api/v1/content/user/support/report/{id}` | ✅ `GET /api/v1/content/user/support/report/{id}` | ✅ 已实现（用户端） |
+| `POST /api/v1/content/user/support/appeal` | `POST /api/v1/content/user/support/appeal/create` | 路径不同 |
+| `POST /api/v1/content/user/support/appeal/{id}/withdraw` | ✅ `POST /api/v1/content/user/support/appeal/{id}/withdraw` | ✅ 已实现 |
+| `GET /api/v1/content/user/support/appeal/list` | `GET /api/v1/content/user/support/appeal/list` | 一致 |
+| `GET /api/v1/content/user/support/appeal/{id}` | ✅ `GET /api/v1/content/user/support/appeal/{id}` | ✅ 已实现 |
+| `GET /api/v1/content/user/support/help/search` | ✅ `GET /api/v1/content/user/support/help/search` | ✅ 已实现 |
+| `GET /api/v1/content/user/support/help/categories` | ✅ `GET /api/v1/content/user/support/help/categories` | ✅ 已实现 |
+| `GET /api/v1/content/user/support/help/article/{id}` | ✅ `GET /api/v1/content/user/support/help/article/{id}` | ✅ 已实现 |
+| `POST /api/v1/content/user/support/help/article/{id}/feedback` | ✅ `POST /api/v1/content/user/support/help/article/{id}/feedback` | ✅ 已实现 |
+| `GET /api/v1/content/user/support/changelog/list` | ✅ `GET /api/v1/content/user/support/changelog/list` | ✅ 已实现 |
+| `POST /api/v1/content/user/support/customer-service/session` | ✅ `POST /api/v1/content/user/support/customer-service/session` | ✅ 已实现 |
 | `POST .../session/{id}/transfer` | 不存在 | 完全缺失（P2） |
 | `POST .../session/{id}/message` | 不存在 | 完全缺失（P2，WebSocket） |
 | `POST .../session/{id}/close` | 不存在 | 完全缺失（P2） |
 | `POST .../session/{id}/rating` | ✅ `POST .../session/{id}/rating` | ✅ 已实现 |
-| `GET /content/user/support/customer-service/sessions` | ✅ `GET /content/user/support/customer-service/sessions` | ✅ 已实现 |
+| `GET /api/v1/content/user/support/customer-service/sessions` | ✅ `GET /api/v1/content/user/support/customer-service/sessions` | ✅ 已实现 |
 | `GET .../session/{id}` | 不存在 | 完全缺失（P2） |
 
 ### 3.2 数据结构差异
@@ -177,23 +177,23 @@
 
 调整前端 API 层以对接已有的后端端点：
 
-1. **举报创建**: 改路径为 `POST /content/user/support/report/create`
-2. **申诉创建**: 改路径为 `POST /content/user/support/appeal/create`
+1. **举报创建**: 改路径为 `POST /api/v1/content/user/support/report/create`
+2. **申诉创建**: 改路径为 `POST /api/v1/content/user/support/appeal/create`
 3. **申诉列表**: 路径已一致，但参数需调整（后端用 `userId` 参数）
-4. **帮助中心**: 改为调用 `GET /content/user/support/help-center`，前端解析 `faqCategories`/`guideEntries`/`releaseNotes`
-5. **客服入口**: 改为调用 `GET /content/user/support/customer-service` 获取路由信息
-6. **更新日志**: ✅ 已在控制器中暴露 `GET /content/user/support/changelog/list`
+4. **帮助中心**: 改为调用 `GET /api/v1/content/user/support/help-center`，前端解析 `faqCategories`/`guideEntries`/`releaseNotes`
+5. **客服入口**: 改为调用 `GET /api/v1/content/user/support/customer-service` 获取路由信息
+6. **更新日志**: ✅ 已在控制器中暴露 `GET /api/v1/content/user/support/changelog/list`
 7. **客服会话列表/创建/评分**: ✅ 全部已在控制器中暴露
 
 ### 5.2 中期方案（后端补充端点）— ✅ 全部完成（2026-06-05）
 
 ~~需要后端补充的控制器端点（服务层已实现，仅需暴露 HTTP 接口）~~
 
-1. ✅ `GET /content/user/support/help/search?keyword=xxx` - 搜索帮助文章
-2. ✅ `GET /content/user/support/changelog/list` - 更新日志列表
-3. ✅ `POST /content/user/support/customer-service/session` - 创建客服会话
-4. ✅ `GET /content/user/support/customer-service/sessions` - 客服会话历史列表
-5. ✅ `POST /content/user/support/customer-service/session/{id}/rating` - 提交服务评分
+1. ✅ `GET /api/v1/content/user/support/help/search?keyword=xxx` - 搜索帮助文章
+2. ✅ `GET /api/v1/content/user/support/changelog/list` - 更新日志列表
+3. ✅ `POST /api/v1/content/user/support/customer-service/session` - 创建客服会话
+4. ✅ `GET /api/v1/content/user/support/customer-service/sessions` - 客服会话历史列表
+5. ✅ `POST /api/v1/content/user/support/customer-service/session/{id}/rating` - 提交服务评分
 
 ### 5.3 长期方案（后端新增功能）— P0+P1 ✅ 全部完成，P2 待后续迭代
 

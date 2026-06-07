@@ -209,7 +209,7 @@
 
 | 子任务 | 平台现状 | 差距 | 说明 |
 |--------|---------|------|------|
-| 8.1 `/api/v1/auth/*` 路径 | 当前 `/sys/*` 路径 | **需新建** 版本化路径 | — |
+| 8.1 `/api/v1/content/auth/*` 路径 | 当前 `/sys/*` 路径 | **需新建** 版本化路径 | — |
 | 8.2 参数校验 + Result<T> 测试 | 有基本校验 | **需新建** 测试 | — |
 | 8.3 Knife4j 注解和错误码 | 部分 `@Schema` 注解，无统一错误码 | **需补齐** | — |
 | 8.4 接口文档测试 | 无 | **需新建** | — |
@@ -285,7 +285,7 @@
 在内容模块内建立完整的 auth 领域，通过 Gateway 调用平台能力：
 
 ```
-ContentAuthController (/api/v1/auth/*)
+ContentAuthController (/api/v1/content/auth/*)
   → ContentAuthService (登录编排)
     → SystemUserAccountGateway (调用平台用户服务)
     → JwtUtil (token 生成，复用平台)

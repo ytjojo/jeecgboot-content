@@ -1057,7 +1057,7 @@ import java.util.List;
 @Tag(name = "频道内容发布", description = "频道内容发布相关接口")
 @Validated
 @RestController
-@RequestMapping("/content/channel/publish")
+@RequestMapping("/api/v1/content/channel/publish")
 public class ChannelPublishController {
 
     @Resource
@@ -1289,7 +1289,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "频道内容审核", description = "频道待审区和审核相关接口")
 @Validated
 @RestController
-@RequestMapping("/content/channel/review")
+@RequestMapping("/api/v1/content/channel/review")
 public class ChannelReviewController {
 
     @Resource
@@ -1813,7 +1813,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "频道内容治理", description = "频道内容置顶、精华、删除、恢复等治理操作接口")
 @Validated
 @RestController
-@RequestMapping("/content/channel/governance")
+@RequestMapping("/api/v1/content/channel/governance")
 public class ChannelGovernanceController {
 
     @Resource
@@ -2078,7 +2078,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "频道公告", description = "频道公告管理接口")
 @Validated
 @RestController
-@RequestMapping("/content/channel/announcement")
+@RequestMapping("/api/v1/content/channel/announcement")
 public class ChannelAnnouncementController {
 
     @Resource

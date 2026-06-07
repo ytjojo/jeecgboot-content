@@ -26,7 +26,7 @@
 
 ### Requirement: 连续参与进度展示
 
-系统 SHALL 在个人成长信息页展示近 7 天连续参与进度，已完成天数用实心圆标记（主题色），当日未完成用空心圆，非统计日用横线。后端 MemberGrowthVO 提供 `participationDays` 字段（连续参与天数），也可通过 `GET /content/user/growth/participation?circleId=&userId=` 接口单独查询。
+系统 SHALL 在个人成长信息页展示近 7 天连续参与进度，已完成天数用实心圆标记（主题色），当日未完成用空心圆，非统计日用横线。后端 MemberGrowthVO 提供 `participationDays` 字段（连续参与天数），也可通过 `GET /api/v1/content/user/growth/participation?circleId=&userId=` 接口单独查询。
 
 #### Scenario: 展示连续参与进度
 - **WHEN** 用户进入个人成长信息页
@@ -58,7 +58,7 @@
 
 ### Requirement: 徽章摘要展示
 
-系统 SHALL 在个人成长信息页展示最近获得的徽章摘要，并提供「查看全部徽章」入口。后端 MemberGrowthVO 未提供 `recentBadges` 字段，需单独调用 `GET /content/user/growth/achievement/list` 接口获取徽章列表并筛选已获得的徽章。
+系统 SHALL 在个人成长信息页展示最近获得的徽章摘要，并提供「查看全部徽章」入口。后端 MemberGrowthVO 未提供 `recentBadges` 字段，需单独调用 `GET /api/v1/content/user/growth/achievement/list` 接口获取徽章列表并筛选已获得的徽章。
 
 #### Scenario: 展示徽章摘要
 - **WHEN** 用户进入个人成长信息页
@@ -70,7 +70,7 @@
 
 ### Requirement: 成员成长信息 API 对接
 
-系统 SHALL 通过 GET `/content/user/growth/info?circleId={circleId}&userId={userId}` 接口获取成员成长信息。
+系统 SHALL 通过 GET `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` 接口获取成员成长信息。
 
 #### Scenario: 接口请求成功
 - **WHEN** 个人成长信息页加载

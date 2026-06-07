@@ -23,9 +23,9 @@
 
 | API 路径 | 方法 | 后端状态 | 代码位置 |
 |----------|------|----------|----------|
-| `/content/user/settings/notification` | GET | 存在 | `ContentUserSettingsController.java:61` |
-| `/content/user/settings/notification/update` | POST | 存在 | `ContentUserSettingsController.java:69` |
-| `/content/user/settings/notification/dnd/update` | POST | 存在 | `ContentUserSettingsController.java:109` |
+| `/api/v1/content/user/settings/notification` | GET | 存在 | `ContentUserSettingsController.java:61` |
+| `/api/v1/content/user/settings/notification/update` | POST | 存在 | `ContentUserSettingsController.java:69` |
+| `/api/v1/content/user/settings/notification/dnd/update` | POST | 存在 | `ContentUserSettingsController.java:109` |
 
 **问题**: `ContentNotificationChannelConfigVO` 仅包含 6 个渠道字段（like/comment/follow/favorite/mention/privateMessage），缺少 `subscriptionChannels`。但实体 `ContentUserNotificationSetting` 有 `subscriptionNoticeEnabled` 字段（第 7 类通知"订阅更新"）。
 
@@ -35,10 +35,10 @@
 
 | API 路径 | 方法 | 后端状态 | 代码位置 |
 |----------|------|----------|----------|
-| `/content/user/settings/privacy` | GET | **缺失** | 无对应端点 |
-| `/content/user/settings/privacy/update` | POST | 存在 | `ContentUserSettingsController.java:50` |
+| `/api/v1/content/user/settings/privacy` | GET | **缺失** | 无对应端点 |
+| `/api/v1/content/user/settings/privacy/update` | POST | 存在 | `ContentUserSettingsController.java:50` |
 
-**问题**: design.md 和 specs 中引用 `GET /content/user/settings/privacy` 获取隐私设置，但后端 `ContentUserSettingsController` 中没有该 GET 端点。隐私数据存储在 `ContentUserPrivacySetting` 实体中，通过 `ContentUserProfileServiceImpl` 管理，但仅在 `GET /content/user/profile/detail` 中作为 profile 的一部分返回，没有独立的隐私设置查询 API。
+**问题**: design.md 和 specs 中引用 `GET /api/v1/content/user/settings/privacy` 获取隐私设置，但后端 `ContentUserSettingsController` 中没有该 GET 端点。隐私数据存储在 `ContentUserPrivacySetting` 实体中，通过 `ContentUserProfileServiceImpl` 管理，但仅在 `GET /api/v1/content/user/profile/detail` 中作为 profile 的一部分返回，没有独立的隐私设置查询 API。
 
 **影响**: 前端隐私设置页面无法独立加载隐私数据，需要依赖 profile 接口或后端补充 GET 端点。
 
@@ -46,8 +46,8 @@
 
 | API 路径 | 方法 | 后端状态 | 代码位置 |
 |----------|------|----------|----------|
-| `/content/user/settings/security` | GET | 存在 | `ContentUserSettingsController.java:119` |
-| `/content/user/settings/security/update` | POST | **缺失** | 无对应端点 |
+| `/api/v1/content/user/settings/security` | GET | 存在 | `ContentUserSettingsController.java:119` |
+| `/api/v1/content/user/settings/security/update` | POST | **缺失** | 无对应端点 |
 
 **问题**: `ContentUserSecuritySettingVO` 包含 `loginAlertEnabled` 字段，GET 端点可查询，但没有 POST 更新端点。specs 中 account-security 要求"切换登录提醒 Switch 开关时调用接口更新"，后端无法支持此操作。
 
@@ -57,9 +57,9 @@
 
 | API 路径 | 方法 | 后端状态 | 代码位置 |
 |----------|------|----------|----------|
-| `/content/user/auth/third-party/` | GET | 存在 | `ContentUserThirdPartyAuthController.java:29` |
-| `/content/user/auth/third-party/{authId}` | GET | 存在 | `ContentUserThirdPartyAuthController.java:38` |
-| `/content/user/auth/third-party/{authId}` | DELETE | 存在 | `ContentUserThirdPartyAuthController.java:48` |
+| `/api/v1/content/user/auth/third-party/` | GET | 存在 | `ContentUserThirdPartyAuthController.java:29` |
+| `/api/v1/content/user/auth/third-party/{authId}` | GET | 存在 | `ContentUserThirdPartyAuthController.java:38` |
+| `/api/v1/content/user/auth/third-party/{authId}` | DELETE | 存在 | `ContentUserThirdPartyAuthController.java:48` |
 
 **验证结果**: 全部通过，无问题。
 
@@ -74,14 +74,14 @@
 
 ### 问题 2: 隐私设置 GET 端点缺失
 - **位置**: specs/privacy-settings/spec.md (Scenario: 页面数据加载)
-- **问题**: 引用 `GET /content/user/settings/privacy` 但后端不存在
+- **问题**: 引用 `GET /api/v1/content/user/settings/privacy` 但后端不存在
 - **建议方案**:
   - **方案 A（推荐）**: 后端在 `ContentUserSettingsController` 中补充 `@GetMapping("/privacy")` 端点
-  - **方案 B**: 前端改为调用 `GET /content/user/profile/detail` 并从返回数据中提取隐私字段
+  - **方案 B**: 前端改为调用 `GET /api/v1/content/user/profile/detail` 并从返回数据中提取隐私字段
 
 ### 问题 3: 安全设置更新端点缺失
 - **位置**: specs/account-security/spec.md (Requirement: 登录提醒开关)
-- **问题**: 要求切换登录提醒时调用接口更新，但后端无 `POST /content/user/settings/security/update`
+- **问题**: 要求切换登录提醒时调用接口更新，但后端无 `POST /api/v1/content/user/settings/security/update`
 - **建议**: 后端需补充安全设置更新端点，或前端暂时隐藏登录提醒 Switch 的保存功能
 
 ### 问题 4: 收藏夹字段名差异

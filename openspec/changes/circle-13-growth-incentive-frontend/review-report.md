@@ -66,10 +66,10 @@
 
 | 前端 spec 引用 | 实际后端路径 | 一致性 |
 |---------------|-------------|--------|
-| `GET /content/circle/{circleId}/level` | `GET /content/user/growth/level/info?circleId={circleId}` | ❌ 不一致 |
-| `GET /content/circle/{circleId}/growth/me` | `GET /content/user/growth/info?circleId={circleId}&userId={userId}` | ❌ 不一致 |
-| `GET /content/circle/{circleId}/badges` | `GET /content/user/growth/achievement/list?circleId={circleId}&userId={userId}` | ❌ 不一致 |
-| `GET /content/circle/{circleId}/leaderboard` | `GET /content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | ❌ 不一致 |
+| `GET /api/v1/content/circle/{circleId}/level` | `GET /api/v1/content/user/growth/level/info?circleId={circleId}` | ❌ 不一致 |
+| `GET /api/v1/content/circle/{circleId}/growth/me` | `GET /api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` | ❌ 不一致 |
+| `GET /api/v1/content/circle/{circleId}/badges` | `GET /api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` | ❌ 不一致 |
+| `GET /api/v1/content/circle/{circleId}/leaderboard` | `GET /api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | ❌ 不一致 |
 
 **术语一致性**:
 
@@ -185,23 +185,23 @@
 
 | 功能 | 前端引用接口 | 后端定义接口 | 匹配状态 |
 |------|------------|------------|---------|
-| 圈子等级 | `GET /content/circle/{circleId}/level` | `GET /content/user/growth/level/info?circleId=` | ❌ 路径+参数不匹配 |
-| 成员成长 | `GET /content/circle/{circleId}/growth/me` | `GET /content/user/growth/info?circleId=&userId=` | ❌ 路径+参数不匹配 |
-| 成就徽章 | `GET /content/circle/{circleId}/badges` | `GET /content/user/growth/achievement/list?circleId=&userId=` | ❌ 路径+参数不匹配 |
-| 排行榜 | `GET /content/circle/{circleId}/leaderboard` | `GET /content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ❌ 路径+参数不匹配 |
+| 圈子等级 | `GET /api/v1/content/circle/{circleId}/level` | `GET /api/v1/content/user/growth/level/info?circleId=` | ❌ 路径+参数不匹配 |
+| 成员成长 | `GET /api/v1/content/circle/{circleId}/growth/me` | `GET /api/v1/content/user/growth/info?circleId=&userId=` | ❌ 路径+参数不匹配 |
+| 成就徽章 | `GET /api/v1/content/circle/{circleId}/badges` | `GET /api/v1/content/user/growth/achievement/list?circleId=&userId=` | ❌ 路径+参数不匹配 |
+| 排行榜样 | `GET /api/v1/content/circle/{circleId}/leaderboard` | `GET /api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ❌ 路径+参数不匹配 |
 
 **后端已有但前端未引用的接口**:
 
 | 接口 | 路径 | 可能用途 |
 |------|------|---------|
-| 连续参与 | `GET /content/user/growth/participation?circleId=&userId=` | ParticipationStreak 组件数据源 |
-| 成长汇总 | `GET /content/user/growth/summary?userId=` | 概览数据 |
-| 勋章分类目录 | `GET /content/user/growth/badge/catalog?userId=` | 徽章分类展示 |
-| 勋章详情 | `GET /content/user/growth/badge/detail?userId=&badgeCode=` | BadgeDetailModal 数据源 |
-| 佩戴勋章 | `POST /content/user/growth/badge/wear` | 徽章佩戴功能 |
-| 查询佩戴勋章 | `GET /content/user/growth/badge/worn?userId=` | 个人主页展示 |
-| 等级权益摘要 | `GET /content/user/growth/level/benefit?userId=` | 权益展示 |
-| 等级配置 | `GET /content/user/growth/level/config` | 等级门槛配置 |
+| 连续参与 | `GET /api/v1/content/user/growth/participation?circleId=&userId=` | ParticipationStreak 组件数据源 |
+| 成长汇总 | `GET /api/v1/content/user/growth/summary?userId=` | 概览数据 |
+| 勋章分类目录 | `GET /api/v1/content/user/growth/badge/catalog?userId=` | 徽章分类展示 |
+| 勋章详情 | `GET /api/v1/content/user/growth/badge/detail?userId=&badgeCode=` | BadgeDetailModal 数据源 |
+| 佩戴勋章 | `POST /api/v1/content/user/growth/badge/wear` | 徽章佩戴功能 |
+| 查询佩戴勋章 | `GET /api/v1/content/user/growth/badge/worn?userId=` | 个人主页展示 |
+| 等级权益摘要 | `GET /api/v1/content/user/growth/level/benefit?userId=` | 权益展示 |
+| 等级配置 | `GET /api/v1/content/user/growth/level/config` | 等级门槛配置 |
 
 ### 3.3 数据模型一致性
 

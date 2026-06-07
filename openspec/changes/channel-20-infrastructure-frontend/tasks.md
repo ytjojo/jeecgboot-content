@@ -6,13 +6,13 @@
 - [x] 1.4 创建 ChannelTypeTag 组件（根据类型显示不同颜色 Tag：system=蓝、personal=绿、organization=紫）
 - [x] 1.5 创建 ChannelStatusTag 组件（根据状态显示不同颜色和文案）
 - [x] 1.6 创建 ChannelForm 组件（频道创建/编辑表单，根据频道类型动态渲染字段，schema 驱动）
-- [x] 1.7 注册用户端路由：`/content/channel/create`、`/content/channel/list`、`/content/channel/manage/:id`
-- [x] 1.8 注册后台端路由：`/content/channel/admin`、`/content/channel/review`
+- [x] 1.7 注册用户端路由：`/api/v1/content/channel/create`、`/api/v1/content/channel/list`、`/api/v1/content/channel/manage/:id`
+- [x] 1.8 注册后台端路由：`/api/v1/content/channel/admin`、`/api/v1/content/channel/review`
 
 ## 2. 频道创建
 
 - [x] 2.1 实现 ChannelCreateSteps 分步向导组件：Step 1 展示个人频道和组织频道两个大卡片选择，Step 2 根据类型动态渲染表单
-- [x] 2.2 实现用户端频道创建页面 `/content/channel/create`，集成 Steps 组件和 ChannelForm
+- [x] 2.2 实现用户端频道创建页面 `/api/v1/content/channel/create`，集成 Steps 组件和 ChannelForm
 - [x] 2.3 实现频道名称唯一性校验逻辑：失焦触发、300ms 防抖、校验中显示 loading 图标、重名红色提示
 - [x] 2.4 实现表单校验规则：名称必填 1-50 字符、简介必填 1-200 字符、图标必填 ≤2MB、封面选填 ≤5MB、分类必填
 - [x] 2.5 实现组织频道创建差异：自动展示绑定组织信息（不可编辑）、默认公开无隐私设置选项、上限 50 个
@@ -22,7 +22,7 @@
 
 ## 3. 我的频道列表
 
-- [x] 3.1 实现"我的频道"列表页 `/content/channel/list`，使用 JVxeTable 展示频道列表
+- [x] 3.1 实现"我的频道"列表页 `/api/v1/content/channel/list`，使用 JVxeTable 展示频道列表
 - [x] 3.2 实现列表列定义：频道图标、频道名称、频道类型 Tag、审核状态 Tag、创建时间（支持排序）、操作列
 - [x] 3.3 实现筛选区：频道类型下拉筛选、审核状态下拉筛选
 - [x] 3.4 实现操作列按状态区分：Active→"管理"、PendingReview→"查看详情"、Rejected→"重新提交"、DeleteCooling→"撤销删除"
@@ -31,7 +31,7 @@
 
 ## 4. 频道管理与编辑
 
-- [x] 4.1 实现频道管理页 `/content/channel/manage/:id`，Tab 结构（概览/编辑信息/设置），顶部显示 ChannelStatusTag
+- [x] 4.1 实现频道管理页 `/api/v1/content/channel/manage/:id`，Tab 结构（概览/编辑信息/设置），顶部显示 ChannelStatusTag
 - [x] 4.2 实现概览 Tab：频道基本信息摘要（名称、图标、类型、状态）+ 关键数据摘要占位
 - [x] 4.3 实现编辑信息 Tab：Drawer 承载编辑表单（宽度 480px），ChannelForm 复用
 - [x] 4.4 实现关键字段审核标识：浅黄色背景 + 橙色 Tag"修改需审核"，首次修改弹出一次性提示
@@ -60,7 +60,7 @@
 
 ## 7. 后台频道管理
 
-- [x] 7.1 实现后台频道管理页 `/content/channel/admin`，JVxeTable 展示全量频道列表
+- [x] 7.1 实现后台频道管理页 `/api/v1/content/channel/admin`，JVxeTable 展示全量频道列表
 - [x] 7.2 实现列表列定义：图标、名称、类型 Tag、状态 Tag、归属、分类、置顶权重、创建时间、操作
 - [x] 7.3 实现筛选区：频道类型、审核状态、归属分类、创建时间范围、名称模糊搜索，筛选区可收起
 - [x] 7.4 实现操作列：所有状态"查看详情"、系统频道"编辑"、DeleteCooling"强制删除"（二次确认）
@@ -69,7 +69,7 @@
 
 ## 8. 审核队列
 
-- [x] 8.1 实现审核队列页 `/content/channel/review`，Table 展示 PendingReview 频道列表
+- [x] 8.1 实现审核队列页 `/api/v1/content/channel/review`，Table 展示 PendingReview 频道列表
 - [x] 8.2 实现列表列定义：频道名称、类型、提交人、提交时间、等待时长（超 24h 标红）、操作
 - [x] 8.3 实现待审核数量统计顶部展示和超时记录行高亮
 - [x] 8.4 实现审核详情 Drawer（宽度 560px）：新建频道展示完整信息，编辑触发的展示 diff 对比

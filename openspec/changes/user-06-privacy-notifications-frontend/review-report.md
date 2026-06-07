@@ -104,8 +104,8 @@
 
 **F-2: 后端 spec API 路径前缀错误** — ✅ 已解决
 - 位置: 后端 `specs/account-security-entry/spec.md`、`specs/third-party-authorization/spec.md`
-- 描述: 文档使用 `/api/v1/` 前缀，实际 controller 使用 `/content/user/` 前缀
-- 复核: spec 实际使用 `/content/user/` 前缀，审核时描述有误
+- 描述: 文档使用 `/api/v1/` 前缀，实际 controller 使用 `/api/v1/content/user/` 前缀
+- 复核: spec 实际使用 `/api/v1/content/user/` 前缀，审核时描述有误
 - 状态: ✅ 无需修复
 
 **F-3: 后端通知偏好 spec 缺少订阅更新 Scenario** — ✅ 已修复
@@ -207,16 +207,16 @@
 
 | # | 接口 | 方法 | 前端定义 | 后端(代码) | 对齐状态 |
 |---|------|------|----------|-----------|---------|
-| 1 | /content/user/settings/notification | GET | ✅ | ✅ | ALIGNED |
-| 2 | /content/user/settings/notification/update | POST | ✅ | ✅ | ALIGNED |
-| 3 | /content/user/settings/notification/dnd/update | POST | ✅ | ✅ | ALIGNED |
-| 4 | /content/user/settings/privacy | GET | ✅ | ✅ | ALIGNED |
-| 5 | /content/user/settings/privacy/update | POST | ✅ | ✅ | ALIGNED |
-| 6 | /content/user/settings/security | GET | ✅ | ✅ | ALIGNED |
-| 7 | /content/user/settings/security/update | POST | ✅ | ✅ | ALIGNED |
-| 8 | /content/user/auth/third-party | GET | ✅ | ✅ | ALIGNED |
-| 9 | /content/user/auth/third-party/{authId} | GET | ✅ | ✅ | ALIGNED |
-| 10 | /content/user/auth/third-party/{authId} | DELETE | ✅ | ✅ | ALIGNED |
+| 1 | /api/v1/content/user/settings/notification | GET | ✅ | ✅ | ALIGNED |
+| 2 | /api/v1/content/user/settings/notification/update | POST | ✅ | ✅ | ALIGNED |
+| 3 | /api/v1/content/user/settings/notification/dnd/update | POST | ✅ | ✅ | ALIGNED |
+| 4 | /api/v1/content/user/settings/privacy | GET | ✅ | ✅ | ALIGNED |
+| 5 | /api/v1/content/user/settings/privacy/update | POST | ✅ | ✅ | ALIGNED |
+| 6 | /api/v1/content/user/settings/security | GET | ✅ | ✅ | ALIGNED |
+| 7 | /api/v1/content/user/settings/security/update | POST | ✅ | ✅ | ALIGNED |
+| 8 | /api/v1/content/user/auth/third-party | GET | ✅ | ✅ | ALIGNED |
+| 9 | /api/v1/content/user/auth/third-party/{authId} | GET | ✅ | ✅ | ALIGNED |
+| 10 | /api/v1/content/user/auth/third-party/{authId} | DELETE | ✅ | ✅ | ALIGNED |
 
 ### 请求/响应字段映射检查
 
@@ -257,7 +257,7 @@
 **F-4: PRD 接口清单遗漏安全设置更新端点** — ✅ 已修复
 - 位置: PRD 第 5 节"接口清单"
 - 描述: 列出 9 个 API，但 account-security spec 要求 `POST /security/update`，未在清单中
-- 修复: 已补充 `POST /content/user/settings/security/update` 到 PRD 接口清单
+- 修复: 已补充 `POST /api/v1/content/user/settings/security/update` 到 PRD 接口清单
 
 **F-5: 收藏夹字段名不一致**
 - 位置: 前端 `specs/privacy-settings/spec.md` "收藏夹字段名映射" Scenario
@@ -342,7 +342,7 @@
 | 编号 | 修复内容 | 修复文件 |
 |------|----------|----------|
 | F-3 | 补充订阅更新通知 Scenario（关闭通知 + 渠道配置） | `user-06-privacy-notifications/specs/notification-preferences/spec.md` |
-| F-4 | PRD 接口清单补充 `POST /content/user/settings/security/update` | `docs/requirements/prd/frontend/EPIC-06-privacy-notifications-frontend-prd.md` |
+| F-4 | PRD 接口清单补充 `POST /api/v1/content/user/settings/security/update` | `docs/requirements/prd/frontend/EPIC-06-privacy-notifications-frontend-prd.md` |
 | B-1~B-4, F-1~F-2 | 经代码验证，后端已全部实现，无需修复 | — |
 
 ---
@@ -389,9 +389,9 @@
 | 编号 | 问题 | 责任方 | 状态 | 修复内容 |
 |------|------|--------|------|----------|
 | F-1 | tasks.md 子任务 4.4 重复编号 | 前端 | ✅ 已修复 | 编号已正确（4.4~4.9 无重复） |
-| F-2 | 后端 spec API 路径前缀错误 | 后端 | ✅ 无需修复 | spec 实际使用 `/content/user/` 前缀，审核时描述有误 |
+| F-2 | 后端 spec API 路径前缀错误 | 后端 | ✅ 无需修复 | spec 实际使用 `/api/v1/content/user/` 前缀，审核时描述有误 |
 | F-3 | 后端通知偏好 spec 缺订阅更新 Scenario | 后端 | ✅ 已修复 | 补充"关闭订阅更新通知"和"订阅更新通知渠道配置"两个 Scenario |
-| F-4 | PRD 接口清单遗漏安全设置更新端点 | 前端 | ✅ 已修复 | 已补充 `POST /content/user/settings/security/update` 到接口清单 |
+| F-4 | PRD 接口清单遗漏安全设置更新端点 | 前端 | ✅ 已修复 | 已补充 `POST /api/v1/content/user/settings/security/update` 到接口清单 |
 | F-5 | 收藏夹字段名不一致 | 前端 | ✅ 已覆盖 | tasks.md task 3.4 已覆盖字段映射 |
 | F-6 | userId 注入拦截器验证 | 前端 | ✅ 已覆盖 | tasks.md task 6.1 已覆盖验证 |
 

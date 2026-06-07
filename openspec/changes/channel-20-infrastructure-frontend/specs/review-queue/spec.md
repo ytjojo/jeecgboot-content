@@ -1,8 +1,8 @@
 ## ADDED Requirements
 
 > **API 路径**:
-> - 审核队列列表: `GET /jeecg-boot/api/v1/content/channel/review/list` (已存在)
-> - 审核操作: `POST /jeecg-boot/api/v1/content/channel/review/action` (已存在)
+> - 审核队列列表: `GET /api/v1/content/channel/review/list` (已存在)
+> - 审核操作: `POST /api/v1/content/channel/review/action` (已存在)
 > **Controller**: ChannelReviewController
 > **前端封装**: `src/api/content/channel/index.ts` - `getReviewList()`, `reviewAction()`
 

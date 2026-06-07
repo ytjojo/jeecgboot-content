@@ -96,7 +96,7 @@
 
 #### ~~BLOCK-001~~ [FIXED]: PRD 内部矛盾 -- 滑块验证在 Non-Goals 中排除但在功能描述中包含
 - **位置**: `EPIC-01-user-authentication-frontend-prd.md` 第 3.11 节 / API 对接 5.4 节 / Non-Goals
-- **描述**: 前端 PRD Non-Goals 明确声明"本期仅使用图形验证码，滑块验证作为后续增强"，但 F11 风控拦截交互详细描述中包含了滑块验证弹窗结构和交互要求，API 对接 5.4 节列出了滑块验证端点 (`GET /api/v1/auth/captcha/slider`、`POST /api/v1/auth/captcha/slider/verify`)。后端 design.md 中也未定义滑块验证接口。
+- **描述**: 前端 PRD Non-Goals 明确声明"本期仅使用图形验证码，滑块验证作为后续增强"，但 F11 风控拦截交互详细描述中包含了滑块验证弹窗结构和交互要求，API 对接 5.4 节列出了滑块验证端点 (`GET /api/v1/content/auth/captcha/slider`、`POST /api/v1/content/auth/captcha/slider/verify`)。后端 design.md 中也未定义滑块验证接口。
 - **影响**: 若按 PRD 实现滑块验证，后端无对应接口；若不实现，PRD 描述与实际功能不符。proposal.md 的 Capabilities `risk-control` 也包含了"滑块验证"描述。
 - **修复措施**: 已确认项目仅实现图片验证码，未实现滑块验证。PRD 5.4 节仅保留图片验证码端点，F11 仅描述图片验证码弹窗，proposal.md `risk-control` 已移除"滑块验证"，design.md Non-Goals 已移除滑块验证排除项，PRD 待确认问题 #4 已标记为已确认。
 
@@ -157,50 +157,50 @@
 
 | 前端引用的 API | 后端 design.md 定义 | 状态 |
 |---------------|-------------------|------|
-| POST /api/v1/auth/register/mobile | 有定义 | OK |
-| POST /api/v1/auth/register/email | 有定义 | OK |
-| GET /api/v1/auth/register/email/confirm | 有定义 | OK |
-| POST /api/v1/auth/login/third-party | 有定义 | OK |
-| POST /api/v1/auth/login/sms-code | 有定义 | OK |
-| POST /api/v1/auth/login/password | 有定义 | OK |
-| POST /api/v1/auth/sms/send | 有定义 | OK |
-| POST /api/v1/auth/email/send | 有定义 | OK |
-| POST /api/v1/auth/token/refresh | 有定义 | OK |
-| POST /api/v1/auth/logout | 有定义 | OK |
-| GET /api/v1/account-security/status | 有定义 | OK |
-| POST /api/v1/account-security/bind/mobile | 有定义 | OK |
-| POST /api/v1/account-security/bind/email | 有定义 | OK |
-| POST /api/v1/account-security/bind/third-party | 有定义 | OK |
-| POST /api/v1/account-security/rebind/mobile | 有定义 | OK |
-| POST /api/v1/account-security/rebind/email | 有定义 | OK |
-| POST /api/v1/account-security/unbind/mobile | 有定义 | OK |
-| POST /api/v1/account-security/unbind/email | 有定义 | OK |
-| POST /api/v1/account-security/unbind/third-party | 有定义 | OK |
-| GET /api/v1/account-security/devices | 有定义 | OK |
-| POST /api/v1/account-security/devices/revoke | 有定义 | OK |
-| POST /api/v1/account-security/devices/trust | 有定义 | OK |
-| POST /api/v1/account-security/devices/untrust | 有定义 | OK |
-| POST /api/v1/account-security/password/reset | 有定义 | OK |
-| POST /api/v1/account-security/password/change | 有定义 | OK |
-| GET /api/v1/account-security/anomaly-notifications | 有定义 | OK |
-| POST /api/v1/account-security/anomaly/confirm | 有定义 | OK |
-| POST /api/v1/account-security/anomaly/deny | 有定义 | OK |
-| POST /api/v1/account-security/sms/send | 有定义 | OK |
-| POST /api/v1/user/preferences/topics | PRD 定义 | OK |
-| GET /api/v1/account-cancellation/eligibility | 有定义 | OK |
-| POST /api/v1/account-cancellation/apply | 有定义 | OK |
-| GET /api/v1/account-cancellation/status | 有定义 | OK |
-| POST /api/v1/account-cancellation/revoke | 有定义 | OK |
-| GET /api/v1/auth/captcha/image | 有定义 | OK |
-| POST /api/v1/auth/captcha/verify | 有定义 | OK |
+| POST /api/v1/content/auth/register/mobile | 有定义 | OK |
+| POST /api/v1/content/auth/register/email | 有定义 | OK |
+| GET /api/v1/content/auth/register/email/confirm | 有定义 | OK |
+| POST /api/v1/content/auth/login/third-party | 有定义 | OK |
+| POST /api/v1/content/auth/login/sms-code | 有定义 | OK |
+| POST /api/v1/content/auth/login/password | 有定义 | OK |
+| POST /api/v1/content/auth/sms/send | 有定义 | OK |
+| POST /api/v1/content/auth/email/send | 有定义 | OK |
+| POST /api/v1/content/auth/token/refresh | 有定义 | OK |
+| POST /api/v1/content/auth/logout | 有定义 | OK |
+| GET /api/v1/content/account-security/status | 有定义 | OK |
+| POST /api/v1/content/account-security/bind/mobile | 有定义 | OK |
+| POST /api/v1/content/account-security/bind/email | 有定义 | OK |
+| POST /api/v1/content/account-security/bind/third-party | 有定义 | OK |
+| POST /api/v1/content/account-security/rebind/mobile | 有定义 | OK |
+| POST /api/v1/content/account-security/rebind/email | 有定义 | OK |
+| POST /api/v1/content/account-security/unbind/mobile | 有定义 | OK |
+| POST /api/v1/content/account-security/unbind/email | 有定义 | OK |
+| POST /api/v1/content/account-security/unbind/third-party | 有定义 | OK |
+| GET /api/v1/content/account-security/devices | 有定义 | OK |
+| POST /api/v1/content/account-security/devices/revoke | 有定义 | OK |
+| POST /api/v1/content/account-security/devices/trust | 有定义 | OK |
+| POST /api/v1/content/account-security/devices/untrust | 有定义 | OK |
+| POST /api/v1/content/account-security/password/reset | 有定义 | OK |
+| POST /api/v1/content/account-security/password/change | 有定义 | OK |
+| GET /api/v1/content/account-security/anomaly-notifications | 有定义 | OK |
+| POST /api/v1/content/account-security/anomaly/confirm | 有定义 | OK |
+| POST /api/v1/content/account-security/anomaly/deny | 有定义 | OK |
+| POST /api/v1/content/account-security/sms/send | 有定义 | OK |
+| POST /api/v1/content/user/preferences/topics | PRD 定义 | OK |
+| GET /api/v1/content/account-cancellation/eligibility | 有定义 | OK |
+| POST /api/v1/content/account-cancellation/apply | 有定义 | OK |
+| GET /api/v1/content/account-cancellation/status | 有定义 | OK |
+| POST /api/v1/content/account-cancellation/revoke | 有定义 | OK |
+| GET /api/v1/content/auth/captcha/image | 有定义 | OK |
+| POST /api/v1/content/auth/captcha/verify | 有定义 | OK |
 
 ### 5.2 接口契约问题清单
 
 #### ~~FLAG-004~~ [FIXED]: 滑块验证 API 在前端 PRD 中定义但后端未定义
 - **位置**: `EPIC-01-user-authentication-frontend-prd.md` 5.4 节
-- **描述**: 前端 PRD 列出了 `GET /api/v1/auth/captcha/slider` 和 `POST /api/v1/auth/captcha/slider/verify` 两个滑块验证端点，但后端 design.md 中未定义这两个接口。
+- **描述**: 前端 PRD 列出了 `GET /api/v1/content/auth/captcha/slider` 和 `POST /api/v1/content/auth/captcha/slider/verify` 两个滑块验证端点，但后端 design.md 中未定义这两个接口。
 - **影响**: 与 BLOCK-001 同源。前端 specs 中未引用这两个端点，实际开发不受影响，但 PRD 文档不一致。
-- **修复措施**: PRD 5.4 节已移除滑块验证端点，仅保留图片验证码端点（`GET /api/v1/auth/captcha/image`、`POST /api/v1/auth/captcha/verify`）。
+- **修复措施**: PRD 5.4 节已移除滑块验证端点，仅保留图片验证码端点（`GET /api/v1/content/auth/captcha/image`、`POST /api/v1/content/auth/captcha/verify`）。
 
 #### ADVISORY-001: 后端定义但前端未引用的 API
 - **位置**: 后端 design.md

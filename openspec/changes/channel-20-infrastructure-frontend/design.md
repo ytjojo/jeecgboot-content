@@ -34,13 +34,13 @@ EPIC-20 后端 API 已定义 15 个频道相关接口，前端需要从零构建
 
 ### 2. 频道创建页复用策略
 
-**决策**: 个人频道和组织频道创建共用同一页面 `/content/channel/create`，通过 Steps 组件实现分步向导（Step 1 选类型，Step 2 填表单），根据类型动态渲染字段。系统频道创建使用后台 Modal 弹窗。
+**决策**: 个人频道和组织频道创建共用同一页面 `/api/v1/content/channel/create`，通过 Steps 组件实现分步向导（Step 1 选类型，Step 2 填表单），根据类型动态渲染字段。系统频道创建使用后台 Modal 弹窗。
 
 **理由**: PRD 明确要求个人/组织频道共用页面，分步向导符合用户认知。系统频道在后台操作，用 Modal 更轻量。
 
 ### 3. 频道管理页 Tab 结构
 
-**决策**: 频道管理页 `/content/channel/manage/:id` 使用 Ant Design Tabs 组件，三个 Tab：概览、编辑信息、设置。
+**决策**: 频道管理页 `/api/v1/content/channel/manage/:id` 使用 Ant Design Tabs 组件，三个 Tab：概览、编辑信息、设置。
 
 **理由**: PRD 要求将危险操作（转让/删除）放在深层级（设置 Tab），编辑信息独立 Tab，概览提供快速了解。Tab 结构清晰且符合项目现有页面模式。
 
@@ -80,40 +80,40 @@ EPIC-20 后端 API 已定义 15 个频道相关接口，前端需要从零构建
 
 | 功能模块 | Controller | API 前缀 | 前端封装路径 |
 |----------|------------|----------|--------------|
-| 用户端频道 CRUD | ChannelController | `/api/v1/channels` | `/api/v1/channels/*` |
-| 后台频道管理 | ChannelAdminController | `/api/v1/admin/channels` | `/api/v1/admin/channels/*` |
-| 审核队列 | ChannelReviewController | `/jeecg-boot/api/v1/content/channel/review` | `/jeecg-boot/api/v1/content/channel/review/*`（绝对路径，不经过 defHttp 前缀拼接） |
-| 生命周期管理 | ChannelLifecycleController | `/jeecg-boot/api/v1/content/channel/lifecycle` | `/jeecg-boot/api/v1/content/channel/lifecycle/*` |
+| 用户端频道 CRUD | ChannelController | `/api/v1/channels` | `/api/v1/content/channels/*` |
+| 后台频道管理 | ChannelAdminController | `/api/v1/admin/channels` | `/api/v1/content/admin/channels/*` |
+| 审核队列 | ChannelReviewController | `/api/v1/content/channel/review` | `/api/v1/content/channel/review/*`（绝对路径，不经过 defHttp 前缀拼接） |
+| 生命周期管理 | ChannelLifecycleController | `/api/v1/content/channel/lifecycle` | `/api/v1/content/channel/lifecycle/*` |
 | 频道治理 | ChannelGovernanceController | `/channel/governance` | `/channel/governance/*` |
-| 内容发布 | ChannelPublishController | `/content/channel/publish` | `/content/channel/publish` |
+| 内容发布 | ChannelPublishController | `/api/v1/content/channel/publish` | `/api/v1/content/channel/publish` |
 
 **理由**: 后端 API 存在多个 Controller，路径前缀不一致，前端需统一管理避免混淆。
 
 **后端已实现的 API（ChannelController）**:
-- `POST /api/v1/channels/create` — 创建频道
-- `GET /api/v1/channels/list` — 我的频道列表
-- `GET /api/v1/channels/{id}` — 频道详情
-- `PUT /api/v1/channels/{id}` — 更新频道
-- `DELETE /api/v1/channels/{id}` — 删除频道
-- `POST /api/v1/channels/{id}/cancel-delete` — 撤销删除
-- `POST /api/v1/channels/{id}/transfer` — 发起转让
-- `POST /api/v1/channels/transfer/{transferId}/confirm` — 确认转让
-- `POST /api/v1/channels/transfer/{transferId}/reject` — 拒绝转让
-- `GET /api/v1/channels/{id}/delete-check` — 删除前置校验
-- `GET /api/v1/channels/{id}/transfers` — 转让历史查询
-- `GET /api/v1/channels/{id}/transfer/pending` — 待确认转让查询
-- `GET /api/v1/channels/check-name` — 名称唯一性校验
-- `PUT /api/v1/channels/privacy` — 更新隐私设置
-- `PUT /api/v1/channels/join-method` — 更新加入方式
+- `POST /api/v1/content/channels/create` — 创建频道
+- `GET /api/v1/content/channels/list` — 我的频道列表
+- `GET /api/v1/content/channels/{id}` — 频道详情
+- `PUT /api/v1/content/channels/{id}` — 更新频道
+- `DELETE /api/v1/content/channels/{id}` — 删除频道
+- `POST /api/v1/content/channels/{id}/cancel-delete` — 撤销删除
+- `POST /api/v1/content/channels/{id}/transfer` — 发起转让
+- `POST /api/v1/content/channels/transfer/{transferId}/confirm` — 确认转让
+- `POST /api/v1/content/channels/transfer/{transferId}/reject` — 拒绝转让
+- `GET /api/v1/content/channels/{id}/delete-check` — 删除前置校验
+- `GET /api/v1/content/channels/{id}/transfers` — 转让历史查询
+- `GET /api/v1/content/channels/{id}/transfer/pending` — 待确认转让查询
+- `GET /api/v1/content/channels/check-name` — 名称唯一性校验
+- `PUT /api/v1/content/channels/privacy` — 更新隐私设置
+- `PUT /api/v1/content/channels/join-method` — 更新加入方式
 
 **后端已实现的 API（ChannelReviewController）**:
-- `GET /jeecg-boot/api/v1/content/channel/review/list` — 审核队列列表
-- `GET /jeecg-boot/api/v1/content/channel/review/detail/{id}` — 审核详情
-- `POST /jeecg-boot/api/v1/content/channel/review/action` — 审核操作
+- `GET /api/v1/content/channel/review/list` — 审核队列列表
+- `GET /api/v1/content/channel/review/detail/{id}` — 审核详情
+- `POST /api/v1/content/channel/review/action` — 审核操作
 
 **后端已实现的 API（ChannelAdminController）**:
-- `POST /api/v1/admin/channels/create-system` — 创建系统频道
-- `POST /api/v1/admin/channels/{id}/review` — 审核频道
+- `POST /api/v1/content/admin/channels/create-system` — 创建系统频道
+- `POST /api/v1/content/admin/channels/{id}/review` — 审核频道
 
 ## Risks / Trade-offs
 

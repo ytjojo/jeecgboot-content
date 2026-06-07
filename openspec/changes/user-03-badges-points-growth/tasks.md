@@ -20,7 +20,7 @@
 - [x] 2.7 实现每日上限 Redis 计数和超限跳过奖励
 - [x] 2.8 添加点赞、分享、评论、转发、关注每日上限测试
 - [x] 2.9 改造 `ContentUserGrowthServiceImpl` 委托统一奖励编排
-- [x] 2.10 添加旧 `/content/user/growth/record` 兼容行为测试
+- [x] 2.10 添加旧 `/api/v1/content/user/growth/record` 兼容行为测试
 
 ## 3. 勋章体系
 

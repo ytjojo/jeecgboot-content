@@ -5,7 +5,7 @@
 
 #### Scenario: 查看绑定状态
 - **WHEN** 用户进入个人中心 → 账号安全
-- **THEN** 系统调用 `GET /api/v1/account-security/status`，显示各渠道绑定状态
+- **THEN** 系统调用 `GET /api/v1/content/account-security/status`，显示各渠道绑定状态
 
 #### Scenario: 加载中状态
 - **WHEN** 绑定状态正在加载
@@ -16,7 +16,7 @@
 
 #### Scenario: 绑定手机号成功
 - **WHEN** 用户输入新手机号和验证码，点击确认
-- **THEN** 系统调用 `POST /api/v1/account-security/bind/mobile`，显示"绑定成功"，列表状态实时更新
+- **THEN** 系统调用 `POST /api/v1/content/account-security/bind/mobile`，显示"绑定成功"，列表状态实时更新
 
 #### Scenario: 手机号已被其他账户绑定
 - **WHEN** 用户输入已被其他账户绑定的手机号
@@ -27,14 +27,14 @@
 
 #### Scenario: 绑定邮箱成功
 - **WHEN** 用户输入邮箱并点击确认
-- **THEN** 系统调用 `POST /api/v1/account-security/bind/email`，发送验证邮件，提示"验证邮件已发送"
+- **THEN** 系统调用 `POST /api/v1/content/account-security/bind/email`，发送验证邮件，提示"验证邮件已发送"
 
 ### Requirement: 绑定第三方账号
 系统 SHALL 支持用户绑定微信/Apple/Google 账号，通过第三方授权流程完成。
 
 #### Scenario: 绑定第三方账号成功
 - **WHEN** 用户完成第三方授权
-- **THEN** 系统调用 `POST /api/v1/account-security/bind/third-party`，显示"绑定成功"，列表状态实时更新
+- **THEN** 系统调用 `POST /api/v1/content/account-security/bind/third-party`，显示"绑定成功"，列表状态实时更新
 
 #### Scenario: 第三方授权取消
 - **WHEN** 用户在授权页取消
@@ -45,7 +45,7 @@
 
 #### Scenario: 换绑手机号成功
 - **WHEN** 用户输入原手机号验证码和新手机号验证码，点击确认换绑
-- **THEN** 系统调用 `POST /api/v1/account-security/rebind/mobile`，显示"换绑成功"，列表状态实时更新
+- **THEN** 系统调用 `POST /api/v1/content/account-security/rebind/mobile`，显示"换绑成功"，列表状态实时更新
 
 #### Scenario: 新手机号已被其他账户绑定
 - **WHEN** 用户输入已被绑定的新手机号

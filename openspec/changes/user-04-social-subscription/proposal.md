@@ -31,5 +31,5 @@
 - 影响现有表 `content_user_relation`、`content_user_relation_group`、`content_user_subscription`、`content_user_notification_setting`，并新增或扩展关注流配置、用户动态、关注推荐、订阅源广场、订阅通知偏好等表。
 - 影响内容源读取：需要从文章、笔记、视频、问答、栏目、话题等内容域聚合发布、点赞、收藏和订阅源更新事件。
 - 影响通知链路：特别关注强提醒、订阅更新站内通知、推送和邮件摘要需要接入异步通知或定时任务。
-- 影响 API：补齐 `/content/user/relation/*`、`/content/user/subscription/*`、`/content/user/settings/*` 相关列表、分组、feed、recommendation、discovery、notification 配置接口；后续可统一迁移到 `/api/v1` 风格。
+- 影响 API：补齐 `/api/v1/content/user/relation/*`、`/api/v1/content/user/subscription/*`、`/api/v1/content/user/settings/*` 相关列表、分组、feed、recommendation、discovery、notification 配置接口；后续可统一迁移到 `/api/v1` 风格。
 - 依赖 EPIC-01 的注册登录和用户主体；当前实现继续兼容现有 `userId` 参数，待账号主体稳定后切换到登录态上下文。

@@ -11,7 +11,7 @@
 
 **现状**: `ContentUserSettingsController:52` 已有 `@GetMapping("/privacy")`，返回 `ContentUserPrivacySetting`。
 
-**前端需求**: 隐私设置页面加载时需调用 `GET /content/user/settings/privacy` 获取当前用户的隐私配置。
+**前端需求**: 隐私设置页面加载时需调用 `GET /api/v1/content/user/settings/privacy` 获取当前用户的隐私配置。
 
 **建议实现**:
 

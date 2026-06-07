@@ -1,15 +1,15 @@
 ## ADDED Requirements
 
 ### Requirement: Privacy settings page covering 15 visibility fields
-系统 SHALL 提供隐私设置页面，覆盖 15 个 `*Visibility` 字段和 2 个 Boolean 字段，调用 `POST /content/user/profile/privacy/update?userId=X`。
+系统 SHALL 提供隐私设置页面，覆盖 15 个 `*Visibility` 字段和 2 个 Boolean 字段，调用 `POST /api/v1/content/user/profile/privacy/update?userId=X`。
 
 #### Scenario: Load privacy settings
 - **WHEN** 用户进入隐私设置页
-- **THEN** 页面调用 `GET /content/user/profile/detail?ownerUserId=X&viewerUserId=X` 读取当前隐私配置，按 7 个分组（基础资料/扩展/主页/认证/活动/在线状态/布尔开关）展示
+- **THEN** 页面调用 `GET /api/v1/content/user/profile/detail?ownerUserId=X&viewerUserId=X` 读取当前隐私配置，按 7 个分组（基础资料/扩展/主页/认证/活动/在线状态/布尔开关）展示
 
 #### Scenario: Save privacy settings
 - **WHEN** 用户修改任一 visibility 字段后点击保存
-- **THEN** 系统调用 `POST /content/user/profile/privacy/update?userId=X` 提交 `ContentUserPrivacyUpdateReq`，后端返回 `Result<String>`（"更新成功"），前端保存成功后重新调用 `GET /detail` 获取最新数据，显示"隐私设置已更新"
+- **THEN** 系统调用 `POST /api/v1/content/user/profile/privacy/update?userId=X` 提交 `ContentUserPrivacyUpdateReq`，后端返回 `Result<String>`（"更新成功"），前端保存成功后重新调用 `GET /detail` 获取最新数据，显示"隐私设置已更新"
 
 ### Requirement: Field visibility levels
 系统 SHALL 支持 4 种 visibility 级别：`PUBLIC` / `FOLLOWERS_ONLY` / `MUTUAL_ONLY` / `PRIVATE`，通过 Select 组件选择。
@@ -56,7 +56,7 @@
 - **THEN** 保存时 `ContentUserPrivacyUpdateReq` 中该字段为 `true` 或 `false`
 
 ### Requirement: Privacy cache immediate effect
-系统 SHALL 在隐私设置保存成功后立即调用 `GET /content/user/profile/detail?ownerUserId=X&viewerUserId=X` 刷新本地缓存。
+系统 SHALL 在隐私设置保存成功后立即调用 `GET /api/v1/content/user/profile/detail?ownerUserId=X&viewerUserId=X` 刷新本地缓存。
 
 #### Scenario: Refresh local cache after save
 - **WHEN** 用户保存隐私设置成功

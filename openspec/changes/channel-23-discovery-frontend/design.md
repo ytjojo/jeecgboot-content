@@ -48,18 +48,18 @@ JeecgBoot_sass 内容社区模块已有频道基础功能（EPIC-20 创建、EPI
 
 **缓存失效规则**: 详见 PRD Section 6.2.1 缓存失效规则表，包含各 Store 的缓存时长、失效条件和刷新方式。
 
-**userId 注入方式**: 推荐接口（`/content/channel/recommendation/list`）和搜索接口（`/content/channel/search/query`）需要 `userId` 参数。前端在 API 封装层通过 `useUserStore().getUserInfo.id` 获取当前用户 ID，作为请求参数自动注入。未登录用户调用冷启动接口（`/content/channel/recommendation/cold-start`），无需 userId。
+**userId 注入方式**: 推荐接口（`/api/v1/content/channel/recommendation/list`）和搜索接口（`/api/v1/content/channel/search/query`）需要 `userId` 参数。前端在 API 封装层通过 `useUserStore().getUserInfo.id` 获取当前用户 ID，作为请求参数自动注入。未登录用户调用冷启动接口（`/api/v1/content/channel/recommendation/cold-start`），无需 userId。
 
 ### 3. 发现页数据加载：并行请求 vs 聚合 API
 
-**选择**: 聚合 API `GET /content/channel/discovery/home` 一次性获取推荐+榜单+精选
+**选择**: 聚合 API `GET /api/v1/content/channel/discovery/home` 一次性获取推荐+榜单+精选
 
 **理由**: 减少 HTTP 请求数，后端可做聚合优化，前端只需一次 loading 状态管理。聚合失败时降级为并行请求各子接口。
 
 **降级策略**: 聚合接口超时或失败时，前端 fallback 为并行调用以下独立接口：
-- `GET /content/channel/recommendation/list`（推荐频道，需 userId 参数，从 useUserStore 自动注入）
-- `GET /content/channel/ranking/hot`（热门排行榜）
-- `GET /content/channel/editorial-pick/list`（编辑精选）
+- `GET /api/v1/content/channel/recommendation/list`（推荐频道，需 userId 参数，从 useUserStore 自动注入）
+- `GET /api/v1/content/channel/ranking/hot`（热门排行榜）
+- `GET /api/v1/content/channel/editorial-pick/list`（编辑精选）
 
 **后端状态**: `ContentChannelDiscoveryBiz` 已实现聚合逻辑，但尚缺 Controller 端点暴露（见 backend-issues.md）。
 
@@ -125,7 +125,7 @@ JeecgBoot_sass 内容社区模块已有频道基础功能（EPIC-20 创建、EPI
 
 ## Risks / Trade-offs
 
-- **[聚合 API 耦合]** → 聚合接口 `/content/channel/discovery/home` 将推荐、榜单、精选绑定在一起，任一模块接口变更可能影响聚合接口。缓解：实现降级逻辑，聚合失败时 fallback 到独立接口。
+- **[聚合 API 耦合]** → 聚合接口 `/api/v1/content/channel/discovery/home` 将推荐、榜单、精选绑定在一起，任一模块接口变更可能影响聚合接口。缓解：实现降级逻辑，聚合失败时 fallback 到独立接口。
 - **[分类树数据量]** → 假设分类总数 < 500，一次性加载到 Store。若分类数增长超出预期，需改为懒加载子分类。缓解：前端校验层级不超过 4 级，监控分类树加载性能。
 - **[搜索性能依赖后端]** → 搜索 P99 <= 200ms 目标依赖后端 MySQL FULLTEXT 性能。缓解：前端实现骨架屏减少感知延迟，搜索降级时展示热门频道。
 - **[可见性过滤一致性]** → 前端依赖后端 ChannelVisibilityService 过滤，前端不做二次过滤。若后端过滤遗漏，前端会展示不应显示的频道。缓解：后端已覆盖所有可见性场景，前端仅做展示。

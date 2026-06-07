@@ -2,7 +2,7 @@
 
 当前内容社区前端（jeecgboot-vue3）已有粉丝、互关、邀请等功能模块，位于 `src/views/content/` 目录下。项目使用 Vue 3 + Ant Design Vue + Vben Admin 框架，表单使用 schema 驱动的 Form 组件，API 通过 `defHttp` 封装。
 
-本变更为内容社区新增"设置"功能分区，包含四个独立页面，覆盖通知偏好、隐私可见性、第三方授权和账户安全。后端接口部分就绪（`/content/user/settings/` 和 `/content/user/auth/`），其中通知设置和第三方授权 API 已完整，但隐私设置缺少 GET 端点、安全设置缺少更新端点，需后端补充。详见 `backend-issues.md`。
+本变更为内容社区新增"设置"功能分区，包含四个独立页面，覆盖通知偏好、隐私可见性、第三方授权和账户安全。后端接口部分就绪（`/api/v1/content/user/settings/` 和 `/content/user/auth/`），其中通知设置和第三方授权 API 已完整，但隐私设置缺少 GET 端点、安全设置缺少更新端点，需后端补充。详见 `backend-issues.md`。
 
 ## Goals / Non-Goals
 
@@ -78,8 +78,8 @@ src/views/content/settings/
 
 ## Risks / Trade-offs
 
-- **[隐私设置 GET 端点缺失]** 后端 `ContentUserSettingsController` 中没有 `GET /content/user/settings/privacy` 端点，隐私数据仅通过 profile 接口返回 → 需后端补充独立 GET 端点，或前端改为从 profile 接口提取隐私字段。详见 `backend-issues.md`。
-- **[安全设置更新端点缺失]** 后端仅有 `GET /content/user/settings/security`，无 POST 更新端点 → 登录提醒开关无法保存，需后端补充 `POST /content/user/settings/security/update`。详见 `backend-issues.md`。
+- **[隐私设置 GET 端点缺失]** 后端 `ContentUserSettingsController` 中没有 `GET /api/v1/content/user/settings/privacy` 端点，隐私数据仅通过 profile 接口返回 → 需后端补充独立 GET 端点，或前端改为从 profile 接口提取隐私字段。详见 `backend-issues.md`。
+- **[安全设置更新端点缺失]** 后端仅有 `GET /api/v1/content/user/settings/security`，无 POST 更新端点 → 登录提醒开关无法保存，需后端补充 `POST /api/v1/content/user/settings/security/update`。详见 `backend-issues.md`。
 - **[订阅更新渠道字段缺失]** `ContentNotificationChannelConfigVO` 仅 6 个渠道字段，缺少 `subscriptionChannels` → 需后端补充，否则第 7 类通知（订阅更新）无法配置渠道。
 - **[拦截器兼容性]** userId 自动注入拦截器可能未覆盖 POST 请求的 params 场景 → 开发时验证，必要时在 API 封装中手动补充 userId。
 - **[免打扰规则数限制]** PRD 假设最多 5 条规则，但未在后端接口文档中明确 → 前端做本地限制（超过 5 条隐藏新增按钮），后端也应做校验。

@@ -94,21 +94,21 @@ mkdir -p jeecgboot-vue3/src/styles
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  follow = '/content/user/relation/follow',
-  unfollow = '/content/user/relation/unfollow',
-  specialFollow = '/content/user/relation/special-follow',
-  cancelSpecialFollow = '/content/user/relation/special-follow/cancel',
-  followList = '/content/user/relation/follow-list',
-  specialFollowList = '/content/user/relation/special-follow-list',
-  followGroupList = '/content/user/relation/groups',
-  createFollowGroup = '/content/user/relation/group/create',
-  renameFollowGroup = '/content/user/relation/group/rename',
-  deleteFollowGroup = '/content/user/relation/group/delete',
-  moveFollowGroup = '/content/user/relation/group/move',
-  removeFromGroup = '/content/user/relation/group/remove',
-  recommendList = '/content/user/relation/recommendations',
-  batchUnfollow = '/content/user/relation/batch/unfollow',
-  batchCancelSpecial = '/content/user/relation/batch/special-follow/cancel',
+  follow = '/api/v1/content/user/relation/follow',
+  unfollow = '/api/v1/content/user/relation/unfollow',
+  specialFollow = '/api/v1/content/user/relation/special-follow',
+  cancelSpecialFollow = '/api/v1/content/user/relation/special-follow/cancel',
+  followList = '/api/v1/content/user/relation/follow-list',
+  specialFollowList = '/api/v1/content/user/relation/special-follow-list',
+  followGroupList = '/api/v1/content/user/relation/groups',
+  createFollowGroup = '/api/v1/content/user/relation/group/create',
+  renameFollowGroup = '/api/v1/content/user/relation/group/rename',
+  deleteFollowGroup = '/api/v1/content/user/relation/group/delete',
+  moveFollowGroup = '/api/v1/content/user/relation/group/move',
+  removeFromGroup = '/api/v1/content/user/relation/group/remove',
+  recommendList = '/api/v1/content/user/relation/recommendations',
+  batchUnfollow = '/api/v1/content/user/relation/batch/unfollow',
+  batchCancelSpecial = '/api/v1/content/user/relation/batch/special-follow/cancel',
 }
 
 /** 关注用户 */
@@ -179,21 +179,21 @@ export const batchCancelSpecialFollow = (userId: string, data: { targetUserIds: 
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  subscribe = '/content/user/subscription/subscribe',
-  cancel = '/content/user/subscription/cancel',
-  pause = '/content/user/subscription/pause',
-  resume = '/content/user/subscription/resume',
-  list = '/content/user/subscription/list',
-  feed = '/content/user/subscription/feed',
-  plaza = '/content/user/subscription/plaza',
-  sourceDetail = '/content/user/subscription/source/detail',
-  sourceSubscribe = '/content/user/subscription/source/subscribe',
-  sourceSave = '/content/user/subscription/source/save',
-  notificationPreference = '/content/user/subscription/notification/preference',
-  notificationDecision = '/content/user/subscription/notification/decision',
-  batchPause = '/content/user/subscription/batch/pause',
-  batchResume = '/content/user/subscription/batch/resume',
-  batchCancel = '/content/user/subscription/batch/cancel',
+  subscribe = '/api/v1/content/user/subscription/subscribe',
+  cancel = '/api/v1/content/user/subscription/cancel',
+  pause = '/api/v1/content/user/subscription/pause',
+  resume = '/api/v1/content/user/subscription/resume',
+  list = '/api/v1/content/user/subscription/list',
+  feed = '/api/v1/content/user/subscription/feed',
+  plaza = '/api/v1/content/user/subscription/plaza',
+  sourceDetail = '/api/v1/content/user/subscription/source/detail',
+  sourceSubscribe = '/api/v1/content/user/subscription/source/subscribe',
+  sourceSave = '/api/v1/content/user/subscription/source/save',
+  notificationPreference = '/api/v1/content/user/subscription/notification/preference',
+  notificationDecision = '/api/v1/content/user/subscription/notification/decision',
+  batchPause = '/api/v1/content/user/subscription/batch/pause',
+  batchResume = '/api/v1/content/user/subscription/batch/resume',
+  batchCancel = '/api/v1/content/user/subscription/batch/cancel',
 }
 
 /** 订阅内容源 */
@@ -275,8 +275,8 @@ export const batchCancelSubscribe = (userId: string, data: { subscriptionIds: st
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  followingFeed = '/content/user/relation/feed',
-  subscribeFeed = '/content/user/subscription/feed',
+  followingFeed = '/api/v1/content/user/relation/feed',
+  subscribeFeed = '/api/v1/content/user/subscription/feed',
 }
 
 /** 获取关注流 */

@@ -660,7 +660,7 @@ public class MemberGrowthVO {
 ```java
 @Tag(name = "成员成长信息")
 @RestController
-@RequestMapping("/content/user/growth")
+@RequestMapping("/api/v1/content/user/growth")
 public class MemberGrowthController {
     @Resource
     private IMemberGrowthService memberGrowthService;
@@ -872,7 +872,7 @@ public class CircleLevelVO {
 ```java
 @Tag(name = "圈子等级信息")
 @RestController
-@RequestMapping("/content/user/growth/level")
+@RequestMapping("/api/v1/content/user/growth/level")
 public class CircleLevelController {
     @Resource
     private ICircleLevelService circleLevelService;
@@ -1123,7 +1123,7 @@ public class AchievementVO {
 ```java
 @Tag(name = "成就徽章")
 @RestController
-@RequestMapping("/content/user/growth/achievement")
+@RequestMapping("/api/v1/content/user/growth/achievement")
 public class AchievementController {
     @Resource
     private IAchievementService achievementService;
@@ -1330,7 +1330,7 @@ public class LeaderboardEntryVO {
 ```java
 @Tag(name = "圈子排行榜")
 @RestController
-@RequestMapping("/content/user/growth/leaderboard")
+@RequestMapping("/api/v1/content/user/growth/leaderboard")
 public class LeaderboardController {
     @Resource
     private ILeaderboardService leaderboardService;

@@ -6,7 +6,7 @@
 
 #### Scenario: 加载当前公告
 - **WHEN** 管理员进入公告管理页
-- **THEN** 调用 `GET /content/channel/announcement/channel/{channelId}` 获取当前公告，展示公告状态（已发布/未发布）和公告内容
+- **THEN** 调用 `GET /api/v1/content/channel/announcement/channel/{channelId}` 获取当前公告，展示公告状态（已发布/未发布）和公告内容
 
 #### Scenario: 编辑公告内容
 - **WHEN** 管理员在 Tinymce 富文本编辑器中编辑公告
@@ -14,7 +14,7 @@
 
 #### Scenario: 预览公告
 - **WHEN** 管理员点击"预览"
-- **THEN** 在下方预览区展示渲染效果，通过 `POST /content/channel/announcement/preview` 接口过滤不安全内容（**后端待实现**）
+- **THEN** 在下方预览区展示渲染效果，通过 `POST /api/v1/content/channel/announcement/preview` 接口过滤不安全内容（**后端待实现**）
 
 #### Scenario: 发布公告
 - **WHEN** 管理员点击"发布公告"
@@ -30,11 +30,11 @@
 
 #### Scenario: 查看公告历史版本
 - **WHEN** 管理员在公告管理页底部查看"公告历史"
-- **THEN** 调用 `GET /content/channel/announcement/{channelId}/history` 展示最近 3 个历史版本（**后端待实现**）（版本号、修改人、修改时间），支持"恢复此版本"操作
+- **THEN** 调用 `GET /api/v1/content/channel/announcement/{channelId}/history` 展示最近 3 个历史版本（**后端待实现**）（版本号、修改人、修改时间），支持"恢复此版本"操作
 
 #### Scenario: 恢复历史版本
 - **WHEN** 管理员点击某历史版本的"恢复此版本"
-- **THEN** 调用 `POST /content/channel/announcement/restore/{versionId}` 恢复为当前公告（**后端待实现**）
+- **THEN** 调用 `POST /api/v1/content/channel/announcement/restore/{versionId}` 恢复为当前公告（**后端待实现**）
 
 #### Scenario: 并发编辑冲突
 - **WHEN** 管理员保存公告时后端检测到版本冲突

@@ -242,8 +242,8 @@ export const joinByInvite = (inviteCode: string) =>
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  updatePrivacy = '/api/v1/channels/privacy',
-  updateJoinMethod = '/api/v1/channels/join-method',
+  updatePrivacy = '/api/v1/content/channels/privacy',
+  updateJoinMethod = '/api/v1/content/channels/join-method',
 }
 
 /** 更新隐私设置 */

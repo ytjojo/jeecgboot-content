@@ -22,25 +22,25 @@
 
 | API | 路径 | 后端文件 | 状态 |
 |-----|------|----------|------|
-| getCurrentStatus | GET /api/content/user-status/current | UserStatusController.java:50 | ✅ 存在 |
-| getUserStatus | GET /api/content/user-status/{userId} | UserStatusController.java:56 | ✅ 存在 |
-| changeUserStatus | POST /api/content/user-status/{userId}/change | UserStatusController.java:76 | ✅ 存在 |
-| getStatusHistory | GET /api/content/user-status/{userId}/history | UserStatusController.java:101 | ✅ 存在 |
-| releaseUser | POST /api/content/user-status/{userId}/release | UserStatusController.java:108 | ✅ 存在 |
+| getCurrentStatus | GET /api/v1/content/user-status/current | UserStatusController.java:50 | ✅ 存在 |
+| getUserStatus | GET /api/v1/content/user-status/{userId} | UserStatusController.java:56 | ✅ 存在 |
+| changeUserStatus | POST /api/v1/content/user-status/{userId}/change | UserStatusController.java:76 | ✅ 存在 |
+| getStatusHistory | GET /api/v1/content/user-status/{userId}/history | UserStatusController.java:101 | ✅ 存在 |
+| releaseUser | POST /api/v1/content/user-status/{userId}/release | UserStatusController.java:108 | ✅ 存在 |
 
 ### 缺失的 API（9/14）
 
 | API | 预期路径 | 用途 | 优先级 |
 |-----|----------|------|--------|
-| getStatusList | GET /api/content/user-status/list | 管理员分页查询用户状态列表 | 🔴 高 |
-| getTransitions | GET /api/content/user-status/transitions/{currentStatus} | 获取可转换状态列表 | 🔴 高 |
-| batchReleaseUsers | POST /api/content/user-status/batch-release | 批量解禁用户 | 🟡 中 |
-| getAuditLogList | GET /api/content/user-status/audit-logs | 审计日志分页查询 | 🔴 高 |
-| getAuditLogDetail | GET /api/content/user-status/audit-logs/{logId} | 审计日志详情 | 🟡 中 |
-| getUserAuditLogs | GET /api/content/user-status/users/{userId}/audit-logs | 用户审计日志 | 🟡 中 |
-| exportAuditLogs | GET /api/content/user-status/audit-logs/export | 导出审计日志 | 🟡 中 |
-| verifySecurity | POST /api/content/user-status/verify-security | 安全核验（冻结解冻） | 🔴 高 |
-| sendVerifyCode | POST /api/content/user-status/send-verify-code | 发送手机验证码 | 🔴 高 |
+| getStatusList | GET /api/v1/content/user-status/list | 管理员分页查询用户状态列表 | 🔴 高 |
+| getTransitions | GET /api/v1/content/user-status/transitions/{currentStatus} | 获取可转换状态列表 | 🔴 高 |
+| batchReleaseUsers | POST /api/v1/content/user-status/batch-release | 批量解禁用户 | 🟡 中 |
+| getAuditLogList | GET /api/v1/content/user-status/audit-logs | 审计日志分页查询 | 🔴 高 |
+| getAuditLogDetail | GET /api/v1/content/user-status/audit-logs/{logId} | 审计日志详情 | 🟡 中 |
+| getUserAuditLogs | GET /api/v1/content/user-status/users/{userId}/audit-logs | 用户审计日志 | 🟡 中 |
+| exportAuditLogs | GET /api/v1/content/user-status/audit-logs/export | 导出审计日志 | 🟡 中 |
+| verifySecurity | POST /api/v1/content/user-status/verify-security | 安全核验（冻结解冻） | 🔴 高 |
+| sendVerifyCode | POST /api/v1/content/user-status/send-verify-code | 发送手机验证码 | 🔴 高 |
 
 ### 后端已有的基础设施
 
@@ -63,7 +63,7 @@
 **位置**: design.md, specs/user-status-manage/spec.md
 
 **问题**: 
-- design.md 第 31 行引用 `GET /api/content/user-status/transitions/{currentStatus}`
+- design.md 第 31 行引用 `GET /api/v1/content/user-status/transitions/{currentStatus}`
 - specs/user-status-manage/spec.md 第 31 行同样引用此路径
 - 但后端 UserStatusController 中**没有**此端点
 
@@ -78,7 +78,7 @@
 **位置**: design.md, user-status-store/spec.md
 
 **问题**:
-- specs 中定义 `GET /api/content/user-status/current` 无参数
+- specs 中定义 `GET /api/v1/content/user-status/current` 无参数
 - 后端实际实现需要 `@RequestParam("userId")` 参数
 
 **影响**: 前端调用时需要传 userId 参数

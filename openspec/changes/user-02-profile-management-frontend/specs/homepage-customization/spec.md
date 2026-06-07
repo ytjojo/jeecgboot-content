@@ -5,11 +5,11 @@
 
 #### Scenario: Load homepage settings
 - **WHEN** 用户从个人主页点击齿轮图标进入主页设置
-- **THEN** 页面调用 `GET /content/user/profile/homepage/modules?userId=X` 加载模块列表，并回填当前背景图与主题色
+- **THEN** 页面调用 `GET /api/v1/content/user/profile/homepage/modules?userId=X` 加载模块列表，并回填当前背景图与主题色
 
 #### Scenario: Save homepage settings
 - **WHEN** 用户修改背景图或主题色后点击保存
-- **THEN** 系统调用 `POST /content/user/profile/homepage/update?userId=X` 提交，后端返回 `Result<String>`（"更新成功"），前端保存成功后重新调用 `GET /detail` 获取最新数据，显示"主页设置已更新"
+- **THEN** 系统调用 `POST /api/v1/content/user/profile/homepage/update?userId=X` 提交，后端返回 `Result<String>`（"更新成功"），前端保存成功后重新调用 `GET /detail` 获取最新数据，显示"主页设置已更新"
 
 ### Requirement: Background image upload via OSS
 系统 SHALL 支持主页背景图上传，校验规则复用头像上传（JPG/PNG/WebP，≤5MB），裁剪比例 16:9，通过 OSS 客户端直传。
@@ -20,7 +20,7 @@
 
 #### Scenario: Restore default background
 - **WHEN** 用户点击"恢复默认"按钮
-- **THEN** 系统调用 `POST /content/user/profile/homepage/defaults/restore?userId=X`，后端返回 `Result<String>`（"恢复成功"），前端恢复成功后重新调用 `GET /detail` 获取最新数据，预览区显示平台默认渐变背景
+- **THEN** 系统调用 `POST /api/v1/content/user/profile/homepage/defaults/restore?userId=X`，后端返回 `Result<String>`（"恢复成功"），前端恢复成功后重新调用 `GET /detail` 获取最新数据，预览区显示平台默认渐变背景
 
 ### Requirement: Theme color selection
 系统 SHALL 支持主题色选择，提供 8-12 个预设颜色和自定义颜色输入。
@@ -35,7 +35,7 @@
 
 #### Scenario: Restore default theme
 - **WHEN** 用户点击"恢复全部默认"
-- **THEN** 系统调用 `POST /content/user/profile/homepage/defaults/restore?userId=X`，后端返回 `Result<String>`（"恢复成功"），前端恢复成功后重新调用 `GET /detail` 获取最新数据，清除自定义背景和主题色，使用平台默认样式
+- **THEN** 系统调用 `POST /api/v1/content/user/profile/homepage/defaults/restore?userId=X`，后端返回 `Result<String>`（"恢复成功"），前端恢复成功后重新调用 `GET /detail` 获取最新数据，清除自定义背景和主题色，使用平台默认样式
 
 ### Requirement: Theme color contrast accessibility
 系统 SHALL 自动校验主题色与文字的对比度（WCAG AA 标准，对比度 ≥ 4.5:1），对比度不足时自动调整文字颜色。
@@ -65,7 +65,7 @@
 
 #### Scenario: Restore default module config
 - **WHEN** 用户点击"恢复默认排序"
-- **THEN** 系统调用 `POST /content/user/profile/homepage/defaults/restore?userId=X`，后端返回 `Result<String>`（"恢复成功"），前端恢复成功后重新加载模块列表
+- **THEN** 系统调用 `POST /api/v1/content/user/profile/homepage/defaults/restore?userId=X`，后端返回 `Result<String>`（"恢复成功"），前端恢复成功后重新加载模块列表
 
 ### Requirement: Mobile drag interaction
 移动端 SHALL 通过长按（300ms）触发拖拽模式，拖拽手柄最小触摸热区 44px x 44px。

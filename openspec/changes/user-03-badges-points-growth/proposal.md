@@ -31,5 +31,5 @@
 - 影响现有表 `content_user_profile`、`content_user_point_ledger`、`content_user_growth_ledger`、`content_user_badge_definition`、`content_user_badge_grant`，并新增奖励规则、每日上限、兑换订单、功能解锁、礼物记录、等级配置、成长衰减等表或扩展表。
 - 影响 Redis：新增行为奖励每日计数、幂等事件锁、勋章进度缓存、等级权益缓存。
 - 影响事件接入：登录、浏览、点赞、分享、评论、发布、推荐、加精、转发、关注、邀请注册、任务完成等行为事件。
-- 影响 API：补齐 `/content/user/growth/*`、勋章列表/佩戴/回收、积分明细/兑换、等级权益、衰减说明等接口。
+- 影响 API：补齐 `/api/v1/content/user/growth/*`、勋章列表/佩戴/回收、积分明细/兑换、等级权益、衰减说明等接口。
 - 依赖 EPIC-01 的注册登录用户主体，依赖 EPIC-02 的个人主页和帖子/评论展示位置；在这些变更未完成前使用现有 `userId`、profile 和内容社区用户域保持兼容。

@@ -5,7 +5,7 @@ The system SHALL provide an invite share page at `/content/invite` that displays
 
 #### Scenario: First-time invite code generation
 - **WHEN** user visits the invite page for the first time
-- **THEN** the system SHALL auto-generate an invite code via `POST /content/user/invite/generate` and display it prominently with a copyable link and QR code
+- **THEN** the system SHALL auto-generate an invite code via `POST /api/v1/content/user/invite/generate` and display it prominently with a copyable link and QR code
 
 #### Scenario: Reuse existing invite code
 - **WHEN** user visits the invite page and already has an invite code
@@ -24,7 +24,7 @@ The system SHALL display invite statistics on the invite page including total in
 
 #### Scenario: View invite statistics
 - **WHEN** user visits the invite page
-- **THEN** the system SHALL display CountTo animated numbers for total invite count, successful registration count, and total reward points via `GET /content/user/invite/stats`
+- **THEN** the system SHALL display CountTo animated numbers for total invite count, successful registration count, and total reward points via `GET /api/v1/content/user/invite/stats`
 
 ### Requirement: Invite records list
 The system SHALL display a paginated table of invite records on the invite page.
@@ -77,7 +77,7 @@ The system SHALL integrate invite APIs using `defHttp` encapsulation in `src/api
 
 #### Scenario: Fetch invite code
 - **WHEN** the invite page loads
-- **THEN** the system SHALL call `POST /content/user/invite/generate` to get or generate the invite code
+- **THEN** the system SHALL call `POST /api/v1/content/user/invite/generate` to get or generate the invite code
 
 #### Scenario: Fetch invite info for landing page
 - **WHEN** the landing page loads with an invite code
@@ -86,11 +86,11 @@ The system SHALL integrate invite APIs using `defHttp` encapsulation in `src/api
 
 #### Scenario: Fetch invite records
 - **WHEN** the invite page loads
-- **THEN** the system SHALL call `GET /content/user/invite/records` with pagination params
+- **THEN** the system SHALL call `GET /api/v1/content/user/invite/records` with pagination params
 
 #### Scenario: Fetch invite statistics
 - **WHEN** the invite page loads
-- **THEN** the system SHALL call `GET /content/user/invite/stats` to get aggregate statistics
+- **THEN** the system SHALL call `GET /api/v1/content/user/invite/stats` to get aggregate statistics
 
 ### Requirement: Invite store for caching
 The system SHALL create a Pinia store (`useInviteStore`) to cache invite code and statistics within the session.
@@ -105,7 +105,7 @@ API 文件: `src/api/content/invite.ts`
 
 | 端点 | 方法 | 参数 | 响应关键字段 | 状态 |
 |------|------|------|------------|------|
-| `/content/user/invite/generate` | POST | 无参数 | inviteCode, inviteLink | ✅ 后端已实现 |
-| `/content/user/invite/info/{inviteCode}` | GET | @PathVariable: inviteCode | inviterNickname, inviterAvatar, inviteCode, expired, maxReached, registerRewardPoints | ❌ 后端待补充 |
-| `/content/user/invite/records` | GET | @RequestParam: page, pageSize | records[{inviteeNickname, registerTime, rewardPoints}], total | ✅ 后端已实现 |
-| `/content/user/invite/stats` | GET | 无参数 | totalInviteCount, successRegisterCount, totalRewardPoints | ✅ 后端已实现 |
+| `/api/v1/content/user/invite/generate` | POST | 无参数 | inviteCode, inviteLink | ✅ 后端已实现 |
+| `/api/v1/content/user/invite/info/{inviteCode}` | GET | @PathVariable: inviteCode | inviterNickname, inviterAvatar, inviteCode, expired, maxReached, registerRewardPoints | ❌ 后端待补充 |
+| `/api/v1/content/user/invite/records` | GET | @RequestParam: page, pageSize | records[{inviteeNickname, registerTime, rewardPoints}], total | ✅ 后端已实现 |
+| `/api/v1/content/user/invite/stats` | GET | 无参数 | totalInviteCount, successRegisterCount, totalRewardPoints | ✅ 后端已实现 |

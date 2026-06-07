@@ -20,17 +20,17 @@
 
 | # | HTTP 方法 | 路径 | 实际返回类型 | 文档声称返回类型 | 是否一致 |
 |---|-----------|------|-------------|----------------|---------|
-| 1 | GET | `/content/user/profile/detail` | `Result<ContentUserProfileVO>` | `ContentUserProfileVO` | 部分一致(1) |
-| 2 | POST | `/content/user/profile/update` | `Result<ContentUserProfileVO>` | `ContentUserProfileVO` | ✅ 已改造 |
-| 3 | POST | `/content/user/profile/review/handle` | `Result<String>` | `Result<?>` | 一致 |
-| 4 | POST | `/content/user/profile/privacy/update` | `Result<String>` | `Result<String>` | ✅ 已修正 |
-| 5 | POST | `/content/user/profile/homepage/update` | `Result<ContentUserProfileVO>` | `Result<ContentUserProfileVO>` | ✅ 已改造 |
-| 6 | POST | `/content/user/profile/homepage/defaults/restore` | `Result<ContentUserProfileVO>` | `Result<ContentUserProfileVO>` | ✅ 已改造 |
-| 7 | GET | `/content/user/profile/homepage/modules` | `Result<List<ContentUserHomepageModuleVO>>` | `List<ContentUserHomepageModuleVO>` | 部分一致(1) |
-| 8 | GET | `/content/user/profile/badge/list` | `Result<List<ContentUserVerificationBadgeVO>>` | `List<ContentUserVerificationBadgeVO>` | 部分一致(1) |
-| 9 | GET | `/content/user/profile/badge/detail` | `Result<ContentUserVerificationBadgeVO>` | `ContentUserVerificationBadgeVO` | 部分一致(1) |
-| 10 | GET | `/content/user/profile/history/list` | `Result<List<ContentUserProfileHistoryVO>>` | `List<ContentUserProfileHistoryVO>` | 部分一致(1) |
-| 11 | POST | `/content/user/profile/history/restore` | `Result<ContentUserProfileVO>` | `Result<ContentUserProfileVO>` | ✅ 已改造 |
+| 1 | GET | `/api/v1/content/user/profile/detail` | `Result<ContentUserProfileVO>` | `ContentUserProfileVO` | 部分一致(1) |
+| 2 | POST | `/api/v1/content/user/profile/update` | `Result<ContentUserProfileVO>` | `ContentUserProfileVO` | ✅ 已改造 |
+| 3 | POST | `/api/v1/content/user/profile/review/handle` | `Result<String>` | `Result<?>` | 一致 |
+| 4 | POST | `/api/v1/content/user/profile/privacy/update` | `Result<String>` | `Result<String>` | ✅ 已修正 |
+| 5 | POST | `/api/v1/content/user/profile/homepage/update` | `Result<ContentUserProfileVO>` | `Result<ContentUserProfileVO>` | ✅ 已改造 |
+| 6 | POST | `/api/v1/content/user/profile/homepage/defaults/restore` | `Result<ContentUserProfileVO>` | `Result<ContentUserProfileVO>` | ✅ 已改造 |
+| 7 | GET | `/api/v1/content/user/profile/homepage/modules` | `Result<List<ContentUserHomepageModuleVO>>` | `List<ContentUserHomepageModuleVO>` | 部分一致(1) |
+| 8 | GET | `/api/v1/content/user/profile/badge/list` | `Result<List<ContentUserVerificationBadgeVO>>` | `List<ContentUserVerificationBadgeVO>` | 部分一致(1) |
+| 9 | GET | `/api/v1/content/user/profile/badge/detail` | `Result<ContentUserVerificationBadgeVO>` | `ContentUserVerificationBadgeVO` | 部分一致(1) |
+| 10 | GET | `/api/v1/content/user/profile/history/list` | `Result<List<ContentUserProfileHistoryVO>>` | `List<ContentUserProfileHistoryVO>` | 部分一致(1) |
+| 11 | POST | `/api/v1/content/user/profile/history/restore` | `Result<ContentUserProfileVO>` | `Result<ContentUserProfileVO>` | ✅ 已改造 |
 
 > (1) 实际返回 `Result<T>` 包装，文档省略了 `Result` 包装层。这是 JeecgBoot 惯例，前端 defHttp 已自动解包，属于文档简化，非实质错误。
 

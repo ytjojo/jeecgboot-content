@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Verification badge display driven by visualStyleKey
-系统 SHALL 在昵称右侧展示认证标识 Badge，使用后端 `visualStyleKey` 字段映射图标/颜色，对接 `GET /content/user/profile/badge/list?userId=X`。
+系统 SHALL 在昵称右侧展示认证标识 Badge，使用后端 `visualStyleKey` 字段映射图标/颜色，对接 `GET /api/v1/content/user/profile/badge/list?userId=X`。
 
 #### Scenario: Display badges by visualStyleKey
 - **WHEN** 父组件传入 `ContentUserVerificationBadgeVO[]` 列表
@@ -27,7 +27,7 @@
 - **THEN** VerificationBadge 组件按优先级排序后渲染 Badge 列表，处理折叠逻辑
 
 ### Requirement: Badge click detail modal
-系统 SHALL 支持点击认证标识打开认证详情弹窗，调用 `GET /content/user/profile/badge/detail?badgeId=Y` 加载详情。
+系统 SHALL 支持点击认证标识打开认证详情弹窗，调用 `GET /api/v1/content/user/profile/badge/detail?badgeId=Y` 加载详情。
 
 #### Scenario: Open badge detail modal on PC
 - **WHEN** 用户在 PC 端点击认证标识

@@ -1703,7 +1703,7 @@ import java.time.LocalDate;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/content/channel/stats")
+@RequestMapping("/api/v1/content/channel/stats")
 @Tag(name = "频道统计", description = "频道数据统计看板接口")
 public class ChannelStatsController {
 
@@ -1962,7 +1962,7 @@ import javax.validation.Valid;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/content/channel/lifecycle")
+@RequestMapping("/api/v1/content/channel/lifecycle")
 @Tag(name = "频道生命周期", description = "频道生命周期管理接口")
 public class ChannelLifecycleController {
 
@@ -2043,7 +2043,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/content/channel/review")
+@RequestMapping("/api/v1/content/channel/review")
 @Tag(name = "频道审核", description = "频道审核管理接口")
 public class ChannelReviewController {
 
@@ -2136,7 +2136,7 @@ import javax.validation.Valid;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/content/channel/export")
+@RequestMapping("/api/v1/content/channel/export")
 @Tag(name = "频道数据导出", description = "频道数据导出接口")
 public class ChannelExportController {
 

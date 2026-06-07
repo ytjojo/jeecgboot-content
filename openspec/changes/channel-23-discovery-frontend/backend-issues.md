@@ -10,7 +10,7 @@
 
 **需要补充**:
 - 创建 `ContentChannelDiscoveryController`
-- 映射 `GET /content/channel/discovery/home`
+- 映射 `GET /api/v1/content/channel/discovery/home`
 - 入参: `userId`（从登录态获取或 @RequestParam）
 - 返回: `Result<Map<String, Object>>` 包含 recommendations、hotRanking、editorialPicks 三个字段
 
@@ -22,11 +22,11 @@
 
 ### BI-2: 分类启用接口缺失（CRITICAL）
 
-**现状**: `ContentChannelCategoryController` 仅有 `POST /content/channel/category/disable`，无启用接口。`IContentChannelCategoryService` 仅有 `disableCategory` 方法。
+**现状**: `ContentChannelCategoryController` 仅有 `POST /api/v1/content/channel/category/disable`，无启用接口。`IContentChannelCategoryService` 仅有 `disableCategory` 方法。
 
 **需要补充**:
 - 在 `IContentChannelCategoryService` 添加 `enableCategory(String categoryId)`
-- 在 `ContentChannelCategoryController` 添加 `POST /content/channel/category/enable`
+- 在 `ContentChannelCategoryController` 添加 `POST /api/v1/content/channel/category/enable`
 - 逻辑: 将分类状态从停用改为启用，刷新分类树缓存
 
 **涉及文件**:
@@ -43,7 +43,7 @@
 **需要补充**:
 - 创建 `ChannelTagUpdateReq`（含 tagId 和 newName）
 - 在 `IContentChannelTagService` 添加 `updateTag(ChannelTagUpdateReq req)`
-- 在 `ContentChannelTagController` 添加 `POST /content/channel/tag/update`
+- 在 `ContentChannelTagController` 添加 `POST /api/v1/content/channel/tag/update`
 - 校验: 空名称、重复名称、超 20 字符
 
 **涉及文件**:
@@ -59,7 +59,7 @@
 **现状**: `ContentChannelSearchController` 仅有 `search` 查询方法。
 
 **需要补充**:
-- 在 `ContentChannelSearchController` 添加 `POST /content/channel/search/feedback`
+- 在 `ContentChannelSearchController` 添加 `POST /api/v1/content/channel/search/feedback`
 - 入参: `userId`、`query`（搜索关键词）、`helpful`（boolean）
 - 用途: 记录用户对搜索结果的反馈，用于搜索质量优化
 
@@ -76,7 +76,7 @@
 **需要补充**:
 - 创建 `ChannelEditorialPickQueryReq`（含 status 筛选、pageNo、pageSize）
 - 在 `IContentChannelEditorialPickService` 添加 `IPage<ChannelEditorialPickVO> listPicksPage(ChannelEditorialPickQueryReq req)`
-- 在 `ContentChannelEditorialPickController` 添加 `GET /content/channel/editorial-pick/page`
+- 在 `ContentChannelEditorialPickController` 添加 `GET /api/v1/content/channel/editorial-pick/page`
 - 支持状态筛选: 全部/生效中/已过期/状态异常
 
 **涉及文件**:

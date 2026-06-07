@@ -1,15 +1,15 @@
 ## ADDED Requirements
 
 ### Requirement: Edit profile form page
-系统 SHALL 提供编辑资料页面，支持用户编辑昵称、简介、性别、生日、地区、职业、个人链接等字段。表单提交调用 `POST /content/user/profile/update?userId=X`。
+系统 SHALL 提供编辑资料页面，支持用户编辑昵称、简介、性别、生日、地区、职业、个人链接等字段。表单提交调用 `POST /api/v1/content/user/profile/update?userId=X`。
 
 #### Scenario: Load edit profile page
 - **WHEN** 用户从个人中心点击"编辑资料"按钮进入编辑页
-- **THEN** 页面调用 `GET /content/user/profile/detail?ownerUserId=X&viewerUserId=X` 加载数据，表单字段回填当前值
+- **THEN** 页面调用 `GET /api/v1/content/user/profile/detail?ownerUserId=X&viewerUserId=X` 加载数据，表单字段回填当前值
 
 #### Scenario: Save profile successfully
 - **WHEN** 用户修改表单字段后点击保存按钮
-- **THEN** 系统校验通过后调用 `POST /content/user/profile/update?userId=X` 提交 `ContentUserProfileUpdateReq`，后端返回 `Result<String>`（"更新成功"），前端保存成功后重新调用 `GET /content/user/profile/detail` 获取最新数据，显示全局消息"资料已更新"并返回个人中心
+- **THEN** 系统校验通过后调用 `POST /api/v1/content/user/profile/update?userId=X` 提交 `ContentUserProfileUpdateReq`，后端返回 `Result<String>`（"更新成功"），前端保存成功后重新调用 `GET /api/v1/content/user/profile/detail` 获取最新数据，显示全局消息"资料已更新"并返回个人中心
 
 #### Scenario: Cancel with unsaved changes
 - **WHEN** 用户修改了表单字段后点击返回按钮

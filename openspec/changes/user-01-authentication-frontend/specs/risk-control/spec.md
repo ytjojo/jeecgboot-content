@@ -50,7 +50,7 @@
 
 #### Scenario: 获取图形验证码
 - **WHEN** 需要图形验证码时
-- **THEN** 调用 `GET /api/v1/auth/captcha/image`，显示验证码图片
+- **THEN** 调用 `GET /api/v1/content/auth/captcha/image`，显示验证码图片
 
 #### Scenario: 点击刷新验证码
 - **WHEN** 用户点击验证码图片

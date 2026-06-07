@@ -138,9 +138,9 @@
 **位置**: specs/user-status-manage/spec.md 第 116-127 行, specs/user-status-audit-log/spec.md 第 71-76 行, specs/user-login-intercept/spec.md 第 83-86 行
 
 **问题**: specs 的"后端 API 依赖"章节引用旧路径：
-- user-status-manage: `GET /api/content/user-status/{userId}` (PRD 为 `/users/{userId}`)
-- user-status-manage: `GET /api/content/user-status/list` (PRD 为 `/users`)
-- user-status-audit-log: `GET /api/content/user-status/audit-logs` (PRD 为 `/user-status-audit/logs`)
+- user-status-manage: `GET /api/v1/content/user-status/{userId}` (PRD 为 `/users/{userId}`)
+- user-status-manage: `GET /api/v1/content/user-status/list` (PRD 为 `/users`)
+- user-status-audit-log: `GET /api/v1/content/user-status/audit-logs` (PRD 为 `/user-status-audit/logs`)
 
 **建议**: 统一 specs 中的 API 路径引用，以 PRD 4.3 节为准。
 
@@ -273,20 +273,20 @@
 
 | # | API | 方法 | 路径 (PRD) | 后端状态 |
 |---|-----|------|-----------|---------|
-| 1 | getCurrentStatus | GET | `/api/content/user-status/current` | ✅ 已实现 (需 userId 参数) |
-| 2 | getUserStatus | GET | `/api/content/user-status/users/{userId}` | ✅ 已实现 (路径可能需调整) |
-| 3 | getStatusList | GET | `/api/content/user-status/users` | ❌ 未实现 (backend-issues.md) |
-| 4 | getTransitions | GET | `/api/content/user-status/transitions/{currentStatus}` | ❌ 未实现 |
-| 5 | changeUserStatus | POST | `/api/content/user-status/users/{userId}/change` | ✅ 已实现 (路径可能需调整) |
-| 6 | releaseUser | POST | `/api/content/user-status/users/{userId}/release` | ✅ 已实现 (路径可能需调整) |
-| 7 | batchReleaseUsers | POST | `/api/content/user-status/users/batch-release` | ❌ 未实现 |
-| 8 | getStatusHistory | GET | `/api/content/user-status/users/{userId}/history` | ✅ 已实现 |
-| 9 | getAuditLogList | GET | `/api/content/user-status-audit/logs` | ❌ 未实现 |
-| 10 | getAuditLogDetail | GET | `/api/content/user-status-audit/logs/{logId}` | ❌ 未实现 |
-| 11 | getUserAuditLogs | GET | `/api/content/user-status-audit/logs/user/{userId}` | ❌ 未实现 |
-| 12 | exportAuditLogs | POST | `/api/content/user-status-audit/export` | ❌ 未实现 |
-| 13 | verifySecurity | POST | `/api/content/user-status/verify` | ❌ 未实现 |
-| 14 | sendVerifyCode | POST | `/api/content/user-status/send-code` | ❌ 未实现 |
+| 1 | getCurrentStatus | GET | `/api/v1/content/user-status/current` | ✅ 已实现 (需 userId 参数) |
+| 2 | getUserStatus | GET | `/api/v1/content/user-status/users/{userId}` | ✅ 已实现 (路径可能需调整) |
+| 3 | getStatusList | GET | `/api/v1/content/user-status/users` | ❌ 未实现 (backend-issues.md) |
+| 4 | getTransitions | GET | `/api/v1/content/user-status/transitions/{currentStatus}` | ❌ 未实现 |
+| 5 | changeUserStatus | POST | `/api/v1/content/user-status/users/{userId}/change` | ✅ 已实现 (路径可能需调整) |
+| 6 | releaseUser | POST | `/api/v1/content/user-status/users/{userId}/release` | ✅ 已实现 (路径可能需调整) |
+| 7 | batchReleaseUsers | POST | `/api/v1/content/user-status/users/batch-release` | ❌ 未实现 |
+| 8 | getStatusHistory | GET | `/api/v1/content/user-status/users/{userId}/history` | ✅ 已实现 |
+| 9 | getAuditLogList | GET | `/api/v1/content/user-status-audit/logs` | ❌ 未实现 |
+| 10 | getAuditLogDetail | GET | `/api/v1/content/user-status-audit/logs/{logId}` | ❌ 未实现 |
+| 11 | getUserAuditLogs | GET | `/api/v1/content/user-status-audit/logs/user/{userId}` | ❌ 未实现 |
+| 12 | exportAuditLogs | POST | `/api/v1/content/user-status-audit/export` | ❌ 未实现 |
+| 13 | verifySecurity | POST | `/api/v1/content/user-status/verify` | ❌ 未实现 |
+| 14 | sendVerifyCode | POST | `/api/v1/content/user-status/send-code` | ❌ 未实现 |
 
 ### 5.2 req/vo 匹配检查
 
@@ -321,7 +321,7 @@
 
 **位置**: PRD 4.3 第 380 行
 
-**问题**: PRD 定义 `exportAuditLogs` 为 `POST /api/content/user-status-audit/export`，但 backend-issues.md 中的建议代码使用 `GET` 方法。HTTP 方法不一致可能导致实现混淆。
+**问题**: PRD 定义 `exportAuditLogs` 为 `POST /api/v1/content/user-status-audit/export`，但 backend-issues.md 中的建议代码使用 `GET` 方法。HTTP 方法不一致可能导致实现混淆。
 
 **建议**: 统一为 POST 方法（因可能携带复杂筛选参数），更新 backend-issues.md。
 

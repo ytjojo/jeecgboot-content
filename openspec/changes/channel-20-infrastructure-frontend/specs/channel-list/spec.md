@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-> **API 路径**: `GET /api/v1/channels/list` (已存在)
+> **API 路径**: `GET /api/v1/content/channels/list` (已存在)
 > **Controller**: ChannelController
 > **前端封装**: `src/api/content/channel/index.ts` - `getChannelList()`
 
@@ -34,7 +34,7 @@
 
 #### Scenario: Active 状态频道操作
 - **WHEN** 用户点击 Active 状态频道的"管理"按钮
-- **THEN** 跳转到频道管理页 `/content/channel/manage/:id`
+- **THEN** 跳转到频道管理页 `/api/v1/content/channel/manage/:id`
 
 #### Scenario: Rejected 状态频道操作
 - **WHEN** 用户点击 Rejected 状态频道的"重新提交"按钮

@@ -163,7 +163,7 @@
 
 | 任务 | 状态 | 说明 |
 |------|------|------|
-| 8.1 `/api/v1/auth/*` 等 Controller 入参校验 | **缺失** | 当前路径为 `/content/user/account/*`，无版本化 |
+| 8.1 `/api/v1/content/auth/*` 等 Controller 入参校验 | **缺失** | 当前路径为 `/api/v1/content/user/account/*` |
 | 8.2 WebMvc 参数校验和 Result<T> 测试 | **缺失** | — |
 | 8.3 Knife4j 注解和错误码常量 | **缺失** | — |
 | 8.4 接口文档和错误码测试 | **缺失** | — |

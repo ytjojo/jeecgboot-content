@@ -56,7 +56,7 @@
 
 | API | 后端状态 | 说明 |
 |-----|---------|------|
-| `GET /content/user/support/changelog/list` | ✅ 已暴露（2026-06-05） | `getChangelog(userId)` 已在控制器中暴露为 HTTP 端点 |
+| `GET /api/v1/content/user/support/changelog/list` | ✅ 已暴露（2026-06-05） | `getChangelog(userId)` 已在控制器中暴露为 HTTP 端点 |
 
 **数据结构差异**:
 - 前端期望 `{ id, version, releaseDate, features[], improvements[], bugfixes[] }`

@@ -5,7 +5,7 @@
 
 #### Scenario: 关闭点赞通知开关
 - **WHEN** 用户将点赞通知的 Switch 关闭并点击保存
-- **THEN** 系统调用 `POST /content/user/settings/notification/update`，`likeNoticeEnabled` 为 false，保存成功后显示"通知设置已保存"
+- **THEN** 系统调用 `POST /api/v1/content/user/settings/notification/update`，`likeNoticeEnabled` 为 false，保存成功后显示"通知设置已保存"
 
 #### Scenario: 安全类通知不可关闭
 - **WHEN** 用户查看通知类型列表

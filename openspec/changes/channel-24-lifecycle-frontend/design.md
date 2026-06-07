@@ -213,7 +213,7 @@
 
 ### 统计看板 API (ChannelStatsController)
 
-**基础路径**: `/jeecg-boot/api/v1/content/channel/stats`
+**基础路径**: `/api/v1/content/channel/stats`
 
 | API | 功能 | 状态 | 备注 |
 |-----|------|------|------|
@@ -225,7 +225,7 @@
 
 ### 数据导出 API (ChannelExportController)
 
-**基础路径**: `/jeecg-boot/api/v1/content/channel/export`
+**基础路径**: `/api/v1/content/channel/export`
 
 | API | 功能 | 状态 | 备注 |
 |-----|------|------|------|
@@ -236,7 +236,7 @@
 
 ### 审核管理 API (ChannelReviewController)
 
-**基础路径**: `/jeecg-boot/api/v1/content/channel/review`
+**基础路径**: `/api/v1/content/channel/review`
 
 | API | 功能 | 状态 | 备注 |
 |-----|------|------|------|
@@ -246,7 +246,7 @@
 
 ### 生命周期管理 API (ChannelLifecycleController)
 
-**基础路径**: `/jeecg-boot/api/v1/content/channel/lifecycle`
+**基础路径**: `/api/v1/content/channel/lifecycle`
 
 | API | 功能 | 状态 | 备注 |
 |-----|------|------|------|
@@ -261,7 +261,7 @@
 
 ### 申诉管理 API (ChannelLifecycleController)
 
-**基础路径**: `/jeecg-boot/api/v1/content/channel/lifecycle/appeal`
+**基础路径**: `/api/v1/content/channel/lifecycle/appeal`
 
 | API | 功能 | 状态 | 备注 |
 |-----|------|------|------|

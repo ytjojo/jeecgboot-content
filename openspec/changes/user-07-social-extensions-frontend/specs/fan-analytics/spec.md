@@ -41,11 +41,11 @@ The system SHALL integrate fan analytics APIs using `defHttp` encapsulation in `
 
 #### Scenario: Fetch fan list
 - **WHEN** the fan list tab loads or user searches/paginates
-- **THEN** the system SHALL call `GET /content/user/fan/list` with pagination and search params
+- **THEN** the system SHALL call `GET /api/v1/content/user/fan/list` with pagination and search params
 
 #### Scenario: Fetch fan trend data
 - **WHEN** user switches to the trend tab or changes dimension
-- **THEN** the system SHALL call `GET /content/user/fan/trend` with dimension (day/week/month) and optional date range params
+- **THEN** the system SHALL call `GET /api/v1/content/user/fan/trend` with dimension (day/week/month) and optional date range params
 
 ### Requirement: ECharts lazy loading
 The system SHALL use `echarts/core` with on-demand chart type registration to minimize bundle size.
@@ -60,7 +60,7 @@ API 文件: `src/api/content/fan-analytics.ts`
 
 | 端点 | 方法 | 参数 | 响应关键字段 | 状态 |
 |------|------|------|------------|------|
-| `/content/user/fan/list` | GET | @RequestParam: page, pageSize, keyword? | records[{avatar, nickname, followTime, interactionCount}], total, totalFans, todayNew | ✅ 后端已实现 |
-| `/content/user/fan/trend` | GET | @RequestParam: dimension(day/week/month), startDate?, endDate? | [{date, count}] | ✅ 后端已实现 |
-| `/content/user/fan/profile` | GET | 无参数（基于当前用户） | interests[], regions[], activeHours[], totalFans | ⏸️ 降级至二期 |
-| `/content/user/fan/export` | POST | 无参数 | CSV 文件流 | ⏸️ 降级至二期 |
+| `/api/v1/content/user/fan/list` | GET | @RequestParam: page, pageSize, keyword? | records[{avatar, nickname, followTime, interactionCount}], total, totalFans, todayNew | ✅ 后端已实现 |
+| `/api/v1/content/user/fan/trend` | GET | @RequestParam: dimension(day/week/month), startDate?, endDate? | [{date, count}] | ✅ 后端已实现 |
+| `/api/v1/content/user/fan/profile` | GET | 无参数（基于当前用户） | interests[], regions[], activeHours[], totalFans | ⏸️ 降级至二期 |
+| `/api/v1/content/user/fan/export` | POST | 无参数 | CSV 文件流 | ⏸️ 降级至二期 |

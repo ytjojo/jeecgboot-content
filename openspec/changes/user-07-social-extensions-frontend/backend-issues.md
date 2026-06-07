@@ -17,13 +17,13 @@
 
 **建议接口设计**:
 ```
-GET /content/user/relation/mutual-status
+GET /api/v1/content/user/relation/mutual-status
 参数: userIds (逗号分隔的用户ID列表)
 返回: Map<userId, boolean>  (userId -> 是否互关)
 ```
 
 **现有相关代码**:
-- Controller: `ContentUserRelationController`（路径 `/content/user/relation`）
+- Controller: `ContentUserRelationController`（路径 `/api/v1/content/user/relation`）
 - Service: `IContentUserRelationService` / `ContentUserRelationServiceImpl`
 - Mapper: `ContentUserRelationMapper`
 
@@ -42,7 +42,7 @@ GET /content/user/relation/mutual-status
 
 **建议接口设计**:
 ```
-GET /content/user/invite/info/{inviteCode}
+GET /api/v1/content/user/invite/info/{inviteCode}
 返回: {
   valid: boolean,
   expired: boolean,
@@ -54,7 +54,7 @@ GET /content/user/invite/info/{inviteCode}
 ```
 
 **现有相关代码**:
-- Controller: `ContentInviteController`（路径 `/content/user/invite`）
+- Controller: `ContentInviteController`（路径 `/api/v1/content/user/invite`）
 - Service: `IContentInviteService` / `ContentInviteServiceImpl`
 - Entity: `ContentInviteCode`
 - Mapper: `ContentInviteCodeMapper`
@@ -74,7 +74,7 @@ GET /content/user/invite/info/{inviteCode}
 
 **建议接口设计**:
 ```
-GET /content/user/governance/audit-log
+GET /api/v1/content/user/governance/audit-log
 参数: page, pageSize, operatorName, operationType, startTime, endTime
 返回: 分页结果，字段包含 operator, operationTime, operationType, targetUser, reason, ipAddress
 ```
@@ -82,7 +82,7 @@ GET /content/user/governance/audit-log
 **现有相关代码**:
 - Entity: `ContentUserAuditLog`（路径 `jeecg-module-content/.../user/entity/ContentUserAuditLog.java`）
 - VO: `ContentUserAuditLogVO`
-- Governance Controller: `ContentUserGovernanceController`（路径 `/content/user/governance`）
+- Governance Controller: `ContentUserGovernanceController`（路径 `/api/v1/content/user/governance`）
 - 注意：`UserStatusAuditLog` 是另一个独立的审计日志实体（用户状态变更），与治理操作审计日志不同
 
 **影响范围**: 任务 9.1-9.4（审计日志页全部功能）
@@ -97,11 +97,11 @@ GET /content/user/governance/audit-log
 
 | 功能 | API 路径 | Controller |
 |------|---------|------------|
-| 互关好友列表 | `GET /content/user/relation/mutual-follow-list` | ContentUserRelationController |
-| 粉丝列表 | `GET /content/user/fan/list` | ContentFanAnalyticsController |
-| 粉丝趋势 | `GET /content/user/fan/trend` | ContentFanAnalyticsController |
-| 邀请码生成 | `POST /content/user/invite/generate` | ContentInviteController |
-| 邀请记录 | `GET /content/user/invite/records` | ContentInviteController |
-| 邀请统计 | `GET /content/user/invite/stats` | ContentInviteController |
-| 删除评论 | `POST /content/user/governance/moderator/comment/delete` | ContentUserGovernanceController |
-| 警告用户 | `POST /content/user/governance/moderator/user/warn` | ContentUserGovernanceController |
+| 互关好友列表 | `GET /api/v1/content/user/relation/mutual-follow-list` | ContentUserRelationController |
+| 粉丝列表 | `GET /api/v1/content/user/fan/list` | ContentFanAnalyticsController |
+| 粉丝趋势 | `GET /api/v1/content/user/fan/trend` | ContentFanAnalyticsController |
+| 邀请码生成 | `POST /api/v1/content/user/invite/generate` | ContentInviteController |
+| 邀请记录 | `GET /api/v1/content/user/invite/records` | ContentInviteController |
+| 邀请统计 | `GET /api/v1/content/user/invite/stats` | ContentInviteController |
+| 删除评论 | `POST /api/v1/content/user/governance/moderator/comment/delete` | ContentUserGovernanceController |
+| 警告用户 | `POST /api/v1/content/user/governance/moderator/user/warn` | ContentUserGovernanceController |

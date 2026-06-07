@@ -15,7 +15,7 @@
 
 ### 实际后端 API 端点（ContentUserGrowthController）
 
-基础路径：`/content/user/growth`
+基础路径：`/api/v1/content/user/growth`
 
 | 端点 | 方法 | 功能 | specs 中引用的路径 | 是否匹配 |
 |------|------|------|-------------------|----------|
@@ -23,14 +23,14 @@
 | `/badge/catalog` | GET | 勋章分类目录 | `getBadgeList` | 路径不同，功能可用 |
 | `/badge/detail` | GET | 勋章详情 | `getBadgeDetail` | 路径不同，功能可用 |
 | `/badge/worn` | GET | 佩戴勋章列表 | `getWornBadges` / `getWornBadgesByUserId` | 路径不同，功能可用 |
-| `/badge/wear` | POST | 保存佩戴勋章 | `/content/user/badge/wear` | **路径错误** |
+| `/badge/wear` | POST | 保存佩戴勋章 | `/api/v1/content/user/growth/badge/wear` | **路径错误** |
 | `/badge/recycle` | POST | 回收勋章 | `/content/admin/badge/recycle` | **路径错误** |
 | `/point/ledger` | GET | 积分明细查询 | `getPointLedger` | 路径不同，功能可用 |
 | `/point/exchange/goods` | GET | 兑换商品列表 | `getExchangeGoods` | 路径不同，功能可用 |
 | `/point/exchange` | POST | 积分兑换 | `createExchange` | 路径不同，功能可用 |
-| `/point/feature/unlock` | POST | 功能解锁 | `/content/user/feature/unlock` | **路径错误** |
+| `/point/feature/unlock` | POST | 功能解锁 | `/api/v1/content/user/growth/point/feature/unlock` | **路径错误** |
 | `/point/feature/unlock` | GET | 查询功能解锁状态 | (未在 specs 中提及) | 无 |
-| `/point/gift/send` | POST | 赠送虚拟礼物 | `/content/user/gift/send` | **路径错误** |
+| `/point/gift/send` | POST | 赠送虚拟礼物 | `/api/v1/content/user/growth/point/gift/send` | **路径错误** |
 | `/level/benefit` | GET | 等级权益摘要 | (未在 specs 中提及) | 无 |
 | `/level/config` | GET | 等级配置列表 | `getLevelConfig` | 路径不同，功能可用 |
 | `/decay/rule` | GET | 衰减规则说明 | `getDecayRule` | 路径不同，功能可用 |
@@ -57,10 +57,10 @@
 
 specs 中引用了 4 个错误的 API 路径：
 
-1. `POST /content/user/badge/wear` → 实际：`POST /content/user/growth/badge/wear`
-2. `POST /content/admin/badge/recycle` → 实际：`POST /content/user/growth/badge/recycle`
-3. `POST /content/user/feature/unlock` → 实际：`POST /content/user/growth/point/feature/unlock`
-4. `POST /content/user/gift/send` → 实际：`POST /content/user/growth/point/gift/send`
+1. `POST /content/user/badge/wear` → 实际：`POST /api/v1/content/user/growth/badge/wear`
+2. `POST /content/admin/badge/recycle` → 实际：`POST /api/v1/content/user/growth/badge/recycle`
+3. `POST /content/user/feature/unlock` → 实际：`POST /api/v1/content/user/growth/point/feature/unlock`
+4. `POST /content/user/gift/send` → 实际：`POST /api/v1/content/user/growth/point/gift/send`
 
 ---
 
@@ -74,8 +74,8 @@ specs 中引用了 4 个错误的 API 路径：
 
 ### specs 问题
 
-1. **badge-system/spec.md**：引用错误 API 路径 `/content/user/badge/wear` 和 `/content/admin/badge/recycle`
-2. **point-system/spec.md**：引用错误 API 路径 `/content/user/feature/unlock` 和 `/content/user/gift/send`
+1. **badge-system/spec.md**：引用错误 API 路径 `/api/v1/content/user/growth/badge/wear` 和 `/api/v1/content/user/growth/badge/recycle`
+2. **point-system/spec.md**：引用错误 API 路径 `/api/v1/content/user/growth/point/feature/unlock` 和 `/api/v1/content/user/growth/point/gift/send`
 3. **point-system/spec.md**：ExchangeConcurrencyControl 中 requestId 幂等依赖后端未实现
 4. **growth-level/spec.md**：Level up congratulations 依赖 `levelChanged` 字段，后端未实现
 5. **decay-notice/spec.md**：用户级衰减状态查询 API 缺失
@@ -94,9 +94,9 @@ specs 中引用了 4 个错误的 API 路径：
 
 ### 立即修复（前端文档内部可修正）✅ 已完成
 
-1. ✅ **修正所有 specs 中的 API 路径**，统一使用 `/content/user/growth/` 前缀（specs 中路径已正确）
+1. ✅ **修正所有 specs 中的 API 路径**，统一使用 `/api/v1/content/user/growth/` 前缀（specs 中路径已正确）
 2. ✅ **修正 tasks.md 中的 API 封装函数名**，与实际后端端点对齐（已更新为 getBadgeCatalog、getPointLedger、getGrowthSummary 等）
-3. ✅ **将 getPointBalance 和 getLevelInfo 合并**，统一使用 `/content/user/growth/summary` 接口（tasks.md 1.3 已更新）
+3. ✅ **将 getPointBalance 和 getLevelInfo 合并**，统一使用 `/api/v1/content/user/growth/summary` 接口（tasks.md 1.3 已更新）
 4. ✅ **标注阻塞项**：design.md 和 specs 中已标注依赖后端但未实现的功能
 
 ### 需后端配合（记录到 backend-issues.md）

@@ -5,7 +5,7 @@
 
 #### Scenario: 正常展示授权列表
 - **WHEN** 用户进入第三方授权页
-- **THEN** 调用 `GET /content/user/auth/third-party`，Table 展示所有已授权应用，授权时间格式为 YYYY-MM-DD HH:mm
+- **THEN** 调用 `GET /api/v1/content/user/auth/third-party`，Table 展示所有已授权应用，授权时间格式为 YYYY-MM-DD HH:mm
 
 #### Scenario: 应用名称为 null
 - **WHEN** 授权记录的应用名称字段为 null
@@ -28,14 +28,14 @@
 
 #### Scenario: 查看授权详情
 - **WHEN** 用户点击某行的"查看详情"按钮
-- **THEN** 调用 `GET /content/user/auth/third-party/{authId}`，打开 Modal 弹窗展示该应用可访问的数据范围清单（个人资料、发布内容、联系人等）
+- **THEN** 调用 `GET /api/v1/content/user/auth/third-party/{authId}`，打开 Modal 弹窗展示该应用可访问的数据范围清单（个人资料、发布内容、联系人等）
 
 ### Requirement: 撤销第三方授权
 系统 SHALL 提供"撤销授权"按钮，点击后弹出二次确认弹窗，确认后调用撤销接口。
 
 #### Scenario: 撤销授权成功
 - **WHEN** 用户点击"撤销授权"，在确认弹窗中点击"确认撤销"
-- **THEN** 调用 `DELETE /content/user/auth/third-party/{authId}`，成功后全局提示"授权已撤销"，该行从列表中移除
+- **THEN** 调用 `DELETE /api/v1/content/user/auth/third-party/{authId}`，成功后全局提示"授权已撤销"，该行从列表中移除
 
 #### Scenario: 撤销授权确认弹窗
 - **WHEN** 用户点击"撤销授权"按钮

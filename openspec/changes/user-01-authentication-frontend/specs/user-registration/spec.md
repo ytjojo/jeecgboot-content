@@ -5,7 +5,7 @@
 
 #### Scenario: 手机号注册成功
 - **WHEN** 用户输入有效手机号、正确图形验证码、正确短信验证码，勾选协议，点击注册
-- **THEN** 系统调用 `POST /api/v1/auth/register/mobile`，注册成功后自动登录，跳转首页
+- **THEN** 系统调用 `POST /api/v1/content/auth/register/mobile`，注册成功后自动登录，跳转首页
 
 #### Scenario: 手机号已注册
 - **WHEN** 用户输入已注册的手机号并提交注册
@@ -28,7 +28,7 @@
 
 #### Scenario: 邮箱注册成功
 - **WHEN** 用户输入有效邮箱、符合强度要求的密码，勾选协议，点击注册
-- **THEN** 系统调用 `POST /api/v1/auth/register/email`，显示"验证邮件已发送至 xxx@xxx.com，请在 24 小时内完成验证"
+- **THEN** 系统调用 `POST /api/v1/content/auth/register/email`，显示"验证邮件已发送至 xxx@xxx.com，请在 24 小时内完成验证"
 
 #### Scenario: 密码强度不足
 - **WHEN** 用户输入少于 8 位或不含数字的密码
@@ -58,7 +58,7 @@
 
 #### Scenario: 用户选择兴趣标签
 - **WHEN** 用户点选至少 3 个标签，点击"开始探索"
-- **THEN** 系统调用 `POST /api/v1/user/preferences/topics`，关闭弹窗，首页内容流根据选择优先展示相关内容
+- **THEN** 系统调用 `POST /api/v1/content/user/preferences/topics`，关闭弹窗，首页内容流根据选择优先展示相关内容
 
 #### Scenario: 用户跳过引导
 - **WHEN** 用户点击"稍后设置"

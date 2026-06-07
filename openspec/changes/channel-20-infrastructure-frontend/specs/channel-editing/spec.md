@@ -1,15 +1,15 @@
 ## ADDED Requirements
 
 > **API 路径**:
-> - 查询频道详情: `GET /api/v1/channels/{id}` (已存在)
-> - 编辑频道: `PUT /api/v1/channels/{id}` (已存在)
-> - 名称唯一性校验: `GET /api/v1/channels/check-name` (已存在)
+> - 查询频道详情: `GET /api/v1/content/channels/{id}` (已存在)
+> - 编辑频道: `PUT /api/v1/content/channels/{id}` (已存在)
+> - 名称唯一性校验: `GET /api/v1/content/channels/check-name` (已存在)
 > **Controller**: ChannelController
 > **前端封装**: `src/api/content/channel/index.ts` - `getChannelDetail()`, `updateChannel()`, `checkNameUnique()`
 
 ### Requirement: 频道管理页 Tab 结构
 
-频道管理页 `/content/channel/manage/:id` SHALL 采用 Tab 结构组织内容，包含三个 Tab：概览（频道基本信息摘要 + 关键数据摘要）、编辑信息（频道信息编辑表单）、设置（转让频道、删除频道等危险操作）。页面顶部始终显示当前频道状态标签（ChannelStatusTag 组件）。默认选中 Tab 1（概览）。
+频道管理页 `/api/v1/content/channel/manage/:id` SHALL 采用 Tab 结构组织内容，包含三个 Tab：概览（频道基本信息摘要 + 关键数据摘要）、编辑信息（频道信息编辑表单）、设置（转让频道、删除频道等危险操作）。页面顶部始终显示当前频道状态标签（ChannelStatusTag 组件）。默认选中 Tab 1（概览）。
 
 #### Scenario: 进入频道管理页
 - **WHEN** 用户访问频道管理页

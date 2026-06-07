@@ -73,14 +73,14 @@
 
 #### Scenario: User unlocks a feature
 - **WHEN** 用户触发功能解锁操作
-- **THEN** 调用 POST `/content/user/growth/point/feature/unlock` API，成功后扣除积分并解锁功能
+- **THEN** 调用 POST `/api/v1/content/user/growth/point/feature/unlock` API，成功后扣除积分并解锁功能
 
 ### Requirement: Virtual gift sending
 系统 SHALL 支持使用积分赠送虚拟礼物。
 
 #### Scenario: User sends a gift
 - **WHEN** 用户在虚拟礼物赠送弹窗选择礼物并确认赠送
-- **THEN** 调用 POST `/content/user/growth/point/gift/send` API，原子性扣积分+发记录+发通知
+- **THEN** 调用 POST `/api/v1/content/user/growth/point/gift/send` API，原子性扣积分+发记录+发通知
 
 ### Requirement: Point empty state
 系统 SHALL 在无积分记录时展示空状态引导。

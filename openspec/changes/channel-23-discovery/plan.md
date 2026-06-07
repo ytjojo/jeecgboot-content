@@ -1027,7 +1027,7 @@ import java.util.List;
 
 @Tag(name = "频道分类管理")
 @RestController
-@RequestMapping("/content/channel/category")
+@RequestMapping("/api/v1/content/channel/category")
 public class ContentChannelCategoryController {
 
     @Resource
@@ -1369,7 +1369,7 @@ import java.util.List;
 
 @Tag(name = "频道标签管理")
 @RestController
-@RequestMapping("/content/channel/tag")
+@RequestMapping("/api/v1/content/channel/tag")
 public class ContentChannelTagController {
 
     @Resource
@@ -1965,7 +1965,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "频道推荐")
 @RestController
-@RequestMapping("/content/channel/recommendation")
+@RequestMapping("/api/v1/content/channel/recommendation")
 public class ContentChannelRecommendationController {
 
     @Resource
@@ -2285,7 +2285,7 @@ import java.util.List;
 
 @Tag(name = "频道排行榜")
 @RestController
-@RequestMapping("/content/channel/ranking")
+@RequestMapping("/api/v1/content/channel/ranking")
 public class ContentChannelRankingController {
 
     @Resource
@@ -2771,7 +2771,7 @@ import java.util.List;
 
 @Tag(name = "频道编辑精选")
 @RestController
-@RequestMapping("/content/channel/editorial-pick")
+@RequestMapping("/api/v1/content/channel/editorial-pick")
 public class ContentChannelEditorialPickController {
 
     @Resource
@@ -2986,7 +2986,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "频道分类浏览")
 @RestController
-@RequestMapping("/content/channel/browse")
+@RequestMapping("/api/v1/content/channel/browse")
 public class ContentChannelBrowseController {
 
     @Resource
@@ -3238,7 +3238,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "频道搜索")
 @RestController
-@RequestMapping("/content/channel/search")
+@RequestMapping("/api/v1/content/channel/search")
 public class ContentChannelSearchController {
 
     @Resource

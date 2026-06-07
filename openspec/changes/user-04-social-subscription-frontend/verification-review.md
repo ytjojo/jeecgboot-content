@@ -78,30 +78,30 @@
 
 | 端点 | 方法 | 说明 | Spec 要求 | 状态 |
 |------|------|------|-----------|------|
-| `/content/user/relation/follow` | POST | 关注用户 | ✅ Requirement 1 | ✅ 存在 |
-| `/content/user/relation/unfollow` | POST | 取消关注 | ✅ Requirement 1 | ✅ 存在 |
-| `/content/user/relation/special-follow` | POST | 特别关注用户 | ✅ Requirement 2 | ✅ 存在 |
-| `/content/user/relation/special-follow/cancel` | POST | 取消特别关注 | ✅ Requirement 2 | ✅ 存在 |
-| `/content/user/relation/groups` | GET | 查询关注分组 | ✅ Requirement 3 | ✅ 存在 |
-| `/content/user/relation/group/create` | POST | 创建关注分组 | ✅ Requirement 3 | ✅ 存在 |
-| `/content/user/relation/group/rename` | POST | 重命名关注分组 | ✅ Requirement 3 | ✅ 存在 |
-| `/content/user/relation/group/delete` | POST | 删除关注分组 | ✅ Requirement 3 | ✅ 存在 |
-| `/content/user/relation/group/move` | POST | 移动关注对象到分组 | ✅ Requirement 3 | ✅ 存在 |
-| `/content/user/relation/group/remove` | POST | 移出关注分组 | ✅ Requirement 3 | ✅ 存在 |
-| `/content/user/relation/follow-list` | GET | 分页查询关注列表 | ✅ Requirement 4 | ✅ 存在 |
-| `/content/user/relation/special-follow-list` | GET | 分页查询特别关注列表 | ✅ Requirement 5 | ✅ 存在 |
-| `/content/user/relation/recommendations` | GET | 分页查询关注推荐 | ✅ Requirement 6 | ✅ 存在 |
-| `/content/user/relation/batch/unfollow` | POST | 批量取消关注 | ✅ Requirement 7 | ✅ 存在 |
-| `/content/user/relation/batch/special-follow/cancel` | POST | 批量取消特别关注 | ✅ Requirement 7 | ✅ 存在 |
-| `/content/user/relation/feed` | GET | 分页查询关注流 | ✅ social-feed Req 1 | ✅ 存在 |
-| `/content/user/relation/mutual-follow-list` | GET | 分页查询互关好友列表 | - | ✅ 存在（额外） |
-| `/content/user/relation/detail` | GET | 查询关系 | - | ✅ 存在（额外） |
-| `/content/user/relation/block` | POST | 拉黑用户 | - | ✅ 存在（额外） |
-| `/content/user/relation/unblock` | POST | 解除拉黑 | - | ✅ 存在（额外） |
-| `/content/user/relation/mute` | POST | 屏蔽用户 | - | ✅ 存在（额外） |
-| `/content/user/relation/mute/cancel` | POST | 解除屏蔽 | - | ✅ 存在（额外） |
-| `/content/user/relation/blacklist` | GET | 分页查询黑名单 | - | ✅ 存在（额外） |
-| `/content/user/relation/block-mute/help` | GET | 获取拉黑/屏蔽帮助说明 | - | ✅ 存在（额外） |
+| `/api/v1/content/user/relation/follow` | POST | 关注用户 | ✅ Requirement 1 | ✅ 存在 |
+| `/api/v1/content/user/relation/unfollow` | POST | 取消关注 | ✅ Requirement 1 | ✅ 存在 |
+| `/api/v1/content/user/relation/special-follow` | POST | 特别关注用户 | ✅ Requirement 2 | ✅ 存在 |
+| `/api/v1/content/user/relation/special-follow/cancel` | POST | 取消特别关注 | ✅ Requirement 2 | ✅ 存在 |
+| `/api/v1/content/user/relation/groups` | GET | 查询关注分组 | ✅ Requirement 3 | ✅ 存在 |
+| `/api/v1/content/user/relation/group/create` | POST | 创建关注分组 | ✅ Requirement 3 | ✅ 存在 |
+| `/api/v1/content/user/relation/group/rename` | POST | 重命名关注分组 | ✅ Requirement 3 | ✅ 存在 |
+| `/api/v1/content/user/relation/group/delete` | POST | 删除关注分组 | ✅ Requirement 3 | ✅ 存在 |
+| `/api/v1/content/user/relation/group/move` | POST | 移动关注对象到分组 | ✅ Requirement 3 | ✅ 存在 |
+| `/api/v1/content/user/relation/group/remove` | POST | 移出关注分组 | ✅ Requirement 3 | ✅ 存在 |
+| `/api/v1/content/user/relation/follow-list` | GET | 分页查询关注列表 | ✅ Requirement 4 | ✅ 存在 |
+| `/api/v1/content/user/relation/special-follow-list` | GET | 分页查询特别关注列表 | ✅ Requirement 5 | ✅ 存在 |
+| `/api/v1/content/user/relation/recommendations` | GET | 分页查询关注推荐 | ✅ Requirement 6 | ✅ 存在 |
+| `/api/v1/content/user/relation/batch/unfollow` | POST | 批量取消关注 | ✅ Requirement 7 | ✅ 存在 |
+| `/api/v1/content/user/relation/batch/special-follow/cancel` | POST | 批量取消特别关注 | ✅ Requirement 7 | ✅ 存在 |
+| `/api/v1/content/user/relation/feed` | GET | 分页查询关注流 | ✅ social-feed Req 1 | ✅ 存在 |
+| `/api/v1/content/user/relation/mutual-follow-list` | GET | 分页查询互关好友列表 | - | ✅ 存在（额外） |
+| `/api/v1/content/user/relation/detail` | GET | 查询关系 | - | ✅ 存在（额外） |
+| `/api/v1/content/user/relation/block` | POST | 拉黑用户 | - | ✅ 存在（额外） |
+| `/api/v1/content/user/relation/unblock` | POST | 解除拉黑 | - | ✅ 存在（额外） |
+| `/api/v1/content/user/relation/mute` | POST | 屏蔽用户 | - | ✅ 存在（额外） |
+| `/api/v1/content/user/relation/mute/cancel` | POST | 解除屏蔽 | - | ✅ 存在（额外） |
+| `/api/v1/content/user/relation/blacklist` | GET | 分页查询黑名单 | - | ✅ 存在（额外） |
+| `/api/v1/content/user/relation/block-mute/help` | GET | 获取拉黑/屏蔽帮助说明 | - | ✅ 存在（额外） |
 
 **结论**: 用户关注相关 API **完全覆盖** Spec 要求，且提供了额外的功能（拉黑、屏蔽、互关好友等）。
 
@@ -113,22 +113,22 @@
 
 | 端点 | 方法 | 说明 | Spec 要求 | 状态 |
 |------|------|------|-----------|------|
-| `/content/user/subscription/subscribe` | POST | 订阅内容源 | ✅ content-subscription Req 1 | ✅ 存在 |
-| `/content/user/subscription/cancel` | POST | 取消订阅 | ✅ content-subscription Req 1 | ✅ 存在 |
-| `/content/user/subscription/pause` | POST | 暂停订阅 | ✅ content-subscription Req 2 | ✅ 存在 |
-| `/content/user/subscription/resume` | POST | 恢复订阅 | ✅ content-subscription Req 2 | ✅ 存在 |
-| `/content/user/subscription/list` | GET | 查询订阅列表 | ✅ content-subscription Req 5 | ✅ 存在 |
-| `/content/user/subscription/feed` | GET | 查询订阅流 | ✅ social-feed Req 2 | ✅ 存在 |
-| `/content/user/subscription/plaza` | GET | 查询订阅广场 | ✅ content-subscription Req 4 | ✅ 存在 |
-| `/content/user/subscription/source/detail` | GET | 查询订阅源详情 | ✅ content-subscription Req 4 | ✅ 存在 |
-| `/content/user/subscription/source/subscribe` | POST | 从订阅广场订阅内容源 | ✅ content-subscription Req 4 | ✅ 存在 |
-| `/content/user/subscription/source/save` | POST | 写入订阅源目录 | - | ✅ 存在（额外） |
-| `/content/user/subscription/batch/pause` | POST | 批量暂停订阅 | ✅ content-subscription Req 5 | ✅ 存在 |
-| `/content/user/subscription/batch/resume` | POST | 批量恢复订阅 | ✅ content-subscription Req 5 | ✅ 存在 |
-| `/content/user/subscription/batch/cancel` | POST | 批量取消订阅 | ✅ content-subscription Req 5 | ✅ 存在 |
-| `/content/user/subscription/notification/preference` | POST | 保存订阅级通知偏好 | ✅ content-subscription Req 3 | ✅ 存在 |
-| `/content/user/subscription/notification/preference` | GET | 查询订阅级有效通知偏好 | ✅ content-subscription Req 3 | ✅ 存在 |
-| `/content/user/subscription/notification/decision` | GET | 计算订阅源更新通知决策 | - | ✅ 存在（额外） |
+| `/api/v1/content/user/subscription/subscribe` | POST | 订阅内容源 | ✅ content-subscription Req 1 | ✅ 存在 |
+| `/api/v1/content/user/subscription/cancel` | POST | 取消订阅 | ✅ content-subscription Req 1 | ✅ 存在 |
+| `/api/v1/content/user/subscription/pause` | POST | 暂停订阅 | ✅ content-subscription Req 2 | ✅ 存在 |
+| `/api/v1/content/user/subscription/resume` | POST | 恢复订阅 | ✅ content-subscription Req 2 | ✅ 存在 |
+| `/api/v1/content/user/subscription/list` | GET | 查询订阅列表 | ✅ content-subscription Req 5 | ✅ 存在 |
+| `/api/v1/content/user/subscription/feed` | GET | 查询订阅流 | ✅ social-feed Req 2 | ✅ 存在 |
+| `/api/v1/content/user/subscription/plaza` | GET | 查询订阅广场 | ✅ content-subscription Req 4 | ✅ 存在 |
+| `/api/v1/content/user/subscription/source/detail` | GET | 查询订阅源详情 | ✅ content-subscription Req 4 | ✅ 存在 |
+| `/api/v1/content/user/subscription/source/subscribe` | POST | 从订阅广场订阅内容源 | ✅ content-subscription Req 4 | ✅ 存在 |
+| `/api/v1/content/user/subscription/source/save` | POST | 写入订阅源目录 | - | ✅ 存在（额外） |
+| `/api/v1/content/user/subscription/batch/pause` | POST | 批量暂停订阅 | ✅ content-subscription Req 5 | ✅ 存在 |
+| `/api/v1/content/user/subscription/batch/resume` | POST | 批量恢复订阅 | ✅ content-subscription Req 5 | ✅ 存在 |
+| `/api/v1/content/user/subscription/batch/cancel` | POST | 批量取消订阅 | ✅ content-subscription Req 5 | ✅ 存在 |
+| `/api/v1/content/user/subscription/notification/preference` | POST | 保存订阅级通知偏好 | ✅ content-subscription Req 3 | ✅ 存在 |
+| `/api/v1/content/user/subscription/notification/preference` | GET | 查询订阅级有效通知偏好 | ✅ content-subscription Req 3 | ✅ 存在 |
+| `/api/v1/content/user/subscription/notification/decision` | GET | 计算订阅源更新通知决策 | - | ✅ 存在（额外） |
 
 **结论**: 内容订阅相关 API **完全覆盖** Spec 要求，且提供了额外的功能（订阅源目录管理、通知决策等）。
 
@@ -230,37 +230,37 @@
      ## API Endpoints
 
      ### 用户关注相关 API
-     - `POST /content/user/relation/follow` - 关注用户
-     - `POST /content/user/relation/unfollow` - 取消关注
-     - `POST /content/user/relation/special-follow` - 特别关注用户
-     - `POST /content/user/relation/special-follow/cancel` - 取消特别关注
-     - `GET /content/user/relation/groups` - 查询关注分组
-     - `POST /content/user/relation/group/create` - 创建关注分组
-     - `POST /content/user/relation/group/rename` - 重命名关注分组
-     - `POST /content/user/relation/group/delete` - 删除关注分组
-     - `POST /content/user/relation/group/move` - 移动关注对象到分组
-     - `GET /content/user/relation/follow-list` - 分页查询关注列表
-     - `GET /content/user/relation/special-follow-list` - 分页查询特别关注列表
-     - `GET /content/user/relation/recommendations` - 分页查询关注推荐
-     - `POST /content/user/relation/batch/unfollow` - 批量取消关注
-     - `POST /content/user/relation/batch/special-follow/cancel` - 批量取消特别关注
-     - `GET /content/user/relation/feed` - 分页查询关注流
+     - `POST /api/v1/content/user/relation/follow` - 关注用户
+     - `POST /api/v1/content/user/relation/unfollow` - 取消关注
+     - `POST /api/v1/content/user/relation/special-follow` - 特别关注用户
+     - `POST /api/v1/content/user/relation/special-follow/cancel` - 取消特别关注
+     - `GET /api/v1/content/user/relation/groups` - 查询关注分组
+     - `POST /api/v1/content/user/relation/group/create` - 创建关注分组
+     - `POST /api/v1/content/user/relation/group/rename` - 重命名关注分组
+     - `POST /api/v1/content/user/relation/group/delete` - 删除关注分组
+     - `POST /api/v1/content/user/relation/group/move` - 移动关注对象到分组
+     - `GET /api/v1/content/user/relation/follow-list` - 分页查询关注列表
+     - `GET /api/v1/content/user/relation/special-follow-list` - 分页查询特别关注列表
+     - `GET /api/v1/content/user/relation/recommendations` - 分页查询关注推荐
+     - `POST /api/v1/content/user/relation/batch/unfollow` - 批量取消关注
+     - `POST /api/v1/content/user/relation/batch/special-follow/cancel` - 批量取消特别关注
+     - `GET /api/v1/content/user/relation/feed` - 分页查询关注流
 
      ### 内容订阅相关 API
-     - `POST /content/user/subscription/subscribe` - 订阅内容源
-     - `POST /content/user/subscription/cancel` - 取消订阅
-     - `POST /content/user/subscription/pause` - 暂停订阅
-     - `POST /content/user/subscription/resume` - 恢复订阅
-     - `GET /content/user/subscription/list` - 查询订阅列表
-     - `GET /content/user/subscription/feed` - 查询订阅流
-     - `GET /content/user/subscription/plaza` - 查询订阅广场
-     - `GET /content/user/subscription/source/detail` - 查询订阅源详情
-     - `POST /content/user/subscription/source/subscribe` - 从订阅广场订阅内容源
-     - `POST /content/user/subscription/batch/pause` - 批量暂停订阅
-     - `POST /content/user/subscription/batch/resume` - 批量恢复订阅
-     - `POST /content/user/subscription/batch/cancel` - 批量取消订阅
-     - `POST /content/user/subscription/notification/preference` - 保存订阅级通知偏好
-     - `GET /content/user/subscription/notification/preference` - 查询订阅级有效通知偏好
+     - `POST /api/v1/content/user/subscription/subscribe` - 订阅内容源
+     - `POST /api/v1/content/user/subscription/cancel` - 取消订阅
+     - `POST /api/v1/content/user/subscription/pause` - 暂停订阅
+     - `POST /api/v1/content/user/subscription/resume` - 恢复订阅
+     - `GET /api/v1/content/user/subscription/list` - 查询订阅列表
+     - `GET /api/v1/content/user/subscription/feed` - 查询订阅流
+     - `GET /api/v1/content/user/subscription/plaza` - 查询订阅广场
+     - `GET /api/v1/content/user/subscription/source/detail` - 查询订阅源详情
+     - `POST /api/v1/content/user/subscription/source/subscribe` - 从订阅广场订阅内容源
+     - `POST /api/v1/content/user/subscription/batch/pause` - 批量暂停订阅
+     - `POST /api/v1/content/user/subscription/batch/resume` - 批量恢复订阅
+     - `POST /api/v1/content/user/subscription/batch/cancel` - 批量取消订阅
+     - `POST /api/v1/content/user/subscription/notification/preference` - 保存订阅级通知偏好
+     - `GET /api/v1/content/user/subscription/notification/preference` - 查询订阅级有效通知偏好
      ```
 
 2. **补充 API 请求/响应格式**
@@ -277,8 +277,8 @@
      ### Requirement: 关注与取消关注功能
 
      **API Endpoints**:
-     - `POST /content/user/relation/follow` - 关注用户
-     - `POST /content/user/relation/unfollow` - 取消关注
+     - `POST /api/v1/content/user/relation/follow` - 关注用户
+     - `POST /api/v1/content/user/relation/unfollow` - 取消关注
 
      系统 SHALL 支持用户关注和取消关注其他用户...
      ```

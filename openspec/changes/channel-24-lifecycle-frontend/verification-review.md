@@ -42,7 +42,7 @@
 
 ### 2.1 统计看板 API (ChannelStatsController)
 
-**基础路径**: `/jeecg-boot/api/v1/content/channel/stats`
+**基础路径**: `/api/v1/content/channel/stats`
 
 | API | 设计要求 | 实际存在 | 状态 |
 |-----|----------|----------|------|
@@ -62,7 +62,7 @@
 
 ### 2.2 数据导出 API (ChannelExportController)
 
-**基础路径**: `/jeecg-boot/api/v1/content/channel/export`
+**基础路径**: `/api/v1/content/channel/export`
 
 | API | 设计要求 | 实际存在 | 状态 |
 |-----|----------|----------|------|
@@ -80,7 +80,7 @@
 
 ### 2.3 审核管理 API (ChannelReviewController)
 
-**基础路径**: `/jeecg-boot/api/v1/content/channel/review`
+**基础路径**: `/api/v1/content/channel/review`
 
 | API | 设计要求 | 实际存在 | 状态 |
 |-----|----------|----------|------|
@@ -97,7 +97,7 @@
 
 ### 2.4 生命周期管理 API (ChannelLifecycleController)
 
-**基础路径**: `/jeecg-boot/api/v1/content/channel/lifecycle`
+**基础路径**: `/api/v1/content/channel/lifecycle`
 
 | API | 设计要求 | 实际存在 | 状态 |
 |-----|----------|----------|------|
@@ -122,7 +122,7 @@
 
 ### 2.5 审计日志 API
 
-**当前实现**: 审计日志通过 `/jeecg-boot/api/v1/content/channel/lifecycle/logs` 访问
+**当前实现**: 审计日志通过 `/api/v1/content/channel/lifecycle/logs` 访问
 
 | API | 设计要求 | 实际存在 | 状态 |
 |-----|----------|----------|------|
@@ -139,7 +139,7 @@
 
 ### 2.6 申诉管理 API
 
-**当前实现**: 申诉管理通过 `/jeecg-boot/api/v1/content/channel/lifecycle/appeal/` 访问
+**当前实现**: 申诉管理通过 `/api/v1/content/channel/lifecycle/appeal/` 访问
 
 | API | 设计要求 | 实际存在 | 状态 |
 |-----|----------|----------|------|
@@ -178,7 +178,7 @@
 
 | # | 问题 | 位置 | 建议修复方案 |
 |---|------|------|--------------|
-| 1 | API 路径不一致 | design.md | 统一使用 `/jeecg-boot/api/v1/content/channel/` 前缀 |
+| 1 | API 路径不一致 | design.md | 统一使用 `/api/v1/content/channel/` 前缀 |
 | 2 | 审计日志 API 位置分散 | design.md | 考虑将审计日志独立为 `/audit-log` 路径 |
 
 ---

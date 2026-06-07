@@ -31,7 +31,7 @@
 
 #### Scenario: 查询用户状态历史
 - GIVEN: 用户 ID 为 user001
-- WHEN: 调用 GET /api/content/user-status-audit/user/{userId}
+- WHEN: 调用 GET /api/v1/content/user-status-audit/user/{userId}
 - THEN: 返回该用户按时间倒序排列的所有状态变更记录
 
 #### Scenario: 时间范围筛选

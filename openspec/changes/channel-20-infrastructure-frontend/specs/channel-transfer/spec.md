@@ -1,11 +1,11 @@
 ## ADDED Requirements
 
 > **API 路径**:
-> - 发起转让: `POST /api/v1/channels/{id}/transfer` (已存在)
-> - 确认转让: `POST /api/v1/channels/transfer/{transferId}/confirm` (已存在)
-> - 拒绝转让: `POST /api/v1/channels/transfer/{transferId}/reject` (已存在)
-> - 转让历史查询: `GET /api/v1/channels/{id}/transfers` (已存在)
-> - 待确认转让查询: `GET /api/v1/channels/{id}/transfer/pending` (已存在)
+> - 发起转让: `POST /api/v1/content/channels/{id}/transfer` (已存在)
+> - 确认转让: `POST /api/v1/content/channels/transfer/{transferId}/confirm` (已存在)
+> - 拒绝转让: `POST /api/v1/content/channels/transfer/{transferId}/reject` (已存在)
+> - 转让历史查询: `GET /api/v1/content/channels/{id}/transfers` (已存在)
+> - 待确认转让查询: `GET /api/v1/content/channels/{id}/transfer/pending` (已存在)
 > **Controller**: ChannelController
 > **前端封装**: `src/api/content/channel/index.ts` - `transferChannel()`, `confirmTransfer()`, `rejectTransfer()`, `getTransferHistory()`
 

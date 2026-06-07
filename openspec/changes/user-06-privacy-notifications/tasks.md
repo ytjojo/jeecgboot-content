@@ -27,7 +27,7 @@
 - [x] 4.4 测试：验证 mapper CRUD，特别是按 userId 查询和按 authId + userId 撤销
 - [x] 4.5 新建 `IContentUserThirdPartyAuthService` 和 `ContentUserThirdPartyAuthServiceImpl`（列出授权、撤销授权）
 - [x] 4.6 测试：验证撤销授权后 token hash 被清除、状态标记为 revoked、再次访问被拒绝
-- [x] 4.7 新建 `ContentUserThirdPartyAuthController`（GET /content/user/auth/third-party, DELETE /content/user/auth/third-party/{authId}）
+- [x] 4.7 新建 `ContentUserThirdPartyAuthController`（GET /content/user/auth/third-party, DELETE /api/v1/content/user/auth/third-party/{authId}）
 - [x] 4.8 测试：验证接口鉴权——未登录返回 401，越权操作返回 403
 
 ## 5. 账户安全设置聚合接口

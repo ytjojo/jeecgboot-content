@@ -121,7 +121,7 @@ Redis key 建议：
 2. 扩展 `content_user_badge_definition` 和 `content_user_badge_grant` 的展示、进度、回收、佩戴排序相关字段。
 3. 为 `content_user_point_ledger`、`content_user_growth_ledger` 补齐 source description、event id、rule snapshot 等可选审计字段。
 4. 初始化默认积分规则、成长规则、等级阈值、等级权益和基础勋章定义。
-5. 发布统一奖励事件入口，保留旧 `/content/user/growth/record` 作为兼容入口但内部委托新编排。
+5. 发布统一奖励事件入口，保留旧 `/api/v1/content/user/growth/record` 作为兼容入口但内部委托新编排。
 6. 开启 Redis 上限计数和幂等锁，观察奖励发放量、上限命中、重复事件、消费失败率。
 7. 最后开启经验衰减定时任务，先 dry-run 记录待衰减用户，再启用真实扣减。
 

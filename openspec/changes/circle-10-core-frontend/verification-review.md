@@ -23,27 +23,27 @@
 
 | 设计文档名称 | 实际路径 | 方法 | 控制器 |
 |-------------|---------|------|--------|
-| createCircle | `/content/circle/create` | POST | CircleController |
-| updateCircle | `/content/circle/update` | PUT | CircleController |
-| joinCircle | `/content/circle/join` | POST | CircleController |
-| quitCircle | `/content/circle/leave` | POST | CircleController |
-| setModerator | `/content/circle/member/change-role` | POST | CircleMemberController |
-| muteMember | `/content/circle/member/mute` | POST | CircleMemberController |
-| unmuteMember | `/content/circle/member/unmute` | POST | CircleMemberController |
-| removeMember | `/content/circle/member/remove` | POST | CircleMemberController |
+| createCircle | `/api/v1/content/circle/create` | POST | CircleController |
+| updateCircle | `/api/v1/content/circle/update` | PUT | CircleController |
+| joinCircle | `/api/v1/content/circle/join` | POST | CircleController |
+| quitCircle | `/api/v1/content/circle/leave` | POST | CircleController |
+| setModerator | `/api/v1/content/circle/member/change-role` | POST | CircleMemberController |
+| muteMember | `/api/v1/content/circle/member/mute` | POST | CircleMemberController |
+| unmuteMember | `/api/v1/content/circle/member/unmute` | POST | CircleMemberController |
+| removeMember | `/api/v1/content/circle/member/remove` | POST | CircleMemberController |
 
-**注意**: searchCircles (`GET /content/circle/search`) 也存在，由 CircleSearchController 提供。
+**注意**: searchCircles (`GET /api/v1/content/circle/search`) 也存在，由 CircleSearchController 提供。
 
 ### 2.2 缺失的 API（6 个）
 
 | 设计文档名称 | 期望路径 | 缺失影响 | 严重程度 |
 |-------------|---------|---------|---------|
-| **getCircleDetail** | `GET /content/circle/{id}` | 详情页无法加载 | **P0 阻塞** |
-| **getMyCircleList** | `GET /content/circle/my-list` | 已加入 Tab 无法加载 | **P0 阻塞** |
-| **getPublicCircleList** | `GET /content/circle/public-list` | 发现 Tab 无法加载 | **P0 阻塞** |
-| **checkCircleName** | `GET /content/circle/check-name` | 名称唯一性校验无法调用 | **P1 重要** |
-| **getMemberList** | `GET /content/circle/member/list` | 成员管理页无法加载 | **P0 阻塞** |
-| **getGovernanceLogList** | `GET /content/circle/governance-log/list` | 治理日志页无法加载 | **P1 重要** |
+| **getCircleDetail** | `GET /api/v1/content/circle/{id}` | 详情页无法加载 | **P0 阻塞** |
+| **getMyCircleList** | `GET /api/v1/content/circle/my-list` | 已加入 Tab 无法加载 | **P0 阻塞** |
+| **getPublicCircleList** | `GET /api/v1/content/circle/public-list` | 发现 Tab 无法加载 | **P0 阻塞** |
+| **checkCircleName** | `GET /api/v1/content/circle/check-name` | 名称唯一性校验无法调用 | **P1 重要** |
+| **getMemberList** | `GET /api/v1/content/circle/member/list` | 成员管理页无法加载 | **P0 阻塞** |
+| **getGovernanceLogList** | `GET /api/v1/content/circle/governance-log/list` | 治理日志页无法加载 | **P1 重要** |
 
 ### 2.3 已有但未在设计中引用的 API
 
@@ -88,7 +88,7 @@ creatorId, memberCount, maxMemberCount, status, joined, myRole, createTime
 
 | 设计文档 | 后端实际 | 建议 |
 |---------|---------|------|
-| quitCircle | `/content/circle/leave` | 前端 API 封装使用 `leaveCircle` 名称，与后端一致 |
+| quitCircle | `/api/v1/content/circle/leave` | 前端 API 封装使用 `leaveCircle` 名称，与后端一致 |
 
 ---
 
@@ -137,15 +137,15 @@ creatorId, memberCount, maxMemberCount, status, joined, myRole, createTime
 
 ### 6.1 后端需补充的接口（P0 — 阻塞前端开发）
 
-1. **圈子详情接口**: `GET /content/circle/{id}` 返回 CircleVO（需补充 applyStatus、isInvited 字段）
-2. **我的圈子列表**: `GET /content/circle/my-list` 分页返回当前用户已加入的圈子
-3. **公开圈子列表**: `GET /content/circle/public-list` 分页返回公开圈子
-4. **成员列表接口**: `GET /content/circle/member/list?circleId=xxx` 分页返回成员列表
+1. **圈子详情接口**: `GET /api/v1/content/circle/{id}` 返回 CircleVO（需补充 applyStatus、isInvited 字段）
+2. **我的圈子列表**: `GET /api/v1/content/circle/my-list` 分页返回当前用户已加入的圈子
+3. **公开圈子列表**: `GET /api/v1/content/circle/public-list` 分页返回公开圈子
+4. **成员列表接口**: `GET /api/v1/content/circle/member/list?circleId=xxx` 分页返回成员列表
 
 ### 6.2 后端需补充的接口（P1 — 影响功能完整性）
 
-5. **名称唯一性校验**: `GET /content/circle/check-name?name=xxx` 暴露已有 service 方法
-6. **治理日志查询**: `GET /content/circle/{circleId}/governance-log` 分页查询治理日志
+5. **名称唯一性校验**: `GET /api/v1/content/circle/check-name?name=xxx` 暴露已有 service 方法
+6. **治理日志查询**: `GET /api/v1/content/circle/{circleId}/governance-log` 分页查询治理日志
 
 ### 6.3 后端需补充的字段
 

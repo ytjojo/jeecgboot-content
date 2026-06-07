@@ -11,17 +11,17 @@
 
 | 前端文档路径 | 实际后端路径 | HTTP 方法 | 偏差类型 |
 |-------------|-------------|-----------|---------|
-| `/content/user/profile/detail` | `/content/user/profile/detail` | GET | 无偏差 |
-| `/content/user/profile/update` | `/content/user/profile/update` | POST | 无偏差 |
-| `/content/user/profile/review/handle` | `/content/user/profile/review/handle` | POST | 无偏差（前端不对接） |
-| `/content/user/profile/privacy/update` | `/content/user/profile/privacy/update` | POST | 无偏差 |
-| `/content/user/profile/homepage/update` | `/content/user/profile/homepage/update` | POST | 无偏差 |
-| `/content/user/profile/homepage/defaults/restore` | `/content/user/profile/homepage/defaults/restore` | POST | 无偏差 |
-| `/content/user/profile/homepage/modules` | `/content/user/profile/homepage/modules` | GET | 无偏差 |
-| `/content/user/profile/badge/list` | `/content/user/profile/badge/list` | GET | 无偏差 |
-| `/content/user/profile/badge/detail` | `/content/user/profile/badge/detail` | GET | 无偏差 |
-| `/content/user/profile/history/list` | `/content/user/profile/history/list` | GET | 无偏差 |
-| `/content/user/profile/history/restore` | `/content/user/profile/history/restore` | POST | 无偏差 |
+| `/api/v1/content/user/profile/detail` | `/api/v1/content/user/profile/detail` | GET | 无偏差 |
+| `/api/v1/content/user/profile/update` | `/api/v1/content/user/profile/update` | POST | 无偏差 |
+| `/api/v1/content/user/profile/review/handle` | `/api/v1/content/user/profile/review/handle` | POST | 无偏差（前端不对接） |
+| `/api/v1/content/user/profile/privacy/update` | `/api/v1/content/user/profile/privacy/update` | POST | 无偏差 |
+| `/api/v1/content/user/profile/homepage/update` | `/api/v1/content/user/profile/homepage/update` | POST | 无偏差 |
+| `/api/v1/content/user/profile/homepage/defaults/restore` | `/api/v1/content/user/profile/homepage/defaults/restore` | POST | 无偏差 |
+| `/api/v1/content/user/profile/homepage/modules` | `/api/v1/content/user/profile/homepage/modules` | GET | 无偏差 |
+| `/api/v1/content/user/profile/badge/list` | `/api/v1/content/user/profile/badge/list` | GET | 无偏差 |
+| `/api/v1/content/user/profile/badge/detail` | `/api/v1/content/user/profile/badge/detail` | GET | 无偏差 |
+| `/api/v1/content/user/profile/history/list` | `/api/v1/content/user/profile/history/list` | GET | 无偏差 |
+| `/api/v1/content/user/profile/history/restore` | `/api/v1/content/user/profile/history/restore` | POST | 无偏差 |
 
 > **结论**：所有 API 路径完全一致，无偏差。
 
@@ -80,6 +80,6 @@
 ## 五、实施建议
 
 1. **前端 API 封装层**：所有 POST 端点返回类型应声明为 `Promise<string>`（非 VO 类型），避免前端解析错误
-2. **数据刷新策略**：所有写入操作成功后，统一调用 `GET /content/user/profile/detail` 刷新本地缓存
+2. **数据刷新策略**：所有写入操作成功后，统一调用 `GET /api/v1/content/user/profile/detail` 刷新本地缓存
 3. **错误处理**：后端返回的 `Result<String>` 中 `success=false` 时，前端应展示 `message` 字段内容
 4. **隐私设置特殊处理**：`onlineStatusVisibility` 字段使用 `PUBLIC|HIDDEN|MUTUAL_ONLY` 三值枚举，与其他 14 个 visibility 字段的四值枚举不同，前端 Select 组件需动态切换选项

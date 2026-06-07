@@ -19,7 +19,7 @@
 - [x] 3.1 创建 UserStatusAuditLogMapper（含 XML 映射文件）
 - [x] 3.2 编写 UserStatusAuditLogServiceTest 测试用例：日志写入、按用户查询、时间范围筛选、防篡改
 - [x] 3.3 实现 UserStatusAuditLogService：日志写入、查询、导出
-- [x] 3.4 实现审计日志查询接口 GET /api/content/user-status-audit/user/{userId}
+- [x] 3.4 实现审计日志查询接口 GET /api/v1/content/user-status-audit/user/{userId}
 
 ## 4. 功能限制策略（先写测试）
 
@@ -38,7 +38,7 @@
 
 - [x] 6.1 编写 UserStatusAutoReleaseSchedulerTest 测试用例：到期解禁、永久封禁跳过、异常处理
 - [x] 6.2 实现 UserStatusAutoReleaseScheduler 定时任务（每 5 分钟扫描）
-- [x] 6.3 实现人工解禁接口 POST /api/content/user-status/{userId}/release
+- [x] 6.3 实现人工解禁接口 POST /api/v1/content/user-status/{userId}/release
 - [ ] 6.4 实现申诉恢复回调接口（与 EPIC-08 集成）
 - [ ] 6.5 实现解禁通知（站内消息）
 

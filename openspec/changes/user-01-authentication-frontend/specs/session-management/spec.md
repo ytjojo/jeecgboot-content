@@ -5,7 +5,7 @@
 
 #### Scenario: 查看设备列表
 - **WHEN** 用户进入个人中心 → 账号安全 → 设备管理
-- **THEN** 系统调用 `GET /api/v1/account-security/devices`，按最后登录时间倒序显示设备列表
+- **THEN** 系统调用 `GET /api/v1/content/account-security/devices`，按最后登录时间倒序显示设备列表
 
 #### Scenario: 设备列表为空
 - **WHEN** 用户所有设备已下线
@@ -20,7 +20,7 @@
 
 #### Scenario: 下线非当前设备
 - **WHEN** 用户点击非当前设备的"下线"按钮并确认
-- **THEN** 系统调用 `POST /api/v1/account-security/devices/revoke`，设备从列表移除，显示"已下线"消息提示
+- **THEN** 系统调用 `POST /api/v1/content/account-security/devices/revoke`，设备从列表移除，显示"已下线"消息提示
 
 #### Scenario: 当前设备下线按钮禁用
 - **WHEN** 用户查看当前设备
@@ -35,11 +35,11 @@
 
 #### Scenario: 信任设备
 - **WHEN** 用户点击未信任设备的"信任设备"按钮并确认
-- **THEN** 系统调用 `POST /api/v1/account-security/devices/trust`，设备信任状态标签变为"信任"（绿色）
+- **THEN** 系统调用 `POST /api/v1/content/account-security/devices/trust`，设备信任状态标签变为"信任"（绿色）
 
 #### Scenario: 取消信任
 - **WHEN** 用户点击信任设备的"取消信任"按钮并确认
-- **THEN** 系统调用 `POST /api/v1/account-security/devices/untrust`，标签变为"未信任"
+- **THEN** 系统调用 `POST /api/v1/content/account-security/devices/untrust`，标签变为"未信任"
 
 #### Scenario: 当前设备信任状态不可修改
 - **WHEN** 用户查看当前设备

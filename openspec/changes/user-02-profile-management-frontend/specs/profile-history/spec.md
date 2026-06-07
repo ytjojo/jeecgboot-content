@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: History record page
-系统 SHALL 提供历史记录页面，通过 Tabs 切换"昵称历史"和"头像历史"。每种类型调用 `GET /content/user/profile/history/list?userId=X&historyType=NICKNAME|AVATAR` 加载。
+系统 SHALL 提供历史记录页面，通过 Tabs 切换"昵称历史"和"头像历史"。每种类型调用 `GET /api/v1/content/user/profile/history/list?userId=X&historyType=NICKNAME|AVATAR` 加载。
 
 #### Scenario: Load nickname history
 - **WHEN** 用户进入历史记录页并默认显示"昵称历史" Tab
@@ -16,7 +16,7 @@
 - **THEN** 显示空状态插图和文案"暂无历史记录"
 
 ### Requirement: Restore historical value
-系统 SHALL 支持恢复曾用昵称和头像，恢复操作调用 `POST /content/user/profile/history/restore?userId=X&historyId=Y`，后端返回 `Result<ContentUserProfileVO>`，前端恢复成功后重新调用 `GET /detail` 获取最新数据。
+系统 SHALL 支持恢复曾用昵称和头像，恢复操作调用 `POST /api/v1/content/user/profile/history/restore?userId=X&historyId=Y`，后端返回 `Result<ContentUserProfileVO>`，前端恢复成功后重新调用 `GET /detail` 获取最新数据。
 
 #### Scenario: Restore historical nickname
 - **WHEN** 用户点击某条昵称记录的"恢复"按钮

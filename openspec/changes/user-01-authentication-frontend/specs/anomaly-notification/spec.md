@@ -9,7 +9,7 @@
 
 #### Scenario: 确认本人操作
 - **WHEN** 用户点击"是我本人操作"
-- **THEN** 调用 `POST /api/v1/account-security/anomaly/confirm`，弹窗关闭，后续该设备不再弹出提醒
+- **THEN** 调用 `POST /api/v1/content/account-security/anomaly/confirm`，弹窗关闭，后续该设备不再弹出提醒
 
 #### Scenario: 否认操作并下线
 - **WHEN** 用户点击"不是我，立即下线"
@@ -20,7 +20,7 @@
 
 #### Scenario: 查看历史通知
 - **WHEN** 用户进入消息中心查看异常登录通知
-- **THEN** 调用 `GET /api/v1/account-security/anomaly-notifications`，显示通知列表
+- **THEN** 调用 `GET /api/v1/content/account-security/anomaly-notifications`，显示通知列表
 
 #### Scenario: 已处理通知状态
 - **WHEN** 通知已被处理

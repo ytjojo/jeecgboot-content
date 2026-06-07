@@ -19,20 +19,20 @@
 
 | # | API | 路径 | Controller 方法 | 状态 |
 |---|-----|------|-----------------|------|
-| 1 | getCurrentStatus | GET /api/content/user-status/current?userId={userId} | getCurrentUserStatus() | ✅ |
-| 2 | getUserStatus | GET /api/content/user-status/{userId} | getUserStatus() | ✅ |
-| 3 | changeUserStatus | POST /api/content/user-status/{userId}/change | changeUserStatus() | ✅ |
-| 4 | getStatusHistory | GET /api/content/user-status/{userId}/history | getUserStatusHistory() | ✅ |
-| 5 | releaseUser | POST /api/content/user-status/{userId}/release | releaseUserStatus() | ✅ |
-| 6 | getTransitions | GET /api/content/user-status/transitions/{currentStatus} | getTransitions() | ✅ |
-| 7 | getStatusList | GET /api/content/user-status/list | getStatusList() | ✅ |
-| 8 | sendVerifyCode | POST /api/content/user-status/send-verify-code | sendVerifyCode() | ✅ |
-| 9 | verifySecurity | POST /api/content/user-status/verify-security | verifySecurity() | ✅ |
-| 10 | getAuditLogList | GET /api/content/user-status/audit-logs | getAuditLogList() | ✅ |
-| 11 | getAuditLogDetail | GET /api/content/user-status/audit-logs/{logId} | getAuditLogDetail() | ✅ |
-| 12 | batchReleaseUsers | POST /api/content/user-status/batch-release | batchReleaseUsers() | ✅ |
-| 13 | exportAuditLogs | GET /api/content/user-status/audit-logs/export | exportAuditLogs() | ✅ |
-| 14 | getUserAuditLogs | GET /api/content/user-status/users/{userId}/audit-logs | getUserAuditLogs() | ✅ |
+| 1 | getCurrentStatus | GET /api/v1/content/user-status/current?userId={userId} | getCurrentUserStatus() | ✅ |
+| 2 | getUserStatus | GET /api/v1/content/user-status/{userId} | getUserStatus() | ✅ |
+| 3 | changeUserStatus | POST /api/v1/content/user-status/{userId}/change | changeUserStatus() | ✅ |
+| 4 | getStatusHistory | GET /api/v1/content/user-status/{userId}/history | getUserStatusHistory() | ✅ |
+| 5 | releaseUser | POST /api/v1/content/user-status/{userId}/release | releaseUserStatus() | ✅ |
+| 6 | getTransitions | GET /api/v1/content/user-status/transitions/{currentStatus} | getTransitions() | ✅ |
+| 7 | getStatusList | GET /api/v1/content/user-status/list | getStatusList() | ✅ |
+| 8 | sendVerifyCode | POST /api/v1/content/user-status/send-verify-code | sendVerifyCode() | ✅ |
+| 9 | verifySecurity | POST /api/v1/content/user-status/verify-security | verifySecurity() | ✅ |
+| 10 | getAuditLogList | GET /api/v1/content/user-status/audit-logs | getAuditLogList() | ✅ |
+| 11 | getAuditLogDetail | GET /api/v1/content/user-status/audit-logs/{logId} | getAuditLogDetail() | ✅ |
+| 12 | batchReleaseUsers | POST /api/v1/content/user-status/batch-release | batchReleaseUsers() | ✅ |
+| 13 | exportAuditLogs | GET /api/v1/content/user-status/audit-logs/export | exportAuditLogs() | ✅ |
+| 14 | getUserAuditLogs | GET /api/v1/content/user-status/users/{userId}/audit-logs | getUserAuditLogs() | ✅ |
 
 ### 参数注意点
 

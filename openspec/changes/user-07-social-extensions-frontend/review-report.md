@@ -80,7 +80,7 @@
 | # | 级别 | 问题 | 位置 |
 |---|------|------|------|
 | S-1 | FLAG | **PRD API 路径与 Specs 严重不一致** — PRD 使用旧路径模式 `content/{feature}`，specs 已修正为实际后端路径 `content/user/{feature}`。共 11 处不一致。此问题会导致开发者困惑：以 PRD 为准还是以 spec 为准？ | PRD Section 5 全部 API 表 |
-| S-2 | FLAG | **PRD 邀请码生成方法错误** — PRD 写 `GET /content/invite/code`（获取/生成），spec 已修正为 `POST /content/user/invite/generate`（显式生成）。PRD 语义暗示"首次自动生成后续复用"，但实际是 POST 显式生成 | PRD L464 vs invite-system spec L8 |
+| S-2 | FLAG | **PRD 邀请码生成方法错误** — PRD 写 `GET /content/invite/code`（获取/生成），spec 已修正为 `POST /api/v1/content/user/invite/generate`（显式生成）。PRD 语义暗示"首次自动生成后续复用"，但实际是 POST 显式生成 | PRD L464 vs invite-system spec L8 |
 | S-3 | FLAG | **design.md 文件结构与 tasks.md 不一致** — design.md 列出 `MutualFollowList.vue`、`FanList.vue`、`FanTrend.vue`、`InviteShare.vue` 等文件名，但 tasks.md 使用 `index.vue` 命名模式（如 `mutual-follow/index.vue`、`fan/index.vue`）。实际代码使用 `index.vue` 模式 | design.md L158-169 vs tasks.md |
 
 ### 3.3 可实现性 (Feasibility) — 9/10
@@ -127,7 +127,7 @@
 
 | # | 级别 | 问题 | 位置 |
 |---|------|------|------|
-| A-1 | BLOCK | **3 个后端端点缺失，阻塞对应前端功能** — (1) `GET /content/user/relation/mutual-status` 阻塞增量评论互关标识；(2) `GET /content/user/invite/info/{inviteCode}` 阻塞邀请落地页全部功能（6.1-6.6）；(3) `GET /content/user/governance/audit-log` 阻塞审计日志页全部功能（9.1-9.4）。tasks.md 将这些任务标记为"完成"，但后端接口不存在 | backend-issues.md |
+| A-1 | BLOCK | **3 个后端端点缺失，阻塞对应前端功能** — (1) `GET /api/v1/content/user/relation/mutual-status` 阻塞增量评论互关标识；(2) `GET /api/v1/content/user/invite/info/{inviteCode}` 阻塞邀请落地页全部功能（6.1-6.6）；(3) `GET /api/v1/content/user/governance/audit-log` 阻塞审计日志页全部功能（9.1-9.4）。tasks.md 将这些任务标记为"完成"，但后端接口不存在 | backend-issues.md |
 | A-2 | FLAG | **specs 缺少请求/响应 VO 定义** — 7 个 spec 文件均无请求参数类型（Req）和响应结构（VO）定义。开发者需同时阅读 PRD 和 spec 才能了解完整接口契约，增加认知负担 | 所有 spec 文件 |
 
 ### 3.6 边界覆盖 (Boundary) — 7/10
@@ -159,16 +159,16 @@
 
 | 功能 | 后端实际路径 | 前端 Spec 路径 | 状态 |
 |------|------------|--------------|------|
-| 互关好友列表 | `GET /content/user/relation/mutual-follow-list` | `GET /content/user/relation/mutual-follow-list` | [MATCH] |
-| 互关状态查询 | **不存在** | `GET /content/user/relation/mutual-status` | [MISSING] |
-| 粉丝列表 | `GET /content/user/fan/list` | `GET /content/user/fan/list` | [MATCH] |
-| 粉丝趋势 | `GET /content/user/fan/trend` | `GET /content/user/fan/trend` | [MATCH] |
-| 邀请码生成 | `POST /content/user/invite/generate` | `POST /content/user/invite/generate` | [MATCH] |
+| 互关好友列表 | `GET /api/v1/content/user/relation/mutual-follow-list` | `GET /api/v1/content/user/relation/mutual-follow-list` | [MATCH] |
+| 互关状态查询 | **不存在** | `GET /api/v1/content/user/relation/mutual-status` | [MISSING] |
+| 粉丝列表 | `GET /api/v1/content/user/fan/list` | `GET /api/v1/content/user/fan/list` | [MATCH] |
+| 粉丝趋势 | `GET /api/v1/content/user/fan/trend` | `GET /api/v1/content/user/fan/trend` | [MATCH] |
+| 邀请码生成 | `POST /api/v1/content/user/invite/generate` | `POST /api/v1/content/user/invite/generate` | [MATCH] |
 | 邀请码校验 | **不存在** | (specs 中 NOTE 标注需后端补充) | [MISSING] |
-| 邀请记录 | `GET /content/user/invite/records` | `GET /content/user/invite/records` | [MATCH] |
-| 邀请统计 | `GET /content/user/invite/stats` | `GET /content/user/invite/stats` | [MATCH] |
-| 删除评论 | `POST /content/user/governance/moderator/comment/delete` | `POST /content/user/governance/moderator/comment/delete` | [MATCH] |
-| 警告用户 | `POST /content/user/governance/moderator/user/warn` | `POST /content/user/governance/moderator/user/warn` | [MATCH] |
+| 邀请记录 | `GET /api/v1/content/user/invite/records` | `GET /api/v1/content/user/invite/records` | [MATCH] |
+| 邀请统计 | `GET /api/v1/content/user/invite/stats` | `GET /api/v1/content/user/invite/stats` | [MATCH] |
+| 删除评论 | `POST /api/v1/content/user/governance/moderator/comment/delete` | `POST /api/v1/content/user/governance/moderator/comment/delete` | [MATCH] |
+| 警告用户 | `POST /api/v1/content/user/governance/moderator/user/warn` | `POST /api/v1/content/user/governance/moderator/user/warn` | [MATCH] |
 | 审计日志 | **不存在** | (specs 中 NOTE 标注需后端补充) | [MISSING] |
 
 **匹配率**: 8/11 = 73%（已实现端点全部匹配，3 个端点后端缺失）
@@ -237,7 +237,7 @@
 
 1. **BLOCK — 3 个后端端点缺失**: 互关状态批量查询、邀请码校验、审计日志查询端点后端尚未实现。其中邀请码校验缺失直接阻塞邀请落地页全部功能（6 个任务），审计日志缺失阻塞审计日志页全部功能（4 个任务）。tasks.md 将这些任务标记为"已完成"，但实际后端接口不存在。
 
-2. **PRD 与 Specs 路径严重分裂**: PRD 使用旧路径模式（如 `/content/invite/code`），specs 已修正为实际后端路径（如 `/content/user/invite/generate`）。开发者若以 PRD 为准将对接错误接口。
+2. **PRD 与 Specs 路径严重分裂**: PRD 使用旧路径模式（如 `/content/invite/code`），specs 已修正为实际后端路径（如 `/api/v1/content/user/invite/generate`）。开发者若以 PRD 为准将对接错误接口。
 
 3. **前端无自动化测试**: 53 个实现任务无一测试任务，违反 AGENTS.md 的 TDD 要求。
 
@@ -282,8 +282,8 @@
 
 | # | 级别 | 修复内容 | 关联文件 |
 |---|------|---------|---------|
-| S-1 | FLAG | **已验证无需修复** — PRD Section 5 当前已使用正确路径 `/content/user/...`，与 specs 一致。审核时基于旧版 PRD | PRD |
-| S-2 | FLAG | **已验证无需修复** — PRD 当前已使用 `POST /content/user/invite/generate`，与 spec 一致 | PRD |
+| S-1 | FLAG | **已验证无需修复** — PRD Section 5 当前已使用正确路径 `/api/v1/content/user/...`，与 specs 一致。审核时基于旧版 PRD | PRD |
+| S-2 | FLAG | **已验证无需修复** — PRD 当前已使用 `POST /api/v1/content/user/invite/generate`，与 spec 一致 | PRD |
 | S-3 | FLAG | **已验证无需修复** — design.md 当前版本（93 行）无文件结构章节，不存在命名不一致问题 | design.md |
 | A-2 | FLAG | **已修复** — 为 7 个 spec 文件补充 `## API 封装` 章节，包含端点路径、方法、参数注解、响应关键字段和后端实现状态 | 所有 spec 文件 |
 | B-1 | FLAG | **已修复** — moderation spec 中删除原因和警告原因 textarea 增加 `maxLength: 200` 约束 | specs/moderation/spec.md |
@@ -291,7 +291,7 @@
 | T-2 | FLAG | **已修复** — mutual-follow spec 搜索场景增加防抖 300ms ± 50ms 验收标准；fan-analytics spec 列表加载 < 1s、图表渲染 < 2s 验收标准 | specs/mutual-follow/spec.md, specs/fan-analytics/spec.md |
 | C-1 | FLAG | **已验证无需修复** — design.md 当前版本无文件结构章节，粉丝画像已在 Non-Goals 中标注降级 | design.md |
 | F-1 | ADVISORY | **已验证无需修复** — 同 C-1 | design.md |
-| invite-stats 路径 | — | **已修复** — invite-system spec 中 `GET /content/invite/stats` 修正为 `GET /content/user/invite/stats` | specs/invite-system/spec.md |
+| invite-stats 路径 | — | **已修复** — invite-system spec 中 `GET /content/invite/stats` 修正为 `GET /api/v1/content/user/invite/stats` | specs/invite-system/spec.md |
 
 ### 仍未修复（后端依赖）
 

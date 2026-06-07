@@ -190,9 +190,9 @@
 
 | 检查项 | 状态 | 说明 |
 |--------|------|------|
-| 列表端点 | ✅ | `GET /content/user/auth/third-party/`（在独立 Controller 中） |
+| 列表端点 | ✅ | `GET /api/v1/content/user/auth/third-party/`（在独立 Controller 中） |
 | 详情端点 | ❌ | Controller 中无详情查询端点 |
-| 撤销端点 | ✅ | `DELETE /content/user/auth/third-party/{authId}`（在独立 Controller 中） |
+| 撤销端点 | ✅ | `DELETE /api/v1/content/user/auth/third-party/{authId}`（在独立 Controller 中） |
 | 返回 VO 而非实体 | ✅ | 返回 `ContentThirdPartyAuthVO` |
 | `ContentThirdPartyAuthorizationDetailVO` | ❌ | 文件不存在 |
 | 端点位置 | ⚠️ | 在 `ContentUserThirdPartyAuthController` 而非 `ContentUserSettingsController` |
@@ -244,14 +244,14 @@
 ### Step 6.1: 扩展设置控制器端点 — ⚠️ 部分完成
 
 **ContentUserSettingsController 已有端点：**
-- `POST /content/user/settings/privacy/update` — 隐私设置更新 ✅
-- `GET /content/user/settings/notification` — 通知偏好查询 ✅
-- `POST /content/user/settings/notification/update` — 通知偏好更新 ✅
-- `POST /content/user/settings/notification/dnd/update` — 免打扰规则更新 ✅
-- `GET /content/user/settings/feed` — 关注流设置查询 ✅
-- `POST /content/user/settings/feed/update` — 关注流设置更新 ✅
-- `GET /content/user/settings/visibility/content` — 内容可见性检查 ✅
-- `GET /content/user/settings/security` — 账户安全设置查询 ✅
+- `POST /api/v1/content/user/settings/privacy/update` — 隐私设置更新 ✅
+- `GET /api/v1/content/user/settings/notification` — 通知偏好查询 ✅
+- `POST /api/v1/content/user/settings/notification/update` — 通知偏好更新 ✅
+- `POST /api/v1/content/user/settings/notification/dnd/update` — 免打扰规则更新 ✅
+- `GET /api/v1/content/user/settings/feed` — 关注流设置查询 ✅
+- `POST /api/v1/content/user/settings/feed/update` — 关注流设置更新 ✅
+- `GET /api/v1/content/user/settings/visibility/content` — 内容可见性检查 ✅
+- `GET /api/v1/content/user/settings/security` — 账户安全设置查询 ✅
 
 **缺失：** 第三方授权端点在独立 `ContentUserThirdPartyAuthController` 中，未在 SettingsController 中
 

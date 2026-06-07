@@ -36,7 +36,7 @@
 
 #### Scenario: 打开状态变更弹窗
 - **WHEN** 管理员点击某用户的"变更状态"按钮
-- **THEN** 弹出状态变更弹窗，调用 GET /api/content/user-status/transitions/{currentStatus} 获取可转换状态列表，下拉框仅渲染返回的状态
+- **THEN** 弹出状态变更弹窗，调用 GET /api/v1/content/user-status/transitions/{currentStatus} 获取可转换状态列表，下拉框仅渲染返回的状态
 
 #### Scenario: 禁言操作
 - **WHEN** 管理员选择目标状态为"禁言"，填写原因和期限，点击确定
@@ -112,10 +112,10 @@
 
 | API | 路径 | 用途 | 状态 |
 |-----|------|------|------|
-| getUserStatus | GET /api/content/user-status/{userId} | 查询指定用户状态 | ✅ 已实现 |
-| changeUserStatus | POST /api/content/user-status/{userId}/change | 变更用户状态 | ✅ 已实现 |
-| releaseUser | POST /api/content/user-status/{userId}/release | 解禁用户 | ✅ 已实现 |
-| getStatusHistory | GET /api/content/user-status/{userId}/history | 查询状态历史 | ✅ 已实现 |
-| getStatusList | GET /api/content/user-status/list | 分页查询用户状态列表 | ✅ 已实现 |
-| getTransitions | GET /api/content/user-status/transitions/{currentStatus} | 获取可转换状态列表 | ✅ 已实现 |
-| batchReleaseUsers | POST /api/content/user-status/batch-release | 批量解禁 | ✅ 已实现 |
+| getUserStatus | GET /api/v1/content/user-status/{userId} | 查询指定用户状态 | ✅ 已实现 |
+| changeUserStatus | POST /api/v1/content/user-status/{userId}/change | 变更用户状态 | ✅ 已实现 |
+| releaseUser | POST /api/v1/content/user-status/{userId}/release | 解禁用户 | ✅ 已实现 |
+| getStatusHistory | GET /api/v1/content/user-status/{userId}/history | 查询状态历史 | ✅ 已实现 |
+| getStatusList | GET /api/v1/content/user-status/list | 分页查询用户状态列表 | ✅ 已实现 |
+| getTransitions | GET /api/v1/content/user-status/transitions/{currentStatus} | 获取可转换状态列表 | ✅ 已实现 |
+| batchReleaseUsers | POST /api/v1/content/user-status/batch-release | 批量解禁 | ✅ 已实现 |

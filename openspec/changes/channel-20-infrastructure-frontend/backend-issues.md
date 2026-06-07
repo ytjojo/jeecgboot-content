@@ -208,10 +208,10 @@ public Result<ChannelTransferVO> getPendingTransfer(@PathVariable String id) {
 |------------|----------|------|
 | ChannelController | `/api/v1/channels` | 保持 |
 | ChannelAdminController | `/api/v1/admin/channels` | 保持 |
-| ChannelReviewController | `/jeecg-boot/api/v1/content/channel/review` | 考虑简化 |
-| ChannelLifecycleController | `/jeecg-boot/api/v1/content/channel/lifecycle` | 考虑简化 |
+| ChannelReviewController | `/api/v1/content/channel/review` | 考虑简化 |
+| ChannelLifecycleController | `/api/v1/content/channel/lifecycle` | 考虑简化 |
 | ChannelGovernanceController | `/channel/governance` | 需统一前缀 |
-| ChannelPublishController | `/content/channel/publish` | 需统一前缀 |
+| ChannelPublishController | `/api/v1/content/channel/publish` | 需统一前缀 |
 
 ### 3.2 ChannelReviewController 中的 TODO
 

@@ -90,40 +90,40 @@ PRD 第 5.4 节"生命周期管理 API"列出了 11 个操作 API，但缺少两
 
 | 功能 | 前端 PRD 路径 | 后端实际路径 | 匹配 |
 |------|-------------|-------------|------|
-| 核心指标 | `/api/v1/channel/{channelId}/stats/overview` | `/jeecg-boot/api/v1/content/channel/stats/core` | ❌ |
-| 趋势数据 | `/api/v1/channel/{channelId}/stats/trend` | `/jeecg-boot/api/v1/content/channel/stats/trend` | ❌ |
+| 核心指标 | `/api/v1/channel/{channelId}/stats/overview` | `/api/v1/content/channel/stats/core` | ❌ |
+| 趋势数据 | `/api/v1/channel/{channelId}/stats/trend` | `/api/v1/content/channel/stats/trend` | ❌ |
 | 互动数据 | `/api/v1/channel/{channelId}/stats/interaction` | (待实现) | ❌ |
-| 热门内容 | `/api/v1/channel/{channelId}/stats/hot-content` | `/jeecg-boot/api/v1/content/channel/stats/hot-content` | ❌ |
-| 用户分析 | `/api/v1/channel/{channelId}/stats/user-analysis` | `/jeecg-boot/api/v1/content/channel/stats/user-analysis` | ❌ |
+| 热门内容 | `/api/v1/channel/{channelId}/stats/hot-content` | `/api/v1/content/channel/stats/hot-content` | ❌ |
+| 用户分析 | `/api/v1/channel/{channelId}/stats/user-analysis` | `/api/v1/content/channel/stats/user-analysis` | ❌ |
 
 **数据导出 API**:
 
 | 功能 | 前端 PRD 路径 | 后端实际路径 | 匹配 |
 |------|-------------|-------------|------|
-| 创建导出 | `POST /api/v1/channel/{channelId}/export` | `POST /jeecg-boot/api/v1/content/channel/export/create` | ❌ |
-| 查询状态 | `GET /api/v1/channel/export/{taskId}` | `GET /jeecg-boot/api/v1/content/channel/export/status` | ❌ |
-| 下载文件 | `GET /api/v1/channel/export/{taskId}/download` | `GET /jeecg-boot/api/v1/content/channel/export/download` | ❌ |
+| 创建导出 | `POST /api/v1/channel/{channelId}/export` | `POST /api/v1/content/channel/export/create` | ❌ |
+| 查询状态 | `GET /api/v1/channel/export/{taskId}` | `GET /api/v1/content/channel/export/status` | ❌ |
+| 下载文件 | `GET /api/v1/channel/export/{taskId}/download` | `GET /api/v1/content/channel/export/download` | ❌ |
 | 导出历史 | `GET /api/v1/channel/{channelId}/export/history` | (待实现) | ❌ |
 
 **审核管理 API**:
 
 | 功能 | 前端 PRD 路径 | 后端实际路径 | 匹配 |
 |------|-------------|-------------|------|
-| 审核列表 | `GET /api/v1/channel/review/list` | `GET /jeecg-boot/api/v1/content/channel/review/list` | ❌ |
+| 审核列表 | `GET /api/v1/channel/review/list` | `GET /api/v1/content/channel/review/list` | ❌ |
 | 审核详情 | `GET /api/v1/channel/review/{reviewId}` | (待实现) | ❌ |
-| 审核操作 | `POST /api/v1/channel/review/{reviewId}/action` | `POST /jeecg-boot/api/v1/content/channel/review/action` | ❌ |
+| 审核操作 | `POST /api/v1/channel/review/{reviewId}/action` | `POST /api/v1/content/channel/review/action` | ❌ |
 
 **生命周期管理 API**:
 
 | 功能 | 前端 PRD 路径 | 后端实际路径 | 匹配 |
 |------|-------------|-------------|------|
-| 冻结 | `POST /channel/{channelId}/lifecycle/freeze` | `POST /jeecg-boot/api/v1/content/channel/lifecycle/freeze` | ❌ |
-| 解冻 | `POST /channel/{channelId}/lifecycle/unfreeze` | `POST /jeecg-boot/api/v1/content/channel/lifecycle/unfreeze` | ❌ |
-| 限制推荐 | `POST /channel/{channelId}/lifecycle/restrict` | `POST /jeecg-boot/api/v1/content/channel/lifecycle/restrict-recommend` | ❌ |
-| 强制隐藏 | `POST /channel/{channelId}/lifecycle/hide` | `POST /jeecg-boot/api/v1/content/channel/lifecycle/hide` | ❌ |
+| 冻结 | `POST /channel/{channelId}/lifecycle/freeze` | `POST /api/v1/content/channel/lifecycle/freeze` | ❌ |
+| 解冻 | `POST /channel/{channelId}/lifecycle/unfreeze` | `POST /api/v1/content/channel/lifecycle/unfreeze` | ❌ |
+| 限制推荐 | `POST /channel/{channelId}/lifecycle/restrict` | `POST /api/v1/content/channel/lifecycle/restrict-recommend` | ❌ |
+| 强制隐藏 | `POST /channel/{channelId}/lifecycle/hide` | `POST /api/v1/content/channel/lifecycle/hide` | ❌ |
 | 恢复可见 | `POST /channel/{channelId}/lifecycle/restore` | (待实现) | ❌ |
-| 永久关闭 | `POST /channel/{channelId}/lifecycle/close` | `POST /jeecg-boot/api/v1/content/channel/lifecycle/close` | ❌ |
-| 归档 | `POST /channel/{channelId}/lifecycle/archive` | `POST /jeecg-boot/api/v1/content/channel/lifecycle/archive` | ❌ |
+| 永久关闭 | `POST /channel/{channelId}/lifecycle/close` | `POST /api/v1/content/channel/lifecycle/close` | ❌ |
+| 归档 | `POST /channel/{channelId}/lifecycle/archive` | `POST /api/v1/content/channel/lifecycle/archive` | ❌ |
 | 合并 | `POST /channel/{channelId}/lifecycle/merge` | (待确认) | ❌ |
 
 **不一致根因**:

@@ -31,10 +31,10 @@
 
 #### Scenario: 查询当前状态
 - GIVEN: 已登录用户
-- WHEN: 调用 GET /api/content/user-status/current
+- WHEN: 调用 GET /api/v1/content/user-status/current
 - THEN: 返回当前用户的状态枚举值、状态开始时间、状态结束时间、状态原因
 
 #### Scenario: 查询指定用户状态（管理员）
 - GIVEN: 管理员用户
-- WHEN: 调用 GET /api/content/user-status/{userId}
+- WHEN: 调用 GET /api/v1/content/user-status/{userId}
 - THEN: 返回指定用户的状态详情

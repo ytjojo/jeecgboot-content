@@ -56,16 +56,16 @@
 
 **优先级**：中
 
-**现状**：仅有 `GET /content/user/growth/decay/rule` 返回全局衰减规则（`ContentUserGrowthDecayRuleVO`），无查询特定用户当前衰减状态的接口。
+**现状**：仅有 `GET /api/v1/content/user/growth/decay/rule` 返回全局衰减规则（`ContentUserGrowthDecayRuleVO`），无查询特定用户当前衰减状态的接口。
 
 **需要新增**：
-1. `GET /content/user/growth/decay/status?userId=xxx` 端点
+1. `GET /api/v1/content/user/growth/decay/status?userId=xxx` 端点
 2. 返回用户当前衰减状态：`status`（NORMAL/DECAYING/PROTECTION/DOWNGRADED）、`inactiveDays`、`protectionUntil`、`currentLevel` 等
 3. 数据来源：`content_user_growth_decay_state` 表 + `content_user_profile` 表
 
 **影响**：DecayWarning 组件无法展示用户当前衰减状态，只能展示全局规则。
 
-**已完成**：新增 `GET /content/user/growth/decay/status` 端点，返回 `ContentUserGrowthDecayStatusVO`，包含 status、inactiveDays、protectionUntil、currentLevel、currentGrowthValue、lastActiveTime、decayCount 字段。
+**已完成**：新增 `GET /api/v1/content/user/growth/decay/status` 端点，返回 `ContentUserGrowthDecayStatusVO`，包含 status、inactiveDays、protectionUntil、currentLevel、currentGrowthValue、lastActiveTime、decayCount 字段。
 
 ---
 

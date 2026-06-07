@@ -75,7 +75,7 @@
 
 ## 8. API 收口与验收
 
-- [x] 8.1 补齐 `/api/v1/auth/*`、`/api/v1/account-security/*`、`/api/v1/account-cancellation/*` Controller 入参校验
+- [x] 8.1 补齐 `/api/v1/content/auth/*`、`/api/v1/content/account-security/*`、`/api/v1/content/account-cancellation/*` Controller 入参校验
 - [x] 8.2 添加 Controller WebMvc 参数校验和 `Result<T>` 响应测试
 - [x] 8.3 补齐 Knife4j 注解、中文字段说明和错误码常量
 - [x] 8.4 添加接口文档生成和错误码覆盖测试

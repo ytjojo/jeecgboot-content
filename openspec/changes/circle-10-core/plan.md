@@ -430,9 +430,9 @@ git commit -m "feat(circle): add CircleGovernanceLog entity"
 - Create: `main/java/org/jeecg/modules/content/circle/mapper/CircleMapper.java`
 - Create: `main/java/org/jeecg/modules/content/circle/mapper/CircleMemberMapper.java`
 - Create: `main/java/org/jeecg/modules/content/circle/mapper/CircleGovernanceLogMapper.java`
-- Create: `main/resources/mapper/content/circle/CircleMapper.xml`
-- Create: `main/resources/mapper/content/circle/CircleMemberMapper.xml`
-- Create: `main/resources/mapper/content/circle/CircleGovernanceLogMapper.xml`
+- Create: `main/resources/mapper/api/v1/content/circle/CircleMapper.xml`
+- Create: `main/resources/mapper/api/v1/content/circle/CircleMemberMapper.xml`
+- Create: `main/resources/mapper/api/v1/content/circle/CircleGovernanceLogMapper.xml`
 
 - [ ] **Step 1: 创建 CircleMapper**
 
@@ -506,7 +506,7 @@ CircleGovernanceLogMapper.xml:
 
 ```bash
 git add jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/circle/mapper/
-git add jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/resources/mapper/content/circle/
+git add jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/resources/mapper/api/v1/content/circle/
 git commit -m "feat(circle): add Mapper interfaces and XML files"
 ```
 
@@ -2195,7 +2195,7 @@ class CircleControllerWebMvcTest {
 
             when(circleBiz.createCircle(any(), eq("u_001"))).thenReturn(vo);
 
-            mockMvc.perform(post("/content/circle/create")
+            mockMvc.perform(post("/api/v1/content/circle/create")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"name":"测试圈子","description":"简介","privacyType":"PUBLIC","joinType":"DIRECT"}
@@ -2208,7 +2208,7 @@ class CircleControllerWebMvcTest {
         @Test
         @DisplayName("blank name - returns 400")
         void blankName_returns400() throws Exception {
-            mockMvc.perform(post("/content/circle/create")
+            mockMvc.perform(post("/api/v1/content/circle/create")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"name":"","description":"简介","privacyType":"PUBLIC","joinType":"DIRECT"}
@@ -2222,7 +2222,7 @@ class CircleControllerWebMvcTest {
             when(circleBiz.createCircle(any(), eq("u_001")))
                     .thenThrow(new JeecgBootException("该圈子名称已存在，请修改"));
 
-            mockMvc.perform(post("/content/circle/create")
+            mockMvc.perform(post("/api/v1/content/circle/create")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"name":"已存在","description":"简介","privacyType":"PUBLIC","joinType":"DIRECT"}
@@ -2240,7 +2240,7 @@ class CircleControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(put("/content/circle/update")
+            mockMvc.perform(put("/api/v1/content/circle/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","description":"新简介"}
@@ -2283,7 +2283,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "圈子管理", description = "圈子创建、更新、查询等接口")
 @Validated
 @RestController
-@RequestMapping("/content/circle")
+@RequestMapping("/api/v1/content/circle")
 public class CircleController {
 
     @Resource
@@ -2418,7 +2418,7 @@ class CircleMemberControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/circle/member/change-role")
+            mockMvc.perform(post("/api/v1/content/circle/member/change-role")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","targetUserId":"u_002","targetRole":"MODERATOR"}
@@ -2432,7 +2432,7 @@ class CircleMemberControllerWebMvcTest {
         @Test
         @DisplayName("blank targetUserId - returns 400")
         void blankTargetUserId_returns400() throws Exception {
-            mockMvc.perform(post("/content/circle/member/change-role")
+            mockMvc.perform(post("/api/v1/content/circle/member/change-role")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","targetUserId":"","targetRole":"MODERATOR"}
@@ -2448,7 +2448,7 @@ class CircleMemberControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/circle/member/mute")
+            mockMvc.perform(post("/api/v1/content/circle/member/mute")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","targetUserId":"u_002","muteDuration":"24h","reason":"违规发言"}
@@ -2465,7 +2465,7 @@ class CircleMemberControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/circle/member/remove")
+            mockMvc.perform(post("/api/v1/content/circle/member/remove")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","targetUserId":"u_002","reason":"严重违规"}
@@ -2480,7 +2480,7 @@ class CircleMemberControllerWebMvcTest {
             doThrow(new JeecgBootException("目标用户不是圈子成员"))
                     .when(circleMemberBiz).removeMember(any(), eq("u_001"));
 
-            mockMvc.perform(post("/content/circle/member/remove")
+            mockMvc.perform(post("/api/v1/content/circle/member/remove")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","targetUserId":"u_999"}
@@ -2520,7 +2520,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "圈子成员管理", description = "成员角色变更、禁言、移除等接口")
 @Validated
 @RestController
-@RequestMapping("/content/circle/member")
+@RequestMapping("/api/v1/content/circle/member")
 public class CircleMemberController {
 
     @Resource
@@ -2653,7 +2653,7 @@ class CircleSearchControllerWebMvcTest {
 
             when(circleService.page(any(), any())).thenReturn(new Page<Circle>().setRecords(List.of(circle)));
 
-            mockMvc.perform(get("/content/circle/search")
+            mockMvc.perform(get("/api/v1/content/circle/search")
                             .param("keyword", "Java"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
@@ -2666,7 +2666,7 @@ class CircleSearchControllerWebMvcTest {
         void noResults_returnsEmptyList() throws Exception {
             when(circleService.page(any(), any())).thenReturn(new Page<Circle>().setRecords(List.of()));
 
-            mockMvc.perform(get("/content/circle/search")
+            mockMvc.perform(get("/api/v1/content/circle/search")
                             .param("keyword", "不存在的关键词"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
@@ -2710,7 +2710,7 @@ import java.util.List;
 @Tag(name = "圈子搜索", description = "圈子搜索接口")
 @Validated
 @RestController
-@RequestMapping("/content/circle")
+@RequestMapping("/api/v1/content/circle")
 public class CircleSearchController {
 
     @Resource

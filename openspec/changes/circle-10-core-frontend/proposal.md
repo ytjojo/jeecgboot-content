@@ -35,7 +35,7 @@
 ## Impact
 
 - **前端路由**: 新增 `/circle/list`、`/circle/create`、`/circle/:id`、`/circle/:id/members`、`/circle/search`、`/circle/:id/governance-log` 六个页面路由
-- **API 对接**: 依赖后端 14 个接口定义（圈子 CRUD 6 个、成员管理 7 个、搜索 1 个、治理日志 1 个），统一使用 `defHttp` 封装。当前后端已实现 8 个（create/update/join/leave/change-role/mute/unmute/remove），search 已实现但结果 VO 缺少 category 字段；6 个接口尚未实现（detail/my-list/public-list/check-name/member-list/governance-log），前端采用 Mock 开发策略。注意：前端封装路径需与后端实际路径对齐（join 在 `/content/circle/join` 而非 `/content/circle/member/join`，leave 在 `/content/circle/leave` 而非 `/content/circle/member/quit`，change-role 在 `/content/circle/member/change-role` 而非 `/content/circle/member/set-moderator`）
+- **API 对接**: 依赖后端 14 个接口定义（圈子 CRUD 6 个、成员管理 7 个、搜索 1 个、治理日志 1 个），统一使用 `defHttp` 封装。当前后端已实现 8 个（create/update/join/leave/change-role/mute/unmute/remove），search 已实现但结果 VO 缺少 category 字段；6 个接口尚未实现（detail/my-list/public-list/check-name/member-list/governance-log），前端采用 Mock 开发策略。注意：前端封装路径需与后端实际路径对齐（join 在 `/api/v1/content/circle/join` 而非 `/api/v1/content/circle/member/join`，leave 在 `/api/v1/content/circle/leave` 而非 `/api/v1/content/circle/member/quit`，change-role 在 `/api/v1/content/circle/member/change-role` 而非 `/api/v1/content/circle/member/set-moderator`）
 - **状态管理**: 新增 `useCircleStore`（Pinia），管理圈子详情、用户角色、成员状态
 - **组件库**: 新增 8 个业务组件，复用现有 Form/Table/Modal/Drawer/Upload/Cropper 等基础组件
 - **国际化**: 当前版本中文硬编码，但文案统一管理在 `src/locales/lang/zh-CN/circle.ts` 常量文件中，预留 `t()` 接口

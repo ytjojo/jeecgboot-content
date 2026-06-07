@@ -23,7 +23,7 @@
 
 #### Scenario: 管理员提前解禁
 - GIVEN: 管理员具有状态管理权限
-- WHEN: 调用 POST /api/content/user-status/{userId}/release 并指定原因
+- WHEN: 调用 POST /api/v1/content/user-status/{userId}/release 并指定原因
 - THEN: 系统立即将用户状态恢复为 NORMAL，记录操作人和原因到审计日志
 
 #### Scenario: 解禁后功能恢复

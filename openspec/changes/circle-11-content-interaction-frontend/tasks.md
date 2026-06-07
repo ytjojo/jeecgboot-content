@@ -2,7 +2,7 @@
 
 - [ ] 1.1 创建 `src/api/circle/content.ts`：封装置顶/精华切换接口（`togglePin`、`toggleFeatured`）
 - [ ] 1.2 创建 `src/api/circle/announcement.ts`：封装公告接口（`createAnnouncement`、`getActiveAnnouncement`、`deleteAnnouncement`）
-- [ ] 1.3 创建 `src/api/circle/mention.ts`：封装 @成员查询接口（复用 `GET /content/circle/member/list`，方法名 `getMentionableMembers`）
+- [ ] 1.3 创建 `src/api/circle/mention.ts`：封装 @成员查询接口（复用 `GET /api/v1/content/circle/member/list`，方法名 `getMentionableMembers`）
 - [ ] 1.4 创建 `src/api/circle/joinRequest.ts`：封装申请审核接口（`getJoinRequestList`（`GET /circle-join-review/list`）、`getPendingJoinRequests`（`GET /circle-join-review/pending/{circleId}`）、`approveJoinRequest`、`rejectJoinRequest`）
 - [ ] 1.5 创建 `src/api/circle/report.ts`：封装举报相关接口（`createReport`、`getReportList`、`deleteReportContent`、`ignoreReport`、`muteUser`）
 - [ ] 1.6 创建 `src/store/modules/circleInteraction.ts`：实现 `useCircleInteractionStore`（公告状态、@成员列表、审核统计）
@@ -28,7 +28,7 @@
 
 - [ ] 4.1 创建 `MentionMemberPicker` 组件：浮层展示成员列表、搜索过滤、键盘导航
 - [ ] 4.2 实现 @触发逻辑：输入框监听 `@` 字符输入，弹出浮层
-- [ ] 4.3 实现成员搜索：防抖 300ms，调用 `getMentionableMembers`（复用 `GET /content/circle/member/list`）接口
+- [ ] 4.3 实现成员搜索：防抖 300ms，调用 `getMentionableMembers`（复用 `GET /api/v1/content/circle/member/list`）接口
 - [ ] 4.4 实现提及标记插入：纯文本场景插入 `@{userId:xxx}昵称`，富文本场景插入 `<span class="mention">` 标签
 - [ ] 4.5 实现 @提及内容解析渲染：正则匹配提及标记，渲染为可点击链接（跳转用户主页）
 - [ ] 4.6 在内容发布框和评论输入框中集成 `MentionMemberPicker`

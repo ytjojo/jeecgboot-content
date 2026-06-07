@@ -1,6 +1,6 @@
 ## Context
 
-内容社区模块（jeecg-module-content）基于 JeecgBoot Vue3 前端框架，使用 Vue 3 + TypeScript + Ant Design Vue 4 + Vben Admin 架构。本次变更对接后端 `ContentUserProfileController`（`/content/user/profile/*` 前缀，11 个端点，其中 `review/handle` 为后台审核端点前端不对接），实现前端资料管理与主页个性化能力。
+内容社区模块（jeecg-module-content）基于 JeecgBoot Vue3 前端框架，使用 Vue 3 + TypeScript + Ant Design Vue 4 + Vben Admin 架构。本次变更对接后端 `ContentUserProfileController`（`/api/v1/content/user/profile/*` 前缀，11 个端点，其中 `review/handle` 为后台审核端点前端不对接），实现前端资料管理与主页个性化能力。
 
 > **实施更新（2026-06-04）**: 本次更新以"前端对齐后端实际契约"为目标。原 design 假设的独立上传端点、update-count 接口、5/10 次频控等**不**在当前后端实现中，已剔除相关假设；头像/背景图改由前端 OSS 直传。后端 Controller 实际提供 11 个端点。**后端改造已完成**：4 个 POST 端点（`/update`、`/homepage/update`、`/homepage/defaults/restore`、`/history/restore`）已改造为返回 `Result<ContentUserProfileVO>`，`/privacy/update` 保持返回 `Result<String>`。
 
@@ -51,7 +51,7 @@
 
 **决策**: 
 - **OSS 客户端直传**：用户选择本地图片后，前端使用 OSS SDK 直接上传到对象存储，成功后回填 CDN URL。
-- **URL 持久化**：上传完成后把 CDN URL 提交给 `POST /content/user/profile/update` 的 `avatar` 或 `homepage/homepageBackground` 字段。
+- **URL 持久化**：上传完成后把 CDN URL 提交给 `POST /api/v1/content/user/profile/update` 的 `avatar` 或 `homepage/homepageBackground` 字段。
 - **裁剪**：集成 `cropperjs`，头像锁定 1:1、背景图锁定 16:9。
 - **客户端校验**：格式（JPG/PNG/WebP）、大小（≤5MB）由前端在文件选择阶段拦截。
 
@@ -78,7 +78,7 @@
 
 ### D6: 隐私设置即时生效方案
 
-**决策**: 隐私设置保存成功后，前端主动调用 `GET /content/user/profile/detail?ownerUserId=X&viewerUserId=Y` 刷新本地缓存的用户资料数据。不实现前端缓存失效逻辑。
+**决策**: 隐私设置保存成功后，前端主动调用 `GET /api/v1/content/user/profile/detail?ownerUserId=X&viewerUserId=Y` 刷新本地缓存的用户资料数据。不实现前端缓存失效逻辑。
 
 **理由**: 后端 Redis TTL 由后端控制，前端只需在用户主动修改后立即刷新本地数据，保证修改者自己看到最新效果。
 
@@ -98,9 +98,9 @@
 
 ### D8: 历史记录按类型分 Tab
 
-**决策**: 历史记录页用 Tabs 切换"昵称历史"和"头像历史"，每个 Tab 调用 `GET /content/user/profile/history/list?userId=X&historyType=NICKNAME|AVATAR` 加载。
+**决策**: 历史记录页用 Tabs 切换"昵称历史"和"头像历史"，每个 Tab 调用 `GET /api/v1/content/user/profile/history/list?userId=X&historyType=NICKNAME|AVATAR` 加载。
 
-**理由**: 后端接口使用 `historyType` 路径/查询参数区分类型，前端按 Tab 触发对应请求；恢复操作统一调用 `POST /content/user/profile/history/restore?userId=X&historyId=Y`。
+**理由**: 后端接口使用 `historyType` 路径/查询参数区分类型，前端按 Tab 触发对应请求；恢复操作统一调用 `POST /api/v1/content/user/profile/history/restore?userId=X&historyId=Y`。
 
 ### D9: 频率限制展示
 
@@ -114,17 +114,17 @@
 
 | 端点 | HTTP | 入参 | 出参（解包后） | 涉及能力 |
 |------|------|------|----------------|----------|
-| `/content/user/profile/detail` | GET | `ownerUserId`, `viewerUserId`(可选) | `ContentUserProfileVO` | profile-editing / verification-badge / homepage-customization |
-| `/content/user/profile/update` | POST | `userId` (query) + `ContentUserProfileUpdateReq` | `ContentUserProfileVO` | profile-editing / homepage-customization |
-| `/content/user/profile/review/handle` | POST | `ContentUserReviewHandleReq` | `String`（"处理成功"） | 后台审核，前端**不**对接 |
-| `/content/user/profile/privacy/update` | POST | `userId` (query) + `ContentUserPrivacyUpdateReq` | `String`（"更新成功"） | privacy-settings |
-| `/content/user/profile/homepage/update` | POST | `userId` (query) + `ContentUserHomepageUpdateReq` | `ContentUserProfileVO` | homepage-customization |
-| `/content/user/profile/homepage/defaults/restore` | POST | `userId` (query) | `ContentUserProfileVO` | homepage-customization |
-| `/content/user/profile/homepage/modules` | GET | `userId` (query) | `List<ContentUserHomepageModuleVO>` | homepage-customization |
-| `/content/user/profile/badge/list` | GET | `userId` (query) | `List<ContentUserVerificationBadgeVO>` | verification-badge |
-| `/content/user/profile/badge/detail` | GET | `badgeId` (query) | `ContentUserVerificationBadgeVO` | verification-badge |
-| `/content/user/profile/history/list` | GET | `userId`, `historyType` (NICKNAME\|AVATAR) | `List<ContentUserProfileHistoryVO>` | profile-history |
-| `/content/user/profile/history/restore` | POST | `userId`, `historyId` (query) | `ContentUserProfileVO` | profile-history |
+| `/api/v1/content/user/profile/detail` | GET | `ownerUserId`, `viewerUserId`(可选) | `ContentUserProfileVO` | profile-editing / verification-badge / homepage-customization |
+| `/api/v1/content/user/profile/update` | POST | `userId` (query) + `ContentUserProfileUpdateReq` | `ContentUserProfileVO` | profile-editing / homepage-customization |
+| `/api/v1/content/user/profile/review/handle` | POST | `ContentUserReviewHandleReq` | `String`（"处理成功"） | 后台审核，前端**不**对接 |
+| `/api/v1/content/user/profile/privacy/update` | POST | `userId` (query) + `ContentUserPrivacyUpdateReq` | `String`（"更新成功"） | privacy-settings |
+| `/api/v1/content/user/profile/homepage/update` | POST | `userId` (query) + `ContentUserHomepageUpdateReq` | `ContentUserProfileVO` | homepage-customization |
+| `/api/v1/content/user/profile/homepage/defaults/restore` | POST | `userId` (query) | `ContentUserProfileVO` | homepage-customization |
+| `/api/v1/content/user/profile/homepage/modules` | GET | `userId` (query) | `List<ContentUserHomepageModuleVO>` | homepage-customization |
+| `/api/v1/content/user/profile/badge/list` | GET | `userId` (query) | `List<ContentUserVerificationBadgeVO>` | verification-badge |
+| `/api/v1/content/user/profile/badge/detail` | GET | `badgeId` (query) | `ContentUserVerificationBadgeVO` | verification-badge |
+| `/api/v1/content/user/profile/history/list` | GET | `userId`, `historyType` (NICKNAME\|AVATAR) | `List<ContentUserProfileHistoryVO>` | profile-history |
+| `/api/v1/content/user/profile/history/restore` | POST | `userId`, `historyId` (query) | `ContentUserProfileVO` | profile-history |
 
 > **端点总数**：11 个（其中 `review/handle` 为后台审核端点，前端不对接，实际前端使用 10 个端点）。
 

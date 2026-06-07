@@ -14,27 +14,27 @@
 
 | 前端文档引用 | 后端实际端点 | 状态 |
 |---|---|---|
-| `/content/channel/browse/category` | `GET /content/channel/browse/category` (ContentChannelBrowseController) | 一致 |
-| `/content/channel/recommendation/list` | `GET /content/channel/recommendation/list` (ContentChannelRecommendationController) | 一致 |
-| `/content/channel/recommendation/cold-start` | `GET /content/channel/recommendation/cold-start` | 一致 |
-| `/content/channel/recommendation/not-interested` | `POST /content/channel/recommendation/not-interested` | 一致 |
-| `/content/channel/ranking/hot` | `GET /content/channel/ranking/hot` | 一致 |
-| `/content/channel/ranking/new` | `GET /content/channel/ranking/new` | 一致 |
-| `/content/channel/ranking/system` | `GET /content/channel/ranking/system` | 一致 |
-| `/content/channel/category/tree` | `GET /content/channel/category/tree` | 一致 |
-| `/content/channel/category/create` | `POST /content/channel/category/create` | 一致 |
-| `/content/channel/category/update` | `POST /content/channel/category/update` | 一致 |
-| `/content/channel/category/disable` | `POST /content/channel/category/disable` | 一致 |
-| `/content/channel/editorial-pick/list` | `GET /content/channel/editorial-pick/list` | 一致 |
-| `/content/channel/tag/list` | `GET /content/channel/tag/list` | 一致 |
+| `/api/v1/content/channel/browse/category` | `GET /api/v1/content/channel/browse/category` (ContentChannelBrowseController) | 一致 |
+| `/api/v1/content/channel/recommendation/list` | `GET /api/v1/content/channel/recommendation/list` (ContentChannelRecommendationController) | 一致 |
+| `/api/v1/content/channel/recommendation/cold-start` | `GET /api/v1/content/channel/recommendation/cold-start` | 一致 |
+| `/api/v1/content/channel/recommendation/not-interested` | `POST /api/v1/content/channel/recommendation/not-interested` | 一致 |
+| `/api/v1/content/channel/ranking/hot` | `GET /api/v1/content/channel/ranking/hot` | 一致 |
+| `/api/v1/content/channel/ranking/new` | `GET /api/v1/content/channel/ranking/new` | 一致 |
+| `/api/v1/content/channel/ranking/system` | `GET /api/v1/content/channel/ranking/system` | 一致 |
+| `/api/v1/content/channel/category/tree` | `GET /api/v1/content/channel/category/tree` | 一致 |
+| `/api/v1/content/channel/category/create` | `POST /api/v1/content/channel/category/create` | 一致 |
+| `/api/v1/content/channel/category/update` | `POST /api/v1/content/channel/category/update` | 一致 |
+| `/api/v1/content/channel/category/disable` | `POST /api/v1/content/channel/category/disable` | 一致 |
+| `/api/v1/content/channel/editorial-pick/list` | `GET /api/v1/content/channel/editorial-pick/list` | 一致 |
+| `/api/v1/content/channel/tag/list` | `GET /api/v1/content/channel/tag/list` | 一致 |
 
 #### 路径不一致的 API（3 个）
 
 | 前端文档引用 | 后端实际端点 | 问题 |
 |---|---|---|
-| `/content/channel/discovery/home` (聚合接口) | 无对应 Controller，仅 `ContentChannelDiscoveryBiz` 业务类存在 | **缺失 Controller**：Biz 类已有聚合逻辑，但未暴露 HTTP 端点 |
-| `/content/channel/search` (design.md 引用) | `GET /content/channel/search/query` | **路径不一致**：前端文档引用 `/content/channel/search`，后端实际为 `/content/channel/search/query` |
-| `/content/channel/ranking/list` (tasks.md 7.2 引用) | 分别为 `/content/channel/ranking/hot`、`/new`、`/system` | **路径不一致**：前端引用单一 list 接口，后端为三个独立端点 |
+| `/api/v1/content/channel/discovery/home` (聚合接口) | 无对应 Controller，仅 `ContentChannelDiscoveryBiz` 业务类存在 | **缺失 Controller**：Biz 类已有聚合逻辑，但未暴露 HTTP 端点 |
+| `/api/v1/content/channel/search` (design.md 引用) | `GET /api/v1/content/channel/search/query` | **路径不一致**：前端文档引用 `/api/v1/content/channel/search`，后端实际为 `/api/v1/content/channel/search/query` |
+| `/api/v1/content/channel/ranking/list` (tasks.md 7.2 引用) | 分别为 `/api/v1/content/channel/ranking/hot`、`/new`、`/system` | **路径不一致**：前端引用单一 list 接口，后端为三个独立端点 |
 
 #### 缺失的 API（3 个）
 
@@ -53,7 +53,7 @@
 
 ## CRITICAL Issues
 
-### ~~C1: 聚合接口 `/content/channel/discovery/home` 缺少 Controller 端点~~ [已解决]
+### ~~C1: 聚合接口 `/api/v1/content/channel/discovery/home` 缺少 Controller 端点~~ [已解决]
 - **状态**: ✅ 已实现
 - **位置**: `ContentChannelDiscoveryController.java:24` — `@GetMapping("/home")`
 
@@ -83,10 +83,10 @@
 ## WARNING Issues
 
 ### W1: 搜索 API 路径不一致 [已修复]
-- **位置**: specs/channel-search/spec.md 已修正为 `GET /content/channel/search/query`
+- **位置**: specs/channel-search/spec.md 已修正为 `GET /api/v1/content/channel/search/query`
 
 ### W2: 排行榜 API 路径不一致 [已修复]
-- **位置**: tasks.md 7.2 已修正为分别引用 `/content/channel/ranking/hot`、`/new`、`/system`
+- **位置**: tasks.md 7.2 已修正为分别引用 `/api/v1/content/channel/ranking/hot`、`/new`、`/system`
 
 ### W3: 推荐接口需要 userId 参数
 - **位置**: `ContentChannelRecommendationController.java:24` — `getRecommendations` 需要 `@RequestParam String userId`

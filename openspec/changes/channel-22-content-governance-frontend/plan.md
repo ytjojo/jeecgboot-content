@@ -31,13 +31,13 @@ mkdir -p jeecgboot-vue3/src/api/content/channel
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  available = '/content/channel/publish/available',
-  submit = '/content/channel/publish',
-  result = '/content/channel/publish/result',
-  scheduled = '/content/channel/publish/scheduled',
-  scheduledList = '/content/channel/publish/scheduled/list',
-  limitCheck = '/content/channel/publish/limit/check',
-  permission = '/content/channel/publish/permission',
+  available = '/api/v1/content/channel/publish/available',
+  submit = '/api/v1/content/channel/publish',
+  result = '/api/v1/content/channel/publish/result',
+  scheduled = '/api/v1/content/channel/publish/scheduled',
+  scheduledList = '/api/v1/content/channel/publish/scheduled/list',
+  limitCheck = '/api/v1/content/channel/publish/limit/check',
+  permission = '/api/v1/content/channel/publish/permission',
 }
 
 /** 获取用户可发布/投稿/管理的频道列表 */
@@ -91,9 +91,9 @@ export const savePublishPermission = (data: {
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  list = '/jeecg-boot/api/v1/content/channel/review/list',
-  action = '/jeecg-boot/api/v1/content/channel/review/action',
-  stats = '/content/channel/review/stats',
+  list = '/api/v1/content/channel/review/list',
+  action = '/api/v1/content/channel/review/action',
+  stats = '/api/v1/content/channel/review/stats',
 }
 
 /** 获取待审区列表（后端使用 current/size 分页） */
@@ -130,11 +130,11 @@ export const getReviewStats = (channelId: string) =>
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  governance = '/content/channel/governance',
-  contentList = '/content/channel/governance/content/list',
-  editAssistHistory = '/content/channel/governance/edit-assist/history',
-  recycleBinList = '/content/channel/governance/recycle-bin/list',
-  logList = '/content/channel/governance/log',
+  governance = '/api/v1/content/channel/governance',
+  contentList = '/api/v1/content/channel/governance/content/list',
+  editAssistHistory = '/api/v1/content/channel/governance/edit-assist/history',
+  recycleBinList = '/api/v1/content/channel/governance/recycle-bin/list',
+  logList = '/api/v1/content/channel/governance/log',
 }
 
 /** 统一治理操作（后端使用 action 字段区分操作类型） */
@@ -197,11 +197,11 @@ export const getGovernanceLogList = (params: {
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  base = '/content/channel/announcement',
-  channel = '/content/channel/announcement/channel',
-  preview = '/content/channel/announcement/preview',
-  history = '/content/channel/announcement/history',
-  restore = '/content/channel/announcement/restore',
+  base = '/api/v1/content/channel/announcement',
+  channel = '/api/v1/content/channel/announcement/channel',
+  preview = '/api/v1/content/channel/announcement/preview',
+  history = '/api/v1/content/channel/announcement/history',
+  restore = '/api/v1/content/channel/announcement/restore',
 }
 
 /** 获取频道当前公告 */
@@ -237,9 +237,9 @@ export const restoreAnnouncementVersion = (versionId: string) =>
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  add = '/content/channel/publish/add-existing',
-  search = '/content/channel/publish/add-existing/search',
-  channels = '/content/channel/publish/content-channels',
+  add = '/api/v1/content/channel/publish/add-existing',
+  search = '/api/v1/content/channel/publish/add-existing/search',
+  channels = '/api/v1/content/channel/publish/content-channels',
 }
 
 /** 添加已发布内容到频道 */

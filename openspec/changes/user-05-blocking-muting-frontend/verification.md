@@ -63,7 +63,7 @@ POST /content/user/not-interested — 记录不感兴趣反馈（@RequestParam: 
 
 ### 3. Mute List 缺少分页查询端点 ✅ 已修复
 
-**问题**: `GET /content/user/relation/blacklist` 存在用于黑名单分页查询，但屏蔽列表无对应端点。
+**问题**: `GET /api/v1/content/user/relation/blacklist` 存在用于黑名单分页查询，但屏蔽列表无对应端点。
 
 **前端依赖**:
 - 任务 6.5-6.6: 屏蔽列表管理页 → 屏蔽用户 Tab
@@ -71,7 +71,7 @@ POST /content/user/not-interested — 记录不感兴趣反馈（@RequestParam: 
 **已修复**: 在 `ContentUserRelationController` 新增端点，新建 `ContentUserMuteListPageVO` 和 `ContentUserMuteListItemVO`，2 个测试通过：
 
 ```
-GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（@RequestParam: userId, pageNo, pageSize）
+GET /api/v1/content/user/relation/mute-list — 分页查询屏蔽用户列表（@RequestParam: userId, pageNo, pageSize）
 ```
 
 **返回 VO**: `ContentUserMuteListPageVO`，包含 `records` (List<ContentUserMuteListItemVO>), `total`, `pageNo`, `pageSize`。每条记录包含 `mutedUserId`, `nickname`, `avatar`, `muteTime`。
@@ -84,8 +84,8 @@ GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（@Reque
 
 | 修复前 | 修复后 | 文件 |
 |--------|--------|------|
-| `POST /content/user/relation/blacklist` | `POST /content/user/relation/block` | `ContentUserRelationController.java` |
-| `POST /content/user/relation/blacklist/cancel` | `POST /content/user/relation/unblock` | `ContentUserRelationController.java` |
+| `POST /api/v1/content/user/relation/blacklist` | `POST /api/v1/content/user/relation/block` | `ContentUserRelationController.java` |
+| `POST /api/v1/content/user/relation/blacklist/cancel` | `POST /api/v1/content/user/relation/unblock` | `ContentUserRelationController.java` |
 
 **原因**: `blacklist` 是名词（集合），单个用户拉黑操作应使用动词 `block`/`unblock`。`GET /blacklist`（集合端点）语义正确，保持不变。
 
@@ -105,15 +105,15 @@ GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（@Reque
 
 | 前端 Specs 引用 | 实际后端路径 | HTTP Method | 参数风格 |
 |----------------|-------------|-------------|----------|
-| `POST /api/content/user/block` | `POST /content/user/relation/block` | POST | @RequestParam: userId, targetUserId |
-| `POST /api/content/user/unblock` | `POST /content/user/relation/unblock` | POST | @RequestParam: userId, targetUserId |
-| `POST /api/content/user/mute` | `POST /content/user/relation/mute` | POST | @RequestParam: userId, targetUserId |
-| `POST /api/content/user/unmute` | `POST /content/user/relation/mute/cancel` | POST | @RequestParam: userId, targetUserId |
-| `GET /api/content/user/blacklist` | `GET /content/user/relation/blacklist` | GET | @RequestParam: userId, pageNo, pageSize |
-| `GET /api/content/user/relation` | `GET /content/user/relation/detail` | GET | @RequestParam: userId, targetUserId |
-| `GET /api/content/user/block-mute-help` | `GET /content/user/relation/block-mute/help` | GET | 无参数 |
-| `DELETE /api/content/user/filter-rule/:id` | 待创建 | POST | — |
-| `POST /api/content/user/not-interested` | 待创建 | POST | — |
+| `POST /api/content/user/block` | `POST /api/v1/content/user/relation/block` | POST | @RequestParam: userId, targetUserId |
+| `POST /api/content/user/unblock` | `POST /api/v1/content/user/relation/unblock` | POST | @RequestParam: userId, targetUserId |
+| `POST /api/content/user/mute` | `POST /api/v1/content/user/relation/mute` | POST | @RequestParam: userId, targetUserId |
+| `POST /api/content/user/unmute` | `POST /api/v1/content/user/relation/mute/cancel` | POST | @RequestParam: userId, targetUserId |
+| `GET /api/content/user/blacklist` | `GET /api/v1/content/user/relation/blacklist` | GET | @RequestParam: userId, pageNo, pageSize |
+| `GET /api/content/user/relation` | `GET /api/v1/content/user/relation/detail` | GET | @RequestParam: userId, targetUserId |
+| `GET /api/content/user/block-mute-help` | `GET /api/v1/content/user/relation/block-mute/help` | GET | 无参数 |
+| `DELETE /api/v1/content/user/filter-rule/:id` | 待创建 | POST | — |
+| `POST /api/v1/content/user/not-interested` | 待创建 | POST | — |
 
 **参数风格差异**:
 - 前端 PRD 设计: JSON Body + Path Variable
@@ -125,7 +125,7 @@ GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（@Reque
 
 ### 6. 前端 Specs 使用 DELETE 方法但后端统一使用 POST
 
-**问题**: specs 中屏蔽词删除使用 `DELETE /api/content/user/filter-rule/:id`，但后端所有写操作统一使用 POST。
+**问题**: specs 中屏蔽词删除使用 `DELETE /api/v1/content/user/filter-rule/:id`，但后端所有写操作统一使用 POST。
 
 **建议**: 前端 API 封装统一使用 `defHttp.post`，删除操作通过 POST + body 传递 ID。
 
@@ -146,11 +146,11 @@ GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（@Reque
 
 ### 8. 屏蔽用户列表端点路径已确认 ✅
 
-**说明**: `GET /content/user/relation/mute-list` 端点已实现，返回 `ContentUserMuteListPageVO`。
+**说明**: `GET /api/v1/content/user/relation/mute-list` 端点已实现，返回 `ContentUserMuteListPageVO`。
 
 ### 9. ContentBlockMuteHelpVO 已存在
 
-**说明**: `GET /content/user/relation/block-mute/help` 端点已实现，返回 `ContentBlockMuteHelpVO`，包含:
+**说明**: `GET /api/v1/content/user/relation/block-mute/help` 端点已实现，返回 `ContentBlockMuteHelpVO`，包含:
 - `blockConfirmation`: 拉黑确认文案
 - `muteConfirmation`: 屏蔽确认文案
 - `unblockConfirmation`: 解除拉黑文案
@@ -165,14 +165,14 @@ GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（@Reque
 ### 10. 批量操作端点已存在
 
 **说明**: 后端已有以下批量操作端点，前端可直接使用:
-- `POST /content/user/relation/batch/unfollow` — 批量取消关注
-- `POST /content/user/relation/batch/special-follow/cancel` — 批量取消特别关注
+- `POST /api/v1/content/user/relation/batch/unfollow` — 批量取消关注
+- `POST /api/v1/content/user/relation/batch/special-follow/cancel` — 批量取消特别关注
 
 屏蔽列表的批量取消屏蔽功能需要对应的 filter-rule 批量删除端点（见 CRITICAL #1）。
 
 ### 11. 关注推荐端点已存在
 
-**说明**: `GET /content/user/relation/recommendations` 已实现，支持 `interestTag` 参数过滤，前端关注推荐功能可直接对接。
+**说明**: `GET /api/v1/content/user/relation/recommendations` 已实现，支持 `interestTag` 参数过滤，前端关注推荐功能可直接对接。
 
 ---
 
@@ -182,30 +182,30 @@ GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（@Reque
 
 | Method | Path | 说明 | 参数 |
 |--------|------|------|------|
-| POST | `/content/user/relation/follow` | 关注用户 | @RequestParam userId, @RequestBody ContentFollowReq |
-| POST | `/content/user/relation/special-follow` | 特别关注 | @RequestParam userId, @RequestBody ContentFollowReq |
-| POST | `/content/user/relation/unfollow` | 取消关注 | @RequestParam userId, targetUserId |
-| POST | `/content/user/relation/block` | 拉黑用户 | @RequestParam userId, targetUserId |
-| POST | `/content/user/relation/unblock` | 解除拉黑 | @RequestParam userId, targetUserId |
-| POST | `/content/user/relation/mute` | 屏蔽用户 | @RequestParam userId, targetUserId |
-| POST | `/content/user/relation/mute/cancel` | 解除屏蔽 | @RequestParam userId, targetUserId |
-| POST | `/content/user/relation/special-follow/cancel` | 取消特别关注 | @RequestParam userId, targetUserId |
-| GET | `/content/user/relation/detail` | 查询关系 | @RequestParam userId, targetUserId |
-| GET | `/content/user/relation/groups` | 查询关注分组 | @RequestParam userId |
-| POST | `/content/user/relation/group/create` | 创建分组 | @RequestParam userId, @RequestBody |
-| POST | `/content/user/relation/group/rename` | 重命名分组 | @RequestParam userId, groupId, @RequestBody |
-| POST | `/content/user/relation/group/delete` | 删除分组 | @RequestParam userId, groupId |
-| POST | `/content/user/relation/group/move` | 移动到分组 | @RequestParam userId, @RequestBody |
-| POST | `/content/user/relation/group/remove` | 移出分组 | @RequestParam userId, @RequestBody |
-| POST | `/content/user/relation/batch/unfollow` | 批量取消关注 | @RequestParam userId, @RequestBody |
-| POST | `/content/user/relation/batch/special-follow/cancel` | 批量取消特别关注 | @RequestParam userId, @RequestBody |
-| GET | `/content/user/relation/follow-list` | 关注列表 | @RequestParam userId, relationGroupId?, keyword?, pageNo, pageSize |
-| GET | `/content/user/relation/special-follow-list` | 特别关注列表 | @RequestParam userId, pageNo, pageSize |
-| GET | `/content/user/relation/blacklist` | 黑名单 | @RequestParam userId, pageNo, pageSize |
-| GET | `/content/user/relation/feed` | 关注流动态 | @RequestParam userId, pageNo, pageSize |
-| GET | `/content/user/relation/block-mute/help` | 帮助说明 | 无参数 |
-| GET | `/content/user/relation/mutual-follow-list` | 互关好友 | @RequestParam userId, keyword?, pageNo, pageSize |
-| GET | `/content/user/relation/recommendations` | 关注推荐 | @RequestParam userId, interestTag?, pageNo, pageSize |
+| POST | `/api/v1/content/user/relation/follow` | 关注用户 | @RequestParam userId, @RequestBody ContentFollowReq |
+| POST | `/api/v1/content/user/relation/special-follow` | 特别关注 | @RequestParam userId, @RequestBody ContentFollowReq |
+| POST | `/api/v1/content/user/relation/unfollow` | 取消关注 | @RequestParam userId, targetUserId |
+| POST | `/api/v1/content/user/relation/block` | 拉黑用户 | @RequestParam userId, targetUserId |
+| POST | `/api/v1/content/user/relation/unblock` | 解除拉黑 | @RequestParam userId, targetUserId |
+| POST | `/api/v1/content/user/relation/mute` | 屏蔽用户 | @RequestParam userId, targetUserId |
+| POST | `/api/v1/content/user/relation/mute/cancel` | 解除屏蔽 | @RequestParam userId, targetUserId |
+| POST | `/api/v1/content/user/relation/special-follow/cancel` | 取消特别关注 | @RequestParam userId, targetUserId |
+| GET | `/api/v1/content/user/relation/detail` | 查询关系 | @RequestParam userId, targetUserId |
+| GET | `/api/v1/content/user/relation/groups` | 查询关注分组 | @RequestParam userId |
+| POST | `/api/v1/content/user/relation/group/create` | 创建分组 | @RequestParam userId, @RequestBody |
+| POST | `/api/v1/content/user/relation/group/rename` | 重命名分组 | @RequestParam userId, groupId, @RequestBody |
+| POST | `/api/v1/content/user/relation/group/delete` | 删除分组 | @RequestParam userId, groupId |
+| POST | `/api/v1/content/user/relation/group/move` | 移动到分组 | @RequestParam userId, @RequestBody |
+| POST | `/api/v1/content/user/relation/group/remove` | 移出分组 | @RequestParam userId, @RequestBody |
+| POST | `/api/v1/content/user/relation/batch/unfollow` | 批量取消关注 | @RequestParam userId, @RequestBody |
+| POST | `/api/v1/content/user/relation/batch/special-follow/cancel` | 批量取消特别关注 | @RequestParam userId, @RequestBody |
+| GET | `/api/v1/content/user/relation/follow-list` | 关注列表 | @RequestParam userId, relationGroupId?, keyword?, pageNo, pageSize |
+| GET | `/api/v1/content/user/relation/special-follow-list` | 特别关注列表 | @RequestParam userId, pageNo, pageSize |
+| GET | `/api/v1/content/user/relation/blacklist` | 黑名单 | @RequestParam userId, pageNo, pageSize |
+| GET | `/api/v1/content/user/relation/feed` | 关注流动态 | @RequestParam userId, pageNo, pageSize |
+| GET | `/api/v1/content/user/relation/block-mute/help` | 帮助说明 | 无参数 |
+| GET | `/api/v1/content/user/relation/mutual-follow-list` | 互关好友 | @RequestParam userId, keyword?, pageNo, pageSize |
+| GET | `/api/v1/content/user/relation/recommendations` | 关注推荐 | @RequestParam userId, interestTag?, pageNo, pageSize |
 
 ## 待创建端点汇总
 
@@ -216,7 +216,7 @@ GET /content/user/relation/mute-list — 分页查询屏蔽用户列表（@Reque
 | POST | `/content/user/filter-rule/batch-delete` | 批量删除屏蔽规则 | CRITICAL | ✅ 已创建 |
 | GET | `/content/user/filter-rule/list` | 查询屏蔽规则列表 | CRITICAL | ✅ 已创建 |
 | POST | `/content/user/not-interested` | 不感兴趣反馈 | CRITICAL | ✅ 已创建 |
-| GET | `/content/user/relation/mute-list` | 屏蔽用户列表 | WARNING | ✅ 已创建 |
+| GET | `/api/v1/content/user/relation/mute-list` | 屏蔽用户列表 | WARNING | ✅ 已创建 |
 
 ---
 

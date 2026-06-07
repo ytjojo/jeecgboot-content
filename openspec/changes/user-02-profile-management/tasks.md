@@ -77,5 +77,5 @@
 ## 8. 实施回顾遗留项（与原 design.md 偏差）
 
 - [ ] 8.1 在 service 层补齐资料更新与隐私更新频控（每日 5 次 / 每小时 10 次）
-- [ ] 8.2 评估是否新增 `POST /content/user/profile/asset/validate` 服务端素材校验端点
+- [ ] 8.2 评估是否新增 `POST /api/v1/content/user/profile/asset/validate` 服务端素材校验端点
 - [ ] 8.3 与前端对齐 `onlineStatusVisibility` 特殊枚举的前端表单实现

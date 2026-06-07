@@ -16,7 +16,7 @@
 
 ### 1. 圈子详情接口
 
-- **接口**: `GET /content/circle/{id}`
+- **接口**: `GET /api/v1/content/circle/{id}`
 - **返回**: `CircleVO`（需补充字段，见下方）
 - **影响**: 圈子详情页 (`/circle/:id`) 无法加载，影响详情展示、加入/退出操作、成员管理入口
 - **现有代码位置**: `CircleController.java` 缺少 detail 端点
@@ -24,7 +24,7 @@
 
 ### 2. 我的圈子列表接口
 
-- **接口**: `GET /content/circle/my-list`
+- **接口**: `GET /api/v1/content/circle/my-list`
 - **参数**: `pageNum`, `pageSize`（分页）
 - **返回**: 分页 `CircleVO` 列表
 - **影响**: 圈子列表页「已加入」Tab 无法加载
@@ -32,7 +32,7 @@
 
 ### 3. 公开圈子列表接口
 
-- **接口**: `GET /content/circle/public-list`
+- **接口**: `GET /api/v1/content/circle/public-list`
 - **参数**: `pageNum`, `pageSize`（分页）
 - **返回**: 分页 `CircleVO` 列表
 - **影响**: 圈子列表页「发现」Tab 无法加载
@@ -41,7 +41,7 @@
 
 ### 4. 成员列表接口
 
-- **接口**: `GET /content/circle/member/list`
+- **接口**: `GET /api/v1/content/circle/member/list`
 - **参数**: `circleId`, `role`（可选筛选）, `status`（可选筛选）, `keyword`（昵称搜索，可选）, `pageNum`, `pageSize`
 - **返回**: 分页成员列表（含头像、昵称、角色、状态、加入时间）
 - **影响**: 成员管理页 (`/circle/:id/members`) 无法加载
@@ -53,7 +53,7 @@
 
 ### 5. 名称唯一性校验接口
 
-- **接口**: `GET /content/circle/check-name`
+- **接口**: `GET /api/v1/content/circle/check-name`
 - **参数**: `name`（圈子名称）
 - **返回**: `{ available: true/false }`
 - **影响**: 创建圈子时名称唯一性实时校验无法调用
@@ -62,7 +62,7 @@
 
 ### 6. 治理日志查询接口
 
-- **接口**: `GET /content/circle/{circleId}/governance-log`
+- **接口**: `GET /api/v1/content/circle/{circleId}/governance-log`
 - **参数**: `circleId`, `action`（可选筛选：MUTE/UNMUTE/REMOVE/ROLE_CHANGE）, `targetKeyword`（操作对象昵称，可选）, `startDate`, `endDate`, `pageNum`, `pageSize`
 - **返回**: 分页治理日志列表（时间、操作者、操作对象、操作类型、详情）
 - **影响**: 治理日志页 (`/circle/:id/governance-log`) 无法加载
@@ -139,9 +139,9 @@
 | `/circle-join-review/reject` | POST | CircleJoinReviewController | 拒绝加入申请 |
 | `/api/circle/{circleId}/data/statistics` | GET | CircleDataController | 圈子数据统计 |
 | `/api/circle/{circleId}/data/export` | GET | CircleDataController | 数据导出 CSV |
-| `/content/circle/recommend` | GET | CircleRecommendController | 推荐圈子 |
-| `/content/circle/recommend/click` | POST | CircleRecommendController | 推荐点击 |
-| `/content/circle/recommend/join` | POST | CircleRecommendController | 推荐加入 |
+| `/api/v1/content/circle/recommend` | GET | CircleRecommendController | 推荐圈子 |
+| `/api/v1/content/circle/recommend/click` | POST | CircleRecommendController | 推荐点击 |
+| `/api/v1/content/circle/recommend/join` | POST | CircleRecommendController | 推荐加入 |
 
 ---
 
@@ -149,18 +149,18 @@
 
 | 设计文档名称 | 后端实际路径 | 方法 | 一致性 |
 |-------------|-------------|------|--------|
-| createCircle | /content/circle/create | POST | 一致 |
-| updateCircle | /content/circle/update | PUT | 一致 |
-| getCircleDetail | `GET /content/circle/{id}` | GET | 需新增（建议 path param 风格） |
+| createCircle | /api/v1/content/circle/create | POST | 一致 |
+| updateCircle | /api/v1/content/circle/update | PUT | 一致 |
+| getCircleDetail | `GET /api/v1/content/circle/{id}` | GET | 需新增（建议 path param 风格） |
 | getMyCircleList | **不存在** | - | 需新增 |
 | getPublicCircleList | **不存在** | - | 需新增 |
 | checkCircleName | **不存在** | - | 需新增（service 已有） |
-| joinCircle | /content/circle/join | POST | 一致 |
-| leaveCircle | /content/circle/leave | POST | 一致（已对齐为 leaveCircle） |
+| joinCircle | /api/v1/content/circle/join | POST | 一致 |
+| leaveCircle | /api/v1/content/circle/leave | POST | 一致（已对齐为 leaveCircle） |
 | getMemberList | **不存在** | - | 需新增 |
-| changeRole | /content/circle/member/change-role | POST | 一致（已对齐为 changeRole） |
-| muteMember | /content/circle/member/mute | POST | 一致 |
-| unmuteMember | /content/circle/member/unmute | POST | 一致 |
-| removeMember | /content/circle/member/remove | POST | 一致 |
-| searchCircles | /content/circle/search | GET | 一致 |
+| changeRole | /api/v1/content/circle/member/change-role | POST | 一致（已对齐为 changeRole） |
+| muteMember | /api/v1/content/circle/member/mute | POST | 一致 |
+| unmuteMember | /api/v1/content/circle/member/unmute | POST | 一致 |
+| removeMember | /api/v1/content/circle/member/remove | POST | 一致 |
+| searchCircles | /api/v1/content/circle/search | GET | 一致 |
 | getGovernanceLogList | **不存在** | - | 需新增 |

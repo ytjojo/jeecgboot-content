@@ -86,7 +86,7 @@ public class LevelBenefitVO {
 
 **现状**: `CircleLevelController` 只返回汇总的成长分和进度百分比，无分项数据。
 
-**建议**: 在 `CircleLevelVO` 中增加分项指标，或新增 `GET /content/user/growth/level/detail?circleId=` 接口返回分项数据。
+**建议**: 在 `CircleLevelVO` 中增加分项指标，或新增 `GET /api/v1/content/user/growth/level/detail?circleId=` 接口返回分项数据。
 
 ### 2.2 徽章进度查询
 

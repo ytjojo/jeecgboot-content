@@ -50,7 +50,7 @@
 
 ### Requirement: 圈子等级信息 API 对接
 
-系统 SHALL 通过 GET `/content/user/growth/level/info?circleId={circleId}` 接口获取圈子等级信息，包含等级、成长分、下一等级门槛、进度百分比。
+系统 SHALL 通过 GET `/api/v1/content/user/growth/level/info?circleId={circleId}` 接口获取圈子等级信息，包含等级、成长分、下一等级门槛、进度百分比。
 
 #### Scenario: 接口请求成功
 - **WHEN** 圈子详情页加载

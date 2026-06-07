@@ -82,5 +82,5 @@
 
 | API | 路径 | 用途 | 状态 |
 |-----|------|------|------|
-| sendVerifyCode | POST /api/content/user-status/send-verify-code | 发送手机验证码 | ✅ 已实现 |
-| verifySecurity | POST /api/content/user-status/verify-security | 安全核验（验证码校验 + 状态恢复） | ✅ 已实现 |
+| sendVerifyCode | POST /api/v1/content/user-status/send-verify-code | 发送手机验证码 | ✅ 已实现 |
+| verifySecurity | POST /api/v1/content/user-status/verify-security | 安全核验（验证码校验 + 状态恢复） | ✅ 已实现 |

@@ -22,7 +22,7 @@
 - [x] 3.4 实现粉丝趋势统计接口（按天/周/月聚合，返回时序数据）
 - [x] 3.5 实现粉丝画像分析接口（兴趣分布、地域分布、活跃时段，粉丝数<100 返回提示）
 - [x] 3.6 实现粉丝数据导出（CSV 格式，脱敏）
-- [x] 3.7 创建 `ContentFanAnalyticsController`（`/content/user/fan` 路径）
+- [x] 3.7 创建 `ContentFanAnalyticsController`（`/api/v1/content/user/fan` 路径）
 - [x] 3.8 创建 `ContentFanTrendAggregationTask` 定时任务（每日聚合新增粉丝数）
 - [x] 3.9 编写粉丝分析服务单元测试 `ContentFanAnalyticsServiceTest`
 
@@ -34,7 +34,7 @@
 - [x] 4.4 实现邀请关系绑定逻辑（注册时通过邀请码绑定，防重复、防自邀）
 - [x] 4.5 实现邀请积分奖励发放（复用 `ContentUserRewardRule`，规则码 `INVITE_REGISTER`，每日上限）
 - [x] 4.6 实现邀请记录列表和收益统计查询
-- [x] 4.7 创建 `ContentInviteController`（`/content/user/invite` 路径）
+- [x] 4.7 创建 `ContentInviteController`（`/api/v1/content/user/invite` 路径）
 - [x] 4.8 编写邀请服务单元测试 `ContentInviteServiceTest`
 
 ## 5. 社区角色标签与管理权限（后端）

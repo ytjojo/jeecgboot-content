@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Basic profile editing
-The system SHALL allow an authenticated content user to view and update required and optional profile fields through the unified `POST /content/user/profile/update` endpoint with strict field validation, sensitive-word moderation, and review state tracking.
+The system SHALL allow an authenticated content user to view and update required and optional profile fields through the unified `POST /api/v1/content/user/profile/update` endpoint with strict field validation, sensitive-word moderation, and review state tracking.
 
 #### Scenario: Required profile fields are saved
 - **WHEN** an authenticated user submits a valid `nickname` (≤30 chars) and `avatar` (≤512 chars URL) with optional `bio` (≤500), `gender` (`MALE|FEMALE|OTHER|UNKNOWN`), `birthday` (past), `region` (≤64), `profession` (≤64), and `personalLink` (≤256, http(s)://)
@@ -17,20 +17,20 @@ The system SHALL allow an authenticated content user to view and update required
 
 #### Scenario: Suspicious profile content enters review
 - **WHEN** a `nickname`, `avatar`, or `bio` matches sensitive-word or AI review risk rules
-- **THEN** the system creates a pending review record in `content_user_profile_review` and does not publicly expose the submitted value until `POST /content/user/profile/review/handle` approves it
+- **THEN** the system creates a pending review record in `content_user_profile_review` and does not publicly expose the submitted value until `POST /api/v1/content/user/profile/review/handle` approves it
 
 #### Scenario: Pending review blocks another profile change
 - **WHEN** a user has a pending profile review and submits another profile modification
 - **THEN** the system rejects the modification with a "profile under review" error
 
 #### Scenario: Review handler publishes or restores
-- **WHEN** a moderator calls `POST /content/user/profile/review/handle` with `approve=true`
+- **WHEN** a moderator calls `POST /api/v1/content/user/profile/review/handle` with `approve=true`
 - **THEN** the system publishes the snapshot to the profile and clears the pending review
-- **WHEN** a moderator calls `POST /content/user/profile/review/handle` with `approve=false` and a rejection reason
+- **WHEN** a moderator calls `POST /api/v1/content/user/profile/review/handle` with `approve=false` and a rejection reason
 - **THEN** the system discards the snapshot and records the rejection reason in the review history
 
 ### Requirement: Homepage personalization
-The system SHALL allow users to personalize their public homepage background, theme color, module visibility, and module order through `POST /content/user/profile/homepage/update` and `GET /content/user/profile/homepage/modules`.
+The system SHALL allow users to personalize their public homepage background, theme color, module visibility, and module order through `POST /api/v1/content/user/profile/homepage/update` and `GET /api/v1/content/user/profile/homepage/modules`.
 
 #### Scenario: Homepage background and theme are saved
 - **WHEN** a user submits a valid `homepageBackground` (≤512 chars URL) and `themeColor` matching `^#[0-9A-Fa-f]{6}$` via `/homepage/update`
@@ -41,22 +41,22 @@ The system SHALL allow users to personalize their public homepage background, th
 - **THEN** the system rejects the update with the matching validation error
 
 #### Scenario: Homepage modules are aggregated for display
-- **WHEN** a viewer calls `GET /content/user/profile/homepage/modules?userId=X`
+- **WHEN** a viewer calls `GET /api/v1/content/user/profile/homepage/modules?userId=X`
 - **THEN** the system returns `List<ContentUserHomepageModuleVO>` with each module's `moduleKey`, `moduleName`, `visible`, and `sortOrder`, filtered by the current privacy visibility rules
 
 #### Scenario: Restore homepage defaults
-- **WHEN** a user calls `POST /content/user/profile/homepage/defaults/restore?userId=X`
+- **WHEN** a user calls `POST /api/v1/content/user/profile/homepage/defaults/restore?userId=X`
 - **THEN** the system clears custom background, theme color, and module layout, uses platform defaults, and returns the updated `ContentUserProfileVO`
 
 ### Requirement: Verification badge display
-The system SHALL expose trusted verification badges through `GET /content/user/profile/badge/list` and `GET /content/user/profile/badge/detail` with `visualStyleKey` for frontend icon/color mapping.
+The system SHALL expose trusted verification badges through `GET /api/v1/content/user/profile/badge/list` and `GET /api/v1/content/user/profile/badge/detail` with `visualStyleKey` for frontend icon/color mapping.
 
 #### Scenario: Verification badge list returns visible badges
-- **WHEN** a viewer calls `GET /content/user/profile/badge/list?userId=X`
+- **WHEN** a viewer calls `GET /api/v1/content/user/profile/badge/list?userId=X`
 - **THEN** the system returns a `List<ContentUserVerificationBadgeVO>` filtered by `verificationBadgesVisibility` privacy setting, where each badge contains `badgeId`, `badgeType` (`INDIVIDUAL|ENTERPRISE|CREATOR|OFFICIAL|REAL_NAME|MOBILE|EMAIL`), `badgeLabel`, `visualStyleKey`, `verifiedAt`, `expiresAt`, and `description`
 
 #### Scenario: Verification detail is queryable
-- **WHEN** a viewer calls `GET /content/user/profile/badge/detail?badgeId=Y` for a visible badge
+- **WHEN** a viewer calls `GET /api/v1/content/user/profile/badge/detail?badgeId=Y` for a visible badge
 - **THEN** the system returns the `ContentUserVerificationBadgeVO` for that badge
 
 #### Scenario: Invalid verification records are not displayed
@@ -72,10 +72,10 @@ The system SHALL expose trusted verification badges through `GET /content/user/p
 - **THEN** the system omits the bound contact badges from the badge list response
 
 ### Requirement: Field visibility and privacy
-The system SHALL apply per-field profile visibility rules for public, followers-only, mutual-only, and private scopes on every profile read through `POST /content/user/profile/privacy/update`.
+The system SHALL apply per-field profile visibility rules for public, followers-only, mutual-only, and private scopes on every profile read through `POST /api/v1/content/user/profile/privacy/update`.
 
 #### Scenario: 15 visibility fields cover profile, homepage, and presence
-- **WHEN** a user calls `POST /content/user/profile/privacy/update` with any subset of `bioVisibility`, `genderVisibility`, `birthdayVisibility`, `regionVisibility`, `professionVisibility`, `personalLinkVisibility`, `homepageBackgroundVisibility`, `themeColorVisibility`, `certificationVisibility`, `verificationBadgesVisibility`, `onlineStatusVisibility`, `homepageModuleVisibility`, `profileCompletionVisibility`, `profileReviewStatusVisibility`, `recentActivityVisibility`
+- **WHEN** a user calls `POST /api/v1/content/user/profile/privacy/update` with any subset of `bioVisibility`, `genderVisibility`, `birthdayVisibility`, `regionVisibility`, `professionVisibility`, `personalLinkVisibility`, `homepageBackgroundVisibility`, `themeColorVisibility`, `certificationVisibility`, `verificationBadgesVisibility`, `onlineStatusVisibility`, `homepageModuleVisibility`, `profileCompletionVisibility`, `profileReviewStatusVisibility`, `recentActivityVisibility`
 - **THEN** the system accepts valid values (`PUBLIC|FOLLOWERS_ONLY|MUTUAL_ONLY|PRIVATE` for all except `onlineStatusVisibility` which accepts `PUBLIC|HIDDEN|MUTUAL_ONLY`)
 
 #### Scenario: Online status visibility has reduced enum
@@ -122,10 +122,10 @@ The system SHALL use profile caching only when it cannot violate current privacy
 - **THEN** the system avoids writing unsafe cache entries and falls back to direct data loading
 
 ### Requirement: Nickname and avatar history
-The system SHALL record previous nicknames and avatars, retain them for 180 days, keep at most 20 records per user and history type, and allow users to restore valid history values through `GET /content/user/profile/history/list` and `POST /content/user/profile/history/restore`.
+The system SHALL record previous nicknames and avatars, retain them for 180 days, keep at most 20 records per user and history type, and allow users to restore valid history values through `GET /api/v1/content/user/profile/history/list` and `POST /api/v1/content/user/profile/history/restore`.
 
 #### Scenario: History list returns per-type ordered records
-- **WHEN** a viewer calls `GET /content/user/profile/history/list?userId=X&historyType=NICKNAME`
+- **WHEN** a viewer calls `GET /api/v1/content/user/profile/history/list?userId=X&historyType=NICKNAME`
 - **THEN** the system returns a `List<ContentUserProfileHistoryVO>` in reverse chronological order with at most 20 active records, each containing `historyId`, `historyType`, `historyValue`, `changedAt`, `expiresAt`, and `sourceProfileUpdateId`
 - The same applies to `historyType=AVATAR`
 
@@ -142,7 +142,7 @@ The system SHALL record previous nicknames and avatars, retain them for 180 days
 - **THEN** the system removes or expires those records so they cannot be restored
 
 #### Scenario: Restore history value succeeds
-- **WHEN** a user calls `POST /content/user/profile/history/restore?userId=X&historyId=Y` and the history record is non-expired and the value passes current validation and moderation rules
+- **WHEN** a user calls `POST /api/v1/content/user/profile/history/restore?userId=X&historyId=Y` and the history record is non-expired and the value passes current validation and moderation rules
 - **THEN** the system treats the restore as a new profile modification, runs through the same audit pipeline, and returns the updated `ContentUserProfileVO` after approval if needed
 
 #### Scenario: Restore history rejects invalid or unavailable values

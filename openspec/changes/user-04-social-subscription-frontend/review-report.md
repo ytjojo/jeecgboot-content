@@ -67,11 +67,11 @@
 - **PRD 功能列表 ↔ Spec Requirements 一一对应**: 14 个功能均有对应 spec scenario
 
 #### BLOCK
-- **[B1] API 路径前缀不一致**: 前端 PRD 使用 `/api/v1/` 前缀（如 `/api/v1/feed/following`、`/api/v1/user/recommend`），但后端 design.md 使用 `/content/user/relation` 和 `/content/user/subscription` 前缀。前后端对接时将产生路径不匹配。**必须在 apply 前明确统一的 API 路径前缀**
+- **[B1] API 路径前缀不一致**: 前端 PRD 使用 `/api/v1/` 前缀（如 `/api/v1/feed/following`、`/api/v1/user/recommend`），但后端 design.md 使用 `/api/v1/content/user/relation` 和 `/api/v1/content/user/subscription` 前缀。前后端对接时将产生路径不匹配。**必须在 apply 前明确统一的 API 路径前缀**
 
 #### FLAG
-- **[F3] 推荐接口路径不一致**: 前端 PRD 3.7 节定义推荐接口为 `GET /api/v1/user/recommend`，后端 design.md API 表定义为 `GET /content/user/relation/recommendations`。路径和命名风格均不同
-- **[F4] 关注流接口路径不一致**: 前端 PRD 3.6 节定义为 `GET /api/v1/feed/following`，后端 design.md 定义为 `GET /content/user/relation/feed`
+- **[F3] 推荐接口路径不一致**: 前端 PRD 3.7 节定义推荐接口为 `GET /api/v1/user/recommend`，后端 design.md API 表定义为 `GET /api/v1/content/user/relation/recommendations`。路径和命名风格均不同
+- **[F4] 关注流接口路径不一致**: 前端 PRD 3.6 节定义为 `GET /api/v1/feed/following`，后端 design.md 定义为 `GET /api/v1/content/user/relation/feed`
 
 #### ADVISORY
 - **[A2] 分页策略表述差异**: 前端 PRD 3.7 节推荐接口使用"基于游标分页，返回 `hasMore` + `nextCursor`"，后端 spec 使用标准 page/size 分页。需确认最终采用哪种分页策略
@@ -120,10 +120,10 @@
 - **Backend spec 输入校验充分**: 每个 scenario 都有 invalid values 场景（null/empty/over-length/duplicate 等）
 
 #### BLOCK
-- **[B2] API 路径前缀未统一**: 见 [B1]。前端 PRD 使用 `/api/v1/` 路径，后端 design 使用 `/content/user/` 路径。这是阻塞性问题，前后端无法对接
+- **[B2] API 路径前缀未统一**: 见 [B1]。前端 PRD 使用 `/api/v1/` 路径，后端 design 使用 `/api/v1/content/user/` 路径。这是阻塞性问题，前后端无法对接
 
 #### FLAG
-- **[F7] 全局通知默认配置接口路径不一致**: 前端 PRD 3.10 节引用 `GET /api/v1/subscribe/notification/global-default`，但后端 design.md API 表中无此端点。后端仅列出 `/content/user/subscription/notification/preference` (GET)。全局默认配置的获取路径需要确认
+- **[F7] 全局通知默认配置接口路径不一致**: 前端 PRD 3.10 节引用 `GET /api/v1/subscribe/notification/global-default`，但后端 design.md API 表中无此端点。后端仅列出 `/api/v1/content/user/subscription/notification/preference` (GET)。全局默认配置的获取路径需要确认
 - **[F8] VO/Req 字段定义缺失**: design.md API 表仅列出端点和说明，未定义具体的 Req body 字段和 VO 返回字段。前端开发需要明确的字段定义才能对接
 - **[F9] 批量操作上限未在后端 spec 明确**: 前端 PRD 假设单次批量操作最多 100 条，但后端 spec 仅提到"over-limit target count"会被拒绝，未给出具体上限数值
 
@@ -170,16 +170,16 @@
 
 | 前端端点 | 后端状态 | 风险 |
 |----------|----------|------|
-| `GET /content/user/relation/mutual-follow-list` | 后端 spec 未提及互关好友列表 | FLAG |
-| `GET /content/user/relation/detail` | 后端 spec 提及 relationship detail 可查询 | PASS |
-| `POST /content/user/relation/block` | 后端 spec 未定义拉黑接口（属 EPIC-05） | ADVISORY |
-| `POST /content/user/relation/unblock` | 同上 | ADVISORY |
-| `POST /content/user/relation/mute` | 同上 | ADVISORY |
-| `POST /content/user/relation/mute/cancel` | 同上 | ADVISORY |
-| `GET /content/user/relation/blacklist` | 同上 | ADVISORY |
-| `GET /content/user/relation/block-mute/help` | 同上 | ADVISORY |
-| `POST /content/user/subscription/source/save` | 后端 spec 未提及订阅源写入接口 | FLAG |
-| `GET /content/user/subscription/notification/decision` | 后端 spec 未提及通知决策计算接口 | FLAG |
+| `GET /api/v1/content/user/relation/mutual-follow-list` | 后端 spec 未提及互关好友列表 | FLAG |
+| `GET /api/v1/content/user/relation/detail` | 后端 spec 提及 relationship detail 可查询 | PASS |
+| `POST /api/v1/content/user/relation/block` | 后端 spec 未定义拉黑接口（属 EPIC-05） | ADVISORY |
+| `POST /api/v1/content/user/relation/unblock` | 同上 | ADVISORY |
+| `POST /api/v1/content/user/relation/mute` | 同上 | ADVISORY |
+| `POST /api/v1/content/user/relation/mute/cancel` | 同上 | ADVISORY |
+| `GET /api/v1/content/user/relation/blacklist` | 同上 | ADVISORY |
+| `GET /api/v1/content/user/relation/block-mute/help` | 同上 | ADVISORY |
+| `POST /api/v1/content/user/subscription/source/save` | 后端 spec 未提及订阅源写入接口 | FLAG |
+| `GET /api/v1/content/user/subscription/notification/decision` | 后端 spec 未提及通知决策计算接口 | FLAG |
 
 #### 后端 spec 定义但前端 design.md 未引用的端点
 
@@ -260,7 +260,7 @@ change 文档质量**中等偏上**，结构完整、PRD 功能覆盖率 100%、
 
 ### 必须解决 (BLOCK) -- 2 项
 
-1. **[B1] API 路径前缀不一致**: 前端 `/api/v1/` vs 后端 `/content/user/`，必须统一
+1. **[B1] API 路径前缀不一致**: 前端 `/api/v1/` vs 后端 `/api/v1/content/user/`，必须统一
 2. **[B2] API 契约字段定义缺失**: 31 个端点均无 Req/VO 字段定义，前端无法开发
 
 ### 建议解决 (FLAG) -- 11 项
@@ -307,7 +307,7 @@ change 文档质量**中等偏上**，结构完整、PRD 功能覆盖率 100%、
 
 | 编号 | 问题 | 状态 | 解决方案 |
 |------|------|------|----------|
-| B1 | API 路径前缀不一致 | ✅ 已解决 | 活跃前端 PRD（`docs/requirements/prd/frontend/EPIC-04-social-subscription-frontend-prd.md`）已统一使用 `/content/user/*` 路径。design.md 和 plan.md 均与后端 Controller 路径一致。review-report 记录的是旧版 PRD 的路径冲突，已修复 |
+| B1 | API 路径前缀不一致 | ✅ 已解决 | 活跃前端 PRD（`docs/requirements/prd/frontend/EPIC-04-social-subscription-frontend-prd.md`）已统一使用 `/api/v1/content/user/*` 路径。design.md 和 plan.md 均与后端 Controller 路径一致。review-report 记录的是旧版 PRD 的路径冲突，已修复 |
 | B2 | API 契约字段定义缺失 | ✅ 已解决 | 在 design.md 中新增"后端 VO/Req 字段定义"章节，从后端已实现的 Java 类（`ContentFollowReq`、`ContentSubscriptionReq`、`ContentUserRelationVO` 等）提取完整 TypeScript 接口定义，覆盖全部 31 个端点的请求/响应结构 |
 
 ### FLAG 项处理
@@ -316,11 +316,11 @@ change 文档质量**中等偏上**，结构完整、PRD 功能覆盖率 100%、
 |------|------|------|----------|
 | F1 | 缺少 gap-analysis.md | ✅ 已解决 | verification-review.md 已验证全部 31 个后端 API 端点均存在且覆盖 Spec 要求。后端 API 已就绪，无需 mock 降级方案。Mock 策略已补充到 design.md Test Strategy 章节 |
 | F2 | Plan.md 体积过大 (91KB) | ℹ️ 已知 | 建议后续按模块拆分（关注/订阅/信息流），当前不阻塞开发 |
-| F3 | 推荐接口路径不一致 | ✅ 已解决 | 活跃 PRD 和 design.md 均使用 `GET /content/user/relation/recommendations`，与后端 Controller 一致 |
-| F4 | 关注流接口路径不一致 | ✅ 已解决 | 活跃 PRD 和 design.md 均使用 `GET /content/user/relation/feed`，与后端 Controller 一致 |
+| F3 | 推荐接口路径不一致 | ✅ 已解决 | 活跃 PRD 和 design.md 均使用 `GET /api/v1/content/user/relation/recommendations`，与后端 Controller 一致 |
+| F4 | 关注流接口路径不一致 | ✅ 已解决 | 活跃 PRD 和 design.md 均使用 `GET /api/v1/content/user/relation/feed`，与后端 Controller 一致 |
 | F5 | 订阅源目录表前置依赖 | ✅ 已解决 | 后端已有 `ContentSubscriptionSourceReq`、`ContentSubscriptionSourceVO` 和 `/source/save` 端点，订阅源目录表已创建并可用 |
 | F6 | 性能阈值来源不一致 | ✅ 已解决 | 在 design.md Test Strategy 中明确："关注流首次加载 <2s"包含网络往返和后端聚合时间，前端需实现超时降级策略 |
-| F7 | 全局通知默认配置接口路径 | ✅ 已解决 | 在 design.md 中明确：全局默认配置通过 `GET /content/user/subscription/notification/preference`（不传 subscriptionId）获取，无需单独端点 |
+| F7 | 全局通知默认配置接口路径 | ✅ 已解决 | 在 design.md 中明确：全局默认配置通过 `GET /api/v1/content/user/subscription/notification/preference`（不传 subscriptionId）获取，无需单独端点 |
 | F8 | VO/Req 字段定义缺失 | ✅ 已解决 | 在 design.md 中新增完整的 TypeScript 接口定义，从后端 Java VO/Req 类提取，含字段名、类型、校验规则 |
 | F9 | 批量操作上限未明确 | ✅ 已解决 | 后端 `@Size(max=100)` 校验已确认上限为 100 条，已在 design.md 中文档化 |
 | F10 | 并发操作边界缺失 | ✅ 已解决 | 在 design.md 中补充并发操作边界方案：Pinia 乐观更新 + 后端幂等性 + 状态变更检查 |

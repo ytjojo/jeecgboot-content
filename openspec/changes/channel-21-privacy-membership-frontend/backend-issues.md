@@ -107,7 +107,7 @@ public Result<Void> updatePrivacy(@PathVariable String id,
 ```
 
 **方案 B：使用现有 API**
-前端使用 `PUT /api/v1/channels/{id}` 并在 DTO 中传递 `privacyType` 字段。
+前端使用 `PUT /api/v1/content/channels/{id}` 并在 DTO 中传递 `privacyType` 字段。
 
 **前端依赖**: tasks.md 2.1 隐私设置页面需要此 API
 
@@ -139,7 +139,7 @@ public Result<Void> updateJoinMethod(@PathVariable String id,
 ```
 
 **方案 B：使用现有 API**
-前端使用 `PUT /api/v1/channels/{id}` 并在 DTO 中传递 `joinMethod`、`allowReapply`、`reapplyIntervalHours` 字段。
+前端使用 `PUT /api/v1/content/channels/{id}` 并在 DTO 中传递 `joinMethod`、`allowReapply`、`reapplyIntervalHours` 字段。
 
 **前端依赖**: tasks.md 2.3 加入方式配置页面需要此 API
 
@@ -332,11 +332,11 @@ public Result<String> renameGroup(@RequestParam String groupId, @RequestParam St
 
 | 文件 | 路径 |
 |------|------|
-| ChannelSubscriptionController | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/controller/ChannelSubscriptionController.java` |
-| ChannelMemberController | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/controller/ChannelMemberController.java` |
-| ChannelInviteController | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/controller/ChannelInviteController.java` |
-| ChannelGovernanceController | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/controller/ChannelGovernanceController.java` |
-| ChannelController | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/controller/ChannelController.java` |
-| ChannelSubscriptionService | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/service/ChannelSubscriptionService.java` |
-| ChannelBlacklistService | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/service/ChannelBlacklistService.java` |
-| ChannelGovernanceLogService | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/service/ChannelGovernanceLogService.java` |
+| ChannelSubscriptionController | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/controller/ChannelSubscriptionController.java` |
+| ChannelMemberController | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/controller/ChannelMemberController.java` |
+| ChannelInviteController | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/controller/ChannelInviteController.java` |
+| ChannelGovernanceController | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/controller/ChannelGovernanceController.java` |
+| ChannelController | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/controller/ChannelController.java` |
+| ChannelSubscriptionService | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/service/ChannelSubscriptionService.java` |
+| ChannelBlacklistService | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/service/ChannelBlacklistService.java` |
+| ChannelGovernanceLogService | `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/service/ChannelGovernanceLogService.java` |

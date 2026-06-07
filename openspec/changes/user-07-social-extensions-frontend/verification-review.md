@@ -15,39 +15,39 @@
 
 ### 1. 互关关系 API (`ContentUserRelationController`)
 
-**实际基础路径**: `/content/user/relation`
+**实际基础路径**: `/api/v1/content/user/relation`
 
 | Spec 中的路径 | 实际路径 | 状态 |
 |--------------|---------|------|
-| `GET /content/user-relation/mutual-follow-list` | `GET /content/user/relation/mutual-follow-list` | 路径不匹配（`user-relation` vs `user/relation`） |
+| `GET /content/user-relation/mutual-follow-list` | `GET /api/v1/content/user/relation/mutual-follow-list` | 路径不匹配（`user-relation` vs `user/relation`） |
 | `GET /content/user-relation/mutual-status` | 不存在 | **缺失** - controller 中无此端点 |
 
 **详情**:
-- `/mutual-follow-list` 端点存在（第 278 行），但路径前缀应为 `/content/user/relation` 而非 `/content/user-relation`
+- `/mutual-follow-list` 端点存在（第 278 行），但路径前缀应为 `/api/v1/content/user/relation` 而非 `/content/user-relation`
 - `/mutual-status` 端点在 controller 中不存在，仅有 `/mutual-follow-list`、`/recommendations`、`/follow-list` 等端点
 
 ### 2. 粉丝分析 API (`ContentFanAnalyticsController`)
 
-**实际基础路径**: `/content/user/fan`
+**实际基础路径**: `/api/v1/content/user/fan`
 
 | Spec 中的路径 | 实际路径 | 状态 |
 |--------------|---------|------|
-| `GET /content/fan-analytics/list` | `GET /content/user/fan/list` | 路径不匹配 |
-| `GET /content/fan-analytics/trend` | `GET /content/user/fan/trend` | 路径不匹配 |
+| `GET /content/fan-analytics/list` | `GET /api/v1/content/user/fan/list` | 路径不匹配 |
+| `GET /content/fan-analytics/trend` | `GET /api/v1/content/user/fan/trend` | 路径不匹配 |
 
 **详情**:
 - 两个端点都存在，但基础路径完全不同：spec 用 `fan-analytics`，实际用 `user/fan`
 
 ### 3. 邀请系统 API (`ContentInviteController`)
 
-**实际基础路径**: `/content/user/invite`
+**实际基础路径**: `/api/v1/content/user/invite`
 
 | Spec 中的路径 | 实际路径 | 状态 |
 |--------------|---------|------|
-| `GET /content/invite/code` | `POST /content/user/invite/generate` | **方法+路径不匹配**（GET vs POST，且路径不同） |
+| `GET /content/invite/code` | `POST /api/v1/content/user/invite/generate` | **方法+路径不匹配**（GET vs POST，且路径不同） |
 | `GET /content/invite/info/:inviteCode` | 不存在 | **缺失** - controller 中无此端点 |
-| `GET /content/invite/records` | `GET /content/user/invite/records` | 路径不匹配 |
-| `GET /content/invite/stats` | `GET /content/user/invite/stats` | 路径不匹配 |
+| `GET /content/invite/records` | `GET /api/v1/content/user/invite/records` | 路径不匹配 |
+| `GET /content/invite/stats` | `GET /api/v1/content/user/invite/stats` | 路径不匹配 |
 
 **详情**:
 - 邀请码生成是 `POST /generate` 而非 `GET /code`
@@ -56,12 +56,12 @@
 
 ### 4. 治理操作 API (`ContentUserGovernanceController`)
 
-**实际基础路径**: `/content/user/governance`
+**实际基础路径**: `/api/v1/content/user/governance`
 
 | Spec 中的路径 | 实际路径 | 状态 |
 |--------------|---------|------|
-| `POST /content/user-governance/delete-comment` | `POST /content/user/governance/moderator/comment/delete` | **路径不匹配**（路径结构和端点名都不同） |
-| `POST /content/user-governance/warn-user` | `POST /content/user/governance/moderator/user/warn` | **路径不匹配** |
+| `POST /content/user-governance/delete-comment` | `POST /api/v1/content/user/governance/moderator/comment/delete` | **路径不匹配**（路径结构和端点名都不同） |
+| `POST /content/user-governance/warn-user` | `POST /api/v1/content/user/governance/moderator/user/warn` | **路径不匹配** |
 
 **详情**:
 - 两个端点都存在，但路径结构差异大：spec 用扁平结构，实际用 `/moderator/` 前缀嵌套
@@ -75,22 +75,22 @@
 
 **详情**:
 - `ContentUserAuditLog` 实体类存在，但无专用的查询 API controller 端点
-- `UserStatusController`（路径 `/api/content/user-status`）有 `/history` 端点，但这是用户状态变更历史，不是治理操作审计日志
+- `UserStatusController`（路径 `/api/v1/content/user-status`）有 `/history` 端点，但这是用户状态变更历史，不是治理操作审计日志
 
 ## Spec 文档 API 路径汇总（需修正）
 
 | Spec 文件 | 引用的 API 路径 | 应修正为 |
 |-----------|----------------|---------|
-| mutual-follow/spec.md | `GET /content/user-relation/mutual-follow-list` | `GET /content/user/relation/mutual-follow-list` |
+| mutual-follow/spec.md | `GET /content/user-relation/mutual-follow-list` | `GET /api/v1/content/user/relation/mutual-follow-list` |
 | mutual-follow/spec.md | `GET /content/user-relation/mutual-status` | 需后端补充或移除此需求 |
-| fan-analytics/spec.md | `GET /content/fan-analytics/list` | `GET /content/user/fan/list` |
-| fan-analytics/spec.md | `GET /content/fan-analytics/trend` | `GET /content/user/fan/trend` |
-| invite-system/spec.md | `GET /content/invite/code` | `POST /content/user/invite/generate`（方法和路径都不同） |
+| fan-analytics/spec.md | `GET /content/fan-analytics/list` | `GET /api/v1/content/user/fan/list` |
+| fan-analytics/spec.md | `GET /content/fan-analytics/trend` | `GET /api/v1/content/user/fan/trend` |
+| invite-system/spec.md | `GET /content/invite/code` | `POST /api/v1/content/user/invite/generate`（方法和路径都不同） |
 | invite-system/spec.md | `GET /content/invite/info/:inviteCode` | 需后端补充 |
-| invite-system/spec.md | `GET /content/invite/records` | `GET /content/user/invite/records` |
-| invite-system/spec.md | `GET /content/invite/stats` | `GET /content/user/invite/stats` |
-| moderation/spec.md | `POST /content/user-governance/delete-comment` | `POST /content/user/governance/moderator/comment/delete` |
-| moderation/spec.md | `POST /content/user-governance/warn-user` | `POST /content/user/governance/moderator/user/warn` |
+| invite-system/spec.md | `GET /content/invite/records` | `GET /api/v1/content/user/invite/records` |
+| invite-system/spec.md | `GET /content/invite/stats` | `GET /api/v1/content/user/invite/stats` |
+| moderation/spec.md | `POST /content/user-governance/delete-comment` | `POST /api/v1/content/user/governance/moderator/comment/delete` |
+| moderation/spec.md | `POST /content/user-governance/warn-user` | `POST /api/v1/content/user/governance/moderator/user/warn` |
 | audit-log/spec.md | `GET /content/user-governance/audit-log` | 需后端补充 |
 
 ## 前端文档问题列表

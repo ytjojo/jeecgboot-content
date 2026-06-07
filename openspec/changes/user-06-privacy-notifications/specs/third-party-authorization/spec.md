@@ -49,14 +49,14 @@
 - **THEN** 系统引导用户重新完成 OAuth 授权流程
 
 ### Requirement: 第三方授权管理接口
-系统 SHALL 提供 `/content/user/auth/third-party` 接口集合，包含列出授权、查看详情、撤销授权三个操作。
+系统 SHALL 提供 `/api/v1/content/user/auth/third-party` 接口集合，包含列出授权、查看详情、撤销授权三个操作。
 
 #### Scenario: 列出授权接口
-- **WHEN** 客户端调用 GET /content/user/auth/third-party
+- **WHEN** 客户端调用 GET /api/v1/content/user/auth/third-party
 - **THEN** 系统返回当前用户的所有已授权应用列表
 
 #### Scenario: 撤销授权接口
-- **WHEN** 客户端调用 DELETE /content/user/auth/third-party/{authId}
+- **WHEN** 客户端调用 DELETE /api/v1/content/user/auth/third-party/{authId}
 - **THEN** 系统撤销指定授权并返回成功状态
 
 #### Scenario: 撤销授权接口异常——越权

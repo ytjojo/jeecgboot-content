@@ -12,8 +12,8 @@
 - **THEN** 页面展示冷启动推荐结果（热门频道），其余模块与登录用户一致
 
 #### Scenario: 发现页数据加载失败
-- **WHEN** 聚合接口 `GET /content/channel/discovery/home` 请求失败
-- **THEN** 前端降级为并行调用 `GET /content/channel/recommendation/list`、`GET /content/channel/ranking/hot`、`GET /content/channel/editorial-pick/list` 三个独立接口，任一模块加载失败时展示该模块的错误状态和重试按钮
+- **WHEN** 聚合接口 `GET /api/v1/content/channel/discovery/home` 请求失败
+- **THEN** 前端降级为并行调用 `GET /api/v1/content/channel/recommendation/list`、`GET /api/v1/content/channel/ranking/hot`、`GET /api/v1/content/channel/editorial-pick/list` 三个独立接口，任一模块加载失败时展示该模块的错误状态和重试按钮
 
 ### Requirement: 推荐频道卡片展示
 推荐频道区 SHALL 展示推荐频道卡片列表，包含频道图标、名称、类型标签、主分类、简介、订阅数、推荐理由和订阅操作。
@@ -24,7 +24,7 @@
 
 #### Scenario: 用户反馈不感兴趣
 - **WHEN** 用户点击推荐卡片的"不感兴趣"按钮并确认
-- **THEN** 调用 `/content/channel/recommendation/not-interested` 接口，卡片从列表中移除，展示"已反馈"提示
+- **THEN** 调用 `/api/v1/content/channel/recommendation/not-interested` 接口，卡片从列表中移除，展示"已反馈"提示
 
 ### Requirement: 排行榜入口区展示
 发现页 SHALL 展示排行榜入口区，支持热门榜/新晋榜/系统榜 Tab 切换，每榜展示 Top 5。
@@ -67,7 +67,7 @@
 - **THEN** 推荐区横向滚动单卡，分类区 2 列，搜索框全宽
 
 > **NOTE**: 后端 API 状态（2026-06-07 更新）：
-> - `GET /content/channel/discovery/home`（聚合接口）— ✅ 已实现（`ContentChannelDiscoveryController.java`）
-> - `GET /content/channel/recommendation/list`（推荐接口，需 userId 参数）— ✅ 已实现
-> - `GET /content/channel/recommendation/cold-start`（冷启动推荐）— ✅ 已实现
+> - `GET /api/v1/content/channel/discovery/home`（聚合接口）— ✅ 已实现（`ContentChannelDiscoveryController.java`）
+> - `GET /api/v1/content/channel/recommendation/list`（推荐接口，需 userId 参数）— ✅ 已实现
+> - `GET /api/v1/content/channel/recommendation/cold-start`（冷启动推荐）— ✅ 已实现
 > - 未登录用户查看发现页时，前端调用 cold-start 接口获取热门频道推荐，无需传递 userId

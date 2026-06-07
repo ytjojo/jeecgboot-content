@@ -29,7 +29,7 @@
 - Verify: `mvn test -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserRelationServiceMutualTest`
 
 ### Step 5: RED — 编写互关列表接口测试
-- 测试: `GET /content/user/relation/mutual-follow-list` 返回分页互关列表
+- 测试: `GET /api/v1/content/user/relation/mutual-follow-list` 返回分页互关列表
 - Expected failure: 端点不存在
 - Verify: `mvn test -pl jeecg-boot-module/jeecg-module-content -Dtest=ContentUserRelationControllerTest`
 

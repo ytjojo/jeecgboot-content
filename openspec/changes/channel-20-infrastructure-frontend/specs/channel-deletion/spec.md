@@ -1,9 +1,9 @@
 ## ADDED Requirements
 
 > **API 路径**:
-> - 删除频道: `DELETE /api/v1/channels/{id}` (已存在)
-> - 撤销删除: `POST /api/v1/channels/{id}/cancel-delete` (已存在)
-> - 删除前置校验: `GET /api/v1/channels/{id}/delete-check` (已存在)
+> - 删除频道: `DELETE /api/v1/content/channels/{id}` (已存在)
+> - 撤销删除: `POST /api/v1/content/channels/{id}/cancel-delete` (已存在)
+> - 删除前置校验: `GET /api/v1/content/channels/{id}/delete-check` (已存在)
 > **Controller**: ChannelController
 > **前端封装**: `src/api/content/channel/index.ts` - `deleteChannel()`, `cancelDelete()`, `checkDeletePrecondition()`
 

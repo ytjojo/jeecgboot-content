@@ -82,10 +82,10 @@
 
 | API | 后端状态 | 说明 |
 |-----|---------|------|
-| `GET /content/user/support/help/categories` | ✅ 已实现（2026-06-05） | 从 `getHelpCenter` 的 `faqCategories` 拆分独立接口 |
-| `GET /content/user/support/help/search` | ✅ 已暴露（2026-06-05） | `searchHelpArticles(userId, keyword)` 已在控制器中暴露；后端无分页支持，返回 `List<ContentHelpSearchResultVO>` |
-| `GET /content/user/support/help/article/{id}` | ✅ 已实现（2026-06-05） | 从帮助中心静态数据中按 code 匹配返回文章详情 |
-| `POST /content/user/support/help/article/{id}/feedback` | ✅ 已实现（2026-06-05） | 提交文章有用/无用反馈（stub 实现） |
+| `GET /api/v1/content/user/support/help/categories` | ✅ 已实现（2026-06-05） | 从 `getHelpCenter` 的 `faqCategories` 拆分独立接口 |
+| `GET /api/v1/content/user/support/help/search` | ✅ 已暴露（2026-06-05） | `searchHelpArticles(userId, keyword)` 已在控制器中暴露；后端无分页支持，返回 `List<ContentHelpSearchResultVO>` |
+| `GET /api/v1/content/user/support/help/article/{id}` | ✅ 已实现（2026-06-05） | 从帮助中心静态数据中按 code 匹配返回文章详情 |
+| `POST /api/v1/content/user/support/help/article/{id}/feedback` | ✅ 已实现（2026-06-05） | 提交文章有用/无用反馈（stub 实现） |
 
 **数据结构差异**:
 - 前端期望 `HelpCategory`（id, name, icon, articleCount），后端 `ContentHelpCenterVO` 返回 `faqCategories`（结构不同）— 前端需适配

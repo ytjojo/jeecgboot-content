@@ -1,9 +1,9 @@
 ## ADDED Requirements
 
 > **API 路径**:
-> - 用户端创建频道: `POST /api/v1/channels/create` (已存在)
-> - 后台创建系统频道: `POST /api/v1/admin/channels/create-system` (已存在)
-> - 名称唯一性校验: `GET /api/v1/channels/check-name` (已存在)
+> - 用户端创建频道: `POST /api/v1/content/channels/create` (已存在)
+> - 后台创建系统频道: `POST /api/v1/content/admin/channels/create-system` (已存在)
+> - 名称唯一性校验: `GET /api/v1/content/channels/check-name` (已存在)
 > **Controller**: ChannelController, ChannelAdminController
 > **前端封装**: `src/api/content/channel/index.ts` - `createChannel()`, `createSystemChannel()`, `checkNameUnique()`
 

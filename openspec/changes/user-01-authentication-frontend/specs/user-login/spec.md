@@ -5,7 +5,7 @@
 
 #### Scenario: 密码登录成功
 - **WHEN** 用户输入正确账号和密码，点击登录
-- **THEN** 系统调用 `POST /api/v1/auth/login/password`，登录成功后跳转来源页（有 redirect 参数时）或首页
+- **THEN** 系统调用 `POST /api/v1/content/auth/login/password`，登录成功后跳转来源页（有 redirect 参数时）或首页
 
 #### Scenario: 密码错误
 - **WHEN** 用户输入错误密码
@@ -24,7 +24,7 @@
 
 #### Scenario: 验证码登录成功
 - **WHEN** 用户输入正确手机号和短信验证码，点击登录
-- **THEN** 系统调用 `POST /api/v1/auth/login/sms-code`，登录成功后跳转来源页或首页
+- **THEN** 系统调用 `POST /api/v1/content/auth/login/sms-code`，登录成功后跳转来源页或首页
 
 #### Scenario: 手机号未注册
 - **WHEN** 用户输入未注册的手机号并提交
@@ -39,7 +39,7 @@
 
 #### Scenario: 第三方登录成功（已绑定用户）
 - **WHEN** 已绑定第三方账号的用户完成授权
-- **THEN** 系统调用 `POST /api/v1/auth/login/third-party`，直接登录跳转首页
+- **THEN** 系统调用 `POST /api/v1/content/auth/login/third-party`，直接登录跳转首页
 
 #### Scenario: 第三方登录首次（自动创建账户）
 - **WHEN** 首次使用第三方登录的用户完成授权

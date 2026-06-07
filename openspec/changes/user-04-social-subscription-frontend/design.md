@@ -30,7 +30,7 @@
 - 不实现付费订阅功能（仅保留状态扩展点）
 - 不引入机器学习推荐算法（使用可解释规则）
 - 不重构拉黑与屏蔽语义（仅在查询中尊重现有状态）
-- 不迁移 `/api/v1/*` 路径到 `/content/user/*`（前端 PRD 已统一使用 `/content/user/*` 路径）
+- 不迁移 `/api/v1/*` 路径到 `/content/user/*`（前端 PRD 已统一使用 `/api/v1/content/user/*` 路径）
 - 不实现国际化支持（默认中文界面）
 
 ## Decisions
@@ -177,7 +177,7 @@
 ### 用户关注相关 API
 
 **Controller**: `ContentUserRelationController`
-**Base Path**: `/content/user/relation`
+**Base Path**: `/api/v1/content/user/relation`
 
 | 端点 | 方法 | 说明 | 对应 Spec |
 |------|------|------|-----------|
@@ -209,7 +209,7 @@
 ### 内容订阅相关 API
 
 **Controller**: `ContentUserSubscriptionController`
-**Base Path**: `/content/user/subscription`
+**Base Path**: `/api/v1/content/user/subscription`
 
 | 端点 | 方法 | 说明 | 对应 Spec |
 |------|------|------|-----------|
@@ -253,7 +253,7 @@
 - 超过上限后端返回校验错误，前端在提交前做截断提示
 
 **全局通知默认配置**:
-- 全局默认配置通过 `GET /content/user/subscription/notification/preference` 获取（不传 subscriptionId 时返回全局默认值）
+- 全局默认配置通过 `GET /api/v1/content/user/subscription/notification/preference` 获取（不传 subscriptionId 时返回全局默认值）
 - 无需单独的 `/notification/global-default` 端点
 
 ### 后端 VO/Req 字段定义
@@ -501,7 +501,7 @@ interface ContentSubscriptionNotificationPreferenceVO {
 **示例**:
 ```typescript
 // 关注用户请求
-POST /content/user/relation/follow?userId=current_user_id
+POST /api/v1/content/user/relation/follow?userId=current_user_id
 Content-Type: application/json
 
 {

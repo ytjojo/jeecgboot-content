@@ -6,7 +6,7 @@
 - 分层架构: controller / biz / service / mapper / entity / req / vo / dto
 - biz 层仅用于跨聚合、跨域编排；单表逻辑留在 service
 - 数据库: snake_case 命名，无外键，Flyway 迁移，必须有 id/created_time/updated_time
-- API: `/jeecg-boot/api/v1/{resources}`，Result<T> 返回
+- API: `/api/v1/{resources}`，Result<T> 返回
 - DI: 必须用 @Resource，不用 @Autowired
 - Lombok: @Data 用于 entity/DTO，@Builder 用于 DTO/VO（不用于 entity）
 

@@ -5,7 +5,7 @@
 
 #### Scenario: 手机号找回密码成功
 - **WHEN** 用户输入已注册手机号、正确短信验证码，点击"下一步"，输入新密码和确认密码，点击"确认重置"
-- **THEN** 系统调用 `POST /api/v1/account-security/password/reset`，显示"密码重置成功"，点击"去登录"跳转登录页
+- **THEN** 系统调用 `POST /api/v1/content/account-security/password/reset`，显示"密码重置成功"，点击"去登录"跳转登录页
 
 #### Scenario: 邮箱找回密码成功
 - **WHEN** 用户点击邮件中的重置链接

@@ -19,7 +19,7 @@
 #### 1. 互动数据接口
 
 **所属 Controller**: `ChannelStatsController`
-**接口路径**: `GET /jeecg-boot/api/v1/content/channel/stats/interaction`
+**接口路径**: `GET /api/v1/content/channel/stats/interaction`
 **功能描述**: 返回频道的互动数据统计
 
 **请求参数**:
@@ -59,7 +59,7 @@
 #### 2. 导出历史列表接口
 
 **所属 Controller**: `ChannelExportController`
-**接口路径**: `GET /jeecg-boot/api/v1/content/channel/export/history`
+**接口路径**: `GET /api/v1/content/channel/export/history`
 **功能描述**: 返回用户的导出历史记录
 
 **请求参数**:
@@ -104,7 +104,7 @@
 #### 3. 审核详情接口
 
 **所属 Controller**: `ChannelReviewController`
-**接口路径**: `GET /jeecg-boot/api/v1/content/channel/review/detail/{id}`
+**接口路径**: `GET /api/v1/content/channel/review/detail/{id}`
 **功能描述**: 返回审核申请的详细信息
 
 **请求参数**:
@@ -152,7 +152,7 @@
 #### 4. 恢复可见接口
 
 **所属 Controller**: `ChannelLifecycleController`
-**接口路径**: `POST /jeecg-boot/api/v1/content/channel/lifecycle/restore-visibility`
+**接口路径**: `POST /api/v1/content/channel/lifecycle/restore-visibility`
 **功能描述**: 将 Hidden 状态的频道恢复为 Active
 
 **请求参数**:
@@ -182,7 +182,7 @@
 #### 5. 按频道查询审计日志接口
 
 **所属 Controller**: `ChannelLifecycleController`
-**接口路径**: `GET /jeecg-boot/api/v1/content/channel/lifecycle/logs`
+**接口路径**: `GET /api/v1/content/channel/lifecycle/logs`
 **功能描述**: 支持按频道 ID 查询审计日志
 
 **请求参数**:
@@ -233,7 +233,7 @@
 #### 6. 申诉详情接口
 
 **所属 Controller**: `ChannelLifecycleController`
-**接口路径**: `GET /jeecg-boot/api/v1/content/channel/lifecycle/appeal/detail/{id}`
+**接口路径**: `GET /api/v1/content/channel/lifecycle/appeal/detail/{id}`
 **功能描述**: 返回申诉的详细信息
 
 **请求参数**:
@@ -316,10 +316,10 @@
 
 ## 相关文件
 
-- **Controller**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/controller/`
-- **Service**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/service/`
-- **Biz**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/biz/`
-- **Entity**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/channel/entity/`
+- **Controller**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/controller/`
+- **Service**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/service/`
+- **Biz**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/biz/`
+- **Entity**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/channel/entity/`
 
 ---
 

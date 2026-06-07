@@ -68,17 +68,17 @@
 
 | # | API 名称 | HTTP 方法 | 路径 | 后端状态 | 优先级 |
 |---|---------|-----------|------|---------|--------|
-| 1 | getCurrentStatus | GET | /api/content/user-status/current | ✅ 已实现 | - |
-| 2 | getUserStatus | GET | /api/content/user-status/{userId} | ✅ 已实现 | - |
-| 3 | changeUserStatus | POST | /api/content/user-status/{userId}/change | ✅ 已实现 | - |
-| 4 | getStatusHistory | GET | /api/content/user-status/{userId}/history | ✅ 已实现 | - |
-| 5 | releaseUser | POST | /api/content/user-status/{userId}/release | ✅ 已实现 | - |
-| 6 | getTransitions | GET | /api/content/user-status/transitions/{currentStatus} | ✅ 已实现 | P0 |
-| 7 | getStatusList | GET | /api/content/user-status/list | ✅ 已实现 | P0 |
-| 8 | verifySecurity | POST | /api/content/user-status/verify-security | ✅ 已实现 | P0 |
-| 9 | sendVerifyCode | POST | /api/content/user-status/send-verify-code | ✅ 已实现 | P0 |
-| 10 | getAuditLogList | GET | /api/content/user-status/audit-logs | ✅ 已实现 | P1 |
-| 11 | getAuditLogDetail | GET | /api/content/user-status/audit-logs/{logId} | ✅ 已实现 | P1 |
-| 12 | batchReleaseUsers | POST | /api/content/user-status/batch-release | ✅ 已实现 | P1 |
-| 13 | exportAuditLogs | GET | /api/content/user-status/audit-logs/export | ✅ 已实现 | P1 |
-| 14 | getUserAuditLogs | GET | /api/content/user-status/users/{userId}/audit-logs | ✅ 已实现 | P1 |
+| 1 | getCurrentStatus | GET | /api/v1/content/user-status/current | ✅ 已实现 | - |
+| 2 | getUserStatus | GET | /api/v1/content/user-status/{userId} | ✅ 已实现 | - |
+| 3 | changeUserStatus | POST | /api/v1/content/user-status/{userId}/change | ✅ 已实现 | - |
+| 4 | getStatusHistory | GET | /api/v1/content/user-status/{userId}/history | ✅ 已实现 | - |
+| 5 | releaseUser | POST | /api/v1/content/user-status/{userId}/release | ✅ 已实现 | - |
+| 6 | getTransitions | GET | /api/v1/content/user-status/transitions/{currentStatus} | ✅ 已实现 | P0 |
+| 7 | getStatusList | GET | /api/v1/content/user-status/list | ✅ 已实现 | P0 |
+| 8 | verifySecurity | POST | /api/v1/content/user-status/verify-security | ✅ 已实现 | P0 |
+| 9 | sendVerifyCode | POST | /api/v1/content/user-status/send-verify-code | ✅ 已实现 | P0 |
+| 10 | getAuditLogList | GET | /api/v1/content/user-status/audit-logs | ✅ 已实现 | P1 |
+| 11 | getAuditLogDetail | GET | /api/v1/content/user-status/audit-logs/{logId} | ✅ 已实现 | P1 |
+| 12 | batchReleaseUsers | POST | /api/v1/content/user-status/batch-release | ✅ 已实现 | P1 |
+| 13 | exportAuditLogs | GET | /api/v1/content/user-status/audit-logs/export | ✅ 已实现 | P1 |
+| 14 | getUserAuditLogs | GET | /api/v1/content/user-status/users/{userId}/audit-logs | ✅ 已实现 | P1 |

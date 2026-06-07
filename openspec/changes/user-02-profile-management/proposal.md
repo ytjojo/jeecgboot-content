@@ -5,7 +5,7 @@
 
 ## What Changes
 
-> **实施更新（2026-06-03）**: 本变更已通过 `ContentUserProfileController`（`/content/user/profile` 路径前缀）实现并完成单测覆盖。统一端点 `/profile/update` 承载基础资料 + 主页配置 + 模块排序 + 认证文案的合并提交；隐私接口覆盖 15 个 `*Visibility` 字段。
+> **实施更新（2026-06-03）**: 本变更已通过 `ContentUserProfileController`（`/api/v1/content/user/profile` 路径前缀）实现并完成单测覆盖。统一端点 `/profile/update` 承载基础资料 + 主页配置 + 模块排序 + 认证文案的合并提交；隐私接口覆盖 15 个 `*Visibility` 字段。
 
 - 补齐基础资料维护：昵称、头像、简介、性别、生日、地区、职业、个人链接等字段的保存、字段校验（`@NotBlank`/`@Size`/`@Pattern`）和审核状态。
 - 主页背景图与头像：本期 **仅持久化 CDN URL**（不提供独立上传端点），由前端 OSS 客户端直传后回填 URL；JPG/PNG/WebP、≤5MB 的素材约束由前端 + OSS 联合保证。
@@ -28,7 +28,7 @@
 
 ## Impact
 
-- **新增端点**（`/content/user/profile` 前缀下 12 个接口）:
+- **新增端点**（`/api/v1/content/user/profile` 前缀下 12 个接口）:
   - `GET /detail` 资料详情（owner + viewer 视角裁剪）
   - `POST /update` 统一资料更新
   - `POST /review/handle` 审核处理

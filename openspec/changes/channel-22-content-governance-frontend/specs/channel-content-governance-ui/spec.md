@@ -6,7 +6,7 @@
 
 #### Scenario: 加载频道内容列表
 - **WHEN** 管理员进入内容管理 Tab
-- **THEN** 调用 `GET /content/channel/governance/content/list` 加载内容列表（**后端待实现**），展示标题、类型、作者、发布时间、状态，每行提供治理操作按钮
+- **THEN** 调用 `GET /api/v1/content/channel/governance/content/list` 加载内容列表（**后端待实现**），展示标题、类型、作者、发布时间、状态，每行提供治理操作按钮
 
 #### Scenario: 筛选和排序内容
 - **WHEN** 管理员使用筛选栏（内容类型、状态、作者、时间范围）或切换排序（最新发布/最多点赞）
@@ -14,11 +14,11 @@
 
 #### Scenario: 置顶/取消置顶内容
 - **WHEN** 管理员点击"置顶"
-- **THEN** 调用 `POST /content/channel/governance`（body: `{channelId, contentId, action: "PIN"}`），内容移至列表顶部并展示置顶标识；再次点击取消置顶
+- **THEN** 调用 `POST /api/v1/content/channel/governance`（body: `{channelId, contentId, action: "PIN"}`），内容移至列表顶部并展示置顶标识；再次点击取消置顶
 
 #### Scenario: 标记/取消精华
 - **WHEN** 管理员点击"标记精华"
-- **THEN** 调用 `POST /content/channel/governance`（body: `{channelId, contentId, action: "FEATURE"}`），内容添加精华标识；再次点击取消精华
+- **THEN** 调用 `POST /api/v1/content/channel/governance`（body: `{channelId, contentId, action: "FEATURE"}`），内容添加精华标识；再次点击取消精华
 
 #### Scenario: 删除内容到回收站
 - **WHEN** 管理员点击"删除"
@@ -26,7 +26,7 @@
 
 #### Scenario: 移出频道
 - **WHEN** 管理员点击"移出频道"
-- **THEN** 弹出 MoveChannelDialog，选择目标频道后展示预期结果（直接展示/进入待审），确认后调用 `POST /content/channel/governance`（body: `{channelId, contentId, action: "MOVE", targetChannelId}`）
+- **THEN** 弹出 MoveChannelDialog，选择目标频道后展示预期结果（直接展示/进入待审），确认后调用 `POST /api/v1/content/channel/governance`（body: `{channelId, contentId, action: "MOVE", targetChannelId}`）
 
 #### Scenario: 编辑协助
 - **WHEN** 管理员点击"编辑协助"
@@ -70,7 +70,7 @@
 
 #### Scenario: 确认移出
 - **WHEN** 管理员确认移出
-- **THEN** 调用 `POST /content/channel/governance`（body: `{channelId, contentId, action: "MOVE", targetChannelId}`），成功后从当前列表移除，toast "已移出"
+- **THEN** 调用 `POST /api/v1/content/channel/governance`（body: `{channelId, contentId, action: "MOVE", targetChannelId}`），成功后从当前列表移除，toast "已移出"
 
 ---
 
@@ -84,7 +84,7 @@
 
 #### Scenario: 填写修改原因并保存
 - **WHEN** 管理员修改字段后点击保存
-- **THEN** 必填"修改原因"，保存后调用 `POST /content/channel/governance`（body: `{channelId, contentId, action: "EDIT_ASSIST", editFields: {字段名: 新值}}`）
+- **THEN** 必填"修改原因"，保存后调用 `POST /api/v1/content/channel/governance`（body: `{channelId, contentId, action: "EDIT_ASSIST", editFields: {字段名: 新值}}`）
 
 #### Scenario: 保存后通知作者
 - **WHEN** 编辑协助保存成功
@@ -92,7 +92,7 @@
 
 #### Scenario: 查看修订历史
 - **WHEN** 管理员在 EditAssistDrawer 底部查看修订历史
-- **THEN** 调用 `GET /content/channel/governance/edit-assist/history/{contentId}` 展示修订历史列表（**后端待实现**）（修改人、时间、字段、前后摘要）
+- **THEN** 调用 `GET /api/v1/content/channel/governance/edit-assist/history/{contentId}` 展示修订历史列表（**后端待实现**）（修改人、时间、字段、前后摘要）
 
 #### Scenario: 作者查看修订记录
 - **WHEN** 原作者在内容详情页查看
@@ -106,11 +106,11 @@
 
 #### Scenario: 加载回收站列表
 - **WHEN** 管理员进入回收站 Tab
-- **THEN** 调用 `GET /content/channel/governance/recycle-bin/list` 加载列表（**后端待实现**），展示标题、类型、原作者、删除人、删除时间、删除原因、剩余天数
+- **THEN** 调用 `GET /api/v1/content/channel/governance/recycle-bin/list` 加载列表（**后端待实现**），展示标题、类型、原作者、删除人、删除时间、删除原因、剩余天数
 
 #### Scenario: 恢复单条内容
 - **WHEN** 管理员点击"恢复"
-- **THEN** 展示确认弹窗，确认后调用 `POST /content/channel/governance`（body: `{channelId, contentId, action: "RESTORE"}`）
+- **THEN** 展示确认弹窗，确认后调用 `POST /api/v1/content/channel/governance`（body: `{channelId, contentId, action: "RESTORE"}`）
 
 #### Scenario: 批量恢复
 - **WHEN** 管理员勾选多条后点击"批量恢复"
@@ -132,7 +132,7 @@
 
 #### Scenario: 加载治理日志列表
 - **WHEN** 管理员进入治理日志 Tab
-- **THEN** 调用 `GET /content/channel/governance/log/list` 加载列表（**后端待实现**），展示时间、操作者、操作类型、操作对象、结果、原因/备注
+- **THEN** 调用 `GET /api/v1/content/channel/governance/log/list` 加载列表（**后端待实现**），展示时间、操作者、操作类型、操作对象、结果、原因/备注
 
 #### Scenario: 按操作类型筛选
 - **WHEN** 管理员选择操作类型筛选（置顶/精华/删除/恢复/移出/编辑协助/公告变更）

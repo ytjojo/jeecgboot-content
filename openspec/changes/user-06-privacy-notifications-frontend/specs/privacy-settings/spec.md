@@ -5,7 +5,7 @@
 
 #### Scenario: 设置浏览记录为仅自己可见
 - **WHEN** 用户将浏览记录可见性设置为"仅自己可见"并保存
-- **THEN** 该项下方显示提示文案"其他用户将无法在你的主页看到此内容"，保存后调用 `POST /content/user/settings/privacy/update`
+- **THEN** 该项下方显示提示文案"其他用户将无法在你的主页看到此内容"，保存后调用 `POST /api/v1/content/user/settings/privacy/update`
 
 #### Scenario: 可见性字段为 null 时的默认值
 - **WHEN** 后端返回某项可见性字段为 null
@@ -57,9 +57,9 @@
 - **THEN** 全局错误提示，保留用户已修改的状态
 
 ### Requirement: 页面数据加载
-系统 SHALL 在页面加载时调用 `GET /content/user/settings/privacy` 获取当前隐私设置。
+系统 SHALL 在页面加载时调用 `GET /api/v1/content/user/settings/privacy` 获取当前隐私设置。
 
-> **后端状态**: 该 GET 端点尚未实现（`ContentUserSettingsController` 中仅有 `POST /privacy/update`）。需后端补充，或前端临时改为从 `GET /content/user/profile/detail` 提取隐私字段。详见 `backend-issues.md`。
+> **后端状态**: 该 GET 端点尚未实现（`ContentUserSettingsController` 中仅有 `POST /privacy/update`）。需后端补充，或前端临时改为从 `GET /api/v1/content/user/profile/detail` 提取隐私字段。详见 `backend-issues.md`。
 
 #### Scenario: 加载中显示骨架屏
 - **WHEN** 用户进入隐私设置页

@@ -43,7 +43,7 @@
 
 #### Scenario: 取消注销
 - **WHEN** 用户点击"取消注销"并确认
-- **THEN** 系统调用 `POST /api/v1/account-cancellation/revoke`，账号恢复正常，显示"注销已取消，账号恢复正常"
+- **THEN** 系统调用 `POST /api/v1/content/account-cancellation/revoke`，账号恢复正常，显示"注销已取消，账号恢复正常"
 
 #### Scenario: 冷静期结束
 - **WHEN** 冷静期结束

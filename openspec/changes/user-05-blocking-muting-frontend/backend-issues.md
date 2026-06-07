@@ -10,7 +10,7 @@
 
 ### 问题描述
 
-`GET /content/user/relation/mute-list` 端点尚未实现。前端屏蔽列表管理页的"屏蔽用户" Tab 需要此端点获取已屏蔽用户的分页列表。
+`GET /api/v1/content/user/relation/mute-list` 端点尚未实现。前端屏蔽列表管理页的"屏蔽用户" Tab 需要此端点获取已屏蔽用户的分页列表。
 
 ### 影响范围
 
@@ -88,7 +88,7 @@ public class ContentMuteUserItemVO {
 
 ### 验收标准
 
-- `GET /content/user/relation/mute-list?userId=xxx&pageNo=1&pageSize=10` 返回 200 + 分页数据
+- `GET /api/v1/content/user/relation/mute-list?userId=xxx&pageNo=1&pageSize=10` 返回 200 + 分页数据
 - `mvn test -pl jeecg-boot-module/jeecg-module-content -am` 全量通过
 
 ---

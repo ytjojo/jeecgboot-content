@@ -26,7 +26,7 @@
 - [x] 3.5 实现在线状态可见性：Radio Group 横向三选项 + 选择时的提示文案
 - [x] 3.6 实现搜索引擎索引控制：Switch + 说明文案 + 认证用户推荐标签
 - [x] 3.7 实现 null 值默认逻辑（可见性默认 PUBLIC，搜索引擎默认关闭）
-- [x] 3.8 实现保存按钮：调用 `POST /content/user/settings/privacy/update`，成功/失败提示
+- [x] 3.8 实现保存按钮：调用 `POST /api/v1/content/user/settings/privacy/update`，成功/失败提示
 - [x] 3.9 实现移动端响应式：Radio 组纵向排列，Card 全宽堆叠
 
 ## 4. 第三方授权管理页
@@ -45,7 +45,7 @@
 
 - [x] 5.1 创建 `AccountSecurity.vue` 页面骨架，包含 Page 容器 + 骨架屏加载状态
 - [x] 5.2 实现 2x2 网格卡片布局（设备管理、密码修改、两步验证、登录提醒）
-- [x] 5.3 实现安全功能状态加载：从 GET /content/user/settings/security 获取 Boolean 状态，null 默认"已启用"
+- [x] 5.3 实现安全功能状态加载：从 GET /api/v1/content/user/settings/security 获取 Boolean 状态，null 默认"已启用"
 - [x] 5.4 实现设备管理/密码修改/两步验证卡片的点击跳转（链接到 EPIC-01 已有页面）
 - [x] 5.5 实现登录提醒 Switch 开关：切换调用接口更新，失败时恢复原状态
 - [x] 5.6 实现移动端响应式：卡片从 2x2 网格变为单列堆叠（1x4）

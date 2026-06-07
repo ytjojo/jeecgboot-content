@@ -26,6 +26,7 @@ docs/requirements/prd/decomposition/change-prd-mapping.yaml
 ## 全局硬规则
 - 只修改与当前任务直接相关的文件，不顺手重构无关模块
 - 不覆盖、不回退、不清理用户已有改动，除非用户明确要求
+- 内容社区 API 路径统一使用 `/api/v1/content/` 前缀，与基础库 `/sys/` 隔离，禁止混用 `/api/v1/auth/`、`/api/v1/account-security/` 等无 `content/` 段的路径
 
 
 ## 全局规则

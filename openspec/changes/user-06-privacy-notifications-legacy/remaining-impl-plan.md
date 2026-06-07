@@ -184,6 +184,6 @@ Task 4 (Token撤销) ──→ Task 5 (详情端点)                      Task 6
 1. 所有新增/修改的测试通过
 2. `V3.9.1_58` SQL 包含 6 个可见性字段（原有 1 个 + 新增 3 个 + 2 个已有）
 3. `ContentThirdPartyTokenRevocationPort` 接口存在，Noop 实现注入到 Service
-4. 第三方授权详情端点 `GET /content/user/auth/third-party/{authId}` 可用
+4. 第三方授权详情端点 `GET /api/v1/content/user/auth/third-party/{authId}` 可用
 5. `canViewActivity` 和 `shouldNoindexProfile` 方法在接口和实现中存在
 6. WebMvc 测试覆盖所有 8 个 Settings 端点 + 2 个第三方授权端点

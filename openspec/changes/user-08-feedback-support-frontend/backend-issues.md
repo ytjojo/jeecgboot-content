@@ -24,15 +24,15 @@
 
 | # | HTTP 方法 | 后端路径 | 控制器 | 对应前端 API |
 |---|-----------|---------|--------|-------------|
-| 1 | POST | `/content/user/support/report/create` | ContentUserSupportController | `createReport`（前端路径需含 `/create`） |
-| 2 | POST | `/content/user/support/appeal/create` | ContentUserSupportController | `createAppeal`（前端路径需含 `/create`） |
-| 3 | GET | `/content/user/support/appeal/progress` | ContentUserSupportController | 无直接对应（前端用 detail） |
-| 4 | GET | `/content/user/support/appeal/list` | ContentUserSupportController | `getAppealList`（参数需调整） |
-| 5 | GET | `/content/user/support/report/progress` | ContentUserSupportController | 无直接对应（前端用 detail） |
-| 6 | GET | `/content/user/support/help-center` | ContentUserSupportController | 前端需解析 faqCategories/guideEntries/releaseNotes |
-| 7 | GET | `/content/user/support/customer-service` | ContentUserSupportController | 获取客服入口路由信息 |
+| 1 | POST | `/api/v1/content/user/support/report/create` | ContentUserSupportController | `createReport`（前端路径需含 `/create`） |
+| 2 | POST | `/api/v1/content/user/support/appeal/create` | ContentUserSupportController | `createAppeal`（前端路径需含 `/create`） |
+| 3 | GET | `/api/v1/content/user/support/appeal/progress` | ContentUserSupportController | 无直接对应（前端用 detail） |
+| 4 | GET | `/api/v1/content/user/support/appeal/list` | ContentUserSupportController | `getAppealList`（参数需调整） |
+| 5 | GET | `/api/v1/content/user/support/report/progress` | ContentUserSupportController | 无直接对应（前端用 detail） |
+| 6 | GET | `/api/v1/content/user/support/help-center` | ContentUserSupportController | 前端需解析 faqCategories/guideEntries/releaseNotes |
+| 7 | GET | `/api/v1/content/user/support/customer-service` | ContentUserSupportController | 获取客服入口路由信息 |
 
-**管理端端点**（ContentUserSupportAdminController, base: `/content/user/support/admin`）:
+**管理端端点**（ContentUserSupportAdminController, base: `/api/v1/content/user/support/admin`）:
 - `POST /appeal/handle` - 处理申诉
 - `POST /report/handle` - 处理举报
 - `GET /report/list` - 查询举报列表（管理端）
@@ -52,7 +52,7 @@
 |------|------|
 | 服务方法 | `searchHelpArticles(String userId, String keyword)` |
 | 返回类型 | `List<ContentHelpSearchResultVO>` |
-| 前端需要 | `GET /content/user/support/help/search?keyword=xxx` |
+| 前端需要 | `GET /api/v1/content/user/support/help/search?keyword=xxx` |
 | 实现难度 | 低 -- 仅需添加控制器端点 |
 | 注意事项 | 后端无分页支持，前端期望分页结果。建议后端先暴露无分页版本，前端适配 |
 | 状态 | ✅ 已在控制器中暴露 |
@@ -63,7 +63,7 @@
 |------|------|
 | 服务方法 | `listServiceSessions(ContentServiceSessionPageVO req)` |
 | 返回类型 | `ContentServiceSessionPageVO`（含 records/total/pageNo/pageSize） |
-| 前端需要 | `GET /content/user/support/customer-service/sessions?pageNo=1&pageSize=20` |
+| 前端需要 | `GET /api/v1/content/user/support/customer-service/sessions?pageNo=1&pageSize=20` |
 | 实现难度 | 低 -- 仅需添加控制器端点 |
 | 状态 | ✅ 已在控制器中暴露 |
 
@@ -73,7 +73,7 @@
 |------|------|
 | 服务方法 | `createServiceSession(String userId, String sessionType)` |
 | 返回类型 | 会话对象 |
-| 前端需要 | `POST /content/user/support/customer-service/session` |
+| 前端需要 | `POST /api/v1/content/user/support/customer-service/session` |
 | 实现难度 | 低 -- 仅需添加控制器端点 |
 | 状态 | ✅ 已在控制器中暴露 |
 
@@ -83,7 +83,7 @@
 |------|------|
 | 服务方法 | `rateService(String userId, String sessionId, Integer rating, String comment)` |
 | 返回类型 | void |
-| 前端需要 | `POST /content/user/support/customer-service/session/{id}/rating` |
+| 前端需要 | `POST /api/v1/content/user/support/customer-service/session/{id}/rating` |
 | 实现难度 | 低 -- 仅需添加控制器端点 |
 | 状态 | ✅ 已在控制器中暴露 |
 
@@ -93,7 +93,7 @@
 |------|------|
 | 服务方法 | `getChangelog(String userId)` |
 | 返回类型 | 更新日志列表 |
-| 前端需要 | `GET /content/user/support/changelog/list` |
+| 前端需要 | `GET /api/v1/content/user/support/changelog/list` |
 | 实现难度 | 低 -- 仅需添加控制器端点 |
 | 数据结构差异 | 后端字段为 `additions/improvements/fixes`，前端期望 `features/improvements/bugfixes`，需前端做映射 |
 | 状态 | ✅ 已在控制器中暴露 |
@@ -112,7 +112,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `GET /content/user/support/report/list` |
+| 前端 API | `GET /api/v1/content/user/support/report/list` |
 | 功能 | 用户查询自己的举报记录，支持分页、状态筛选、类型筛选 |
 | 后端现状 | 仅有管理端列表 `/admin/report/list`，用户端完全缺失 |
 | 实现建议 | 新增服务方法 `listReportsForUser(userId, query)`，返回分页结果 |
@@ -123,7 +123,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `GET /content/user/support/report/{id}` |
+| 前端 API | `GET /api/v1/content/user/support/report/{id}` |
 | 功能 | 用户查询自己举报的详情（含处理结果） |
 | 后端现状 | 仅有 `/report/progress`（返回进度）和管理端 `/admin/report/detail` |
 | 实现建议 | 新增服务方法 `getReportDetailForUser(userId, reportId)` |
@@ -134,7 +134,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `GET /content/user/support/appeal/{id}` |
+| 前端 API | `GET /api/v1/content/user/support/appeal/{id}` |
 | 功能 | 查询申诉详情（含审核结果、审核时间） |
 | 后端现状 | 仅有 `/appeal/progress`（返回进度信息），无完整详情 |
 | 实现建议 | 新增服务方法 `getAppealDetail(userId, appealId)` |
@@ -147,7 +147,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `POST /content/user/support/report/{id}/withdraw` |
+| 前端 API | `POST /api/v1/content/user/support/report/{id}/withdraw` |
 | 功能 | 用户撤回待处理状态的举报 |
 | 后端现状 | 完全缺失，服务层无此方法 |
 | 实现建议 | 新增服务方法 `withdrawReport(userId, reportId)`，校验状态为 pending 后更新为 withdrawn |
@@ -158,7 +158,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `POST /content/user/support/appeal/{id}/withdraw` |
+| 前端 API | `POST /api/v1/content/user/support/appeal/{id}/withdraw` |
 | 功能 | 用户撤回审核中状态的申诉 |
 | 后端现状 | 完全缺失，服务层无此方法 |
 | 实现建议 | 新增服务方法 `withdrawAppeal(userId, appealId)`，校验状态为 reviewing 后更新为 withdrawn |
@@ -169,7 +169,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `GET /content/user/support/help/categories` |
+| 前端 API | `GET /api/v1/content/user/support/help/categories` |
 | 功能 | 获取帮助中心分类列表（id, name, icon, articleCount） |
 | 后端现状 | 完全缺失。`getHelpCenter` 返回混合结构，非独立分类接口 |
 | 实现建议 | 从 `getHelpCenter` 的 `faqCategories` 拆分独立接口，或新增服务方法 |
@@ -180,7 +180,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `GET /content/user/support/help/article/{id}` |
+| 前端 API | `GET /api/v1/content/user/support/help/article/{id}` |
 | 功能 | 获取帮助文章详情（标题、Markdown 内容、分类、浏览数） |
 | 后端现状 | 完全缺失，帮助中心仅有静态分类数据 |
 | 实现建议 | 需要新增文章数据模型和查询接口 |
@@ -191,7 +191,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `POST /content/user/support/help/article/{id}/feedback` |
+| 前端 API | `POST /api/v1/content/user/support/help/article/{id}/feedback` |
 | 功能 | 提交文章有用/无用反馈 |
 | 后端现状 | 完全缺失 |
 | 实现建议 | 新增服务方法 `submitArticleFeedback(userId, articleId, helpful)` |
@@ -204,7 +204,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `POST /content/user/support/customer-service/session/{id}/transfer` |
+| 前端 API | `POST /api/v1/content/user/support/customer-service/session/{id}/transfer` |
 | 功能 | 将智能客服会话转为人工客服，加入排队 |
 | 后端现状 | 完全缺失 |
 | 实现建议 | 需要实现排队队列逻辑，优先级规则：level>=15 或 growthValue>=400 |
@@ -224,7 +224,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `POST /content/user/support/customer-service/session/{id}/close` |
+| 前端 API | `POST /api/v1/content/user/support/customer-service/session/{id}/close` |
 | 功能 | 用户主动结束客服会话 |
 | 后端现状 | 完全缺失 |
 | 实现建议 | 新增服务方法 `closeServiceSession(userId, sessionId)` |
@@ -234,7 +234,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 前端 API | `GET /content/user/support/customer-service/session/{id}` |
+| 前端 API | `GET /api/v1/content/user/support/customer-service/session/{id}` |
 | 功能 | 查询会话详情，包含完整消息列表 |
 | 后端现状 | 完全缺失 |
 | 实现建议 | 新增服务方法 `getServiceSessionDetail(userId, sessionId)`，返回会话信息 + 消息列表 |

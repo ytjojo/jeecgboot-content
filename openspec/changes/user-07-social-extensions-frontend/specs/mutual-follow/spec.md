@@ -55,12 +55,12 @@ The system SHALL provide API endpoints for mutual follow list and mutual status 
 
 #### Scenario: Fetch mutual follow list
 - **WHEN** the mutual follow list page loads
-- **THEN** the system SHALL call `GET /content/user/relation/mutual-follow-list` with pagination params (page, pageSize, keyword)
+- **THEN** the system SHALL call `GET /api/v1/content/user/relation/mutual-follow-list` with pagination params (page, pageSize, keyword)
 
 #### Scenario: Batch query mutual status
 - **WHEN** incremental comment loading requires mutual status for a list of userIds
 - **THEN** the system SHALL call the mutual status batch query API with userId list and cache results in `useMutualFollowStore`
-- **NOTE**: 后端需补充 `GET /content/user/relation/mutual-status` 端点，详见 backend-issues.md
+- **NOTE**: 后端需补充 `GET /api/v1/content/user/relation/mutual-status` 端点，详见 backend-issues.md
 
 ## API 封装
 
@@ -68,5 +68,5 @@ API 文件: `src/api/content/mutual-follow.ts`（如已有 relation 相关封装
 
 | 端点 | 方法 | 参数 | 响应关键字段 | 状态 |
 |------|------|------|------------|------|
-| `/content/user/relation/mutual-follow-list` | GET | @RequestParam: page, pageSize, keyword? | records[{userId, nickname, avatar, mutualFollowTime}], total | ✅ 后端已实现 |
-| `/content/user/relation/mutual-status` | GET | @RequestParam: userIds (逗号分隔) | Map<userId, boolean> | ❌ 后端待补充 |
+| `/api/v1/content/user/relation/mutual-follow-list` | GET | @RequestParam: page, pageSize, keyword? | records[{userId, nickname, avatar, mutualFollowTime}], total | ✅ 后端已实现 |
+| `/api/v1/content/user/relation/mutual-status` | GET | @RequestParam: userIds (逗号分隔) | Map<userId, boolean> | ❌ 后端待补充 |

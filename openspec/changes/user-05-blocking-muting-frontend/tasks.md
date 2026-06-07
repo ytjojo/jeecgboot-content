@@ -1,21 +1,21 @@
 ## 1. API 封装层
 
 - [x] 1.1 创建 `src/api/content/block.ts`，封装以下接口（使用 `defHttp.post`/`defHttp.get` + 查询参数）：
-  - `block(userId, targetUserId)` → `POST /content/user/relation/block`
-  - `unblock(userId, targetUserId)` → `POST /content/user/relation/unblock`
-  - `getBlacklist(userId, pageNo, pageSize)` → `GET /content/user/relation/blacklist`
-  - `checkRelation(userId, targetUserId)` → `GET /content/user/relation/detail`
-  - `getBlockMuteHelp()` → `GET /content/user/relation/block-mute/help`
+  - `block(userId, targetUserId)` → `POST /api/v1/content/user/relation/block`
+  - `unblock(userId, targetUserId)` → `POST /api/v1/content/user/relation/unblock`
+  - `getBlacklist(userId, pageNo, pageSize)` → `GET /api/v1/content/user/relation/blacklist`
+  - `checkRelation(userId, targetUserId)` → `GET /api/v1/content/user/relation/detail`
+  - `getBlockMuteHelp()` → `GET /api/v1/content/user/relation/block-mute/help`
 - [x] 1.2 创建 `src/api/content/mute.ts`，封装以下接口：
-  - `mute(userId, targetUserId)` → `POST /content/user/relation/mute`
-  - `unmute(userId, targetUserId)` → `POST /content/user/relation/mute/cancel`
-  - `getMuteList(userId, pageNo, pageSize)` → `GET /content/user/relation/mute-list`
+  - `mute(userId, targetUserId)` → `POST /api/v1/content/user/relation/mute`
+  - `unmute(userId, targetUserId)` → `POST /api/v1/content/user/relation/mute/cancel`
+  - `getMuteList(userId, pageNo, pageSize)` → `GET /api/v1/content/user/relation/mute-list`
 - [x] 1.3 创建 `src/api/content/filterRule.ts`，封装以下接口：
-  - `addRule(userId, ruleType, value, daysValid?)` → `POST /content/user/filter-rule`
-  - `deleteRule(userId, ruleId)` → `POST /content/user/filter-rule/delete`
-  - `batchDeleteRules(userId, ruleIds)` → `POST /content/user/filter-rule/batch-delete`
-  - `getRuleList(userId, ruleType?)` → `GET /content/user/filter-rule/list`
-  - `recordNotInterested(userId, contentId, contentType)` → `POST /content/user/not-interested`
+  - `addRule(userId, ruleType, value, daysValid?)` → `POST /api/v1/content/user/filter-rule`
+  - `deleteRule(userId, ruleId)` → `POST /api/v1/content/user/filter-rule/delete`
+  - `batchDeleteRules(userId, ruleIds)` → `POST /api/v1/content/user/filter-rule/batch-delete`
+  - `getRuleList(userId, ruleType?)` → `GET /api/v1/content/user/filter-rule/list`
+  - `recordNotInterested(userId, contentId, contentType)` → `POST /api/v1/content/user/not-interested`
 - [x] 1.4 添加 API 函数类型定义（请求参数、响应类型）
 
 ## 2. Pinia Store
