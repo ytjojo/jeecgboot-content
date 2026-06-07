@@ -23,7 +23,7 @@
     <!-- 邀请加入配置 -->
     <div v-if="currentMethod === 'INVITE'" class="method-config">
       <Button type="primary" @click="inviteDrawerVisible = true">创建邀请</Button>
-      <Table :dataSource="inviteList" :columns="inviteColumns" :loading="inviteLoading" :pagination="false" style="margin-top: 12px">
+      <Table v-if="!isMobile" :dataSource="inviteList" :columns="inviteColumns" :loading="inviteLoading" :pagination="false" style="margin-top: 12px">
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'status'">
             <Tag :color="getInviteStatusColor(record.status)">{{ getInviteStatusText(record.status) }}</Tag>
@@ -36,6 +36,26 @@
           </template>
         </template>
       </Table>
+
+      <!-- 移动端卡片视图 -->
+      <div v-else class="mobile-card-list">
+        <div v-for="item in inviteList" :key="item.id" class="mobile-card">
+          <div class="mobile-card-header">
+            <span class="mobile-card-code">{{ item.code || item.link }}</span>
+            <Tag :color="getInviteStatusColor(item.status)">{{ getInviteStatusText(item.status) }}</Tag>
+          </div>
+          <div class="mobile-card-body">
+            <div class="mobile-card-field">类型：{{ item.type === 'CODE' ? '邀请码' : '邀请链接' }}</div>
+            <div class="mobile-card-field">有效期：{{ item.expireTime || '永久' }}</div>
+            <div class="mobile-card-field">已用/总次数：{{ item.usage }}</div>
+          </div>
+          <div class="mobile-card-actions">
+            <Button type="primary" size="small" @click="handleCopyInvite(item)">复制</Button>
+            <Button danger size="small" @click="handleRevokeInvite(item)">撤销</Button>
+          </div>
+        </div>
+      </div>
+
       <Empty v-if="!inviteLoading && inviteList.length === 0" description="暂无邀请，点击上方按钮创建" />
     </div>
 
@@ -64,9 +84,17 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, watch } from 'vue';
+  import { ref, reactive, computed, watch } from 'vue';
   import { Radio, Switch, InputNumber, Button, Table, Tag, Space, Drawer, Form, DatePicker, Empty } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
+  import { sizeEnum } from '/@/enums/breakpointEnum';
+
+  const { screenRef } = useBreakpoint();
+  const isMobile = computed(() => {
+    const s = screenRef.value;
+    return s === sizeEnum.XS || s === sizeEnum.SM;
+  });
   import { updateJoinMethod } from '/@/api/content/channelPrivacy';
   import { createInvite, getInviteList, revokeInvite } from '/@/api/content/channelInvite';
   import { copyToClipboard } from '/@/hooks/web/useCopyToClipboard';
@@ -163,4 +191,17 @@
 .setting-label { font-weight: 500; margin-bottom: 12px; }
 .method-config { margin-top: 16px; padding: 12px; background: #fafafa; border-radius: 4px; }
 .config-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.mobile-card-list { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.mobile-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; }
+.mobile-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.mobile-card-code { font-size: 13px; font-family: monospace; word-break: break-all; flex: 1; margin-right: 8px; }
+.mobile-card-body { margin-bottom: 8px; }
+.mobile-card-field { font-size: 13px; color: #666; line-height: 1.8; }
+.mobile-card-actions { display: flex; gap: 8px; justify-content: flex-end; }
+@media (max-width: 575px) {
+  .mobile-card .ant-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
 </style>

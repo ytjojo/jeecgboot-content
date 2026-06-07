@@ -5,7 +5,8 @@
       <h3>成员管理 <span class="count">共 {{ total }} 位成员</span></h3>
     </div>
 
-    <div class="filter-bar">
+    <!-- 桌面端：内联筛选栏 -->
+    <div v-if="!isMobile" class="filter-bar">
       <Space>
         <Select v-model:value="roleFilter" placeholder="角色筛选" style="width: 120px" @change="loadData" allowClear>
           <Select.Option value="">全部</Select.Option>
@@ -27,7 +28,38 @@
       </div>
     </div>
 
+    <!-- 移动端：筛选按钮 -->
+    <div v-else class="mobile-filter-row">
+      <Button @click="filterDrawerVisible = true">筛选</Button>
+      <div v-if="selectedRowKeys.length > 0" class="batch-actions">
+        <span>已选 {{ selectedRowKeys.length }} 项</span>
+      </div>
+    </div>
+
+    <!-- 移动端筛选 Drawer -->
+    <Drawer v-model:open="filterDrawerVisible" title="筛选" placement="bottom" :height="'60%'">
+      <Space direction="vertical" style="width: 100%">
+        <Select v-model:value="roleFilter" placeholder="角色筛选" style="width: 100%" allowClear>
+          <Select.Option value="">全部</Select.Option>
+          <Select.Option value="OWNER">频道主</Select.Option>
+          <Select.Option value="ADMIN">管理员</Select.Option>
+          <Select.Option value="EDITOR">内容编辑</Select.Option>
+          <Select.Option value="MEMBER">普通成员</Select.Option>
+        </Select>
+        <Input.Search v-model:value="searchKeyword" placeholder="搜索成员" @search="loadData" @change="onSearchChange" />
+        <Select v-model:value="sortOrder" style="width: 100%" @change="loadData">
+          <Select.Option value="desc">加入时间倒序</Select.Option>
+          <Select.Option value="asc">加入时间正序</Select.Option>
+        </Select>
+      </Space>
+      <template #footer>
+        <Button @click="filterDrawerVisible = false">关闭</Button>
+        <Button type="primary" @click="filterDrawerVisible = false; loadData()">确定</Button>
+      </template>
+    </Drawer>
+
     <Table
+      v-if="!isMobile"
       :dataSource="memberList"
       :columns="columns"
       :loading="loading"
@@ -66,6 +98,51 @@
       </template>
     </Table>
 
+    <!-- 移动端卡片视图 -->
+    <div v-else class="mobile-card-list">
+      <div v-for="item in memberList" :key="item.id" class="mobile-card">
+        <div class="mobile-card-header">
+          <Space>
+            <Avatar :src="item.avatar" size="small" />
+            <span>{{ item.nickname }}</span>
+          </Space>
+          <Tag :color="getRoleColor(item.role)">{{ getRoleText(item.role) }}</Tag>
+        </div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-field">加入时间：{{ item.joinTime }}</div>
+          <div class="mobile-card-field">贡献数：{{ item.contribution }}</div>
+          <div v-if="item.isMuted" class="mobile-card-field">
+            <Tag color="orange">已禁言 {{ item.muteEndTime }}</Tag>
+          </div>
+          <div v-else-if="item.coolingEndTime" class="mobile-card-field">
+            <Tag color="default">冷却期中</Tag>
+          </div>
+        </div>
+        <div class="mobile-card-actions">
+          <Dropdown v-if="canOperate(item)">
+            <Button size="small">操作</Button>
+            <template #overlay>
+              <Menu @click="({ key }) => handleAction(key, item)">
+                <Menu.Item v-if="canChangeRole" key="changeRole">修改角色</Menu.Item>
+                <Menu.Item key="remove">移除</Menu.Item>
+                <Menu.Item key="mute">禁言</Menu.Item>
+                <Menu.Item key="blacklist">加入黑名单</Menu.Item>
+              </Menu>
+            </template>
+          </Dropdown>
+        </div>
+      </div>
+    </div>
+
+    <!-- 移动端固定底部批量操作栏 -->
+    <div v-if="isMobile && selectedRowKeys.length > 0" class="mobile-batch-bar">
+      <span>已选 {{ selectedRowKeys.length }} 项</span>
+      <Space>
+        <Button danger size="small" @click="handleBatchRemove">批量移除</Button>
+        <Button size="small" @click="handleBatchMute">批量禁言</Button>
+      </Space>
+    </div>
+
     <RoleAssignModal ref="roleAssignModalRef" :channelId="channelId" @updated="loadData" />
     <RemoveMemberModal ref="removeMemberModalRef" :channelId="channelId" @removed="loadData" />
     <MuteModal ref="muteModalRef" :channelId="channelId" @muted="loadData" />
@@ -73,9 +150,17 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, onMounted } from 'vue';
-  import { Table, Button, Space, Avatar, Tag, Select, Input, Dropdown, Menu } from 'ant-design-vue';
+  import { ref, reactive, computed, onMounted } from 'vue';
+  import { Table, Button, Space, Avatar, Tag, Select, Input, Dropdown, Menu, Drawer } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
+  import { sizeEnum } from '/@/enums/breakpointEnum';
+
+  const { screenRef } = useBreakpoint();
+  const isMobile = computed(() => {
+    const s = screenRef.value;
+    return s === sizeEnum.XS || s === sizeEnum.SM;
+  });
   import { getMemberList } from '/@/api/content/channelMember';
   import RoleAssignModal from './RoleAssignModal.vue';
   import RemoveMemberModal from './RemoveMemberModal.vue';
@@ -94,6 +179,7 @@
   const roleFilter = ref('');
   const searchKeyword = ref('');
   const sortOrder = ref('desc');
+  const filterDrawerVisible = ref(false);
   const pagination = reactive({ current: 1, pageSize: 20, total: 0 });
 
   const roleAssignModalRef = ref();
@@ -212,4 +298,19 @@
 .count { font-size: 14px; color: #999; font-weight: normal; }
 .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .batch-actions { display: flex; align-items: center; gap: 8px; }
+.mobile-filter-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.mobile-card-list { display: flex; flex-direction: column; gap: 12px; }
+.mobile-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; }
+.mobile-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.mobile-card-body { margin-bottom: 8px; }
+.mobile-card-field { font-size: 13px; color: #666; line-height: 1.8; }
+.mobile-card-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.mobile-batch-bar { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: #fff; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 100; }
+@media (max-width: 575px) {
+  .mobile-card .ant-btn,
+  .mobile-batch-bar .ant-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
 </style>

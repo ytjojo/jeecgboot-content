@@ -5,7 +5,7 @@
       <h3>黑名单 <span class="count">共 {{ total }} 人</span></h3>
     </div>
 
-    <Table :dataSource="blacklist" :columns="columns" :loading="loading" :pagination="pagination" rowKey="id" @change="handleTableChange">
+    <Table v-if="!isMobile" :dataSource="blacklist" :columns="columns" :loading="loading" :pagination="pagination" rowKey="id" @change="handleTableChange">
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'user'">
           <Space>
@@ -19,6 +19,26 @@
       </template>
     </Table>
 
+    <!-- 移动端卡片视图 -->
+    <div v-else class="mobile-card-list">
+      <div v-for="item in blacklist" :key="item.id" class="mobile-card">
+        <div class="mobile-card-header">
+          <Space>
+            <Avatar :src="item.avatar" size="small" />
+            <span>{{ item.nickname }}</span>
+          </Space>
+        </div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-field">拉黑时间：{{ item.createTime }}</div>
+          <div class="mobile-card-field">操作人：{{ item.operator }}</div>
+          <div class="mobile-card-field">原因：{{ item.reason || '-' }}</div>
+        </div>
+        <div class="mobile-card-actions">
+          <Button danger size="small" @click="handleRemove(item)">移出黑名单</Button>
+        </div>
+      </div>
+    </div>
+
     <Modal v-model:open="removeModalVisible" title="移出黑名单" :confirmLoading="removing" @ok="handleConfirmRemove">
       <p>确认将 <strong>{{ removeTarget?.nickname }}</strong> 移出黑名单？移出后该用户可按频道当前加入规则重新申请或加入。</p>
     </Modal>
@@ -26,9 +46,17 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, onMounted } from 'vue';
+  import { ref, reactive, computed, onMounted } from 'vue';
   import { Table, Button, Space, Avatar, Modal } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
+  import { sizeEnum } from '/@/enums/breakpointEnum';
+
+  const { screenRef } = useBreakpoint();
+  const isMobile = computed(() => {
+    const s = screenRef.value;
+    return s === sizeEnum.XS || s === sizeEnum.SM;
+  });
   import { getBlacklist, removeFromBlacklist } from '/@/api/content/channelBlacklist';
 
   const props = defineProps<{ channelId: string }>();
@@ -93,4 +121,16 @@
 .blacklist-page { padding: 16px; }
 .page-header { margin-bottom: 16px; }
 .count { font-size: 14px; color: #999; font-weight: normal; }
+.mobile-card-list { display: flex; flex-direction: column; gap: 12px; }
+.mobile-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; }
+.mobile-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.mobile-card-body { margin-bottom: 8px; }
+.mobile-card-field { font-size: 13px; color: #666; line-height: 1.8; }
+.mobile-card-actions { display: flex; gap: 8px; justify-content: flex-end; }
+@media (max-width: 575px) {
+  .mobile-card .ant-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
 </style>

@@ -7,7 +7,7 @@
 
     <div class="filter-bar">
       <RangePicker v-model:value="dateRange" :placeholder="['开始时间', '结束时间']" @change="loadData" />
-      <div v-if="selectedRowKeys.length > 0" class="batch-actions">
+      <div v-if="!isMobile && selectedRowKeys.length > 0" class="batch-actions">
         <span>已选 {{ selectedRowKeys.length }} 项</span>
         <Button type="link" @click="handleBatchApprove">批量批准</Button>
         <Button type="link" danger @click="handleBatchReject">批量拒绝</Button>
@@ -15,6 +15,7 @@
     </div>
 
     <Table
+      v-if="!isMobile"
       :dataSource="applicationList"
       :columns="columns"
       :loading="loading"
@@ -42,6 +43,27 @@
       </template>
     </Table>
 
+    <!-- 移动端卡片视图 -->
+    <div v-else class="mobile-card-list">
+      <div v-for="item in applicationList" :key="item.id" class="mobile-card">
+        <div class="mobile-card-header">
+          <Space>
+            <Avatar :src="item.avatar" size="small" />
+            <span>{{ item.nickname }}</span>
+          </Space>
+          <Tag v-if="item.isTimeout" color="orange">超时</Tag>
+        </div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-field">申请理由：{{ item.reason || '-' }}</div>
+          <div class="mobile-card-field">申请时间：{{ item.applyTime }}</div>
+        </div>
+        <div class="mobile-card-actions">
+          <Button type="primary" size="small" @click="handleApprove(item)">批准</Button>
+          <Button danger size="small" @click="handleReject(item)">拒绝</Button>
+        </div>
+      </div>
+    </div>
+
     <!-- 拒绝原因 Modal -->
     <Modal v-model:open="rejectModalVisible" title="拒绝申请" :confirmLoading="rejecting" @ok="handleRejectConfirm">
       <Form layout="vertical">
@@ -50,6 +72,15 @@
         </Form.Item>
       </Form>
     </Modal>
+
+    <!-- 移动端固定底部批量操作栏 -->
+    <div v-if="isMobile && selectedRowKeys.length > 0" class="mobile-batch-bar">
+      <span>已选 {{ selectedRowKeys.length }} 项</span>
+      <Space>
+        <Button type="primary" size="small" @click="handleBatchApprove">批量批准</Button>
+        <Button danger size="small" @click="handleBatchReject">批量拒绝</Button>
+      </Space>
+    </div>
 
     <!-- 批量操作结果 Modal -->
     <Modal v-model:open="resultModalVisible" title="操作结果" :footer="null">
@@ -66,9 +97,17 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, onMounted } from 'vue';
+  import { ref, reactive, computed, onMounted } from 'vue';
   import { Table, Button, Space, Avatar, Tag, Modal, Form, Input, RangePicker, message } from 'ant-design-vue';
+  import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
+  import { sizeEnum } from '/@/enums/breakpointEnum';
   import { getPendingApplications, approveApplications, rejectApplications } from '/@/api/content/channelMember';
+
+  const { screenRef } = useBreakpoint();
+  const isMobile = computed(() => {
+    const s = screenRef.value;
+    return s === sizeEnum.XS || s === sizeEnum.SM;
+  });
 
   const props = defineProps<{ channelId: string }>();
 
@@ -204,4 +243,18 @@
 .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .batch-actions { display: flex; align-items: center; gap: 8px; }
 .error-msg { color: #f5222d; font-size: 12px; margin-left: 8px; }
+.mobile-card-list { display: flex; flex-direction: column; gap: 12px; }
+.mobile-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; }
+.mobile-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.mobile-card-body { margin-bottom: 8px; }
+.mobile-card-field { font-size: 13px; color: #666; line-height: 1.8; }
+.mobile-card-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.mobile-batch-bar { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: #fff; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 100; }
+@media (max-width: 575px) {
+  .mobile-card .ant-btn,
+  .mobile-batch-bar .ant-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
 </style>
