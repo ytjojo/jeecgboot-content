@@ -22,9 +22,11 @@
 - 路径别名优先使用 `/@/` 指向 `src/`
 - 涉及菜单、权限、动态路由时，先确认是否依赖后端返回，不直接破坏现有权限装配链路
 - 优先复用现有组件、hooks、store 和工具函数，避免平行造轮子
+- 单元测试必须统一使用 `vi.mock` / `vi.fn` / `vi.clearAllMocks` **禁止在新测试中使用** `jest.mock` / `jest.fn` / `jest.clearAllMocks`，
 
 
 
 ## 参考
 - 本地补充说明：`CLAUDE.md`
+- 前端测试规范：`docs/agent-context/frontend-testing-conventions.md`
 - 仓库级背景资料：`../docs/agent-context/project-overview.md`、`../docs/agent-context/commands.md`
