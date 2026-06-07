@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/jeecg-boot/api/v1/content/channel/merge")
+@RequestMapping("/api/v1/content/channel/merge")
 @Tag(name = "频道合并", description = "频道合并管理接口")
 public class ChannelMergeController {
 

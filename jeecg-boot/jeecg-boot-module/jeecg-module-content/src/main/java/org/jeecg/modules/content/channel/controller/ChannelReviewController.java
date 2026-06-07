@@ -22,7 +22,7 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/jeecg-boot/api/v1/content/channel/review")
+@RequestMapping("/api/v1/content/channel/review")
 @Tag(name = "频道审核", description = "频道审核管理接口")
 public class ChannelReviewController {
 

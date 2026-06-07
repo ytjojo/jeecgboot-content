@@ -22,7 +22,7 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/jeecg-boot/api/v1/content/channel/stats")
+@RequestMapping("/api/v1/content/channel/stats")
 @Tag(name = "频道统计", description = "频道数据统计看板接口")
 public class ChannelStatsController {
 

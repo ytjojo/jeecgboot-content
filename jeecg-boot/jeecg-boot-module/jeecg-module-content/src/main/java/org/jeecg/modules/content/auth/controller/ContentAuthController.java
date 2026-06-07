@@ -23,7 +23,7 @@ import java.util.List;
 @Tag(name = "内容社区认证", description = "用户注册、登录、设备管理、账号绑定等认证相关接口")
 @Validated
 @RestController
-@RequestMapping("/content/auth")
+@RequestMapping("/api/v1/content/auth")
 public class ContentAuthController {
 
     @Resource
@@ -51,7 +51,7 @@ public class ContentAuthController {
     }
 
     @Operation(summary = "绑定手机号")
-    @PostMapping("/bind/mobile")
+    @PostMapping("/bind/phone")
     public Result<String> bindMobile(@Valid @RequestBody ContentAuthBindMobileReq req) {
         req.setUserId(SecureUtil.currentUser().getId());
         contentAuthBizService.bindMobile(req);
@@ -110,7 +110,7 @@ public class ContentAuthController {
     }
 
     @Operation(summary = "换绑手机号", description = "验证旧手机和新手机验证码后，将凭证迁移到新手机号")
-    @PostMapping("/rebind/mobile")
+    @PostMapping("/rebind/phone")
     public Result<String> rebindMobile(@Valid @RequestBody ContentAuthRebindMobileReq req) {
         req.setUserId(SecureUtil.currentUser().getId());
         contentAuthBizService.rebindMobile(req);
@@ -126,7 +126,7 @@ public class ContentAuthController {
     }
 
     @Operation(summary = "解绑手机号", description = "验证验证码后禁用手机号凭证，不允许解绑最后一种登录方式")
-    @PostMapping("/unbind/mobile")
+    @PostMapping("/unbind/phone")
     public Result<String> unbindMobile(@Valid @RequestBody ContentAuthUnbindMobileReq req) {
         req.setUserId(SecureUtil.currentUser().getId());
         contentAuthBizService.unbindMobile(req);
@@ -172,7 +172,7 @@ public class ContentAuthController {
     }
 
     @Operation(summary = "通用密码重置", description = "根据重置类型(手机号/邮箱)通用密码重置接口")
-    @PostMapping("/reset-password")
+    @PostMapping("/password/reset")
     public Result<String> resetPassword(@Valid @RequestBody ContentAuthPasswordResetReq req) {
         req.setUserId(SecureUtil.currentUser().getId());
         contentAuthBizService.resetPassword(req);

@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @RestController
-@RequestMapping("/jeecg-boot/api/v1/content/channel/export")
+@RequestMapping("/api/v1/content/channel/export")
 @Tag(name = "频道数据导出", description = "频道数据导出接口")
 public class ChannelExportController {
 

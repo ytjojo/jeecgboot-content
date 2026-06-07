@@ -21,14 +21,14 @@ import java.util.List;
 @Tag(name = "风控与异常登录", description = "登录风控、风险事件申诉、异常登录确认等接口")
 @Validated
 @RestController
-@RequestMapping("/content/auth/risk")
+@RequestMapping("/api/v1/content/account-security")
 public class ContentRiskControlController {
 
     @Resource
     private IContentRiskControlBizService riskControlBizService;
 
     @Operation(summary = "申诉风险事件", description = "对误判的风险事件提交申诉，审核通过后解除限制")
-    @PostMapping("/appeal")
+    @PostMapping("/anomaly/appeal")
     public Result<String> appeal(@Valid @RequestBody ContentRiskAppealReq req) {
         String userId = SecureUtil.currentUser().getId();
         riskControlBizService.appealRiskEvent(req.getEventId(), userId, req.getNote());
@@ -36,7 +36,7 @@ public class ContentRiskControlController {
     }
 
     @Operation(summary = "确认异常登录", description = "收到异常登录通知后，确认是否本人操作，非本人将下线其他设备")
-    @PostMapping("/confirm-login")
+    @PostMapping("/anomaly/confirm")
     public Result<String> confirmLogin(@Valid @RequestBody ContentConfirmAbnormalLoginReq req) {
         String userId = SecureUtil.currentUser().getId();
         riskControlBizService.confirmAbnormalLogin(userId, req.getEventId(), Boolean.TRUE.equals(req.getIsSelf()));
@@ -44,7 +44,7 @@ public class ContentRiskControlController {
     }
 
     @Operation(summary = "获取待处理通知", description = "查询用户待处理的异常登录通知列表")
-    @GetMapping("/notifications")
+    @GetMapping("/anomaly/list")
     public Result<List<ContentRiskEvent>> notifications() {
         String userId = SecureUtil.currentUser().getId();
         return Result.OK(riskControlBizService.getPendingNotifications(userId));

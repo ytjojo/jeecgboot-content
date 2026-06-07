@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "账号注销", description = "账号注销申请、冷静期管理、取消注销等接口")
 @Validated
 @RestController
-@RequestMapping("/content/auth/cancellation")
+@RequestMapping("/api/v1/content/account-cancellation")
 public class ContentAccountCancellationController {
 
     @Resource
@@ -40,8 +40,8 @@ public class ContentAccountCancellationController {
     }
 
     @Operation(summary = "取消注销", description = "在冷静期内取消注销申请，恢复正常状态")
-    @PostMapping("/revoke")
-    public Result<Void> revoke() {
+    @PostMapping("/cancel")
+    public Result<Void> cancelCancellation() {
         String userId = SecureUtil.currentUser().getId();
         cancellationBizService.revokeCancellation(userId);
         return Result.OK();
