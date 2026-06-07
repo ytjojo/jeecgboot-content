@@ -1,12 +1,15 @@
 # 后端遗留代码问题
 
-本文档记录前端开发所依赖但后端尚未实现的 API 端点和数据结构问题。前端开发前需确认后端已完成以下补充。
+> **复核时间**: 2026-06-07
+> **复核结论**: 全部 5 个问题已在后端代码中实现，无遗留阻塞项。
+
+本文档记录前端开发所依赖但后端尚未实现的 API 端点和数据结构问题。~~前端开发前需确认后端已完成以下补充。~~
 
 ---
 
-## 问题 1: 隐私设置 GET 端点缺失（高优先级）
+## 问题 1: 隐私设置 GET 端点缺失（高优先级） — ✅ 已解决
 
-**现状**: `ContentUserSettingsController` 中仅有 `POST /content/user/settings/privacy/update`，无独立的 GET 查询端点。
+**现状**: `ContentUserSettingsController:52` 已有 `@GetMapping("/privacy")`，返回 `ContentUserPrivacySetting`。
 
 **前端需求**: 隐私设置页面加载时需调用 `GET /content/user/settings/privacy` 获取当前用户的隐私配置。
 
@@ -35,9 +38,9 @@ public Result<ContentUserPrivacySetting> getPrivacy(@RequestParam("userId") Stri
 
 ---
 
-## 问题 2: 安全设置更新端点缺失（高优先级）
+## 问题 2: 安全设置更新端点缺失（高优先级） — ✅ 已解决
 
-**现状**: `ContentUserSettingsController` 中仅有 `GET /content/user/settings/security`，无 POST 更新端点。
+**现状**: `ContentUserSettingsController:139` 已有 `@PostMapping("/security/update")`，接收 `ContentUserSecurityUpdateReq`。
 
 **前端需求**: 账户安全页面的登录提醒 Switch 开关需要调用接口保存状态。
 
@@ -65,9 +68,9 @@ public Result<String> updateSecuritySetting(@RequestParam("userId") String userI
 
 ---
 
-## 问题 3: 订阅更新渠道字段缺失（中优先级）
+## 问题 3: 订阅更新渠道字段缺失（中优先级） — ✅ 已解决
 
-**现状**: `ContentNotificationChannelConfigVO` 包含 6 个渠道字段:
+**现状**: `ContentNotificationChannelConfigVO:36` 已有 `subscriptionChannels` 字段。
 - `likeChannels`
 - `commentChannels`
 - `followChannels`
@@ -106,9 +109,9 @@ private List<String> subscriptionChannels;
 
 ---
 
-## 问题 5: 订阅更新通知开关字段缺失（高优先级）
+## 问题 5: 订阅更新通知开关字段缺失（高优先级） — ✅ 已解决
 
-**现状**: `ContentUserNotificationSettingVO` 仅包含 6 个 Boolean 开关字段:
+**现状**: `ContentUserNotificationSettingVO:38` 已有 `subscriptionNoticeEnabled` 字段。
 - `likeNoticeEnabled`
 - `commentNoticeEnabled`
 - `followNoticeEnabled`
@@ -138,9 +141,9 @@ private Boolean subscriptionNoticeEnabled;
 
 ## 优先级排序
 
-| 优先级 | 问题 | 阻塞程度 | 预计工作量 |
-|--------|------|----------|-----------|
-| P0 | 隐私设置 GET 端点 | 阻塞隐私设置页面数据加载 | 小（复用已有 service 方法） |
-| P0 | 安全设置更新端点 | 阻塞登录提醒开关保存 | 小（新增 req + service 方法） |
-| P0 | 订阅更新通知开关字段 | 影响第 7 类通知开关配置（VO 已有实体字段但未暴露） | 小（VO 加字段） |
-| P0 | 订阅更新渠道字段 | 影响第 7 类通知渠道配置（与问题 5 配套） | 小（VO 加字段 + JSON 序列化） |
+| 优先级 | 问题 | 阻塞程度 | 状态 |
+|--------|------|----------|------|
+| P0 | 隐私设置 GET 端点 | ~~阻塞隐私设置页面数据加载~~ | ✅ 已解决 |
+| P0 | 安全设置更新端点 | ~~阻塞登录提醒开关保存~~ | ✅ 已解决 |
+| P0 | 订阅更新通知开关字段 | ~~影响第 7 类通知开关配置~~ | ✅ 已解决 |
+| P0 | 订阅更新渠道字段 | ~~影响第 7 类通知渠道配置~~ | ✅ 已解决 |
