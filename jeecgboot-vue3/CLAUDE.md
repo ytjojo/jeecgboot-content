@@ -21,9 +21,9 @@ npx eslint src/path/to/file.vue          # Lint specific file
 npx stylelint "src/**/*.{vue,less,css}"  # Stylelint
 pnpm batch:prettier                       # Format all src files
 
-# Testing (Jest configured but not integrated into npm scripts)
-# Tests exist in tests/ directory but no test script in package.json
-# Run manually if needed: npx jest
+# Testing (Vitest)
+npx vitest run tests/                 # Run all tests
+npx vitest run tests/ContentManage.test.ts  # Run single test file
 
 pnpm clean:cache      # Clear Vite cache
 pnpm gen:icon         # Regenerate icon data

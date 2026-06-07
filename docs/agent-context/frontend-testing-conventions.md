@@ -3,7 +3,7 @@
 ## 测试框架
 
 - **唯一框架：Vitest**（`vitest` + `@vitest/coverage-v8`）
-- Jest 为遗留配置，**禁止在新测试中使用** `jest.mock` / `jest.fn` / `jest.clearAllMocks`，统一使用 `vi.mock` / `vi.fn` / `vi.clearAllMocks`
+- 统一使用 `vi.mock` / `vi.fn` / `vi.clearAllMocks`，**禁止使用** `jest.mock` / `jest.fn` / `jest.clearAllMocks`，
 - 运行命令：`npx vitest run`（单次）或 `npx vitest`（watch 模式）
 
 ## 测试覆盖率要求

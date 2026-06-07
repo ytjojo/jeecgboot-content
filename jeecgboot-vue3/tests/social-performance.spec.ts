@@ -230,7 +230,7 @@ describe('Social module performance', () => {
 
     const cards = wrapper.findAll('.feed-card-stub');
     expect(cards.length).toBe(500);
-    // Must complete within Jest default timeout (10s)
+    // Must complete within Vitest default timeout (10s)
     expect(elapsed).toBeLessThan(10000);
 
     wrapper.unmount();
