@@ -16,7 +16,6 @@
           :minlength="10"
           :rows="4"
           placeholder="请输入申请理由（10-200字）"
-          @input="handleInput"
         />
         <div class="char-count">{{ reason.length }} / 200</div>
       </Form.Item>
@@ -55,10 +54,6 @@
     if (reason.value.length > 200) return '申请理由不能超过 200 个字';
     return '';
   });
-
-  function handleInput() {
-    // 实时字数统计，无需额外处理
-  }
 
   async function handleSubmit() {
     if (!isValid.value) return;

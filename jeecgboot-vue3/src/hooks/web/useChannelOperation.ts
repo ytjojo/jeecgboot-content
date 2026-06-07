@@ -35,7 +35,6 @@ export function useChannelOperation() {
       options.onSuccess?.(result);
       return true;
     } catch (error) {
-      // 失败回滚
       options.onRollback();
       createMessage.error(options.errorMessage || '操作失败，请重试');
       throw error;

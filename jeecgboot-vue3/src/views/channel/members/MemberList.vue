@@ -2,7 +2,7 @@
 <template>
   <div class="member-list">
     <div class="page-header">
-      <h3>成员管理 <span class="count">共 {{ total }} 位成员</span></h3>
+      <h3>成员管理 <span class="count">共 {{ pagination.total }} 位成员</span></h3>
     </div>
 
     <!-- 桌面端：内联筛选栏 -->
@@ -150,7 +150,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, computed, onMounted } from 'vue';
+  import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
   import { Table, Button, Space, Avatar, Tag, Select, Input, Dropdown, Menu, Drawer } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
@@ -166,6 +166,9 @@
   import RemoveMemberModal from './RemoveMemberModal.vue';
   import MuteModal from './MuteModal.vue';
 
+  const ROLE_COLOR_MAP: Record<string, string> = { OWNER: 'purple', ADMIN: 'blue', EDITOR: 'green', MEMBER: 'default' };
+  const ROLE_TEXT_MAP: Record<string, string> = { OWNER: '频道主', ADMIN: '管理员', EDITOR: '内容编辑', MEMBER: '普通成员' };
+
   const props = defineProps<{
     channelId: string;
     currentRole: string; // 当前用户在频道中的角色
@@ -174,7 +177,6 @@
   const { createMessage } = useMessage();
   const loading = ref(false);
   const memberList = ref<any[]>([]);
-  const total = ref(0);
   const selectedRowKeys = ref<string[]>([]);
   const roleFilter = ref('');
   const searchKeyword = ref('');
@@ -198,13 +200,11 @@
   ];
 
   function getRoleColor(role: string) {
-    const map: Record<string, string> = { OWNER: 'purple', ADMIN: 'blue', EDITOR: 'green', MEMBER: 'default' };
-    return map[role] || 'default';
+    return ROLE_COLOR_MAP[role] || 'default';
   }
 
   function getRoleText(role: string) {
-    const map: Record<string, string> = { OWNER: '频道主', ADMIN: '管理员', EDITOR: '内容编辑', MEMBER: '普通成员' };
-    return map[role] || role;
+    return ROLE_TEXT_MAP[role] || role;
   }
 
   function canOperate(record: any) {
@@ -231,12 +231,11 @@
         pageSize: pagination.pageSize,
       });
       memberList.value = res.records || res;
-      total.value = res.total || memberList.value.length;
-      pagination.total = total.value;
+      pagination.total = res.total || memberList.value.length;
     } catch (error: any) {
       if (error?.response?.status === 404) {
         memberList.value = [];
-        total.value = 0;
+        pagination.total = 0;
         createMessage.warning('频道不存在或已被删除');
       } else {
         createMessage.error('加载成员列表失败，请重试');
@@ -288,6 +287,8 @@
     // batchOperating.value = true;
     // try { ... } finally { batchOperating.value = false; }
   }
+
+  onBeforeUnmount(() => clearTimeout(searchTimer));
 
   onMounted(loadData);
 </script>
