@@ -737,6 +737,9 @@ function handleApiError(error: ApiError): void {
     case 42901: case 42920:
       message.warning(error.message);
       break;
+    case 50021:
+      message.error('导出数据量超过上限（100,000 行），请缩小时间范围');
+      break;
     default:
       message.error(error.message || '操作失败，请稍后重试');
   }

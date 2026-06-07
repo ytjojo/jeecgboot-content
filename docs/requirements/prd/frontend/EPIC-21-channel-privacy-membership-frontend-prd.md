@@ -458,8 +458,8 @@ sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal
 | 重命名分组 | POST | `/channel/subscription/group/rename` | `{ groupId, name }` |
 | 删除分组 | POST | `/channel/subscription/group/delete` | `{ groupId }` |
 | 分组列表 | GET | `/channel/subscription/group/list` | 返回分组列表 |
-| 更新提醒设置 | PUT | `/channel/subscription/update-reminder` | `{ channelId, enabled }` |
-| 移动频道到分组 | POST | `/channel/subscription/move-to-group` | `{ channelId, groupId }` |
+| 更新提醒设置 | PUT | `/channel/subscription/reminder` | `{ channelId, enabled }`（P2，后端待实现） |
+| 移动频道到分组 | POST | `/channel/subscription/move-to-group` | `{ channelId, groupId }`（P2，后端待实现） |
 
 ### 5.2 成员与加入相关
 
@@ -468,7 +468,7 @@ sourceProposal: openspec/changes/channel-21-privacy-membership-frontend/proposal
 | 接口 | 方法 | URL | 说明 |
 |------|------|-----|------|
 | 提交加入申请 | POST | `/channel/member/join/apply` | `{ channelId, reason }` |
-| 查询申请状态 | GET | `/channel/member/applications/status/{channelId}` | 返回 `{ status, canReapply }` |
+| 查询申请状态 | GET | `/channel/member/applications/status/{channelId}` | 返回 `{ status, canReapply }`（后端待实现） |
 | 待审列表 | GET | `/channel/member/applications/pending` | `{ channelId }`, 支持分页、筛选 |
 | 批准申请 | POST | `/channel/member/applications/approve` | `{ channelId, applicationIds[] }` |
 | 拒绝申请 | POST | `/channel/member/applications/reject` | `{ channelId, applicationIds[], reason }` |

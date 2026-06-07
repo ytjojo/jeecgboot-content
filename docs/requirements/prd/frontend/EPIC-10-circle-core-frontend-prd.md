@@ -442,9 +442,9 @@
 |------|------|------|------|
 | 创建圈子 | POST | `/content/circle/create` | 提交圈子创建表单数据 |
 | 更新圈子 | PUT | `/content/circle/update` | 更新圈子基础信息（名称不可改） |
-| 圈子详情 | GET | `/content/circle/detail?id={id}` | 获取圈子详情（返回字段含 `applyStatus` 申请状态、`isInvited` 是否受邀、`memberLimit` 成员上限、`memberCount` 当前成员数） |
-| 圈子列表（已加入） | GET | `/content/circle/my-list` | 当前用户已加入的圈子 |
-| 公开圈子列表 | GET | `/content/circle/public-list` | 公开圈子浏览列表 |
+| 圈子详情 | GET | `/content/circle/{id}` | 获取圈子详情（返回字段含 `applyStatus` 申请状态、`isInvited` 是否受邀、`memberLimit` 成员上限、`memberCount` 当前成员数） |
+| 圈子列表（已加入） | GET | `/content/circle/my-list` | 当前用户已加入的圈子（后端待实现） |
+| 公开圈子列表 | GET | `/content/circle/public-list` | 公开圈子浏览列表（后端待实现） |
 | 名称唯一性校验 | GET | `/content/circle/check-name?name={name}` | 实时校验名称是否可用 |
 
 ### 5.2 成员管理
@@ -463,7 +463,7 @@
 
 | 接口 | 方法 | 路径 | 说明 |
 |------|------|------|------|
-| 搜索圈子 | GET | `/content/circle/search?keyword={keyword}&page={page}&size={size}` | 关键词搜索公开圈子 |
+| 搜索圈子 | GET | `/content/circle/search?keyword={keyword}&pageNum={pageNum}&pageSize={pageSize}` | 关键词搜索公开圈子 |
 
 ### 5.4 治理日志
 

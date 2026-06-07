@@ -456,7 +456,7 @@
 
 | 接口 | 方法 | 路径 | 用途 |
 |------|------|------|------|
-| 创建频道 | POST | `/api/v1/channels` | 用户端创建个人/组织频道 |
+| 创建频道 | POST | `/api/v1/channels/create` | 用户端创建个人/组织频道 |
 | 创建系统频道 | POST | `/api/v1/admin/channels/create-system` | 后台创建系统频道 |
 | 我的频道列表 | GET | `/api/v1/channels/list` | 用户端获取自己的频道列表 |
 | 频道详情 | GET | `/api/v1/channels/{id}` | 获取频道详情 |
@@ -466,6 +466,8 @@
 | 发起转让 | POST | `/api/v1/channels/{id}/transfer` | 发起频道转让 |
 | 确认转让 | POST | `/api/v1/channels/transfer/{transferId}/confirm` | 目标用户确认转让 |
 | 拒绝转让 | POST | `/api/v1/channels/transfer/{transferId}/reject` | 目标用户拒绝转让 |
+| 转让历史查询 | GET | `/api/v1/channels/{id}/transfers` | 查询频道的转让历史记录 |
+| 待确认转让查询 | GET | `/api/v1/channels/{id}/transfer/pending` | 查询频道当前待确认的转让请求 |
 | 后台频道列表 | GET | `/api/v1/admin/channels/list` | 后台获取所有频道 |
 | 审核频道 | POST | `/api/v1/admin/channels/{id}/review` | 执行审核操作 |
 | 审核队列 | GET | `/jeecg-boot/api/v1/content/channel/review/list` | 获取待审核列表 |

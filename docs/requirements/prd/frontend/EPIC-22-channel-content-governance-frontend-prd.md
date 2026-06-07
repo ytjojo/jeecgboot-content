@@ -569,9 +569,9 @@ Page (频道设置页)
 |-----|------|------|-------------|
 | `/content/channel/governance/content/list` | GET | 频道内容列表（支持筛选、排序、分页） | ContentGovernance 加载 |
 | `/content/channel/governance` | POST | 统一治理操作入口（action: PIN \| UNPIN \| FEATURE \| UNFEATURE \| DELETE \| RESTORE \| MOVE \| EDIT_ASSIST） | 置顶/精华/删除/恢复/移出/编辑协助，批量操作由前端循环调用 |
-| `/content/channel/governance/edit-assist/history/{contentId}` | GET | 获取编辑协助修订历史 | EditAssistDrawer |
+| `/content/channel/governance/edit-assist/history/{contentId}` | GET | 获取编辑协助修订历史（后端待实现） | EditAssistDrawer |
 | `/content/channel/governance/recycle-bin/list` | GET | 回收站列表 | RecycleBinTable 加载 |
-| `/content/channel/governance/log/list` | GET | 治理日志列表 | GovernanceLogTable 加载 |
+| `/content/channel/governance/log/list` | GET | 治理日志列表（后端待实现） | GovernanceLogTable 加载 |
 
 ### 5.4 公告相关
 

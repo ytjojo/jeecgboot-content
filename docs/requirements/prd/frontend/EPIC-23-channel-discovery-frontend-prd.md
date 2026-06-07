@@ -366,6 +366,8 @@
 
 所有 API 使用 `defHttp` 封装，响应格式: `{ code: 200, result: T, message: string, success: boolean }`
 
+> **userId 参数说明**: 推荐接口（`/recommendation/list`）和搜索接口（`/search/query`）需要 `userId` 参数。前端在 API 封装层通过 `useUserStore().getUserInfo.id` 自动注入，无需页面层手动传递。未登录用户使用冷启动接口（`/recommendation/cold-start`），无需 userId。
+
 | 模块 | API | 方法 | 说明 |
 |------|-----|------|------|
 | 分类 | `/content/channel/category/tree` | GET | 获取分类树 |
@@ -375,9 +377,9 @@
 | 分类 | `/content/channel/category/enable` | POST | 启用分类 |
 | 标签 | `/content/channel/tag/list` | GET | 获取频道标签列表 |
 | 标签 | `/content/channel/tag/create` | POST | 新增标签 |
-| 标签 | `/content/channel/tag/update` | POST | 编辑标签（后端待实现 BI-3） |
+| 标签 | `/content/channel/tag/update` | POST | 编辑标签（参数: tagId, name） |
 | 标签 | `/content/channel/tag/delete` | POST | 删除标签 |
-| 推荐 | `/content/channel/recommendation/list` | GET | 获取推荐频道列表（参数: userId） |
+| 推荐 | `/content/channel/recommendation/list` | GET | 获取推荐频道列表（参数: userId，自动注入） |
 | 推荐 | `/content/channel/recommendation/cold-start` | GET | 冷启动推荐（未登录/新用户） |
 | 推荐 | `/content/channel/recommendation/not-interested` | POST | 提交不感兴趣反馈 |
 | 排行榜 | `/content/channel/ranking/hot` | GET | 获取热门排行榜 |
@@ -387,7 +389,7 @@
 | 精选 | `/content/channel/editorial-pick/create` | POST | 添加精选频道 |
 | 精选 | `/content/channel/editorial-pick/update` | POST | 编辑精选频道 |
 | 精选 | `/content/channel/editorial-pick/remove` | POST | 取消精选 |
-| 搜索 | `/content/channel/search/query` | GET | 搜索频道（参数: userId, keyword, type, category, sort, page, pageSize） |
+| 搜索 | `/content/channel/search/query` | GET | 搜索频道（参数: userId 自动注入, keyword, type, category, sort, page, pageSize） |
 | 浏览 | `/content/channel/browse/category` | GET | 分类浏览频道列表（参数: categoryId, type, sort, page, pageSize） |
 | 发现 | `/content/channel/discovery/home` | GET | 发现页聚合数据（推荐+榜单+精选） |
 
