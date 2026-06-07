@@ -37,26 +37,26 @@
 
 ## 6. 内容治理
 
-- [ ] 6.1 创建 `src/views/channel/components/GovernanceActionMenu.vue`，实现治理操作下拉菜单（权限控制菜单项）
-- [ ] 6.2 编写 `GovernanceActionMenu.test.ts` 测试文件
-- [ ] 6.3 创建 `src/views/channel/components/MoveChannelDialog.vue`，实现移出频道弹窗（目标频道选择、预期结果展示）
-- [ ] 6.4 编写 `MoveChannelDialog.test.ts` 测试文件
-- [ ] 6.5 创建 `src/views/channel/components/EditAssistDrawer.vue`，实现编辑协助抽屉（可编辑字段、修改原因必填、修订历史、作者通知）
-- [ ] 6.6 编写 `EditAssistDrawer.test.ts` 测试文件
-- [ ] 6.7 创建 `src/views/channel/governance/ContentManage.vue`，实现内容治理页（JVxeTable 列表、筛选排序、置顶/精华/删除/移出/编辑协助、批量操作、移动端卡片模式）
-- [ ] 6.8 编写 `ContentManage.test.ts` 测试文件
+- [x] 6.1 创建 `src/views/channel/components/GovernanceActionMenu.vue`，实现治理操作下拉菜单（权限控制菜单项）
+- [x] 6.2 编写 `GovernanceActionMenu.test.ts` 测试文件
+- [x] 6.3 创建 `src/views/channel/components/MoveChannelDialog.vue`，实现移出频道弹窗（目标频道选择、预期结果展示）
+- [x] 6.4 编写 `MoveChannelDialog.test.ts` 测试文件
+- [x] 6.5 创建 `src/views/channel/components/EditAssistDrawer.vue`，实现编辑协助抽屉（可编辑字段、修改原因必填、修订历史、作者通知）
+- [x] 6.6 编写 `EditAssistDrawer.test.ts` 测试文件
+- [x] 6.7 创建 `src/views/channel/governance/ContentManage.vue`，实现内容治理页（JVxeTable 列表、筛选排序、置顶/精华/删除/移出/编辑协助、批量操作、移动端卡片模式）
+- [x] 6.8 编写 `ContentManage.test.ts` 测试文件
 
 ## 7. 回收站与治理日志
 
-- [ ] 7.1 创建 `src/views/channel/governance/RecycleBin.vue`，实现回收站页（Table 列表、单条/批量恢复、超期不可恢复、剩余天数倒计时）
-- [ ] 7.2 编写 `RecycleBin.test.ts` 测试文件
-- [ ] 7.3 创建 `src/views/channel/governance/GovernanceLog.vue`，实现治理日志页（Table 列表、操作类型筛选、操作对象跳转、180 天保留期）
-- [ ] 7.4 编写 `GovernanceLog.test.ts` 测试文件
+- [x] 7.1 创建 `src/views/channel/governance/RecycleBin.vue`，实现回收站页（Table 列表、单条/批量恢复、超期不可恢复、剩余天数倒计时）
+- [x] 7.2 编写 `RecycleBin.test.ts` 测试文件
+- [x] 7.3 创建 `src/views/channel/governance/GovernanceLog.vue`，实现治理日志页（Table 列表、操作类型筛选、操作对象跳转、180 天保留期）
+- [x] 7.4 编写 `GovernanceLog.test.ts` 测试文件
 
 ## 8. 频道公告管理
 
-- [ ] 8.1 创建 `src/views/channel/governance/AnnouncementManage.vue`，实现公告管理页（Tinymce 编辑器、预览、发布/删除确认、历史版本管理、并发冲突处理、移动端 Tab 切换）
-- [ ] 8.2 编写 `AnnouncementManage.test.ts` 测试文件
+- [x] 8.1 创建 `src/views/channel/governance/AnnouncementManage.vue`，实现公告管理页（Tinymce 编辑器、预览、发布/删除确认、历史版本管理、并发冲突处理、移动端 Tab 切换）
+- [x] 8.2 编写 `AnnouncementManage.test.ts` 测试文件
 
 ## 9. 添加已发布内容到频道
 
