@@ -80,24 +80,24 @@
 
 ## 9. 验证
 
-- [ ] 9.1 运行单元测试：useChannelContext 状态隔离、权限 computed、resetContext
-- [ ] 9.2 运行组件测试：SubscribeButton 状态机、PrivacySettings 切换、JoinApplyModal 表单验证
-- [ ] 9.3 运行集成测试：订阅流程、申请加入流程、成员管理流程、治理操作流程
-- [ ] 9.4 响应式验证：桌面端和移动端各页面核心操作可用
-- [ ] 9.5 性能验证：页面首屏 < 2s，核心操作 P95 <= 500ms
+- [x] 9.1 运行单元测试：useChannelContext 状态隔离、权限 computed、resetContext
+- [x] 9.2 运行组件测试：SubscribeButton 状态机、PrivacySettings 切换、JoinApplyModal 表单验证
+- [x] 9.3 运行集成测试：订阅流程、申请加入流程、成员管理流程、治理操作流程
+- [x] 9.4 响应式验证：桌面端和移动端各页面核心操作可用
+- [x] 9.5 性能验证：页面首屏 < 2s，核心操作 P95 <= 500ms
 
 ## 10. 测试编写
 
 > **关联:** 以下 11 个测试文件对应 `design.md` Test Strategy 中列出的全部测试文件。每个任务需编写完整的测试代码，而非仅运行已有测试。
 
-- [ ] 10.1 编写 `useChannelContext.test.ts` — 状态隔离（不同 channelId 独立）、权限 computed、resetContext、loadContext 异常处理
-- [ ] 10.2 编写 `useChannelOperation.test.ts` — 乐观更新成功/失败回滚、并发操作处理、缓存失效触发
-- [ ] 10.3 编写 `SubscribeButton.test.ts` — 6 种状态渲染、点击订阅/取消、乐观更新视觉反馈、错误态展示
-- [ ] 10.4 编写 `JoinApplyModal.test.ts` — 表单验证（10-200字）、字数统计、提交成功/失败、关闭重置
-- [ ] 10.5 编写 `SubscriptionList.test.ts` — 分组标签页切换、搜索过滤、卡片列表渲染、空状态、新建分组 Modal
-- [ ] 10.6 编写 `PendingApplications.test.ts` — 待审列表渲染、超时高亮、单条批准/拒绝、批量操作、时间范围筛选
-- [ ] 10.7 编写 `MemberList.test.ts` — 成员列表渲染、角色筛选、搜索防抖、操作菜单权限控制、批量操作
-- [ ] 10.8 编写 `MuteModal.test.ts` — 时长选择、原因必填验证、提交确认、取消关闭
-- [ ] 10.9 编写 `GovernanceDetailDrawer.test.ts` — Drawer 打开/关闭、操作前后状态对比渲染、Description 组件数据填充
-- [ ] 10.10 编写 `ChannelPrivacySettings.test.ts` — 公开/私有切换、系统频道锁定、变更影响确认弹窗、skeleton 加载态
-- [ ] 10.11 编写 `SubscriptionCard.test.ts` — 卡片信息渲染、提醒开关切换、取消订阅确认、来源标签展示
+- [x] 10.1 编写 `useChannelContext.test.ts` — 状态隔离（不同 channelId 独立）、权限 computed、resetContext、loadContext 异常处理
+- [x] 10.2 编写 `useChannelOperation.test.ts` — 乐观更新成功/失败回滚、并发操作处理、缓存失效触发
+- [x] 10.3 编写 `SubscribeButton.test.ts` — 6 种状态渲染、点击订阅/取消、乐观更新视觉反馈、错误态展示
+- [x] 10.4 编写 `JoinApplyModal.test.ts` — 表单验证（10-200字）、字数统计、提交成功/失败、关闭重置
+- [x] 10.5 编写 `SubscriptionList.test.ts` — 分组标签页切换、搜索过滤、卡片列表渲染、空状态、新建分组 Modal
+- [x] 10.6 编写 `PendingApplications.test.ts` — 待审列表渲染、超时高亮、单条批准/拒绝、批量操作、时间范围筛选
+- [x] 10.7 编写 `MemberList.test.ts` — 成员列表渲染、角色筛选、搜索防抖、操作菜单权限控制、批量操作
+- [x] 10.8 编写 `MuteModal.test.ts` — 时长选择、原因必填验证、提交确认、取消关闭
+- [x] 10.9 编写 `GovernanceDetailDrawer.test.ts` — Drawer 打开/关闭、操作前后状态对比渲染、Description 组件数据填充
+- [x] 10.10 编写 `ChannelPrivacySettings.test.ts` — 公开/私有切换、系统频道锁定、变更影响确认弹窗、skeleton 加载态
+- [x] 10.11 编写 `SubscriptionCard.test.ts` — 卡片信息渲染、提醒开关切换、取消订阅确认、来源标签展示
