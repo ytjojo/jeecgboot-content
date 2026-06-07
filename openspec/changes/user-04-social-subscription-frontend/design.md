@@ -30,7 +30,7 @@
 - 不实现付费订阅功能（仅保留状态扩展点）
 - 不引入机器学习推荐算法（使用可解释规则）
 - 不重构拉黑与屏蔽语义（仅在查询中尊重现有状态）
-- 不迁移 `/api/v1/*` 路径到 `/content/user/*`
+- 不迁移 `/api/v1/*` 路径到 `/content/user/*`（前端 PRD 已统一使用 `/content/user/*` 路径）
 - 不实现国际化支持（默认中文界面）
 
 ## Decisions
@@ -238,9 +238,265 @@
 - 用户 ID 通过 `@RequestParam("userId")` 传递
 
 **响应格式**:
-- 所有响应使用 `Result<T>` 包装
+- 所有响应使用 `Result<T>` 包装（`org.jeecg.common.api.vo.Result`）
 - 成功响应: `Result.OK(data)`
 - 失败响应: `Result.error(message)`
+- 分页响应: `Result.OK(iPage)` 其中 `iPage` 为 MyBatis-Plus 分页对象
+
+**分页策略**:
+- 所有分页接口统一使用 `pageNo` + `pageSize` 参数（非游标分页）
+- 推荐接口（`/recommendations`）同样使用 page/size 分页，与后端保持一致
+- 默认 pageSize=20，最大 pageSize=100
+
+**批量操作上限**:
+- 所有批量接口单次上限 **100 条**（后端 `@Size(max=100)` 校验）
+- 超过上限后端返回校验错误，前端在提交前做截断提示
+
+**全局通知默认配置**:
+- 全局默认配置通过 `GET /content/user/subscription/notification/preference` 获取（不传 subscriptionId 时返回全局默认值）
+- 无需单独的 `/notification/global-default` 端点
+
+### 后端 VO/Req 字段定义
+
+> 以下字段定义来自后端已实现的 Java 类，前端 TypeScript 接口应与此对齐。
+
+#### 关注相关 Req
+
+**ContentFollowReq** — 关注/取消关注请求
+```typescript
+interface ContentFollowReq {
+  targetUserId: string;      // required, max 64
+  relationGroupId?: string;  // optional, max 64
+}
+```
+
+**ContentRelationBatchReq** — 批量操作请求
+```typescript
+interface ContentRelationBatchReq {
+  targetUserIds: string[];   // required, max 100 items, each max 64
+}
+```
+
+**ContentRelationGroupReq** — 分组创建/重命名请求
+```typescript
+interface ContentRelationGroupReq {
+  groupName: string;    // required, max 64
+  sortOrder: number;    // required, min 0
+}
+```
+
+**ContentRelationGroupMoveReq** — 移动到分组请求
+```typescript
+interface ContentRelationGroupMoveReq {
+  targetUserIds: string[];   // required, max 100 items
+  relationGroupId: string;   // required, max 64
+}
+```
+
+#### 订阅相关 Req
+
+**ContentSubscriptionReq** — 订阅请求
+```typescript
+interface ContentSubscriptionReq {
+  sourceType: string;              // required, max 32 (topic/tag/collection/special/column/channel)
+  sourceId: string;                // required, max 64
+  sourceName: string;              // required, max 64
+  notificationChannels?: string;   // optional, max 255
+  notificationFrequency?: string;  // optional, max 32 (REALTIME/DAILY)
+}
+```
+
+**ContentSubscriptionBatchReq** — 批量订阅操作请求
+```typescript
+interface ContentSubscriptionBatchReq {
+  subscriptionIds: string[];
+}
+```
+
+**ContentSubscriptionNotificationPreferenceReq** — 通知偏好请求
+```typescript
+interface ContentSubscriptionNotificationPreferenceReq {
+  subscriptionId: string;
+  notificationChannels: ('IN_APP' | 'PUSH' | 'EMAIL')[];
+  notificationFrequency: 'REALTIME' | 'DAILY';
+  dndStartTime?: string;  // HH:mm 格式
+  dndEndTime?: string;    // HH:mm 格式
+}
+```
+
+#### 关注相关 VO
+
+**ContentUserRelationVO** — 关系详情
+```typescript
+interface ContentUserRelationVO {
+  ownerUserId: string;
+  targetUserId: string;
+  followed: boolean;
+  specialFollow: boolean;
+  muted: boolean;
+  blacklisted: boolean;
+  blockedByOwner: boolean;
+  relationGroupId?: string;
+  mutualFollow: boolean;
+  followedAt: string;
+  specialFollowAt?: string;
+}
+```
+
+**ContentRelationUserItemVO** — 关注列表项
+```typescript
+interface ContentRelationUserItemVO {
+  targetUserId: string;
+  nickname: string;
+  avatar: string;
+  bio: string;
+  certificationLabel?: string;
+  relationGroupId?: string;
+  followed: boolean;
+  specialFollow: boolean;
+  followedAt: string;
+  latestActivityHint?: string;
+  latestActivityTime?: string;
+}
+```
+
+**ContentFollowFeedItemVO** — 关注流动态项
+```typescript
+interface ContentFollowFeedItemVO {
+  snapshotId: string;
+  actorUserId: string;
+  activityType: string;    // publish/like/favorite
+  bizType: string;
+  bizId: string;
+  summary: string;
+  activityTime: string;
+  specialFollow: boolean;
+  keywordMatched: boolean;
+  matchedKeywords?: string[];
+}
+```
+
+**ContentFollowRecommendationItemVO** — 推荐项
+```typescript
+interface ContentFollowRecommendationItemVO {
+  targetUserId: string;
+  nickname: string;
+  avatar: string;
+  bio: string;
+  recommendationRule: string;    // similar/popular/mutual_follow/interest_tag
+  recommendationReason: string;
+  rankingScore: number;
+}
+```
+
+**ContentRelationBatchResultVO** — 批量操作结果
+```typescript
+interface ContentRelationBatchResultVO {
+  successCount: number;
+  failureCount: number;
+  failures: { targetUserId: string; reason: string; retryable: boolean }[];
+}
+```
+
+#### 订阅相关 VO
+
+**ContentUserSubscriptionVO** — 订阅列表项
+```typescript
+interface ContentUserSubscriptionVO {
+  subscriptionId: string;
+  sourceType: string;
+  sourceId: string;
+  sourceName: string;
+  subscribedAt: string;
+  lastUpdateTime?: string;
+  paused: boolean;
+  subscriptionStatus: string;
+  notificationSummary?: string;
+}
+```
+
+**ContentSubscriptionSourceVO** — 订阅广场源项
+```typescript
+interface ContentSubscriptionSourceVO {
+  sourceType: string;
+  sourceId: string;
+  sourceName: string;
+  sourceDescription?: string;
+  category?: string;
+  coverUrl?: string;
+  subscriberCount: number;
+  heatScore: number;
+  latestUpdateTime?: string;
+  subscribed: boolean;
+  subscriptionId?: string;
+}
+```
+
+**ContentSubscriptionFeedItemVO** — 订阅流动态项
+```typescript
+interface ContentSubscriptionFeedItemVO {
+  // 结构与 ContentFollowFeedItemVO 类似
+  snapshotId: string;
+  sourceType: string;
+  sourceId: string;
+  sourceName: string;
+  bizType: string;
+  bizId: string;
+  summary: string;
+  activityTime: string;
+}
+```
+
+**ContentSubscriptionBatchResultVO** — 订阅批量操作结果
+```typescript
+interface ContentSubscriptionBatchResultVO {
+  successCount: number;
+  failureCount: number;
+  failures: { subscriptionId: string; reason: string; retryable: boolean }[];
+}
+```
+
+**ContentSubscriptionNotificationPreferenceVO** — 通知偏好
+```typescript
+interface ContentSubscriptionNotificationPreferenceVO {
+  subscriptionId?: string;
+  notificationChannels: string[];
+  notificationFrequency: string;
+  dndStartTime?: string;
+  dndEndTime?: string;
+  isGlobalDefault: boolean;
+}
+```
+
+### 枚举值定义
+
+**动态类型 (activityType)**:
+- `publish` — 发布内容
+- `like` — 点赞
+- `favorite` — 收藏
+
+**订阅源类型 (sourceType)**:
+- `topic` — 话题
+- `tag` — 标签
+- `collection` — 合集
+- `special` — 专题
+- `column` — 栏目
+- `channel` — 频道
+
+**推荐理由类型 (recommendationRule)**:
+- `similar` — 相似用户
+- `popular` — 热门用户
+- `mutual_follow` — 互关好友关注
+- `interest_tag` — 兴趣标签匹配
+
+**通知渠道 (notificationChannels)**:
+- `IN_APP` — 站内通知
+- `PUSH` — 推送通知
+- `EMAIL` — 邮件通知
+
+**通知频率 (notificationFrequency)**:
+- `REALTIME` — 实时
+- `DAILY` — 每日摘要
 
 **示例**:
 ```typescript
@@ -359,6 +615,8 @@ src/
 
 ### E2E测试
 
+**框架**: Playwright（与项目现有 E2E 测试保持一致）
+
 **完整用户流程测试** (`social-e2e.spec.ts`):
 - 测试关注用户 → 设置特别关注 → 查看关注流 → 批量管理完整流程
 - 测试订阅内容源 → 配置通知 → 查看订阅流 → 管理订阅完整流程
@@ -366,14 +624,46 @@ src/
 
 ### 性能测试
 
+**性能阈值说明**:
+- "关注流首次加载 <2s" 指前端从发起请求到内容渲染完成的端到端时间，包含网络往返和后端聚合时间
+- 后端单次聚合查询预算 2s，前端需实现超时降级（>2s 时展示已加载的部分数据 + "加载更多" 提示）
+- 操作响应 <500ms 指前端乐观更新的 UI 反馈时间（不等待后端响应）
+
 **关注流性能测试**:
-- 测试首次加载时间（目标<2s）
+- 测试首次加载时间（目标<2s，含后端聚合）
 - 测试滚动加载流畅度
 - 测试大关注量用户（500+/2000+）的降级策略
+- 测试超时降级场景（后端>2s 时的部分数据展示）
 
 **批量操作性能测试**:
 - 测试100条批量操作的响应时间（目标<3s）
 - 测试批量操作的结果展示性能
+
+### Mock 策略
+
+**后端 API 未就绪时的前端开发策略**:
+- 使用 MSW (Mock Service Worker) 拦截 API 请求，返回与后端 VO 结构一致的 mock 数据
+- Mock 数据文件存放于 `src/api/__mocks__/` 目录，按模块拆分（follow.ts、subscribe.ts、feed.ts）
+- Mock 数据需覆盖正常响应、空列表、分页边界（最后一页不足 pageSize）、批量操作部分失败等场景
+- 后端 API 就绪后，通过环境变量 `VITE_USE_MOCK=false` 切换到真实 API
+
+### 虚拟滚动方案
+
+**选型**: 基于 Ant Design Vue 的 `<a-list>` 组件 + 自定义虚拟滚动指令
+- 关注流/订阅流等长列表使用虚拟滚动，只渲染可见区域 + 上下各 5 条缓冲
+- 列表项高度固定时使用简单虚拟滚动，高度不固定时使用动态高度测量方案
+- 移动端额外启用触底加载（IntersectionObserver）替代滚动事件监听
+
+### 边界场景补充
+
+**并发操作边界** [F10]:
+- 多标签页同时操作关注/取消关注同一用户时，通过 Pinia store 的乐观更新 + 后端幂等性保证一致性
+- 操作前检查当前状态，若状态已变更则刷新列表而非重复操作
+
+**分页极端场景** [F11]:
+- pageSize=0 或负数：前端校验拦截，不发送请求
+- page 超过总页数：后端返回空列表，前端展示"没有更多了"
+- 数据变更导致 page 失效：后端返回空列表时，前端自动回退到上一页
 
 ## Migration Plan
 
