@@ -66,17 +66,11 @@
 
 ## 后端 API 依赖
 
-本需求依赖以下后端 API，当前**全部未实现**：
+本需求依赖以下后端 API，**全部已实现**（2026-06-07 确认，UserStatusController.java）：
 
 | API | 路径 | 用途 | 状态 |
 |-----|------|------|------|
-| getAuditLogList | GET /api/content/user-status/audit-logs | 审计日志分页查询 | ❌ 未实现 |
-| getAuditLogDetail | GET /api/content/user-status/audit-logs/{logId} | 审计日志详情 | ❌ 未实现 |
-| getUserAuditLogs | GET /api/content/user-status/users/{userId}/audit-logs | 用户审计日志 | ❌ 未实现 |
-| exportAuditLogs | GET /api/content/user-status/audit-logs/export | 导出审计日志 | ❌ 未实现 |
-
-**后端实现要点**：
-1. 审计日志实体 `UserStatusAuditLog` 已存在
-2. `UserStatusAuditLogService` 已有 `writeAuditLog` 和 `queryByUserId` 方法
-3. 需要扩展 Service 层添加分页查询、详情查询、导出方法
-4. 需要创建 AuditLogController 或在 UserStatusController 中添加端点
+| getAuditLogList | GET /api/content/user-status/audit-logs | 审计日志分页查询 | ✅ 已实现 |
+| getAuditLogDetail | GET /api/content/user-status/audit-logs/{logId} | 审计日志详情 | ✅ 已实现 |
+| getUserAuditLogs | GET /api/content/user-status/users/{userId}/audit-logs | 用户审计日志 | ✅ 已实现 |
+| exportAuditLogs | GET /api/content/user-status/audit-logs/export | 导出审计日志 | ✅ 已实现 |

@@ -529,17 +529,37 @@
 
 ### 必须修复 (BLOCK)
 
-1. **B-1/B-3**: 更新 proposal.md 的 API 路径，与 PRD 4.3 节对齐（4 处路径不一致）
-2. **B-2**: 确认后端 4 个 P0 API 实际实现状态（backend-issues.md 标记为未实现，但前版 review 声称已实现）
+1. **B-1/B-3**: ~~更新 proposal.md 的 API 路径，与 PRD 4.3 节对齐（4 处路径不一致）~~ — **误报**：proposal.md 和 PRD 4.3 均使用 `/{userId}` 模式，与后端 Controller 一致，无不一致问题
+2. **B-2**: ~~确认后端 4 个 P0 API 实际实现状态~~ — **已修复**：backend-issues.md 已更新，14/14 API 全部标记为已实现
 
 ### 建议修复 (FLAG)
 
-1. 确认登录接口响应结构变更（F-3）
-2. 统一 specs 中的 API 路径引用（F-2, F-6）
-3. 为关键 scenarios 添加可量化验收条件（F-4）
-4. 补充页面级集成测试（F-5）
-5. 统一导出审计日志的 HTTP 方法（F-7）
-6. 补充验证码频率限制的后端错误码处理（F-8）
+1. ~~确认登录接口响应结构变更（F-3）~~ — **待人工确认**：需与后端确认 LoginBlockedResponse 字段名
+2. ~~统一 specs 中的 API 路径引用（F-2, F-6）~~ — **已修复**：3 个 spec 的 API 依赖表已更新为正确路径，标记为已实现
+3. 为关键 scenarios 添加可量化验收条件（F-4）— 待补充
+4. 补充页面级集成测试（F-5）— 待补充
+5. ~~统一导出审计日志的 HTTP 方法（F-7）~~ — **误报**：PRD 和后端均使用 GET 方法，无不一致
+6. 补充验证码频率限制的后端错误码处理（F-8）— 待补充
+
+### 已修复项汇总（2026-06-07）
+
+| ID | 修复内容 | 涉及文件 |
+|----|---------|---------|
+| B-2 | backend-issues.md 重写，14/14 API 标记为已实现 | backend-issues.md |
+| F-1 | proposal.md Success Criteria 补充 US-09 异常场景 | proposal.md |
+| F-2 | user-status-manage spec API 路径修正 + 状态更新 | specs/user-status-manage/spec.md |
+| F-2 | user-status-audit-log spec API 路径修正 + 状态更新 | specs/user-status-audit-log/spec.md |
+| F-2 | user-login-intercept spec API 状态更新 | specs/user-login-intercept/spec.md |
+| F-6 | user-status-store spec changeStatus/releaseUser 路径修正 | specs/user-status-store/spec.md |
+| A-3 | user-status-store spec fetchCurrentStatus 参数说明补充 | specs/user-status-store/spec.md |
+
+### 待人工确认项
+
+| ID | 事项 | 说明 |
+|----|------|------|
+| F-3 | 登录接口响应结构变更 | 需与后端确认 LoginBlockedResponse 字段名和格式 |
+| A-4 | EPIC-08 申诉系统路由 | 需确认申诉系统的跳转路由和参数格式 |
+| A-6 | 后端权限注解 | 需确认 Controller 是否已添加 @RequiresPermissions 注解 |
 
 ### 可继续的部分
 

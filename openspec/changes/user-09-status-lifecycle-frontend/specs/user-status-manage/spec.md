@@ -108,24 +108,14 @@
 
 ## 后端 API 依赖
 
-本需求依赖以下后端 API：
+本需求依赖以下后端 API，**全部已实现**（2026-06-07 确认，UserStatusController.java）：
 
-### 已实现
-| API | 路径 | 用途 |
-|-----|------|------|
-| getUserStatus | GET /api/content/user-status/{userId} | 查询指定用户状态 |
-| changeUserStatus | POST /api/content/user-status/{userId}/change | 变更用户状态 |
-| releaseUser | POST /api/content/user-status/{userId}/release | 解禁用户 |
-| getStatusHistory | GET /api/content/user-status/{userId}/history | 查询状态历史 |
-
-### 未实现
 | API | 路径 | 用途 | 状态 |
 |-----|------|------|------|
-| getStatusList | GET /api/content/user-status/list | 分页查询用户状态列表 | ❌ 未实现 |
-| getTransitions | GET /api/content/user-status/transitions/{currentStatus} | 获取可转换状态列表 | ❌ 未实现 |
-| batchReleaseUsers | POST /api/content/user-status/batch-release | 批量解禁 | ❌ 未实现 |
-
-**后端实现要点**：
-1. getStatusList：支持按用户ID、状态筛选，返回分页数据
-2. getTransitions：调用 `UserStatusTransition.getAllowedTransitions()` 返回允许的目标状态
-3. batchReleaseUsers：调用 `UserStatusBizManageService.batchChangeStatus()` 批量恢复 NORMAL
+| getUserStatus | GET /api/content/user-status/{userId} | 查询指定用户状态 | ✅ 已实现 |
+| changeUserStatus | POST /api/content/user-status/{userId}/change | 变更用户状态 | ✅ 已实现 |
+| releaseUser | POST /api/content/user-status/{userId}/release | 解禁用户 | ✅ 已实现 |
+| getStatusHistory | GET /api/content/user-status/{userId}/history | 查询状态历史 | ✅ 已实现 |
+| getStatusList | GET /api/content/user-status/list | 分页查询用户状态列表 | ✅ 已实现 |
+| getTransitions | GET /api/content/user-status/transitions/{currentStatus} | 获取可转换状态列表 | ✅ 已实现 |
+| batchReleaseUsers | POST /api/content/user-status/batch-release | 批量解禁 | ✅ 已实现 |

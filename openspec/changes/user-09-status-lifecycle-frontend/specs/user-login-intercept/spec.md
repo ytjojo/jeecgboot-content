@@ -78,13 +78,9 @@
 
 ## 后端 API 依赖
 
-本需求依赖以下后端 API，当前**未实现**：
+本需求依赖以下后端 API，**全部已实现**（2026-06-07 确认，UserStatusController.java）：
 
 | API | 路径 | 用途 | 状态 |
 |-----|------|------|------|
-| sendVerifyCode | POST /api/content/user-status/send-verify-code | 发送手机验证码 | ❌ 未实现 |
-| verifySecurity | POST /api/content/user-status/verify-security | 安全核验（验证码校验 + 状态恢复） | ❌ 未实现 |
-
-**后端实现要点**：
-1. sendVerifyCode：调用短信服务发送验证码，验证码存储到 Redis，有效期 5 分钟
-2. verifySecurity：校验验证码，通过后将 FROZEN 状态恢复为 NORMAL，写入审计日志
+| sendVerifyCode | POST /api/content/user-status/send-verify-code | 发送手机验证码 | ✅ 已实现 |
+| verifySecurity | POST /api/content/user-status/verify-security | 安全核验（验证码校验 + 状态恢复） | ✅ 已实现 |
