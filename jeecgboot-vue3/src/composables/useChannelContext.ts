@@ -22,15 +22,16 @@ const CHANNEL_CONTEXT_KEY = Symbol('channelContext');
 export function useChannelContext(channelId: Ref<string>) {
   const channelInfo = ref<ChannelInfo | null>(null);
   const userRelation = ref<UserChannelRelation | null>(null);
-  const privacyType = ref<'PUBLIC' | 'PRIVATE'>('PUBLIC');
-  const joinMethod = ref<'FREE' | 'REVIEW' | 'INVITE'>('FREE');
-  const isSubscribed = ref(false);
-  const memberRole = ref<string | null>(null);
-  const isMuted = ref(false);
-  const isBlacklisted = ref(false);
   const loading = ref(false);
   const channelNotFound = ref(false);
   const loadError = ref(false);
+
+  const privacyType = computed(() => channelInfo.value?.privacyType ?? 'PUBLIC');
+  const joinMethod = computed(() => channelInfo.value?.joinMethod ?? 'FREE');
+  const isSubscribed = computed(() => userRelation.value?.isSubscribed ?? false);
+  const memberRole = computed(() => userRelation.value?.role ?? null);
+  const isMuted = computed(() => userRelation.value?.isMuted ?? false);
+  const isBlacklisted = computed(() => userRelation.value?.isBlacklisted ?? false);
 
   const canManageMembers = computed(() => {
     const role = userRelation.value?.role;
@@ -41,8 +42,8 @@ export function useChannelContext(channelId: Ref<string>) {
     return !!memberRole.value && !isMuted.value && !isBlacklisted.value;
   });
 
-  async function loadContext(overrideId?: string) {
-    const id = overrideId ?? channelId.value;
+  async function loadContext() {
+    const id = channelId.value;
     loading.value = true;
     channelNotFound.value = false;
     loadError.value = false;
@@ -53,12 +54,6 @@ export function useChannelContext(channelId: Ref<string>) {
       ]);
       channelInfo.value = info;
       userRelation.value = relation;
-      privacyType.value = info.privacyType;
-      joinMethod.value = info.joinMethod;
-      isSubscribed.value = relation.isSubscribed;
-      memberRole.value = relation.role;
-      isMuted.value = relation.isMuted;
-      isBlacklisted.value = relation.isBlacklisted;
     } catch (error: any) {
       if (error?.response?.status === 404) {
         channelNotFound.value = true;
@@ -73,12 +68,6 @@ export function useChannelContext(channelId: Ref<string>) {
   function resetContext() {
     channelInfo.value = null;
     userRelation.value = null;
-    privacyType.value = 'PUBLIC';
-    joinMethod.value = 'FREE';
-    isSubscribed.value = false;
-    memberRole.value = null;
-    isMuted.value = false;
-    isBlacklisted.value = false;
     channelNotFound.value = false;
     loadError.value = false;
   }

@@ -15,21 +15,11 @@
   const channelIdRef = toRef(props, 'channelId');
   const { loadContext, resetContext } = useChannelContext(channelIdRef);
 
-  // 初始加载
   onMounted(loadContext);
 
-  // channelId 变化时重新加载
   watch(channelIdRef, () => {
     resetContext();
     loadContext();
-  });
-
-  // 路由参数变化时重置并重新加载上下文
-  onBeforeRouteUpdate((to, from) => {
-    if (to.params.id !== from.params.id) {
-      resetContext();
-      loadContext(to.params.id);
-    }
   });
 
 </script>

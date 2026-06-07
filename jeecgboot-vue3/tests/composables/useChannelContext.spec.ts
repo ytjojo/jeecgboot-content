@@ -70,17 +70,17 @@ describe('useChannelContext', () => {
       expect(result.isBlacklisted.value).toBe(false);
     });
 
-    it('should use overrideId when provided instead of channelId ref', async () => {
-      mockGetChannelDetail.mockResolvedValue({ id: 'ch99', name: 'X', privacyType: 'PUBLIC', joinMethod: 'FREE', isSystem: false });
+    it('should always use channelId ref value', async () => {
+      mockGetChannelDetail.mockResolvedValue({ id: 'ch1', name: 'X', privacyType: 'PUBLIC', joinMethod: 'FREE', isSystem: false });
       mockGetUserChannelRelation.mockResolvedValue({ isSubscribed: false, role: null, isMuted: false, isBlacklisted: false });
 
       const channelId = ref('ch1');
       const { result } = withSetup(() => useChannelContext(channelId));
 
-      await result.loadContext('ch99');
+      await result.loadContext();
 
-      expect(mockGetChannelDetail).toHaveBeenCalledWith('ch99');
-      expect(mockGetUserChannelRelation).toHaveBeenCalledWith('ch99');
+      expect(mockGetChannelDetail).toHaveBeenCalledWith('ch1');
+      expect(mockGetUserChannelRelation).toHaveBeenCalledWith('ch1');
     });
 
     it('should set channelNotFound on 404 error', async () => {
