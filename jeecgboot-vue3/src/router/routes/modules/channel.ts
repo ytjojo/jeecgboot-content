@@ -47,6 +47,15 @@ const channel: AppRouteModule = {
     {
       path: ':id/governance',
       name: 'ChannelGovernance',
+      component: () => import('/@/views/channel/governance/index.vue'),
+      meta: {
+        title: '内容治理',
+        ignoreKeepAlive: false,
+      },
+    },
+    {
+      path: ':id/governance/log',
+      name: 'ChannelGovernanceLog',
       component: () => import('/@/views/channel/governance/GovernanceLog.vue'),
       meta: {
         title: '治理日志',
