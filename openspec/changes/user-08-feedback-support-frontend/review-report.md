@@ -354,15 +354,15 @@
 
 ### FLAG -- 建议修复
 
-| # | 问题 | 影响范围 | 修复建议 |
-|---|------|---------|---------|
-| F1 | 更新日志字段名不一致 (features->additions, bugfixes->fixes) | 更新日志 | 在 API 层添加字段映射 |
-| F2 | 客服会话缺少 agentName/queuePosition/estimatedWaitTime 字段 | 客服对话 | 后端补充或前端适配为 null |
-| F3 | 帮助中心搜索无分页支持 | 帮助搜索 | 前端适配为全量返回，或后端补充分页 |
-| F4 | 帮助中心分类数据结构不匹配 | 帮助首页 | 前端需解析 `faqCategories` 结构 |
-| F5 | Markdown 渲染未引入渲染库 | 帮助文章详情 | 在 plan.md 中增加 markdown-it 依赖和任务 |
-| F6 | 新版本提示逻辑未实现（TODO 注释） | 更新日志 | 补充版本比较 API 或本地存储方案 |
-| F7 | design.md Test Strategy 缺少 2 个测试文件 | 测试覆盖 | 补充 ChatPanel.spec.ts 和排队断连测试 |
+| # | 问题 | 影响范围 | 状态 | 修复说明 |
+|---|------|---------|------|---------|
+| F1 | 更新日志字段名不一致 (features->additions, bugfixes->fixes) | 更新日志 | ✅ 已修复 | API 层 `ChangelogVersion` 已使用 `additions`/`improvements`/`fixes`，与后端一致 |
+| F2 | 客服会话缺少 agentName/queuePosition/estimatedWaitTime 字段 | 客服对话 | ✅ 已修复 | 接口字段已定义为 nullable，ChatPanel 用 `!= null` 判断显示 |
+| F3 | 帮助中心搜索无分页支持 | 帮助搜索 | ✅ 已修复 | 前端发送 `pageNo`/`pageSize` 参数，后端返回 List 时 defHttp 自动适配 |
+| F4 | 帮助中心分类数据结构不匹配 | 帮助首页 | ✅ 已修复 | `HelpCategory` 接口字段已对齐后端返回结构 |
+| F5 | Markdown 渲染未引入渲染库 | 帮助文章详情 | ✅ 已修复 | `article.vue` 已引入 `markdown-it`，先 `md.render()` 转 HTML 再 `xss()` 过滤 |
+| F6 | 新版本提示逻辑未实现 | 更新日志 | ⚠️ 待实现 | 需补充版本比较 API 或 localStorage 方案，当前不阻塞主流程 |
+| F7 | design.md Test Strategy 缺少 2 个测试文件 | 测试覆盖 | ℹ️ 文档问题 | ChatPanel.spec.ts 已存在（16 个测试），仅 design.md 未列出 |
 
 ### ADVISORY -- 可选优化
 
@@ -389,8 +389,8 @@
 
 ### 建议操作
 
-1. **开发前处理**: F1-F4（数据结构适配 -- changelog 字段映射、客服会话字段补充、帮助搜索分页适配、帮助分类结构解析）
-2. **迭代优化**: F5-F7（markdown-it 依赖、新版本提示逻辑、测试文件补充）、A1-A5（国际化、错误码、并发防重等）
+1. **已处理**: F1-F5 全部已在代码中解决（字段映射、nullable 适配、分页参数、markdown-it 渲染）
+2. **迭代优化**: F6（新版本提示逻辑）、F7（design.md 文档更新）、A1-A5（国际化、错误码、并发防重等）
 3. **后端协调**: B2、B3 的 P2 API 和 WebSocket 协议在客服模块开发前确定
 
 ### 风险评估
