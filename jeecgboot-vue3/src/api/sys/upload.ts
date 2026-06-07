@@ -30,3 +30,10 @@ export function uploadImg(params: UploadFileParams, onUploadProgress: (progressE
     { isReturnResponse: true }
   );
 }
+
+/**
+ * @description: Simple upload wrapper (no progress callback)
+ */
+export function uploadFile(params: UploadFileParams) {
+  return uploadApi(params, () => {});
+}

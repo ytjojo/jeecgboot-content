@@ -128,6 +128,7 @@ export const useChannelGovernanceStore = defineStore({
     },
     async restore(contentId: string, channelId: string) {
       await executeGovernance({ contentId, channelId, action: 'RESTORE' });
+      await this.fetchRecycleBin(channelId);
     },
     async fetchGovernanceLog(channelId: string, params?: { actionType?: string; operator?: string; startTime?: string; endTime?: string; keyword?: string; current?: number; size?: number }) {
       this.loading = true;

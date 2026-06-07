@@ -52,6 +52,10 @@ export const getSecuritySetting = (userId: string) =>
 export const updateSecuritySetting = (userId: string, data: SecurityUpdateReq) =>
   defHttp.post<SecuritySettingVO>({ url: Api.securityUpdate, params: { userId }, data });
 
+/** 更新登录提醒 */
+export const updateLoginAlert = (data: { userId: string; enabled: boolean }) =>
+  updateSecuritySetting(data.userId, { loginAlertEnabled: data.enabled });
+
 /** 获取第三方授权列表 */
 export const listThirdPartyAuths = (userId: string) =>
   defHttp.get<ThirdPartyAuthVO[]>({ url: Api.thirdPartyList, params: { userId } });
