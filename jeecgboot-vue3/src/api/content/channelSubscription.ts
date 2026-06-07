@@ -1,15 +1,15 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  subscribe = '/channel/subscription/subscribe',
-  unsubscribe = '/channel/subscription/unsubscribe',
-  status = '/channel/subscription/status',
-  list = '/channel/subscription/list',
-  groupCreate = '/channel/subscription/group/create',
-  groupRename = '/channel/subscription/group/rename',
-  groupDelete = '/channel/subscription/group/delete',
-  groupList = '/channel/subscription/group/list',
-  reminder = '/channel/subscription/reminder',
+  subscribe = '/api/v1/content/channel/subscription/subscribe',
+  unsubscribe = '/api/v1/content/channel/subscription/unsubscribe',
+  status = '/api/v1/content/channel/subscription/status',
+  list = '/api/v1/content/channel/subscription/list',
+  groupCreate = '/api/v1/content/channel/subscription/group/create',
+  groupRename = '/api/v1/content/channel/subscription/group/rename',
+  groupDelete = '/api/v1/content/channel/subscription/group/delete',
+  groupList = '/api/v1/content/channel/subscription/group/list',
+  reminder = '/api/v1/content/channel/subscription/reminder',
 }
 
 /** 订阅频道 */
@@ -25,7 +25,7 @@ export const getSubscriptionStatus = (channelId: string) =>
   defHttp.get({ url: `${Api.status}/${channelId}` });
 
 /** 订阅列表 */
-export const getSubscriptionList = (params?: any) =>
+export const getSubscriptionList = (params?: { pageNo?: number; pageSize?: number; keyword?: string }) =>
   defHttp.get({ url: Api.list, params });
 
 /** 创建分组 */
@@ -34,11 +34,11 @@ export const createSubscriptionGroup = (data: { name: string }) =>
 
 /** 重命名分组 */
 export const renameSubscriptionGroup = (groupId: string, newName: string) =>
-  defHttp.post({ url: Api.groupRename, params: { groupId, newName } });
+  defHttp.post({ url: Api.groupRename, data: { groupId, newName } });
 
 /** 删除分组 */
 export const deleteSubscriptionGroup = (groupId: string) =>
-  defHttp.post({ url: Api.groupDelete, params: { groupId } });
+  defHttp.post({ url: Api.groupDelete, data: { groupId } });
 
 /** 分组列表 */
 export const getSubscriptionGroupList = () =>

@@ -1,9 +1,9 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  add = '/channel/governance/blacklist/add',
-  remove = '/channel/governance/blacklist/remove',
-  list = '/channel/governance/blacklist/list',
+  add = '/api/v1/content/channel/governance/blacklist/add',
+  remove = '/api/v1/content/channel/governance/blacklist/remove',
+  list = '/api/v1/content/channel/governance/blacklist/list',
 }
 
 /** 加入黑名单 */

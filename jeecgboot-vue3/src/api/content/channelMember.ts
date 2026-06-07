@@ -1,16 +1,16 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  joinApply = '/channel/member/join/apply',
-  applicationPending = '/channel/member/applications/pending',
-  applicationApprove = '/channel/member/applications/approve',
-  applicationReject = '/channel/member/applications/reject',
-  list = '/channel/member/list',
-  search = '/channel/member/search',
-  assignRole = '/channel/member/assign-role',
-  governanceRemove = '/channel/governance/remove',
-  governanceMute = '/channel/governance/mute',
-  governanceUnmute = '/channel/governance/unmute',
+  joinApply = '/api/v1/content/channel/member/join/apply',
+  applicationPending = '/api/v1/content/channel/member/applications/pending',
+  applicationApprove = '/api/v1/content/channel/member/applications/approve',
+  applicationReject = '/api/v1/content/channel/member/applications/reject',
+  list = '/api/v1/content/channel/member/list',
+  search = '/api/v1/content/channel/member/search',
+  assignRole = '/api/v1/content/channel/member/assign-role',
+  governanceRemove = '/api/v1/content/channel/governance/remove',
+  governanceMute = '/api/v1/content/channel/governance/mute',
+  governanceUnmute = '/api/v1/content/channel/governance/unmute',
 }
 
 /** 提交加入申请 */

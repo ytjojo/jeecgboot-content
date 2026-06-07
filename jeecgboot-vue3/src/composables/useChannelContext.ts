@@ -1,5 +1,6 @@
 import { ref, computed, type Ref, provide, inject } from 'vue';
-import { getChannelInfo, getUserChannelRelation } from '/@/api/content/channel';
+import { getChannelDetail } from '/@/api/content/channel';
+import { getUserChannelRelation } from '/@/api/content/channelRelation';
 
 export interface ChannelInfo {
   id: string;
@@ -7,7 +8,6 @@ export interface ChannelInfo {
   privacyType: 'PUBLIC' | 'PRIVATE';
   joinMethod: 'FREE' | 'REVIEW' | 'INVITE';
   isSystem: boolean;
-  [key: string]: any;
 }
 
 export interface UserChannelRelation {
@@ -15,7 +15,6 @@ export interface UserChannelRelation {
   role: string | null;
   isMuted: boolean;
   isBlacklisted: boolean;
-  [key: string]: any;
 }
 
 const CHANNEL_CONTEXT_KEY = Symbol('channelContext');
@@ -48,7 +47,7 @@ export function useChannelContext(channelId: Ref<string>) {
     loadError.value = false;
     try {
       const [info, relation] = await Promise.all([
-        getChannelInfo(channelId.value),
+        getChannelDetail(channelId.value),
         getUserChannelRelation(channelId.value),
       ]);
       channelInfo.value = info;

@@ -1,10 +1,10 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  create = '/channel/invite/create',
-  list = '/channel/invite/list',
-  revoke = '/channel/invite/revoke',
-  use = '/channel/invite/use',
+  create = '/api/v1/content/channel/invite/create',
+  list = '/api/v1/content/channel/invite/list',
+  revoke = '/api/v1/content/channel/invite/revoke',
+  use = '/api/v1/content/channel/invite/use',
 }
 
 /** 创建邀请 */
@@ -12,7 +12,7 @@ export const createInvite = (data: { type: string; expireTime: string[]; maxUses
   defHttp.post({ url: Api.create, data });
 
 /** 邀请列表 */
-export const getInviteList = (params?: any) =>
+export const getInviteList = (params?: { pageNo?: number; pageSize?: number; status?: string }) =>
   defHttp.get({ url: Api.list, params });
 
 /** 撤销邀请 */

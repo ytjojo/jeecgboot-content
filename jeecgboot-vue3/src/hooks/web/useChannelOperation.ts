@@ -20,8 +20,8 @@ export function useChannelOperation() {
   const { createMessage } = useMessage();
   const operating = ref(false);
 
-  async function optimisticExecute<T>(options: OptimisticOperationOptions<T>) {
-    if (operating.value) return;
+  async function optimisticExecute<T>(options: OptimisticOperationOptions<T>): Promise<boolean> {
+    if (operating.value) return false;
     operating.value = true;
 
     // 乐观更新：立即执行
@@ -33,10 +33,12 @@ export function useChannelOperation() {
         createMessage.success(options.successMessage);
       }
       options.onSuccess?.(result);
+      return true;
     } catch (error) {
       // 失败回滚
       options.onRollback();
       createMessage.error(options.errorMessage || '操作失败，请重试');
+      throw error;
     } finally {
       operating.value = false;
     }

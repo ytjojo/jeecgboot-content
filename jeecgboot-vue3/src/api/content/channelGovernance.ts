@@ -1,7 +1,7 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  log = '/channel/governance/log',
+  log = '/api/v1/content/channel/governance/log',
 }
 
 /** 治理日志列表 */
