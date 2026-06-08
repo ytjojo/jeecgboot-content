@@ -27,18 +27,67 @@ interface ChannelStatsState {
   timeRange: TrendQuery['range'];
   customDateRange: [string, string] | null;
   hotPeriod: HotContentQuery['period'];
-  // 独立 loading 状态
   coreLoading: boolean;
   trendLoading: boolean;
   hotContentLoading: boolean;
   userAnalysisLoading: boolean;
   interactionLoading: boolean;
-  // 独立 error 状态
   coreError: string | null;
   trendError: string | null;
   hotContentError: string | null;
   userAnalysisError: string | null;
   interactionError: string | null;
+}
+
+/** 消除 5 个 fetch 方法的重复模板代码 */
+type DataKey = 'core' | 'trend' | 'hotContent' | 'userAnalysis' | 'interaction';
+
+async function guardedFetch<T>(
+  ctx: {
+    set: (key: DataKey, loading: boolean, error: string | null, data?: T) => void;
+    key: DataKey;
+  },
+  fn: () => Promise<T>,
+) {
+  ctx.set(ctx.key, true, null);
+  try {
+    const data = await fn();
+    ctx.set(ctx.key, false, null, data);
+  } catch (e: any) {
+    ctx.set(ctx.key, false, e?.message || '加载失败');
+  }
+}
+
+function setter(state: ChannelStatsState) {
+  return (key: DataKey, loading: boolean, error: string | null, data?: any) => {
+    switch (key) {
+      case 'core':
+        state.coreLoading = loading;
+        state.coreError = error;
+        if (data !== undefined) state.coreStats = data;
+        break;
+      case 'trend':
+        state.trendLoading = loading;
+        state.trendError = error;
+        if (data !== undefined) state.trendData = data;
+        break;
+      case 'hotContent':
+        state.hotContentLoading = loading;
+        state.hotContentError = error;
+        if (data !== undefined) state.hotContent = data;
+        break;
+      case 'userAnalysis':
+        state.userAnalysisLoading = loading;
+        state.userAnalysisError = error;
+        if (data !== undefined) state.userAnalysis = data;
+        break;
+      case 'interaction':
+        state.interactionLoading = loading;
+        state.interactionError = error;
+        if (data !== undefined) state.interaction = data;
+        break;
+    }
+  };
 }
 
 export const useChannelStatsStore = defineStore({
@@ -78,79 +127,53 @@ export const useChannelStatsStore = defineStore({
       this.hotPeriod = period;
     },
     async fetchCoreStats() {
-      this.coreLoading = true;
-      this.coreError = null;
-      try {
-        this.coreStats = await getCoreStats({ channelId: this.channelId });
-      } catch (e: any) {
-        this.coreError = e?.message || '加载核心指标失败';
-      } finally {
-        this.coreLoading = false;
-      }
+      const set = setter(this);
+      await guardedFetch({ set, key: 'core' }, () =>
+        getCoreStats({ channelId: this.channelId }),
+      );
     },
     async fetchTrendData() {
-      this.trendLoading = true;
-      this.trendError = null;
-      try {
-        this.trendData = await getTrendData({
+      const set = setter(this);
+      await guardedFetch({ set, key: 'trend' }, () =>
+        getTrendData({
           channelId: this.channelId,
           range: this.timeRange,
           ...(this.timeRange === 'custom' && this.customDateRange
             ? { startDate: this.customDateRange[0], endDate: this.customDateRange[1] }
             : {}),
-        });
-      } catch (e: any) {
-        this.trendError = e?.message || '加载趋势数据失败';
-      } finally {
-        this.trendLoading = false;
-      }
+        }),
+      );
     },
     async fetchHotContent() {
-      this.hotContentLoading = true;
-      this.hotContentError = null;
-      try {
-        this.hotContent = await getHotContent({
+      const set = setter(this);
+      await guardedFetch({ set, key: 'hotContent' }, () =>
+        getHotContent({
           channelId: this.channelId,
           period: this.hotPeriod,
-        });
-      } catch (e: any) {
-        this.hotContentError = e?.message || '加载热门内容失败';
-      } finally {
-        this.hotContentLoading = false;
-      }
+        }),
+      );
     },
     async fetchUserAnalysis() {
-      this.userAnalysisLoading = true;
-      this.userAnalysisError = null;
-      try {
-        this.userAnalysis = await getUserAnalysis({ channelId: this.channelId });
-      } catch (e: any) {
-        this.userAnalysisError = e?.message || '加载用户分析失败';
-      } finally {
-        this.userAnalysisLoading = false;
-      }
+      const set = setter(this);
+      await guardedFetch({ set, key: 'userAnalysis' }, () =>
+        getUserAnalysis({ channelId: this.channelId }),
+      );
     },
     async fetchInteraction() {
-      this.interactionLoading = true;
-      this.interactionError = null;
-      try {
-        this.interaction = await getInteraction({ channelId: this.channelId });
-      } catch (e: any) {
-        this.interactionError = e?.message || '加载互动数据失败';
-      } finally {
-        this.interactionLoading = false;
-      }
+      const set = setter(this);
+      await guardedFetch({ set, key: 'interaction' }, () =>
+        getInteraction({ channelId: this.channelId }),
+      );
     },
     /** 并行加载所有看板数据 */
     async fetchAllData() {
-      const results = await Promise.allSettled([
+      await Promise.allSettled([
         this.fetchCoreStats(),
         this.fetchTrendData(),
         this.fetchHotContent(),
         this.fetchUserAnalysis(),
         this.fetchInteraction(),
       ]);
-      return results;
     },
   },
 });

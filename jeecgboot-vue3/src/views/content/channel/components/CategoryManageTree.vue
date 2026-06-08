@@ -133,11 +133,13 @@ function filterTree(nodes: CategoryTreeVO[], keyword: string): any[] {
   return result;
 }
 
-/** HTML 转义，防 XSS */
+/** HTML 转义，防 XSS（纯字符串实现，SSR/jsdom 可用） */
 function escapeHtml(str: string): string {
-  const div = document.createElement('div');
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function highlightName(name: string): string {

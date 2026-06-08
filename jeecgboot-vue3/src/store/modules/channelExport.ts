@@ -68,7 +68,8 @@ export const useChannelExportStore = defineStore({
     async queryTaskStatus(taskId: string): Promise<ExportTaskVO | null> {
       try {
         return await getExportTaskStatus(taskId);
-      } catch {
+      } catch (e) {
+        console.warn('[ExportStore] 查询任务状态失败', e);
         return null;
       }
     },
@@ -76,7 +77,8 @@ export const useChannelExportStore = defineStore({
     async downloadFile(taskId: string): Promise<Blob | null> {
       try {
         return await downloadExportFile(taskId);
-      } catch {
+      } catch (e) {
+        console.warn('[ExportStore] 下载文件失败', e);
         return null;
       }
     },
