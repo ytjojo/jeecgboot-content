@@ -36,6 +36,8 @@ export const contentChannelRoutes: AppRouteRecordRaw[] = (modules as Recordable)
 
 export const contentChannelAdminRoutes: AppRouteRecordRaw[] = (modules as Recordable)['./modules/contentChannelAdmin.ts']?.default || [];
 
+export const contentDiscoveryRoutes: AppRouteRecordRaw[] = (modules as Recordable)['./modules/contentDiscovery.ts']?.default || [];
+
 export const RootRoute: AppRouteRecordRaw = {
   path: '/',
   name: 'Root',
@@ -102,4 +104,4 @@ export const LoginVerifyRoute: AppRouteRecordRaw = {
 };
 
 // Basic routing without permission
-export const basicRoutes = [LoginRoute, RootRoute, ...mainOutRoutes, REDIRECT_ROUTE, PAGE_NOT_FOUND_ROUTE, TokenLoginRoute, Oauth2LoginRoute, LoginBlockedRoute, LoginVerifyRoute, ...contentAuthRoutes, ...contentProfileRoutes, ...contentGrowthRoutes, ...contentPrivacyRoutes, ...contentSocialRoutes, ...systemAdminRoutes, ...contentChannelRoutes, ...contentChannelAdminRoutes];
+export const basicRoutes = [LoginRoute, RootRoute, ...mainOutRoutes, REDIRECT_ROUTE, PAGE_NOT_FOUND_ROUTE, TokenLoginRoute, Oauth2LoginRoute, LoginBlockedRoute, LoginVerifyRoute, ...contentAuthRoutes, ...contentProfileRoutes, ...contentGrowthRoutes, ...contentPrivacyRoutes, ...contentSocialRoutes, ...systemAdminRoutes, ...contentChannelRoutes, ...contentChannelAdminRoutes, ...contentDiscoveryRoutes];
