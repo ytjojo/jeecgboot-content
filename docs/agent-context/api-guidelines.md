@@ -62,8 +62,8 @@ DELETE /jeecg-boot/api/v1/users/1,2,3
 - 创建与更新规则不一致时，使用分组校验
 
 ## 分页约定
-- 分页参数统一使用 `current`、`size`
-- `current` 从 `1` 开始，`size` 默认 `10`
+- 分页参数统一使用 `pageNo`、`pageSize`
+- `pageNo` 从 `1` 开始，`pageSize` 默认 `10`
 - 单页条数需要限制上限，建议最大不超过 `100`
 - 查询条件作为普通请求参数或查询对象传入，不使用无结构 `Map`
 - 深分页场景避免高 `OFFSET`，必要时改为基于主键或时间游标的分页
@@ -92,3 +92,36 @@ DELETE /jeecg-boot/api/v1/users/1,2,3
 - 集成测试优先使用 Spring Boot Test
 - 针对接口签名、参数校验、分页逻辑和返回模型变更，优先补充贴近改动范围的测试
 - 不追求低价值覆盖率，重点覆盖容易回归的接口行为
+
+## 前端 API 层约定
+
+### HTTP 客户端
+
+- 使用自定义 Axios 封装：`src/utils/http/axios/`，导出为 `defHttp`
+- 所有请求通过 `signMd5Utils` 进行 MD5 签名
+- 租户模式启用时（`VITE_GLOB_TENANT_MODE`），自动注入 Tenant ID 到请求头
+
+### 响应格式
+
+```typescript
+interface Result<T> {
+  code: number;       // 200 表示成功
+  result: T;          // 业务数据
+  message: string;    // 提示信息
+  success: boolean;   // 业务是否成功
+}
+```
+
+### 使用示例
+
+```typescript
+import { defHttp } from '/@/utils/http/axios';
+
+// GET 请求
+export const getUserStatus = (userId: string) =>
+  defHttp.get({ url: `/api/v1/content/user-status/${userId}` });
+
+// POST 请求
+export const updateUserStatus = (data: UpdateStatusDTO) =>
+  defHttp.post({ url: '/api/v1/content/user-status/update' }, { data });
+```

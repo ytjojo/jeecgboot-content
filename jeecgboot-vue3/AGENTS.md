@@ -29,4 +29,5 @@
 ## 参考
 - 本地补充说明：`CLAUDE.md`
 - 前端测试规范：`docs/agent-context/frontend-testing-conventions.md`
+- 前端编码规范`docs/agent-context/frontend-coding-conventions.md`
 - 仓库级背景资料：`../docs/agent-context/project-overview.md`、`../docs/agent-context/commands.md`

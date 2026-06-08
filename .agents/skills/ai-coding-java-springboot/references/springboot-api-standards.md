@@ -123,9 +123,9 @@ public class UserController {
     // GET /api/v1/users/list - 分页查询
     @GetMapping("/list")
     public Result<Page<UserVO>> getUserList(
-            @RequestParam(defaultValue = "1") Integer current,
-            @RequestParam(defaultValue = "10") Integer size) {
-        Page<UserVO> page = userService.getUsersByPage(new Page<>(current, size));
+            @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        Page<UserVO> page = userService.getUsersByPage(new Page<>(pageNo, pageSize));
         return Result.OK(page);
     }
 
@@ -226,11 +226,11 @@ public class UserDTO {
 ### 标准分页请求
 
 ```
-GET /api/v1/users/page?current=1&size=10&keyword=admin&status=1
+GET /api/v1/users/page?pageNo=1&pageSize=10&keyword=admin&status=1
 ```
 
-- `current`：当前页码（从 1 开始）
-- `size`：每页条数（默认 10，最大限制 100）
+- `pageNo`：当前页码（从 1 开始）
+- `pageSize`：每页条数（默认 10，最大限制 100）
 - 其他参数为查询条件
 
 ### 分页实现
@@ -238,16 +238,16 @@ GET /api/v1/users/page?current=1&size=10&keyword=admin&status=1
 ```java
 @GetMapping("/page")
 public Result<Page<UserVO>> getUsersByPage(
-        @RequestParam(defaultValue = "1") Integer current,
-        @RequestParam(defaultValue = "10") Integer size,
+        @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+        @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
         @RequestParam(required = false) String keyword,
         @RequestParam(required = false) Integer status) {
 
     // 限制单页最大条数，防止一次查太多导致 OOM
-    size = Math.min(size, 100);
+    pageSize = Math.min(pageSize, 100);
 
     Page<UserVO> page = userService.getUsersByPage(
-        new Page<>(current, size), keyword, status);
+        new Page<>(pageNo, pageSize), keyword, status);
     return Result.OK(page);
 }
 ```
@@ -315,8 +315,8 @@ public interface UserConverter {
 ```java
 @Operation(summary = "分页查询用户列表", description = "支持按用户名模糊搜索和状态过滤")
 @Parameters({
-    @Parameter(name = "current", description = "页码", example = "1"),
-    @Parameter(name = "size", description = "每页条数", example = "10"),
+    @Parameter(name = "pageNo", description = "页码", example = "1"),
+    @Parameter(name = "pageSize", description = "每页条数", example = "10"),
     @Parameter(name = "keyword", description = "搜索关键词（模糊匹配用户名）")
 })
 @GetMapping("/page")
@@ -331,8 +331,8 @@ public Result<Page<UserVO>> getUsersByPage(...) { ... }
 /**
  * 分页查询用户列表
  *
- * @param current 页码（从1开始，默认1）
- * @param size    每页条数（默认10，最大100）
+ * @param pageNo 页码（从1开始，默认1）
+ * @param pageSize    每页条数（默认10，最大100）
  * @param keyword 搜索关键词（可选，模糊匹配用户名）
  * @return 分页用户列表
  */
