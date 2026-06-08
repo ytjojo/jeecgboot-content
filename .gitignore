@@ -27,4 +27,4 @@ derby.log
 
 graphify-out/
 graphify-out-vue3
-
+node_modules/
