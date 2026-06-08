@@ -14,6 +14,7 @@
 
 ## 本模块文档路由
 - 模块说明：`README.md`
-- 字段同步说明：`README_EntityFieldSync.md`
+- 模块架构概览：`../../../docs/agent-context/content-module-architecture.md`
+- JeecgBoot 框架规范：`../../../docs/agent-context/springboot-jeecgboot-conventions.md`
 - 设计与规范文档：`docs/`
 - 

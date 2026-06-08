@@ -74,7 +74,7 @@ Dependency direction: Controller → BizManageService → Service → Mapper. No
 - API paths: `/api/v1/{resources}` with actions `list`, `detail`, `save`, `update`, `delete`
 - All writes use POST (save/update). Deletes use DELETE with comma-separated IDs
 - Use `@Valid`/`@Validated` on controller params with descriptive `message` on constraint annotations
-- Pagination params: `current` (1-based), `size` (default 10, max 100)
+- Pagination params: `pageNo` (1-based), `pageSize` (default 10, max 100)
 - Don't return entity objects directly — use VOs
 - Don't modify system-level base modules unless explicitly required
 
@@ -82,4 +82,5 @@ Dependency direction: Controller → BizManageService → Service → Mapper. No
 - 内容社区模块：查看 `jeecg-boot-module/jeecg-module-content/AGENTS.md`
 - 其他后端背景资料：查看 `../docs/agent-context/api-guidelines.md` 和 `../docs/agent-context/architecture.md`
 - 后端编码规范：`../docs/agent-context/springboot-coding-conventions.md`
+- JeecgBoot 框架特有规范：`../docs/agent-context/springboot-jeecgboot-conventions.md`
 - 后端数据库设计：`../docs/agent-context/springboot-db-design.md`

@@ -3,12 +3,16 @@
 ## 后端总体目录
 ```text
 jeecg-boot/
-├── db/
-├── jeecg-boot-base-core/
-├── jeecg-module-system/
+├── jeecg-boot-base-core/          # 框架基础：JeecgEntity、JeecgController、Result、QueryGenerator
+├── jeecg-module-system/           # 系统模块：用户、角色、权限、字典
 ├── jeecg-boot-module/
-└── jeecg-server-cloud/
+│   ├── jeecg-module-demo/         # 示例模块
+│   ├── jeecg-boot-module-airag/   # AI RAG 模块
+│   └── jeecg-module-content/      # 内容社区模块
+└── jeecg-server-cloud/            # 微服务基础设施
 ```
+
+> 框架特有规范见 `springboot-jeecgboot-conventions.md`，内容社区架构见 `content-module-architecture.md`。
 
 ## 前端总体目录
 ```text
