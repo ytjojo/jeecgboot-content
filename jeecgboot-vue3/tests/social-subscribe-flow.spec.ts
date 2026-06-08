@@ -1,5 +1,8 @@
 import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
+import SquareView from '/@/views/social/subscribe/square.vue';
+import NotificationView from '/@/views/social/subscribe/notification.vue';
+import ManageView from '/@/views/social/subscribe/manage.vue';
 
 // --- Mutable state for subscribe store ---
 let subscribeListState: any[] = [];
@@ -117,16 +120,6 @@ function makeSubscribeItem(overrides: Record<string, any> = {}) {
 }
 
 describe('social subscribe flow (E2E-style)', () => {
-  let Square: any;
-  let Notification: any;
-  let Manage: any;
-
-  beforeAll(async () => {
-    Square = (await import('/@/views/social/subscribe/square.vue')).default;
-    Notification = (await import('/@/views/social/subscribe/notification.vue')).default;
-    Manage = (await import('/@/views/social/subscribe/manage.vue')).default;
-  });
-
   beforeEach(() => {
     vi.clearAllMocks();
     mockFetchSubscribeList.mockResolvedValue(undefined);
@@ -144,15 +137,15 @@ describe('social subscribe flow (E2E-style)', () => {
   });
 
   function mountSquare() {
-    return mount(Square, { global: { stubs } });
+    return mount(SquareView, { global: { stubs } });
   }
 
   function mountNotification() {
-    return mount(Notification, { global: { stubs } });
+    return mount(NotificationView, { global: { stubs } });
   }
 
   function mountManage() {
-    return mount(Manage, { global: { stubs } });
+    return mount(ManageView, { global: { stubs } });
   }
 
   // --- Square page tests ---

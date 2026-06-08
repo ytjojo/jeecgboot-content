@@ -1,5 +1,7 @@
 import { vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
+import FollowPageView from '/@/views/social/follow/index.vue';
+import FeedPageView from '/@/views/social/feed/index.vue';
 
 // --- Mutable state ---
 let followListState: any[] = [];
@@ -122,14 +124,6 @@ function makeFeedItem(overrides: Record<string, any> = {}) {
 }
 
 describe('social follow flow (E2E-style)', () => {
-  let FollowPage: any;
-  let FeedPage: any;
-
-  beforeAll(async () => {
-    FollowPage = (await import('/@/views/social/follow/index.vue')).default;
-    FeedPage = (await import('/@/views/social/feed/index.vue')).default;
-  });
-
   beforeEach(() => {
     vi.clearAllMocks();
     mockFetchFollowList.mockResolvedValue(undefined);
@@ -149,11 +143,11 @@ describe('social follow flow (E2E-style)', () => {
   });
 
   function mountFollowPage() {
-    return mount(FollowPage, { global: { stubs } });
+    return mount(FollowPageView, { global: { stubs } });
   }
 
   function mountFeedPage() {
-    return mount(FeedPage, { global: { stubs } });
+    return mount(FeedPageView, { global: { stubs } });
   }
 
   // --- Follow page tests ---
