@@ -20,6 +20,7 @@
           </template>
           <template v-if="column.key === 'status'">
             <ChannelStatusTag :status="record.status" />
+            <a-tag v-if="record.isTimeout" color="error" size="small" style="margin-left: 4px">超时</a-tag>
           </template>
           <template v-if="column.key === 'action'">
             <a-space>
