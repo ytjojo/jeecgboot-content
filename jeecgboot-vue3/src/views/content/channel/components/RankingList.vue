@@ -21,7 +21,7 @@
           class="ranking-list__item"
         >
           <div class="ranking-list__rank">
-            <span :class="getRankClass(item.rank)">{{ item.rank }}</span>
+            <span :class="rankClass(item.rank)">{{ item.rank }}</span>
           </div>
           <div class="ranking-list__icon">
             <img :src="item.iconUrl" :alt="item.name" loading="lazy" />
@@ -52,6 +52,8 @@
 
 <script lang="ts" setup>
 import type { ChannelRankingItemVO } from '/@/api/content/model/channelDiscoveryModel';
+import { formatCount } from '../utils/formatCount';
+import { getRankClass } from '../utils/getRankClass';
 
 interface Props {
   data: ChannelRankingItemVO[];
@@ -74,18 +76,8 @@ const emit = defineEmits<{
   (e: 'methodology'): void;
 }>();
 
-function getRankClass(rank: number): string {
-  if (rank === 1) return 'ranking-list__rank--gold';
-  if (rank === 2) return 'ranking-list__rank--silver';
-  if (rank === 3) return 'ranking-list__rank--bronze';
-  if (rank <= 10) return 'ranking-list__rank--prominent';
-  return 'ranking-list__rank--normal';
-}
-
-function formatCount(count: number): string {
-  if (count >= 10000) return (count / 10000).toFixed(1) + '万';
-  if (count >= 1000) return (count / 1000).toFixed(1) + 'k';
-  return String(count);
+function rankClass(rank: number): string {
+  return getRankClass(rank, 'ranking-list__rank');
 }
 
 function handleDimensionChange(e: any) {

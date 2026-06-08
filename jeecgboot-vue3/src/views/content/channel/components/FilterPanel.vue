@@ -49,6 +49,8 @@
 import { ref, computed } from 'vue';
 import { FilterOutlined } from '@ant-design/icons-vue';
 import type { CategoryTreeVO } from '/@/api/content/model/channelDiscoveryModel';
+import { transformCategoryTree } from '../utils/transformCategoryTree';
+import { useIsMobile } from '../utils/useIsMobile';
 
 interface FilterConfig {
   channelType?: boolean;
@@ -100,31 +102,9 @@ const channelTypeOptions = [
   { label: '官方', value: 'system' },
 ];
 
-const isMobile = ref(false);
+const { isMobile } = useIsMobile();
 
-// 检测是否为移动端
-if (typeof window !== 'undefined') {
-  isMobile.value = window.innerWidth < 768;
-  window.addEventListener('resize', () => {
-    isMobile.value = window.innerWidth < 768;
-  });
-}
-
-// 将分类树转为 a-tree-select 需要的格式
-const categoryTreeData = computed(() => {
-  return transformToTreeData(props.categories);
-});
-
-function transformToTreeData(nodes: CategoryTreeVO[]): any[] {
-  return nodes
-    .filter((n) => n.status === 'enabled')
-    .map((node) => ({
-      id: node.id,
-      name: node.name,
-      value: node.id,
-      children: node.children?.length ? transformToTreeData(node.children) : undefined,
-    }));
-}
+const categoryTreeData = computed(() => transformCategoryTree(props.categories));
 
 const activeFilterCount = computed(() => {
   let count = 0;

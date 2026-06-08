@@ -35,7 +35,7 @@
         <!-- 第三行：订阅数 + 推荐理由/匹配原因 -->
         <div class="channel-card__footer">
           <span class="channel-card__subscribers">
-            {{ formatSubscriberCount(channel.subscriberCount) }} 订阅
+            {{ formatCount(channel.subscriberCount) }} 订阅
           </span>
           <span v-if="mode === 'recommend' && showReason && channel.recommendReason" class="channel-card__reason">
             {{ channel.recommendReason }}
@@ -59,6 +59,8 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import type { ChannelInfo, ChannelRecommendationVO, ChannelSearchResultVO, ChannelRankingItemVO } from '/@/api/content/model/channelDiscoveryModel';
+import { formatCount } from '../utils/formatCount';
+import { getRankClass } from '../utils/getRankClass';
 
 type CardMode = 'recommend' | 'search' | 'browse' | 'ranking';
 
@@ -108,26 +110,7 @@ const channelTypeColor = computed(() => {
   return colors[type] || 'default';
 });
 
-// 排名样式
-const rankClass = computed(() => {
-  const r = props.rank;
-  if (r === 1) return 'channel-card__rank--gold';
-  if (r === 2) return 'channel-card__rank--silver';
-  if (r === 3) return 'channel-card__rank--bronze';
-  if (r <= 10) return 'channel-card__rank--prominent';
-  return 'channel-card__rank--normal';
-});
-
-// 格式化订阅数
-function formatSubscriberCount(count: number): string {
-  if (count >= 10000) {
-    return (count / 10000).toFixed(1) + '万';
-  }
-  if (count >= 1000) {
-    return (count / 1000).toFixed(1) + 'k';
-  }
-  return String(count);
-}
+const rankClass = computed(() => getRankClass(props.rank, 'channel-card__rank'));
 
 function handleNotInterested() {
   emit('not-interested', props.channel.id);

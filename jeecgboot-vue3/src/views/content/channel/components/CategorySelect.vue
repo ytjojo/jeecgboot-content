@@ -48,6 +48,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useChannelCategoryStore } from '/@/store/modules/channelCategory';
 import type { CategoryTreeVO } from '/@/api/content/model/channelDiscoveryModel';
+import { transformCategoryTree } from '../utils/transformCategoryTree';
 
 interface Props {
   primaryCategoryId?: string;
@@ -83,9 +84,8 @@ const specialCategories = [
 ];
 
 const treeSelectData = computed(() => {
-  const tree = transformToTreeData(categoryStore.categoryTree.filter((n) => n.level <= 4));
+  const tree = transformCategoryTree(categoryStore.categoryTree.filter((n) => n.level <= 4));
   if (props.channelType === 'system') {
-    // 系统频道追加特殊分类
     tree.push(...specialCategories.map((c) => ({
       id: c.id,
       name: c.name,
@@ -95,17 +95,6 @@ const treeSelectData = computed(() => {
   }
   return tree;
 });
-
-function transformToTreeData(nodes: CategoryTreeVO[]): any[] {
-  return nodes
-    .filter((n) => n.status === 'enabled')
-    .map((n) => ({
-      id: n.id,
-      name: n.name,
-      value: n.id,
-      children: n.children?.length ? transformToTreeData(n.children) : undefined,
-    }));
-}
 
 // 副分类可选列表（平铺，排除主分类）
 const secondaryOptions = computed(() => {

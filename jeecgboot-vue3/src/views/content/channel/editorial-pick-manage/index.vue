@@ -130,6 +130,7 @@ import {
 } from '/@/api/content/channelDiscovery';
 import { searchChannels } from '/@/api/content/channelDiscovery';
 import type { ChannelEditorialPickVO, EditorialPickFormData, ChannelInfo } from '/@/api/content/model/channelDiscoveryModel';
+import { useIsMobile } from '../utils/useIsMobile';
 import dayjs from 'dayjs';
 
 const pickList = ref<ChannelEditorialPickVO[]>([]);
@@ -148,10 +149,7 @@ const dateRange = ref<any[]>([]);
 const searchedChannels = ref<ChannelInfo[]>([]);
 const pagination = reactive({ current: 1, pageSize: 10, total: 0 });
 
-const isMobile = ref(false);
-if (typeof window !== 'undefined') {
-  isMobile.value = window.innerWidth < 768;
-}
+const { isMobile } = useIsMobile();
 
 const columns = [
   { title: '频道', key: 'channel' },

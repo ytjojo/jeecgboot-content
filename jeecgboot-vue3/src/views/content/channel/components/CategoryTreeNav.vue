@@ -30,6 +30,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import type { CategoryTreeVO } from '/@/api/content/model/channelDiscoveryModel';
+import { transformCategoryTree } from '../utils/transformCategoryTree';
 
 type TreeMode = 'browse' | 'select' | 'manage';
 
@@ -53,18 +54,7 @@ const emit = defineEmits<{
 const expandedKeys = ref<string[]>([]);
 const selectedKeys = computed(() => (props.selectedKey ? [props.selectedKey] : []));
 
-// 将 CategoryTreeVO[] 转为 a-tree 的 tree-data 格式
-const treeData = computed(() => {
-  return transformTree(props.categories);
-});
-
-function transformTree(nodes: CategoryTreeVO[]): any[] {
-  return nodes.map((node) => ({
-    ...node,
-    key: node.id,
-    children: node.children?.length ? transformTree(node.children) : undefined,
-  }));
-}
+const treeData = computed(() => transformCategoryTree(props.categories, { enabledOnly: false }));
 
 const currentMaxLevel = computed(() => {
   return getMaxLevel(props.categories, 1);

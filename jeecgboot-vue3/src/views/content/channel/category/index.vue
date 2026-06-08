@@ -83,6 +83,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useChannelCategoryStore } from '/@/store/modules/channelCategory';
 import { getBrowseChannelList } from '/@/api/content/channelDiscovery';
 import type { ChannelInfo, CategoryTreeVO } from '/@/api/content/model/channelDiscoveryModel';
+import { useIsMobile } from '../utils/useIsMobile';
 import CategoryTreeNav from '../components/CategoryTreeNav.vue';
 import ChannelCard from '../components/ChannelCard.vue';
 import FilterPanel from '../components/FilterPanel.vue';
@@ -102,10 +103,7 @@ const filterValues = ref({
 });
 const loadMoreRef = ref<HTMLElement | null>(null);
 
-const isMobile = ref(false);
-if (typeof window !== 'undefined') {
-  isMobile.value = window.innerWidth < 768;
-}
+const { isMobile } = useIsMobile();
 
 const pageSize = 20;
 const hasMore = computed(() => channels.value.length < total.value);

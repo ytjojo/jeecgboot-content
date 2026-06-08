@@ -72,6 +72,7 @@ import { ref, onMounted } from 'vue';
 import { message } from 'ant-design-vue';
 import { getTagList, createTag, updateTag, deleteTag } from '/@/api/content/channelDiscovery';
 import type { ChannelTagVO } from '/@/api/content/model/channelDiscoveryModel';
+import { useIsMobile } from '../utils/useIsMobile';
 
 interface Props {
   channelId: string;
@@ -86,10 +87,7 @@ const addError = ref('');
 const editingTagId = ref<string | null>(null);
 const editingName = ref('');
 
-const isMobile = ref(false);
-if (typeof window !== 'undefined') {
-  isMobile.value = window.innerWidth < 576;
-}
+const { isMobile } = useIsMobile('sm');
 
 onMounted(() => {
   fetchTags();

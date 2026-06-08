@@ -86,6 +86,7 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons-vue';
 import type { CategoryTreeVO } from '/@/api/content/model/channelDiscoveryModel';
+import { transformCategoryTree, findNodeById } from '../utils/transformCategoryTree';
 
 interface Props {
   categories: CategoryTreeVO[];
@@ -111,18 +112,10 @@ const expandedKeys = ref<string[]>([]);
 
 const filteredTreeData = computed(() => {
   if (!searchKeyword.value.trim()) {
-    return transformTree(props.categories);
+    return transformCategoryTree(props.categories, { enabledOnly: false });
   }
   return filterTree(props.categories, searchKeyword.value.trim().toLowerCase());
 });
-
-function transformTree(nodes: CategoryTreeVO[]): any[] {
-  return nodes.map((node) => ({
-    ...node,
-    key: node.id,
-    children: node.children?.length ? transformTree(node.children) : undefined,
-  }));
-}
 
 function filterTree(nodes: CategoryTreeVO[], keyword: string): any[] {
   const result: any[] = [];
@@ -133,7 +126,7 @@ function filterTree(nodes: CategoryTreeVO[], keyword: string): any[] {
       result.push({
         ...node,
         key: node.id,
-        children: filteredChildren.length > 0 ? filteredChildren : node.children?.length ? transformTree(node.children) : undefined,
+        children: filteredChildren.length > 0 ? filteredChildren : node.children?.length ? transformCategoryTree(node.children, { enabledOnly: false }) : undefined,
       });
     }
   }
@@ -182,7 +175,6 @@ function handleDrop(info: any) {
   const dragNode = info.dragNode?.dataRef as CategoryTreeVO;
   const dropNode = info.node?.dataRef as CategoryTreeVO;
   if (dragNode && dropNode) {
-    // 仅允许同级拖拽
     if (dragNode.parentId === dropNode.parentId) {
       emit('drop', {
         dragNode,
@@ -191,17 +183,6 @@ function handleDrop(info: any) {
       });
     }
   }
-}
-
-function findNodeById(nodes: CategoryTreeVO[], id: string): CategoryTreeVO | null {
-  for (const node of nodes) {
-    if (node.id === id) return node;
-    if (node.children?.length) {
-      const found = findNodeById(node.children, id);
-      if (found) return found;
-    }
-  }
-  return null;
 }
 </script>
 
