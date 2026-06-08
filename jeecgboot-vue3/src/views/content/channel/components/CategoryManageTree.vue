@@ -133,9 +133,18 @@ function filterTree(nodes: CategoryTreeVO[], keyword: string): any[] {
   return result;
 }
 
+/** HTML 转义，防 XSS */
+function escapeHtml(str: string): string {
+  const div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
 function highlightName(name: string): string {
-  return name.replace(
-    new RegExp(`(${searchKeyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+  const escaped = escapeHtml(name);
+  const escapedKeyword = escapeHtml(searchKeyword.value);
+  return escaped.replace(
+    new RegExp(`(${escapedKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
     '<mark>$1</mark>',
   );
 }

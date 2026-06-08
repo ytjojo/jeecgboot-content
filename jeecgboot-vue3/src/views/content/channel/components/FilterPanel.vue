@@ -114,11 +114,6 @@ const activeFilterCount = computed(() => {
   return count;
 });
 
-function emitChange() {
-  emit('change', { ...props.values });
-  emit('update:values', { ...props.values });
-}
-
 function handleChannelTypeChange(checkedValues: string[]) {
   const newValues = { ...props.values, channelType: checkedValues };
   emit('change', newValues);

@@ -127,8 +127,8 @@ import {
   createEditorialPick,
   updateEditorialPick,
   removeEditorialPick,
+  searchChannels,
 } from '/@/api/content/channelDiscovery';
-import { searchChannels } from '/@/api/content/channelDiscovery';
 import type { ChannelEditorialPickVO, EditorialPickFormData, ChannelInfo } from '/@/api/content/model/channelDiscoveryModel';
 import { useIsMobile } from '../utils/useIsMobile';
 import dayjs from 'dayjs';

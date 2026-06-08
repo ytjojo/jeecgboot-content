@@ -1,5 +1,5 @@
 <template>
-  <div class="channel-card" :class="[`channel-card--${mode}`]">
+  <div class="channel-card" :class="[`channel-card--${mode}`]" @click="handleClick">
     <!-- 排名序号（ranking 模式） -->
     <div v-if="mode === 'ranking' && showRank" class="channel-card__rank">
       <span :class="rankClass">{{ rank }}</span>
@@ -16,7 +16,7 @@
         <!-- 第一行：名称 + 类型标签 -->
         <div class="channel-card__header">
           <span class="channel-card__name">
-            <span v-if="mode === 'search' && highlightName" v-html="highlightName" />
+            <span v-if="mode === 'search' && highlightName" v-html="safeHighlightName" />
             <span v-else>{{ channel.name }}</span>
           </span>
           <a-tag v-if="channelTypeLabel" :color="channelTypeColor" size="small">
@@ -111,6 +111,12 @@ const channelTypeColor = computed(() => {
 });
 
 const rankClass = computed(() => getRankClass(props.rank, 'channel-card__rank'));
+
+// 安全高亮：仅保留 <mark> 标签，移除其他 HTML 防 XSS
+const safeHighlightName = computed(() => {
+  if (!props.highlightName) return '';
+  return props.highlightName.replace(/<(?!\/?mark\b)[^>]*>/gi, '');
+});
 
 function handleNotInterested() {
   emit('not-interested', props.channel.id);
