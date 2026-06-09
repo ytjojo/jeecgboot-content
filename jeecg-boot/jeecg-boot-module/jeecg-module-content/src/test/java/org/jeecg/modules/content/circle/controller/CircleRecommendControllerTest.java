@@ -68,7 +68,7 @@ class CircleRecommendControllerTest {
         when(recommendService.getRecommendations(TEST_USER_ID, 10)).thenReturn(vo);
 
         // When & Then
-        mockMvc.perform(get("/api/circle/recommend")
+        mockMvc.perform(get("/api/v1/content/circle/recommend")
                         .param("limit", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -79,7 +79,7 @@ class CircleRecommendControllerTest {
     @DisplayName("recordClick - 记录推荐点击")
     void shouldRecordClick() throws Exception {
         // When & Then
-        mockMvc.perform(post("/api/circle/recommend/click")
+        mockMvc.perform(post("/api/v1/content/circle/recommend/click")
                         .param("sourceId", "source-1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));

@@ -64,12 +64,12 @@ class CircleSearchControllerWebMvcTest {
                 return p;
             }).when(circleService).page(any(), any());
 
-            mockMvc.perform(get("/content/circle/search")
+            mockMvc.perform(get("/api/v1/content/circle/search")
                             .param("keyword", "Java"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.result[0].id").value("c_001"))
-                    .andExpect(jsonPath("$.result[0].name").value("Java技术圈"));
+                    .andExpect(jsonPath("$.result.records[0].id").value("c_001"))
+                    .andExpect(jsonPath("$.result.records[0].name").value("Java技术圈"));
         }
 
         @Test
@@ -81,11 +81,11 @@ class CircleSearchControllerWebMvcTest {
                 return p;
             }).when(circleService).page(any(), any());
 
-            mockMvc.perform(get("/content/circle/search")
+            mockMvc.perform(get("/api/v1/content/circle/search")
                             .param("keyword", "不存在的关键词"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.result").isEmpty());
+                    .andExpect(jsonPath("$.result.records").isEmpty());
         }
     }
 }

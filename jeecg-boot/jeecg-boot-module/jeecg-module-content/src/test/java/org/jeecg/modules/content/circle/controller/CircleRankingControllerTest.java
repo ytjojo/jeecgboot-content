@@ -52,7 +52,7 @@ class CircleRankingControllerTest {
         when(rankingService.getHotRanking(20)).thenReturn(vo);
 
         // When & Then
-        mockMvc.perform(get("/api/circle/ranking/hot"))
+        mockMvc.perform(get("/api/v1/content/circle/ranking/hot"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result.type").value("HOT"))
@@ -70,7 +70,7 @@ class CircleRankingControllerTest {
         when(rankingService.getNewRanking(20)).thenReturn(vo);
 
         // When & Then
-        mockMvc.perform(get("/api/circle/ranking/new"))
+        mockMvc.perform(get("/api/v1/content/circle/ranking/new"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result.type").value("NEW"));

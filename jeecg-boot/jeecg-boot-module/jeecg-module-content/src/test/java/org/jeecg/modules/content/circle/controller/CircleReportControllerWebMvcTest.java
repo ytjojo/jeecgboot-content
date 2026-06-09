@@ -94,7 +94,7 @@ class CircleReportControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success and forwards fields to biz")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/circle-report/")
+            mockMvc.perform(post("/api/v1/content/circle/report/")
                             .header("X-Access-Token", validReporterToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
@@ -114,7 +114,7 @@ class CircleReportControllerWebMvcTest {
         @Test
         @DisplayName("blank contentId - returns 400")
         void blankContentId_returns400() throws Exception {
-            mockMvc.perform(post("/circle-report/")
+            mockMvc.perform(post("/api/v1/content/circle/report/")
                             .header("X-Access-Token", validReporterToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
@@ -131,7 +131,7 @@ class CircleReportControllerWebMvcTest {
             doThrow(new JeecgBootException("已存在举报记录"))
                     .when(circleReportBizService).submitReport(any(), eq(TEST_REPORTER_ID));
 
-            mockMvc.perform(post("/circle-report/")
+            mockMvc.perform(post("/api/v1/content/circle/report/")
                             .header("X-Access-Token", validReporterToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
@@ -164,7 +164,7 @@ class CircleReportControllerWebMvcTest {
             when(circleReportService.getReports("c_001", null))
                     .thenReturn(Arrays.asList(r1));
 
-            mockMvc.perform(get("/circle-report/list/c_001")
+            mockMvc.perform(get("/api/v1/content/circle/report/list/c_001")
                             .header("X-Access-Token", validOperatorToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
@@ -180,7 +180,7 @@ class CircleReportControllerWebMvcTest {
             when(circleReportService.getReports("c_001", "PENDING"))
                     .thenReturn(Collections.emptyList());
 
-            mockMvc.perform(get("/circle-report/list/c_001")
+            mockMvc.perform(get("/api/v1/content/circle/report/list/c_001")
                             .param("status", "PENDING")
                             .header("X-Access-Token", validOperatorToken))
                     .andExpect(status().isOk())
@@ -200,7 +200,7 @@ class CircleReportControllerWebMvcTest {
         @Test
         @DisplayName("valid path+param - calls biz.handleDeleteContent with operatorId")
         void validPathAndParam_callsBiz() throws Exception {
-            mockMvc.perform(post("/circle-report/r_001/delete-content")
+            mockMvc.perform(post("/api/v1/content/circle/report/r_001/delete-content")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validOperatorToken))
                     .andExpect(status().isOk())
@@ -216,7 +216,7 @@ class CircleReportControllerWebMvcTest {
             doThrow(new JeecgBootException("举报已处理"))
                     .when(circleReportBizService).handleDeleteContent("r_done", TEST_OPERATOR_ID, "c_001");
 
-            mockMvc.perform(post("/circle-report/r_done/delete-content")
+            mockMvc.perform(post("/api/v1/content/circle/report/r_done/delete-content")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validOperatorToken))
                     .andExpect(status().isOk())
@@ -234,7 +234,7 @@ class CircleReportControllerWebMvcTest {
         @Test
         @DisplayName("valid path+param - calls biz.handleIgnore with operatorId")
         void validPathAndParam_callsBiz() throws Exception {
-            mockMvc.perform(post("/circle-report/r_002/ignore")
+            mockMvc.perform(post("/api/v1/content/circle/report/r_002/ignore")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validOperatorToken))
                     .andExpect(status().isOk())
@@ -254,7 +254,7 @@ class CircleReportControllerWebMvcTest {
         @Test
         @DisplayName("valid path+param - calls biz.handleMute with operatorId")
         void validPathAndParam_callsBiz() throws Exception {
-            mockMvc.perform(post("/circle-report/r_003/mute")
+            mockMvc.perform(post("/api/v1/content/circle/report/r_003/mute")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validOperatorToken))
                     .andExpect(status().isOk())

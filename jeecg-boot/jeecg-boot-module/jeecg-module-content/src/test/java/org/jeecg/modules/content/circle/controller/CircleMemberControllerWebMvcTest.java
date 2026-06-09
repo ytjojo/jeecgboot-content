@@ -82,7 +82,7 @@ class CircleMemberControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/circle/member/change-role")
+            mockMvc.perform(post("/api/v1/content/circle/member/change-role")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","targetUserId":"u_002","targetRole":"MODERATOR"}
@@ -96,7 +96,7 @@ class CircleMemberControllerWebMvcTest {
         @Test
         @DisplayName("blank targetUserId - returns 400")
         void blankTargetUserId_returns400() throws Exception {
-            mockMvc.perform(post("/content/circle/member/change-role")
+            mockMvc.perform(post("/api/v1/content/circle/member/change-role")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","targetUserId":"","targetRole":"MODERATOR"}
@@ -112,7 +112,7 @@ class CircleMemberControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/circle/member/mute")
+            mockMvc.perform(post("/api/v1/content/circle/member/mute")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","targetUserId":"u_002","muteDuration":"24h","reason":"违规发言"}
@@ -129,7 +129,7 @@ class CircleMemberControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/content/circle/member/remove")
+            mockMvc.perform(post("/api/v1/content/circle/member/remove")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","targetUserId":"u_002","reason":"严重违规"}
@@ -144,7 +144,7 @@ class CircleMemberControllerWebMvcTest {
             doThrow(new JeecgBootException("目标用户不是圈子成员"))
                     .when(circleMemberBiz).removeMember(any(), eq("u_001"));
 
-            mockMvc.perform(post("/content/circle/member/remove")
+            mockMvc.perform(post("/api/v1/content/circle/member/remove")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","targetUserId":"u_999"}

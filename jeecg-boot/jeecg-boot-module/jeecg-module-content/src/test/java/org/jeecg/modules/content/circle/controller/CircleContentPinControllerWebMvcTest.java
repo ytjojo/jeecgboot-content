@@ -74,7 +74,7 @@ class CircleContentPinControllerWebMvcTest {
         @Test
         @DisplayName("valid path+param - returns success and forwards to biz")
         void validPathAndParam_returnsSuccess() throws Exception {
-            mockMvc.perform(put("/circle-content/ct_001/pin")
+            mockMvc.perform(put("/api/v1/content/circle/content/ct_001/pin")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validJwtToken))
                     .andExpect(status().isOk())
@@ -87,7 +87,7 @@ class CircleContentPinControllerWebMvcTest {
         @Test
         @DisplayName("missing circleId query - returns 400")
         void missingCircleId_returns400() throws Exception {
-            mockMvc.perform(put("/circle-content/ct_001/pin")
+            mockMvc.perform(put("/api/v1/content/circle/content/ct_001/pin")
                             .header("X-Access-Token", validJwtToken))
                     .andExpect(status().isBadRequest());
 
@@ -100,7 +100,7 @@ class CircleContentPinControllerWebMvcTest {
             doThrow(new JeecgBootException("仅圈主可置顶"))
                     .when(circleContentPinBizService).pin(eq("ct_001"), eq(TEST_OPERATOR_ID), eq("c_001"));
 
-            mockMvc.perform(put("/circle-content/ct_001/pin")
+            mockMvc.perform(put("/api/v1/content/circle/content/ct_001/pin")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validJwtToken))
                     .andExpect(status().isOk())
@@ -118,7 +118,7 @@ class CircleContentPinControllerWebMvcTest {
         @Test
         @DisplayName("valid path+param - returns success and forwards to biz")
         void validPathAndParam_returnsSuccess() throws Exception {
-            mockMvc.perform(put("/circle-content/ct_002/featured")
+            mockMvc.perform(put("/api/v1/content/circle/content/ct_002/featured")
                             .param("circleId", "c_002")
                             .header("X-Access-Token", validJwtToken))
                     .andExpect(status().isOk())
@@ -134,7 +134,7 @@ class CircleContentPinControllerWebMvcTest {
             doThrow(new JeecgBootException("仅管理员可标记精华"))
                     .when(circleContentPinBizService).feature(eq("ct_002"), eq(TEST_OPERATOR_ID), eq("c_002"));
 
-            mockMvc.perform(put("/circle-content/ct_002/featured")
+            mockMvc.perform(put("/api/v1/content/circle/content/ct_002/featured")
                             .param("circleId", "c_002")
                             .header("X-Access-Token", validJwtToken))
                     .andExpect(status().isOk())

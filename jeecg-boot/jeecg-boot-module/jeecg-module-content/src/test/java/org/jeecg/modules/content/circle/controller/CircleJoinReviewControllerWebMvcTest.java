@@ -104,7 +104,7 @@ class CircleJoinReviewControllerWebMvcTest {
             when(circleJoinReviewService.getPendingRequests("c_001"))
                     .thenReturn(Arrays.asList(req1, req2));
 
-            mockMvc.perform(get("/circle-join-review/pending/c_001")
+            mockMvc.perform(get("/api/v1/content/circle/join-review/pending/c_001")
                             .header("X-Access-Token", validJwtToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
@@ -121,7 +121,7 @@ class CircleJoinReviewControllerWebMvcTest {
             when(circleJoinReviewService.getPendingRequests("c_empty"))
                     .thenReturn(Collections.emptyList());
 
-            mockMvc.perform(get("/circle-join-review/pending/c_empty")
+            mockMvc.perform(get("/api/v1/content/circle/join-review/pending/c_empty")
                             .header("X-Access-Token", validJwtToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
@@ -139,7 +139,7 @@ class CircleJoinReviewControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success and forwards 3 args to biz")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/circle-join-review/approve")
+            mockMvc.perform(post("/api/v1/content/circle/join-review/approve")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validJwtToken)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -156,7 +156,7 @@ class CircleJoinReviewControllerWebMvcTest {
         @Test
         @DisplayName("blank requestId - returns 400")
         void blankRequestId_returns400() throws Exception {
-            mockMvc.perform(post("/circle-join-review/approve")
+            mockMvc.perform(post("/api/v1/content/circle/join-review/approve")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validJwtToken)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -172,7 +172,7 @@ class CircleJoinReviewControllerWebMvcTest {
             doThrow(new JeecgBootException("申请已被处理"))
                     .when(circleJoinReviewBizService).approve(anyString(), eq(TEST_OPERATOR_ID), eq("c_001"));
 
-            mockMvc.perform(post("/circle-join-review/approve")
+            mockMvc.perform(post("/api/v1/content/circle/join-review/approve")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validJwtToken)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -194,7 +194,7 @@ class CircleJoinReviewControllerWebMvcTest {
         @Test
         @DisplayName("valid request with reason - returns success and forwards 4 args including reason")
         void validRequestWithReason_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/circle-join-review/reject")
+            mockMvc.perform(post("/api/v1/content/circle/join-review/reject")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validJwtToken)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -211,7 +211,7 @@ class CircleJoinReviewControllerWebMvcTest {
         @Test
         @DisplayName("missing reason - still calls biz with null reason")
         void missingReason_callsBizWithNullReason() throws Exception {
-            mockMvc.perform(post("/circle-join-review/reject")
+            mockMvc.perform(post("/api/v1/content/circle/join-review/reject")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validJwtToken)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -230,7 +230,7 @@ class CircleJoinReviewControllerWebMvcTest {
             doThrow(new JeecgBootException("权限不足"))
                     .when(circleJoinReviewBizService).reject(any(), any(), any(), any());
 
-            mockMvc.perform(post("/circle-join-review/reject")
+            mockMvc.perform(post("/api/v1/content/circle/join-review/reject")
                             .param("circleId", "c_001")
                             .header("X-Access-Token", validJwtToken)
                             .contentType(MediaType.APPLICATION_JSON)

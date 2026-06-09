@@ -87,7 +87,7 @@ class CircleAnnouncementControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success and forwards fields to biz")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/circle-announcement/")
+            mockMvc.perform(post("/api/v1/content/circle/announcement/")
                             .header("X-Access-Token", validJwtToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
@@ -106,7 +106,7 @@ class CircleAnnouncementControllerWebMvcTest {
         @Test
         @DisplayName("blank content - returns 400")
         void blankContent_returns400() throws Exception {
-            mockMvc.perform(post("/circle-announcement/")
+            mockMvc.perform(post("/api/v1/content/circle/announcement/")
                             .header("X-Access-Token", validJwtToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
@@ -123,7 +123,7 @@ class CircleAnnouncementControllerWebMvcTest {
             doThrow(new JeecgBootException("该圈子无发布权限"))
                     .when(circleAnnouncementBizService).publish(any(), eq(TEST_OPERATOR_ID));
 
-            mockMvc.perform(post("/circle-announcement/")
+            mockMvc.perform(post("/api/v1/content/circle/announcement/")
                             .header("X-Access-Token", validJwtToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
@@ -152,7 +152,7 @@ class CircleAnnouncementControllerWebMvcTest {
             active.setExpireAt(new Date(1735689600000L));
             when(circleAnnouncementService.getActiveByCircleId("c_001")).thenReturn(active);
 
-            mockMvc.perform(get("/circle-announcement/active/c_001")
+            mockMvc.perform(get("/api/v1/content/circle/announcement/active/c_001")
                             .header("X-Access-Token", validJwtToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
@@ -166,7 +166,7 @@ class CircleAnnouncementControllerWebMvcTest {
         void activeNotFound_returnsOKWithNull() throws Exception {
             when(circleAnnouncementService.getActiveByCircleId("c_empty")).thenReturn(null);
 
-            mockMvc.perform(get("/circle-announcement/active/c_empty")
+            mockMvc.perform(get("/api/v1/content/circle/announcement/active/c_empty")
                             .header("X-Access-Token", validJwtToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))

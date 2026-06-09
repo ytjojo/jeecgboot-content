@@ -92,7 +92,7 @@ class CircleControllerWebMvcTest {
 
             when(circleBiz.createCircle(any(), eq("u_001"))).thenReturn(vo);
 
-            mockMvc.perform(post("/content/circle/create")
+            mockMvc.perform(post("/api/v1/content/circle/create")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"name":"测试圈子","description":"简介","privacyType":"PUBLIC","joinType":"DIRECT"}
@@ -105,7 +105,7 @@ class CircleControllerWebMvcTest {
         @Test
         @DisplayName("blank name - returns 400")
         void blankName_returns400() throws Exception {
-            mockMvc.perform(post("/content/circle/create")
+            mockMvc.perform(post("/api/v1/content/circle/create")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"name":"","description":"简介","privacyType":"PUBLIC","joinType":"DIRECT"}
@@ -119,7 +119,7 @@ class CircleControllerWebMvcTest {
             when(circleBiz.createCircle(any(), eq("u_001")))
                     .thenThrow(new JeecgBootException("该圈子名称已存在，请修改"));
 
-            mockMvc.perform(post("/content/circle/create")
+            mockMvc.perform(post("/api/v1/content/circle/create")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"name":"已存在","description":"简介","privacyType":"PUBLIC","joinType":"DIRECT"}
@@ -137,7 +137,7 @@ class CircleControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(put("/content/circle/update")
+            mockMvc.perform(put("/api/v1/content/circle/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"circleId":"c_001","description":"新简介"}

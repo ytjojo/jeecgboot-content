@@ -68,7 +68,7 @@ class CircleDataControllerTest {
                 .thenReturn(vo);
 
         // When & Then
-        mockMvc.perform(get("/api/circle/circle-1/data/statistics")
+        mockMvc.perform(get("/api/v1/content/circle/circle-1/data/statistics")
                         .param("startDate", LocalDate.now().minusDays(7).toString())
                         .param("endDate", LocalDate.now().toString()))
                 .andExpect(status().isOk())
