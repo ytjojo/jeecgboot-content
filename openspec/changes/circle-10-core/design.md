@@ -26,6 +26,8 @@
 **circle 表**:
 - id, name (唯一索引), description, icon_url, cover_url, category, privacy_type (PUBLIC/PRIVATE/PASSWORD), join_type (DIRECT/APPROVAL/INVITE/PASSWORD), password_hash, creator_id, member_count, max_member_count, status, create_time, update_time
 
+> **注意**: `privacy_type=PASSWORD` 表示圈子有密码保护（影响搜索可见性和加入方式），`join_type=PASSWORD` 表示通过密码加入。两者语义不同：privacy_type 控制可见性，join_type 控制加入行为。当 privacy_type=PASSWORD 时，join_type 固定为 PASSWORD。
+
 **circle_member 表**:
 - id, circle_id, user_id, role (CREATOR/MODERATOR/MEMBER), status (ACTIVE/MUTED/REMOVED), mute_end_time, create_time, update_time
 - 联合唯一索引: (circle_id, user_id)
@@ -72,6 +74,74 @@
 **选择**: 使用 BCrypt 加密存储密码，加入时验证
 
 **理由**: BCrypt 是业界标准，JeecgBoot 已有依赖。密码不可明文存储或展示。
+
+## Risks / Trade-offs
+
+---
+
+## API Endpoints
+
+### 认证要求
+
+所有写操作（创建/更新/加入/退出/成员管理）需要已登录用户认证，通过 `SecureUtil.currentUser().getId()` 获取当前用户ID。
+搜索和公开列表接口允许匿名访问。
+
+### 圈子 CRUD (`CircleController` — `/api/v1/content/circle`)
+
+| 方法 | 路径 | 认证 | 说明 |
+|------|------|------|------|
+| POST | /create | 需要 | 创建圈子 |
+| PUT | /update | 需要 | 更新圈子信息 |
+| GET | /{id} | 可选 | 圈子详情 (path param) |
+| GET | /detail | 可选 | 圈子详情 (query param，向后兼容) |
+| GET | /check-name | 可选 | 名称唯一性校验 |
+| GET | /my-list | 需要 | 我的圈子列表 (分页) |
+| GET | /public-list | 可选 | 公开圈子列表 (分页) |
+| POST | /join | 需要 | 加入圈子 |
+| POST | /leave | 需要 | 退出圈子 |
+
+### 成员管理 (`CircleMemberController` — `/api/v1/content/circle/member`)
+
+| 方法 | 路径 | 认证 | 说明 |
+|------|------|------|------|
+| GET | /list | 可选 | 成员列表 (分页，支持 role/status 筛选) |
+| POST | /change-role | 需要 | 变更成员角色 |
+| POST | /mute | 需要 | 禁言成员 |
+| POST | /unmute | 需要 | 解除禁言 |
+| POST | /remove | 需要 | 移除成员 |
+
+### 搜索 (`CircleSearchController` — `/api/v1/content/circle`)
+
+| 方法 | 路径 | 认证 | 说明 |
+|------|------|------|------|
+| GET | /search | 可选 | 关键词搜索公开圈子 (分页) |
+
+### 治理日志 (`CircleGovernanceLogController` — `/api/v1/content/circle/governance-log`)
+
+| 方法 | 路径 | 认证 | 说明 |
+|------|------|------|------|
+| GET | /list | 需要 | 治理日志分页查询 |
+
+### 错误处理
+
+使用 `JeecgBootException` + 中文消息字符串返回业务错误。关键错误消息：
+
+| 错误场景 | 消息 |
+|---------|------|
+| 圈子不存在 | "圈子不存在" |
+| 名称已存在 | "该圈子名称已存在，请修改" |
+| 已是成员 | "您已是圈子成员" |
+| 圈子满员 | "圈子已满员，无法加入" |
+| 密码错误 | "密码错误" |
+| 仅邀请加入 | "该圈子仅限邀请加入" |
+| 创建者不可退出 | "创建者不可退出圈子，请先转让或解散圈子" |
+| 权限不足（角色） | "权限不足，仅创建者可管理角色" |
+| 权限不足（版主） | "权限不足，仅创建者可管理版主" |
+| 目标非成员 | "目标用户不是圈子成员" |
+| 创建者角色不可变更 | "创建者角色不可变更" |
+| 被禁言 | "您已被禁言至 {endTime}" |
+
+> **注意**: MVP 阶段使用消息字符串匹配，后续迭代应引入错误码枚举（如 `CircleErrorCode`）。
 
 ## Risks / Trade-offs
 
@@ -182,6 +252,8 @@ jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/resources/db/migratio
 
 ## Open Questions
 
-- 搜索服务当前部署状态？是否已有 Elasticsearch 集群？
-- 敏感词检测服务是否已存在？还是需要新建？
-- 圈子分类标签是否需要预定义枚举，还是允许自由输入？
+> **2026-06-08 更新**: 以下问题已在实际开发中确认答案。
+
+1. **搜索服务当前部署状态？** → 已确认：MVP 阶段使用 MySQL LIKE 查询，暂不接入 Elasticsearch。满足 P95 < 500ms 要求。
+2. **敏感词检测服务是否已存在？** → 已确认：平台已有敏感词服务，创建圈子时调用。降级方案：服务不可用时使用本地词库匹配，命中则标记圈子为「待复核」状态。
+3. **圈子分类标签是否需要预定义枚举？** → 已确认：支持预定义枚举 + 自由输入。预定义枚举值（技术、生活、兴趣、学习等）由前端下拉提供，同时支持自定义输入。

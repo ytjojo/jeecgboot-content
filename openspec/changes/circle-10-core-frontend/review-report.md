@@ -369,13 +369,55 @@ circle-10-core-frontend 的规范文档整体质量良好，PRD AC 覆盖率达 
 2. **实现前修复**（FLAG-1~7）：补充密码规则、对齐成员上限、确认字段补充
 3. **实现中改进**（ADVISORY-1~6）：TDD 映射、错误码定义、分页契约统一
 
-### 后端协作清单
+### 后端协作清单 — ✅ 全部完成
 
-| 优先级 | 事项 | 后端 Owner |
-|--------|------|-----------|
-| P0 | 实现 4 个阻塞接口（detail/my-list/public-list/member-list） | 待分配 |
-| P0 | CircleVO 补充 applyStatus/isInvited 字段 | 待分配 |
-| P1 | 实现 2 个功能接口（check-name/governance-log） | 待分配 |
-| P1 | CircleSearchResultVO 补充 category 字段 | 待分配 |
-| P1 | 统一接口路径（join/leave/change-role） | 待分配 |
-| P2 | 确认成员上限默认值（500 vs 10,000） | 待分配 |
+| 优先级 | 事项 | 状态 |
+|--------|------|------|
+| P0 | 实现 4 个阻塞接口（detail/my-list/public-list/member-list） | ✅ 已实现 |
+| P0 | CircleVO 补充 applyStatus/isInvited 字段 | ✅ 已补充 |
+| P1 | 实现 2 个功能接口（check-name/governance-log） | ✅ 已实现 |
+| P1 | CircleSearchResultVO 补充 category 字段 | ✅ 已补充 |
+| P1 | 统一接口路径（join/leave/change-role） | ✅ 已对齐 |
+| P2 | 确认成员上限默认值 | ✅ maxMemberCount 后端驱动 |
+
+---
+
+## 7. 处理状态跟踪（2026-06-08 最终更新）
+
+后端已全面就绪：15 个 API 全部实现，CircleVO（含 applyStatus/isInvited）、CircleSearchResultVO（含 category）、CircleMemberVO 字段完整。
+
+### BLOCK 问题处理 — 全部已修复 ✅
+
+| # | 问题 | 状态 | 处理方式 |
+|---|------|------|---------|
+| BLOCK-1 | 圈子信息更新有 spec 无 task | ✅ 已修复 | tasks.md 已新增 6.12-6.15 |
+| BLOCK-2 | design.md/proposal.md 声称 14 个 API 但实际 8 个 | ✅ 已修复 | 文档已更新，15 个接口全部已实现 |
+| BLOCK-3 | 6 个后端接口缺失，specs 未标注 Mock | ✅ 已修复 | 15 个接口全部实现，specs [MOCK] 标记全部移除 |
+| BLOCK-4 | 前后端 3 个接口路径不一致 | ✅ 已修复 | D11 已按实际后端路径对齐 |
+
+### FLAG 问题处理 — 全部已修复 ✅
+
+| # | 问题 | 状态 | 处理方式 |
+|---|------|------|---------|
+| FLAG-1 | 密码校验规则不完整 | ✅ | specs 已补充 6-20 位长度和至少含字母 |
+| FLAG-2 | 成员上限展示未在 spec 明确 | ✅ | spec 已新增"成员数与上限展示" scenario |
+| FLAG-3 | 成员上限默认值不一致 | ✅ | `maxMemberCount` 由后端驱动，前端不做默认值假设 |
+| FLAG-4 | 退出接口命名不一致 | ✅ | 统一为 leaveCircle |
+| FLAG-5 | a11y 无对应 task | ✅ | tasks 已新增 section 13 |
+| FLAG-6 | applyStatus/isInvited 字段缺失 | ✅ | CircleVO 已补充 |
+| FLAG-7 | CircleSearchResultVO 缺 category | ✅ | CircleSearchResultVO 已补充 |
+
+### ADVISORY 问题处理 — 全部已处理 ✅
+
+| # | 问题 | 状态 |
+|---|------|------|
+| ADVISORY-1 | TDD 映射 | ✅ tasks 12.2/12.3 已引用 scenario 覆盖 |
+| ADVISORY-2 | Modal 测试缺失 | ✅ tasks 12.2 已包含 |
+| ADVISORY-3 | 详情路径风格 | ✅ 后端同时提供 Path 和 Query 两个版本 |
+| ADVISORY-4 | 分页参数未统一 | ✅ 全部统一为 pageNum/pageSize |
+| ADVISORY-5 | 错误码枚举 | ✅ backend-issues.md 已列出消息匹配表 |
+| ADVISORY-6 | 禁言提示条+倒计时 | ✅ specs 已覆盖 |
+
+### ✅ 全部遗留问题已解决
+
+参数风格已全面统一：写操作 Body、详情 Path、列表 Query+Page。无遗留适配注意点。

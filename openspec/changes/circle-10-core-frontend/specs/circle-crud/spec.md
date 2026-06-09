@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
-### Requirement: 圈子列表页展示 [MOCK]
-> **Mock 依赖**: `getMyCircleList`（my-list）、`getPublicCircleList`（public-list）接口后端未实现，相关场景需使用 Mock 数据开发。
+### Requirement: 圈子列表页展示
+> **后端接口**: `GET /api/v1/content/circle/my-list`（已加入）、`GET /api/v1/content/circle/public-list`（发现）均已实现，分页参数 `pageNum`/`pageSize`。
 
 系统 SHALL 提供圈子列表页（`/circle/list`），包含「已加入」和「发现」两个 Tab。已加入 Tab 展示当前用户已加入的圈子，按加入时间倒序排列。发现 Tab 展示公开圈子列表，按成员数倒序排列。每个圈子以卡片形式展示图标、名称、简介（2行截断）、成员数、分类、加入状态。
 
@@ -56,8 +56,8 @@
 - **WHEN** 用户点击步骤条的已完成步骤
 - **THEN** 回退到对应步骤，保留已填写内容
 
-### Requirement: 圈子名称唯一性校验 [MOCK]
-> **Mock 依赖**: `checkCircleName`（check-name）接口后端未实现，需使用 Mock 数据开发。
+### Requirement: 圈子名称唯一性校验
+> **后端接口**: `GET /api/v1/content/circle/check-name?name=xxx` 已实现，可直接对接。
 
 系统 SHALL 在圈子名称输入框失焦或输入停顿 500ms 后触发唯一性校验，校验中显示 Loading，结果以行内提示展示。
 
@@ -149,8 +149,8 @@
 - **WHEN** 图标超过 2MB 或封面图超过 5MB
 - **THEN** 展示错误提示 "图标大小不能超过2MB" 或 "封面图大小不能超过5MB"
 
-### Requirement: 圈子详情页 [MOCK]
-> **Mock 依赖**: `getCircleDetail`（detail）接口后端未实现，需使用 Mock 数据开发。
+### Requirement: 圈子详情页
+> **后端接口**: `GET /api/v1/content/circle/detail?id={id}` 已实现，可直接对接。注意：当前 CircleVO 缺少 `applyStatus`/`isInvited` 字段，加入按钮状态逻辑依赖这两个字段，需后端补充或前端降级。
 
 系统 SHALL 提供圈子详情页（`/circle/:id`），展示封面图、圈子图标、名称、简介（最多3行，超出展开/收起）、分类标签、成员数/上限、隐私类型标识。操作栏根据用户角色动态展示不同按钮。
 

@@ -57,3 +57,25 @@
 #### Scenario: 搜索服务异常
 - **WHEN** 搜索服务不可用或返回错误
 - **THEN** 系统展示"搜索暂时不可用"提示，并提供返回公开圈子浏览的入口
+
+---
+
+### Requirement: 分页查询边界处理
+
+系统 SHALL 对分页查询参数进行合理校验，防止异常请求导致不必要的数据库开销。
+
+#### Scenario: 正常分页
+- **WHEN** 用户传入 pageNum=2, pageSize=20
+- **THEN** 系统返回第 2 页的 20 条记录
+
+#### Scenario: 页码为 0 或负数
+- **WHEN** 用户传入 pageNum=0 或 pageNum=-1
+- **THEN** 系统默认使用 pageNum=1
+
+#### Scenario: 页面大小超限
+- **WHEN** 用户传入 pageSize=10000
+- **THEN** 系统将 pageSize 限制为最大值 100
+
+#### Scenario: 空结果集
+- **WHEN** 搜索关键词无匹配结果或页码超出范围
+- **THEN** 系统返回空列表并展示"无搜索结果"

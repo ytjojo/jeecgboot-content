@@ -3,8 +3,8 @@
 ### Requirement: useCircleStore 状态管理
 系统 SHALL 提供 `useCircleStore`（Pinia）管理圈子模块的共享状态，包括当前圈子详情（currentCircle）、用户角色（currentRole）、成员状态（currentMemberStatus）、搜索关键词（searchKeyword）。
 
-#### Scenario: 进入详情页加载状态 [MOCK]
-> **Mock 依赖**: 依赖 `getCircleDetail`（detail）接口，后端未实现。
+#### Scenario: 进入详情页加载状态
+> **后端接口**: `GET /api/v1/content/circle/detail?id={id}` 已实现。当前 CircleVO 提供 `joined` 和 `myRole` 字段，可用于 `currentMemberStatus` 和 `currentRole` 状态填充。`applyStatus` 和 `isInvited` 字段待后端补充。
 
 - **WHEN** 用户进入圈子详情页
 - **THEN** 请求详情接口，将 `currentCircle`、`currentRole`、`currentMemberStatus` 写入 Store

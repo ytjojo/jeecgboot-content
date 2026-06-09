@@ -48,3 +48,39 @@
 - [x] 6.3 验证圈子创建完整流程（创建 → 设置隐私 → 设置加入方式）
 - [x] 6.4 验证成员管理完整流程（加入 → 角色变更 → 禁言 → 解禁 → 移除）
 - [x] 6.5 验证搜索功能（关键词搜索 → 结果展示 → 降级处理）
+
+## 7. 审核后补充 (2026-06-08 review follow-up)
+
+> 来源: `/opsx:review` → `review-report.md`
+> 目的: 修复规范审核发现的 FLAG 问题，补齐边界校验和测试缺口
+
+### 7.1 输入校验加固
+
+- [x] 7.1.1 CircleCreateReq 添加隐私类型/加入方式的枚举校验（`@Pattern` 或自定义 validator），非法值返回 400 而非 500
+- [x] 7.1.2 CircleSearchReq 添加 `@Min(1) pageNum` 和 `@Min(1) @Max(100) pageSize` 分页参数校验
+- [x] 7.1.3 CircleMemberController `/list` 的 pageNum/pageSize 添加 `@Min/@Max` 校验
+
+### 7.2 测试缺口补充
+
+- [x] 7.2.1 CircleGovernanceLog Entity 单元测试 — 验证 Action 枚举 (MUTE/UNMUTE/REMOVE/ROLE_CHANGE)
+- [ ] 7.2.2 CircleBizTest 补充敏感词检测失败场景测试 — **延期**: 敏感词服务未在 MVP 实现中集成，待 EPIC-11 补充
+- [x] 7.2.3 修复既存 WebMvcTest 路径问题 — 测试路径从 `/content/circle/...` 改为 `/api/v1/content/circle/...`
+- [ ] 7.2.4 CircleControllerWebMvcTest 补充 my-list/public-list/{id} 端点测试 — **延期**: 需重构测试以 mock ICircleService/ICircleMemberService
+
+### 7.3 错误处理与降级
+
+- [x] 7.3.1 CircleSearchController 搜索异常时返回明确错误消息"搜索暂时不可用"而非静默空列表
+- [x] 7.3.2 CircleController/GlobalExceptionHandler 数据库超时/连接异常时返回友好错误提示 — 已由 JeecgBootExceptionHandler 全局覆盖
+
+### 7.4 配置与数据模型对齐
+
+- [x] 7.4.1 maxMemberCount 默认值配置化 — 从 `application.yml` 读取 `circle.max-member-count`，默认值对齐前端 PRD（500 人）
+- [x] 7.4.2 前后端分页参数命名对齐 — 确认前端使用 `pageNum`/`pageSize`，member list 已改为 `pageNum`/`pageSize`
+
+### 7.5 规范文档同步
+
+- [x] 7.5.1 design.md 新增 API Endpoints 章节（15 个端点 + 认证矩阵 + 错误消息表）
+- [x] 7.5.2 design.md 关闭 3 个 Open Questions
+- [x] 7.5.3 circle-creation/spec.md 补充非法枚举值 + 敏感词降级边界场景
+- [x] 7.5.4 circle-member-management/spec.md 补充成员计数一致性 Requirement
+- [x] 7.5.5 circle-search/spec.md 补充分页边界处理 Requirement

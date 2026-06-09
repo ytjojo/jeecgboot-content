@@ -125,3 +125,17 @@
 #### Scenario: 查询治理日志
 - **WHEN** 创建者查询某成员的治理记录
 - **THEN** 系统返回该成员的所有治理操作历史
+
+---
+
+### Requirement: 成员计数一致性保障
+
+系统 SHALL 确保圈子成员计数（member_count）与实际成员数一致。
+
+#### Scenario: 成员计数更新
+- **WHEN** 成员加入或退出圈子
+- **THEN** 系统原子更新 member_count 字段（increment/decrement），使用数据库原子操作避免并发问题
+
+#### Scenario: 成员计数一致性校验
+- **WHEN** member_count 与 circle_member 表实际活跃成员数不一致（异常场景）
+- **THEN** MVP 阶段通过 member_count 原子操作保障一致性；后续迭代可引入定时校验任务自动修复

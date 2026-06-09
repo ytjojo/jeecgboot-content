@@ -75,8 +75,8 @@
 - **WHEN** 用户点击「退出」按钮
 - **THEN** 弹出确认 Modal "确定要退出该圈子吗？退出后需重新申请加入"
 
-### Requirement: 成员列表 [MOCK]
-> **Mock 依赖**: `getMemberList`（member-list）接口后端未实现，需使用 Mock 数据开发。
+### Requirement: 成员列表
+> **后端接口**: `GET /api/v1/content/circle/member/list?circleId=xxx&role=&status=&pageNum=1&pageSize=50` 已实现，可直接对接。分页参数统一使用 `pageNum`/`pageSize`，支持 `role`/`status` 可选筛选。
 
 系统 SHALL 提供成员列表页（`/circle/:id/members`），以 Table 形式展示成员信息（头像、昵称、角色、状态、加入时间），支持按角色/状态筛选和成员搜索。
 

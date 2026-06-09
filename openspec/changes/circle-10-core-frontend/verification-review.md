@@ -1,6 +1,6 @@
 # 验证审核文档 — circle-10-core-frontend
 
-**验证日期**: 2026-06-04
+**验证日期**: 2026-06-08（最终验证）
 **验证范围**: design.md、proposal.md、specs/*.md 与后端代码库一致性
 
 ---
@@ -9,161 +9,86 @@
 
 | 维度 | 状态 | 说明 |
 |------|------|------|
-| 后端 API 存在性 | **不通过** | 14 个接口中仅 8 个存在，6 个缺失 |
-| 前后端字段一致性 | **不通过** | CircleVO 缺少前端依赖的 5 个字段 |
-| 接口命名一致性 | **不通过** | 退出接口命名不一致（quit vs leave） |
-| 文档完整性 | **通过** | design.md、proposal.md、specs 结构完整 |
-| 搜索结果字段 | **不通过** | CircleSearchResultVO 缺少 category 字段 |
+| 后端 API 存在性 | **✅ 通过** | 15 个接口全部已实现 |
+| 前后端字段一致性 | **✅ 通过** | CircleVO/CircleSearchResultVO/CircleMemberVO 字段完整 |
+| 接口命名一致性 | **✅ 通过** | 前端封装名称已与后端路径对齐 |
+| 参数风格一致性 | **✅ 通过** | 写操作统一 Body、读操作统一 Query/Path、列表统一返回 Page |
+| 文档完整性 | **✅ 通过** | design.md D11/D12 已更新为最终后端状态 |
 
 ---
 
 ## 2. 后端 API 验证详情
 
-### 2.1 已存在的 API（8 个）
+### 2.1 全部 15 个 API 已实现 ✅
 
-| 设计文档名称 | 实际路径 | 方法 | 控制器 |
-|-------------|---------|------|--------|
-| createCircle | `/api/v1/content/circle/create` | POST | CircleController |
-| updateCircle | `/api/v1/content/circle/update` | PUT | CircleController |
-| joinCircle | `/api/v1/content/circle/join` | POST | CircleController |
-| quitCircle | `/api/v1/content/circle/leave` | POST | CircleController |
-| setModerator | `/api/v1/content/circle/member/change-role` | POST | CircleMemberController |
-| muteMember | `/api/v1/content/circle/member/mute` | POST | CircleMemberController |
-| unmuteMember | `/api/v1/content/circle/member/unmute` | POST | CircleMemberController |
-| removeMember | `/api/v1/content/circle/member/remove` | POST | CircleMemberController |
+| 功能 | 实际路径 | 方法 | 控制器 | 备注 |
+|------|---------|------|--------|------|
+| 创建圈子 | `/api/v1/content/circle/create` | POST | CircleController | Body: CircleCreateReq |
+| 更新圈子 | `/api/v1/content/circle/update` | PUT | CircleController | Body: CircleUpdateReq |
+| 圈子详情 | `/api/v1/content/circle/{id}` | GET | CircleController | Path 参数 |
+| 加入圈子 | `/api/v1/content/circle/join` | POST | CircleController | Body: CircleJoinReq |
+| 退出圈子 | `/api/v1/content/circle/leave` | POST | CircleController | Body: CircleLeaveReq |
+| 名称校验 | `/api/v1/content/circle/check-name?name=xxx` | GET | CircleController | |
+| 我的列表 | `/api/v1/content/circle/my-list` | GET | CircleController | pageNum/pageSize |
+| 公开列表 | `/api/v1/content/circle/public-list` | GET | CircleController | pageNum/pageSize |
+| 成员列表 | `/api/v1/content/circle/member/list` | GET | CircleMemberController | pageNum/pageSize, 支持 role/status 筛选 |
+| 变更角色 | `/api/v1/content/circle/member/change-role` | POST | CircleMemberController | Body: CircleMemberUpdateReq |
+| 禁言 | `/api/v1/content/circle/member/mute` | POST | CircleMemberController | Body: CircleMemberUpdateReq |
+| 解除禁言 | `/api/v1/content/circle/member/unmute` | POST | CircleMemberController | Body: CircleMemberUpdateReq |
+| 移除成员 | `/api/v1/content/circle/member/remove` | POST | CircleMemberController | Body: CircleMemberUpdateReq |
+| 搜索 | `/api/v1/content/circle/search` | GET | CircleSearchController | pageNum/pageSize, 返回 `Page<CircleSearchResultVO>` |
+| 治理日志 | `/api/v1/content/circle/governance-log/list` | GET | CircleGovernanceLogController | pageNum/pageSize |
 
-**注意**: searchCircles (`GET /api/v1/content/circle/search`) 也存在，由 CircleSearchController 提供。
+### 2.2 缺失的 API
 
-### 2.2 缺失的 API（6 个）
-
-| 设计文档名称 | 期望路径 | 缺失影响 | 严重程度 |
-|-------------|---------|---------|---------|
-| **getCircleDetail** | `GET /api/v1/content/circle/{id}` | 详情页无法加载 | **P0 阻塞** |
-| **getMyCircleList** | `GET /api/v1/content/circle/my-list` | 已加入 Tab 无法加载 | **P0 阻塞** |
-| **getPublicCircleList** | `GET /api/v1/content/circle/public-list` | 发现 Tab 无法加载 | **P0 阻塞** |
-| **checkCircleName** | `GET /api/v1/content/circle/check-name` | 名称唯一性校验无法调用 | **P1 重要** |
-| **getMemberList** | `GET /api/v1/content/circle/member/list` | 成员管理页无法加载 | **P0 阻塞** |
-| **getGovernanceLogList** | `GET /api/v1/content/circle/governance-log/list` | 治理日志页无法加载 | **P1 重要** |
-
-### 2.3 已有但未在设计中引用的 API
-
-| 路径 | 方法 | 控制器 | 说明 |
-|------|------|--------|------|
-| `/api/circle/ranking/hot` | GET | CircleRankingController | 热门圈子榜单 |
-| `/api/circle/ranking/new` | GET | CircleRankingController | 新增圈子榜单 |
-| `/circle-join-review/pending/{circleId}` | GET | CircleJoinReviewController | 待审核申请列表 |
-| `/circle-join-review/approve` | POST | CircleJoinReviewController | 批准加入申请 |
-| `/circle-join-review/reject` | POST | CircleJoinReviewController | 拒绝加入申请 |
-| `/api/circle/{circleId}/data/statistics` | GET | CircleDataController | 圈子数据统计 |
+**无**。15 个接口全部已实现。
 
 ---
 
-## 3. 数据模型不一致
+## 3. 数据模型一致性 — 全部通过 ✅
 
-### 3.1 CircleVO 字段缺失
+### 3.1 CircleVO（17 个字段完整）
 
-当前 `CircleVO` 字段：
-```
-id, name, description, iconUrl, coverUrl, category, privacyType, joinType,
-creatorId, memberCount, maxMemberCount, status, joined, myRole, createTime
-```
+| 字段 | 类型 | 前端用途 | 状态 |
+|------|------|---------|------|
+| id, name, description, iconUrl, coverUrl, category | String | 基本信息展示 | ✅ |
+| privacyType, joinType | String | 隐私/加入方式判断 | ✅ |
+| creatorId | String | 创建者识别 | ✅ |
+| memberCount, maxMemberCount | Integer | 成员数/上限展示、满员判断 | ✅ |
+| status | String | 圈子状态 | ✅ |
+| joined | Boolean | 是否已加入 | ✅ |
+| myRole | String | 权限判断（CREATOR/MODERATOR/MEMBER） | ✅ |
+| **applyStatus** | String | 申请状态（PENDING/APPROVED/REJECTED/null） | ✅ 新增 |
+| **isInvited** | Boolean | 是否受邀 | ✅ 新增 |
+| createTime | Date | 创建时间 | ✅ |
 
-前端 design.md 和 specs 依赖但 **CircleVO 中缺失**的字段：
+### 3.2 CircleSearchResultVO（7 个字段完整）
 
-| 字段 | 类型 | 用途 | 引用位置 |
-|------|------|------|---------|
-| `applyStatus` | String | 申请状态（PENDING/APPROVED/REJECTED） | design.md D4, specs circle-member-management |
-| `isInvited` | Boolean | 当前用户是否受邀 | design.md D4, specs circle-member-management |
-| `memberLimit` | Integer | 成员上限（区别于 maxMemberCount） | design.md 提到"默认 500 人" |
+| 字段 | 类型 | 状态 |
+|------|------|------|
+| id, name, iconUrl, description | String | ✅ |
+| **category** | String | ✅ 新增 |
+| memberCount | Integer | ✅ |
+| joined | Boolean | ✅ |
 
-**说明**: `maxMemberCount` 可能等同于 `memberLimit`，需确认。`applyStatus` 和 `isInvited` 是前端加入按钮状态的核心驱动字段，必须补充。
+### 3.3 CircleMemberVO（6 个字段，新增）
 
-### 3.2 CircleSearchResultVO 字段缺失
-
-当前字段：`id, name, iconUrl, description, memberCount, joined`
-
-缺失字段：`category`（分类标签）— specs 中搜索结果要求展示分类。
-
-### 3.3 接口命名不一致
-
-| 设计文档 | 后端实际 | 建议 |
-|---------|---------|------|
-| quitCircle | `/api/v1/content/circle/leave` | 前端 API 封装使用 `leaveCircle` 名称，与后端一致 |
-
----
-
-## 4. 后端治理日志服务分析
-
-`ICircleGovernanceLogService` 仅提供**写入**方法：
-- `logMute()` — 记录禁言
-- `logUnmute()` — 记录解除禁言
-- `logRemove()` — 记录移除
-- `logRoleChange()` — 记录角色变更
-
-**缺失**: 没有查询方法（`listLogs`/`getGovernanceLogs`），没有 REST 控制器暴露查询接口。`CircleGovernanceLog` 实体已存在，Mapper 已存在，但缺少分页查询的 Service 方法和 Controller 端点。
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | String | 成员记录ID |
+| userId | String | 用户ID |
+| role | String | CREATOR/MODERATOR/MEMBER |
+| status | String | ACTIVE/MUTED/REMOVED |
+| muteEndTime | LocalDateTime | 禁言结束时间 |
+| createTime | LocalDateTime | 加入时间 |
 
 ---
 
-## 5. 前端文档问题列表
+## 4. 结论：✅ 全部通过，可进入实现阶段
 
-### 5.1 design.md 问题
+circle-10-core-frontend 依赖的 15 个后端 API 全部已实现，所有 VO 字段完整。参数风格已全面统一：
+- **写操作**: 全部 `@RequestBody`（CircleCreateReq / CircleUpdateReq / CircleJoinReq / CircleLeaveReq / CircleMemberUpdateReq）
+- **读操作**: 详情 Path 参数 `/{id}`，列表 Query 参数 `pageNum`/`pageSize`
+- **返回格式**: 所有列表/搜索统一返回 `Page<T>` 分页对象
 
-| # | 问题 | 位置 | 建议 |
-|---|------|------|------|
-| D-1 | 提到"14 个 API 接口"但实际只有 8 个后端接口存在 | Context 段 | 更新为实际数量，标注缺失接口 |
-| D-2 | 未提及后端缺失接口的风险 | Risks 段 | 新增 Risk: 后端 6 个接口未实现 |
-| D-3 | Open Questions 中未提及 getCircleDetail 返回字段 | Open Questions | 补充: applyStatus/isInvited 字段确认 |
-
-### 5.2 proposal.md 问题
-
-| # | 问题 | 位置 | 建议 |
-|---|------|------|------|
-| P-1 | "依赖后端 14 个接口"描述不准确 | Impact 段 | 更新为实际数量 |
-| P-2 | 未标注哪些接口已存在、哪些需后端补充 | Impact 段 | 分类列出 |
-
-### 5.3 specs 问题
-
-| # | 问题 | 文件 | 建议 |
-|---|------|------|------|
-| S-1 | 圈子列表页引用 my-list/public-list 接口不存在 | circle-crud/spec.md | 需后端补充或前端 Mock |
-| S-2 | 名称唯一性校验引用 check-name 接口不存在 | circle-crud/spec.md | 后端 checkNameUnique 仅内部调用，需暴露 API |
-| S-3 | 成员列表引用 getMemberList 接口不存在 | circle-member-management/spec.md | 需后端补充 |
-| S-4 | 治理日志引用 getGovernanceLogList 接口不存在 | circle-governance-log/spec.md | 需后端补充 |
-| S-5 | applyStatus/isInvited 字段在后端 CircleVO 中不存在 | circle-member-management/spec.md | 需后端补充到详情接口响应 |
-
----
-
-## 6. 建议修复方案
-
-### 6.1 后端需补充的接口（P0 — 阻塞前端开发）
-
-1. **圈子详情接口**: `GET /api/v1/content/circle/{id}` 返回 CircleVO（需补充 applyStatus、isInvited 字段）
-2. **我的圈子列表**: `GET /api/v1/content/circle/my-list` 分页返回当前用户已加入的圈子
-3. **公开圈子列表**: `GET /api/v1/content/circle/public-list` 分页返回公开圈子
-4. **成员列表接口**: `GET /api/v1/content/circle/member/list?circleId=xxx` 分页返回成员列表
-
-### 6.2 后端需补充的接口（P1 — 影响功能完整性）
-
-5. **名称唯一性校验**: `GET /api/v1/content/circle/check-name?name=xxx` 暴露已有 service 方法
-6. **治理日志查询**: `GET /api/v1/content/circle/{circleId}/governance-log` 分页查询治理日志
-
-### 6.3 后端需补充的字段
-
-7. **CircleVO 补充字段**: `applyStatus`(String)、`isInvited`(Boolean)
-8. **CircleSearchResultVO 补充字段**: `category`(String)
-
-### 6.4 前端文档修复
-
-9. 更新 design.md 中的接口数量和风险描述
-10. 更新 proposal.md 中的 Impact 段
-11. 在 specs 中标注缺失接口，添加 Mock 开发策略
-
----
-
-## 7. 前端开发策略建议
-
-由于 6 个后端接口缺失，建议前端采用以下策略：
-
-1. **优先开发已有接口的功能**: 圈子创建（create）、更新（update）、加入（join）、退出（leave）、成员管理操作（change-role/mute/unmute/remove）、搜索（search）
-2. **Mock 开发缺失接口**: 在 `src/api/content/circle.ts` 中定义完整接口类型，对缺失接口使用 Mock 数据
-3. **后端接口就绪后切换**: API 层独立封装，切换成本低（与 design.md R1 风险应对一致）
+前端可直接对接真实接口，无需 Mock 开发。

@@ -2788,9 +2788,210 @@ mvn compile -pl jeecg-boot/jeecg-boot-module/jeecg-module-content
 
 Expected: BUILD SUCCESS
 
-- [ ] **Step 3: Final Commit**
+- [x] **Step 3: Final Commit**
 
 ```bash
 git add -A
 git commit -m "feat(circle): complete circle core MVP - creation, member management, search"
 ```
+
+---
+
+# 审核后补充计划 (Review Follow-up — 2026-06-08)
+
+> 来源: `/opsx:review circle-10-core` → `review-report.md`
+> 已完成: my-list/public-list/{id} 三个缺失端点、CircleVO/CircleSearchResultVO 字段补充
+> 本部分规划 8 个剩余 FLAG 的修复任务。
+
+---
+
+## Task 16: 输入校验加固
+
+**目标**: FLAG-007, FLAG-011
+
+### 16.1 CircleCreateReq — 枚举校验
+
+**文件**: `req/create/CircleCreateReq.java`
+
+在 `privacyType` 和 `joinType` 字段添加 `@Pattern` 校验，避免非法枚举值抛 500：
+
+```java
+@NotNull(message = "隐私类型不能为空")
+@Pattern(regexp = "PUBLIC|PRIVATE|PASSWORD", message = "无效的隐私类型")
+@Schema(description = "隐私类型: PUBLIC/PRIVATE/PASSWORD", requiredMode = Schema.RequiredMode.REQUIRED)
+private String privacyType;
+
+@NotNull(message = "加入方式不能为空")
+@Pattern(regexp = "DIRECT|APPROVAL|INVITE|PASSWORD", message = "无效的加入方式")
+@Schema(description = "加入方式: DIRECT/APPROVAL/INVITE/PASSWORD", requiredMode = Schema.RequiredMode.REQUIRED)
+private String joinType;
+```
+
+- [ ] **Step 1**: 添加 `@Pattern` 校验注解
+- [ ] **Step 2**: 在 WebMvcTest 中添加非法枚举值测试场景
+- [ ] **Step 3**: Commit
+
+### 16.2 CircleSearchReq — 分页参数校验
+
+**文件**: `req/query/CircleSearchReq.java`
+
+```java
+@Min(value = 1, message = "页码从1开始")
+@Schema(description = "页码(从1开始)")
+private Integer pageNum = 1;
+
+@Min(value = 1, message = "每页最少1条")
+@Max(value = 100, message = "每页最多100条")
+@Schema(description = "每页条数")
+private Integer pageSize = 20;
+```
+
+- [ ] **Step 1**: 添加 `@Min`/`@Max` 校验
+- [ ] **Step 2**: 在 WebMvcTest 中添加边界测试 (pageNum=0, pageSize=10000)
+- [ ] **Step 3**: Commit
+
+### 16.3 WebMvcTest 路径修复
+
+**文件**: 
+- `test/.../controller/CircleControllerWebMvcTest.java`
+- `test/.../controller/CircleMemberControllerWebMvcTest.java`
+- `test/.../controller/CircleSearchControllerWebMvcTest.java`
+
+**问题**: 测试使用 `/content/circle/...` 路径，实际 Controller 映射为 `/api/v1/content/circle/...`
+
+- [ ] **Step 1**: 将所有测试路径添加 `/api/v1` 前缀
+- [ ] **Step 2**: 补充新增端点 (my-list, public-list, /{id}) 的测试
+- [ ] **Step 3**: 运行测试确认通过
+- [ ] **Step 4**: Commit
+
+---
+
+## Task 17: 测试缺口补充
+
+**目标**: FLAG-003, FLAG-004
+
+### 17.1 CircleGovernanceLog Entity 测试
+
+**文件**: `test/.../entity/CircleGovernanceLogTest.java`
+
+```java
+@DisplayName("CircleGovernanceLog Entity")
+class CircleGovernanceLogTest {
+
+    @Test
+    @DisplayName("Action enum values")
+    void action_enumValues() {
+        CircleGovernanceLog.Action[] values = CircleGovernanceLog.Action.values();
+        assertEquals(4, values.length);
+        assertNotNull(CircleGovernanceLog.Action.valueOf("MUTE"));
+        assertNotNull(CircleGovernanceLog.Action.valueOf("UNMUTE"));
+        assertNotNull(CircleGovernanceLog.Action.valueOf("REMOVE"));
+        assertNotNull(CircleGovernanceLog.Action.valueOf("ROLE_CHANGE"));
+    }
+}
+```
+
+- [ ] **Step 1**: TDD — 先写测试，确认编译失败
+- [ ] **Step 2**: 运行测试确认通过
+- [ ] **Step 3**: Commit
+
+### 17.2 CircleBizTest 敏感词检测测试
+
+**文件**: `test/.../biz/CircleBizTest.java`
+
+新增测试场景：
+- `sensitiveWord_throwsException` — 敏感词服务返回命中时抛出异常
+- `sensitiveWordService_unavailable_fallback` — 敏感词服务不可用时降级放行
+
+- [ ] **Step 1**: 补充两个测试用例
+- [ ] **Step 2**: 运行测试确认通过
+- [ ] **Step 3**: Commit
+
+---
+
+## Task 18: 错误处理与降级
+
+**目标**: FLAG-002, FLAG-010
+
+### 18.1 搜索降级处理
+
+**文件**: `controller/CircleSearchController.java`
+
+在 `search()` 方法中添加 try-catch，数据库异常时返回降级提示而非空列表：
+
+```java
+try {
+    circleService.page(page, wrapper);
+} catch (Exception e) {
+    log.error("Circle search failed", e);
+    return Result.error("搜索暂时不可用");
+}
+```
+
+- [ ] **Step 1**: 添加 try-catch 降级处理
+- [ ] **Step 2**: 在 WebMvcTest 中添加数据库异常模拟测试
+- [ ] **Step 3**: Commit
+
+### 18.2 全局异常处理
+
+**文件**: 复用项目已有的 `JeecgBootExceptionHandler` 或新增 ControllerAdvice
+
+确保以下异常返回友好错误而非 500：
+- 数据库连接超时 → "服务繁忙，请稍后重试"
+- MyBatis/MyBatis-Plus 异常 → 记录日志，返回通用错误
+
+- [ ] **Step 1**: 确认项目全局异常处理器覆盖数据库异常
+- [ ] **Step 2**: 如未覆盖，在 circle 模块添加 `@RestControllerAdvice`
+- [ ] **Step 3**: Commit
+
+---
+
+## Task 19: 配置对齐
+
+**目标**: FLAG-C004, FLAG-C005
+
+### 19.1 maxMemberCount 配置化
+
+**文件**: `biz/CircleBizImpl.java`
+
+```java
+// 从配置读取默认值，fallback 为 500（与前端 PRD 对齐）
+@Value("${circle.max-member-count:500}")
+private int defaultMaxMemberCount;
+```
+
+替换硬编码 `circle.setMaxMemberCount(10000)` 为 `circle.setMaxMemberCount(defaultMaxMemberCount)`。
+
+**配置文件**: `application.yml` 中添加:
+```yaml
+circle:
+  max-member-count: 500
+```
+
+- [ ] **Step 1**: 添加 `@Value` 注入配置
+- [ ] **Step 2**: 替换 hardcode 10000
+- [ ] **Step 3**: 更新 CircleBizTest mock 适配
+- [ ] **Step 4**: Commit
+
+### 19.2 确认前后端分页参数一致
+
+前端 PRD 使用 `pageNum`/`pageSize`。后端已对齐：
+- CircleSearchReq: `pageNum`, `pageSize`
+- CircleMemberController `/list`: `pageNum`, `pageSize`
+- CircleController `/my-list`: `pageNum`, `pageSize`
+- CircleController `/public-list`: `pageNum`, `pageSize`
+
+- [x] **Step 1**: 确认所有新增端点使用 `pageNum`/`pageSize` 命名
+
+---
+
+## 执行顺序与依赖
+
+```
+Task 16 (校验加固) → 无依赖，可立即开始
+Task 17 (测试补充) → 依赖 Task 16 (测试路径修复)
+Task 18 (错误处理) → 无依赖，可立即开始
+Task 19 (配置对齐) → 无依赖，可立即开始
+```
+
+**建议执行顺序**: Task 16 → Task 17 → Task 18 → Task 19 → 全量测试 → Commit
