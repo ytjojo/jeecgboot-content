@@ -9,6 +9,7 @@ import org.jeecg.modules.content.circle.req.update.CircleUpdateReq;
 import org.jeecg.modules.content.circle.service.ICircleMemberService;
 import org.jeecg.modules.content.circle.service.ICircleService;
 import org.jeecg.modules.content.circle.vo.CircleVO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CircleBizImpl implements ICircleBiz {
 
-    private static final int DEFAULT_MAX_MEMBER_COUNT = 10000;
+    @Value("${circle.max-member-count:500}")
+    private int defaultMaxMemberCount;
 
     @Resource
     private ICircleService circleService;
@@ -42,7 +44,7 @@ public class CircleBizImpl implements ICircleBiz {
         circle.setJoinType(Circle.JoinType.valueOf(req.getJoinType()));
         circle.setCreatorId(userId);
         circle.setMemberCount(1);
-        circle.setMaxMemberCount(DEFAULT_MAX_MEMBER_COUNT);
+        circle.setMaxMemberCount(defaultMaxMemberCount);
         circle.setStatus(Circle.Status.ACTIVE);
 
         if (circle.getPrivacyType() == Circle.PrivacyType.PASSWORD) {

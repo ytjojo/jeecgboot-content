@@ -19,6 +19,9 @@ public class CircleSearchResultVO {
     @Schema(description = "圈子简介")
     private String description;
 
+    @Schema(description = "分类标签")
+    private String category;
+
     @Schema(description = "成员数")
     private Integer memberCount;
 

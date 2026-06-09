@@ -51,6 +51,12 @@ public class CircleVO {
     @Schema(description = "当前用户在圈子中的角色")
     private String myRole;
 
+    @Schema(description = "当前用户的申请状态: PENDING/APPROVED/REJECTED/null")
+    private String applyStatus;
+
+    @Schema(description = "当前用户是否被邀请加入该圈子")
+    private Boolean isInvited;
+
     @Schema(description = "创建时间")
     private Date createTime;
 }

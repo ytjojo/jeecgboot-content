@@ -23,11 +23,11 @@ public class CircleGovernanceLogController {
     @GetMapping("/list")
     public Result<IPage<CircleGovernanceLog>> list(
             @RequestParam String circleId,
-            @RequestParam(defaultValue = "1") Integer current,
-            @RequestParam(defaultValue = "20") Integer size) {
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "20") Integer pageSize) {
         LambdaQueryWrapper<CircleGovernanceLog> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(CircleGovernanceLog::getCircleId, circleId)
                 .orderByDesc(CircleGovernanceLog::getCreateTime);
-        return Result.OK(governanceLogService.page(new Page<>(current, size), wrapper));
+        return Result.OK(governanceLogService.page(new Page<>(pageNum, pageSize), wrapper));
     }
 }

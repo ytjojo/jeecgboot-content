@@ -3,6 +3,7 @@ package org.jeecg.modules.content.circle.req.create;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -30,10 +31,12 @@ public class CircleCreateReq {
     private String category;
 
     @NotNull(message = "隐私类型不能为空")
+    @Pattern(regexp = "PUBLIC|PRIVATE|PASSWORD", message = "无效的隐私类型")
     @Schema(description = "隐私类型: PUBLIC/PRIVATE/PASSWORD", requiredMode = Schema.RequiredMode.REQUIRED)
     private String privacyType;
 
     @NotNull(message = "加入方式不能为空")
+    @Pattern(regexp = "DIRECT|APPROVAL|INVITE|PASSWORD", message = "无效的加入方式")
     @Schema(description = "加入方式: DIRECT/APPROVAL/INVITE/PASSWORD", requiredMode = Schema.RequiredMode.REQUIRED)
     private String joinType;
 
