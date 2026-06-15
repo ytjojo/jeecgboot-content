@@ -165,7 +165,5 @@ grep -A 5 '^- \[ \]' docs/review/*/retrospective.md
 
 ## 参考文件
 
-> **仅加载以下运行时文件。** `verification-report.md` 和 `CHANGELOG.md` 是开发副产品，执行复盘时不需要、不应读取。
-
-- `template.md` — 输出模板（retrospective.md 的完整格式）
-- `checklist.md` — 复盘前/中/后自查清单
+- `template.md` — 输出模板
+- `checklist.md` — 自查清单（含越界红线表、借口对照表、Red Flags）
