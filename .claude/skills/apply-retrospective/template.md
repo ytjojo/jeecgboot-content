@@ -27,7 +27,7 @@
 - **Subagent dispatches**: <次数 or "n/a">
 - **New external dependencies**: <列表，含 license 和版本，or "none">
 - **Bugs encountered post-merge**: <数量，一行一个，or "none">
-- **OpenSpec verify state at archive**: <pass / fail / not-run>
+- **OpenSpec verify state at archive**: <pass / fail / not-run>（仅 openspec 模式，通用降级模式写 n/a）
 - **Test coverage signal**: <百分比 or "n/a">
 
 Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
@@ -61,6 +61,12 @@ Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
 > - 🔴 阻塞性的 — 导致无法继续或需要回滚
 > - 🟡 痛苦的 — 显著降低了效率或质量
 > - 📌 小问题 — 值得记录但不影响主线
+
+> **零问题声明**：如无 🔴 无 🟡 项，必须在此回答：
+> 1. 本次变更真的没有阻塞/痛苦的问题吗？
+> 2. 是否有我选择忽视的问题（因为不便记录）？
+> 3. 如果有外部观察者复盘，会同意零问题吗？
+
 
 ---
 
@@ -100,6 +106,7 @@ Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
     - `skill description tightening` — 具体改哪个 skill 的 frontmatter/instruction
     - `CLAUDE.md trigger` — 具体加哪段判读规则
     - `scope-judgment rule` — 具体 scope 应怎么判读
+    - `n/a — skip justified` — 仅当 Why 引用了 AGENTS.md/CLAUDE.md 的明确跳过规则
     - `one-off — schema boundary case` — 需说明为何是边界
 
 > 通用模式：标注 `(无 openspec schema，跳过)`。
@@ -111,6 +118,12 @@ Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
 - <被推翻的假设>
 
 > 若无：写 `(none observed)`。
+
+> 写入前自问：
+> - 是否有任何我预期会发生但没发生的事？
+> - 是否有任何我没预期但发生了的事？
+> 两条都 No → 写 `(none observed)`
+
 
 ---
 

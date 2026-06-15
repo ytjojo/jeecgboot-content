@@ -3,7 +3,7 @@ name: apply-retrospective
 description: "当用户完成开发变更后需要过程复盘时使用。触发：'/apply-retrospective'、'复盘'、'retrospective'、'post-mortem'、'事后分析'、'回顾'、'回顾变更'、'项目复盘'、'经验教训'、'总结经验'、'反思'、openspec apply 完成后自动调用。"
 ---
 
-# apply-retrospective — 实现流程复盘
+# apply-retrospective — OpenSpec Apply 阶段过程复盘
 
 ## 定位
 
@@ -153,6 +153,8 @@ grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 
 `函数过长` `命名不清晰` `耦合` `抽象层` `覆盖率不够` `commit 太大` `代码质量` `架构问题` `命名差` `格式不一致` `测试不足` `设计缺陷`
 
+> 使用子串匹配（非全词匹配）。例如 "函数命名的风格不统一，命名不清晰" 应命中 `命名不清晰`。
+
 ---
 
 ## 防理性化机制
@@ -198,7 +200,10 @@ grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 ## Carry-forward 机制
 
 ```bash
+# openspec 模式
 grep -A 5 '^- \[ \]' openspec/changes/archive/*/retrospective.md
+# 通用降级模式
+grep -A 5 '^- \[ \]' docs/review/*/retrospective.md
 ```
 
 逐条判断未勾选 candidate：仍相关 → carry-forward / 已过时 → stale / 可执行 → 勾选 `[x]`。
@@ -211,12 +216,14 @@ grep -A 5 '^- \[ \]' openspec/changes/archive/*/retrospective.md
 2. **不替代 code review** — 不评价代码质量、命名、架构设计（参见边界红线表）
 3. **不替代 openspec review** — 不评价需求文档、设计文档完整性（参见边界红线表）
 4. **向前指针** — 事实变化时不重写，追加 Update 指针
-5. **仅一次** — 每个 change 只生成一次 retrospective.md
+5. **仅一次** — 每个 change 只生成一次 retrospective.md。执行前用 `test -f <output-path>/retrospective.md` 检测；若已存在，告知用户并询问：追加 Update 指针 or 归档旧文件后重新生成
 6. **中文输出** — 报告内容使用中文编写
 7. **不跳过关键章节** — 除非满足跳过条件，§0–§6 全部生成（无内容时写 `(none observed)`）
 8. **字面合规等于精神合规** — 引用证据但内容空洞＝未引用；勾选 checklist 但未检查＝未勾选
 
 ## 参考文件
+
+> **仅加载以下运行时文件。** `verification-report.md` 和 `CHANGELOG.md` 是开发副产品，执行复盘时不需要、不应读取。
 
 - `template.md` — 输出模板（retrospective.md 的完整格式）
 - `checklist.md` — 复盘前/中/后自查清单
