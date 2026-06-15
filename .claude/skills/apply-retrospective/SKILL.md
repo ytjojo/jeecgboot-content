@@ -30,40 +30,23 @@ description: "当用户完成开发变更后需要过程复盘时使用。触发
    → 任一不满足：通用降级模式
 
 ### openspec 完整模式
-
-**前置校验**：
-```bash
-test -f openspec/changes/<change-name>/verify.md
-! grep -q '^- \[x\] ❌ FAIL' openspec/changes/<change-name>/verify.md
-```
-任一失败 → 停止，告知用户：verify 必须先通过。
-
-**输出位置**：`openspec/changes/<change-name>/retrospective.md`
+前置校验 (`test -f` + `! grep -q 'FAIL'` verify.md) → 任一失败停止。
+输出：`openspec/changes/<change-name>/retrospective.md`
 
 ### 通用降级模式
-
-**前置条件**：git log 存在可识别的提交范围（用户指定或从上下文推断）
-
-**输出位置**：默认写入项目 `docs/review/` 目录。用户可通过 `--output <目录>` 覆盖（禁止输出到系统临时目录（如 `/tmp/`、`/var/tmp/`））。
+前置：git log 可识别提交范围。
+输出：默认 `docs/review/`，可用 `--output <目录>` 覆盖（禁止临时目录）。
 
 ## 输入数据收集
 
 ### openspec 模式
-
-| 数据源 | 用途 |
-|--------|------|
-| `openspec/changes/<name>/brainstorm.md` | 了解初始想法和方案讨论 |
-| `openspec/changes/<name>/plan.md` | §3 计划与实际的对比基准 |
-| `openspec/changes/<name>/tasks.md` | §0 任务完成率、§3 偏差分析 |
-| `openspec/changes/<name>/verify.md` | §0 验证状态、已知问题 |
-| `git log <base>..HEAD` | §0 量化数据、提交链、diff 规模 |
+- `brainstorm.md` → 初始方案 | `plan.md` → §3 基准 | `tasks.md` → §0 完成率 + §3 偏差
+- `verify.md` → §0 验证状态 | `git log <base>..HEAD` → §0 量化数据
 
 ### 通用降级模式
+- `git log <base>..HEAD` → §0 量化数据 | 对话上下文 → 任务目标、计划（如有）
 
-| 数据源 | 用途 |
-|--------|------|
-| `git log <base>..HEAD` | §0 量化数据、提交链、diff 规模 |
-| 对话上下文 / 用户口述 | 任务目标、计划信息（如有） |
+> 所有 openspec 文件路径前缀为 `openspec/changes/<name>/`。
 
 ---
 
