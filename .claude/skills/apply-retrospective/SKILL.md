@@ -7,12 +7,11 @@ description: "当用户完成开发变更后需要过程复盘时使用。触发
 
 ## 定位
 
-对一次已完成的技术实现进行**过程质量**回顾，关注「怎么做」而非「做成什么样」。
+对已完成的技术实现做**过程质量**回顾，关注「怎么做」而非「做成什么样」。
 
 **关注**：计划与实际的偏差、工作流遵守情况、过程中的意外、可复用的经验
 **禁止评价**：代码质量（code-review 管）、设计文档完整性（openspec-review-change 管）、测试覆盖率（verify 管）
 
-> **字面合规等于精神合规。** 引用证据但内容空洞，等同于未引用。勾选 checklist 但未实际检查，等同于未勾选。
 
 ## 触发方式
 
@@ -35,7 +34,7 @@ description: "当用户完成开发变更后需要过程复盘时使用。触发
 
 ### 通用降级模式
 前置：git log 可识别提交范围。
-输出：默认 `docs/review/`，可用 `--output <目录>` 覆盖（禁止临时目录）。
+输出：默认 `docs/review/`，`--output` 覆盖。禁止临时目录。
 
 ## 输入数据收集
 
@@ -81,14 +80,9 @@ grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 | §5 Surprises | 被证伪的假设 | 不变 |
 | §6 Promote candidates | 晋升候选（Why/How to apply） | 不变 |
 
-**§4 注意事项**：
-- 仅列出 **apply（实现）阶段**的技能，brainstorming/writing-plans 等 plan 阶段技能不在此列
-- 技能列表从 openspec schema 的 apply 阶段动态获取
-- 默认预期：全部 ✓。每个 ✗ 必须在 `### Deliberately Skipped Skills` 子章节回答三问（What/Why/How to prevent）
-- **禁止模糊理由**："不需要""太小""没时间""纯配置""变更量小""单提交""手动等价""已知模式""没必要"。必须给出具体 trigger — 引用 `git log --stat` 输出或 AGENTS.md/CLAUDE.md 中的跳过规则原文证明满足条件
-- How to prevent 选 `n/a — skip justified` 仅当 Why 中引用了 AGENTS.md/CLAUDE.md 的明确跳过规则
+**§4 注意事项**：仅列出 apply 阶段技能（从 schema 动态获取）。每个 ✗ 回答三问（What/Why/How to prevent）。Why 必须引用具体 trigger（git log --stat 或规则原文），禁止模糊理由（完整禁止清单见 checklist.md §4）。
 
-**§6 晋升目标**：参见 `template.md` 中的晋升目标参考表。
+**§6 晋升目标**：见 `template.md` 晋升目标参考表。
 
 ### Step 3: 写入输出
 
@@ -129,10 +123,7 @@ grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 
 ## 防理性化机制
 
-复盘本质是自我审视，AI 会本能地回避问题。执行时对照 `checklist.md` 中的：
-- 「理性化自查」清单
-- 「常见理性化借口对照」表
-- 「Red Flags」列表
+复盘本质是 AI 自我审视，易合理化。对照 `checklist.md` 中的理性化自查清单、借口对照表、Red Flags 列表。
 
 ---
 
