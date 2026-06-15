@@ -48,7 +48,6 @@ Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
 
 - [evidence: <commit/file/test>] <描述>
 
-
 ---
 
 ## §2 Misses
@@ -66,7 +65,6 @@ Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
 > 1. 本次变更真的没有阻塞/痛苦的问题吗？
 > 2. 是否有我选择忽视的问题（因为不便记录）？
 > 3. 如果有外部观察者复盘，会同意零问题吗？
-
 
 ---
 
@@ -92,7 +90,6 @@ Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
 |-------|------|
 | <skill-name> | ✓/✗ |
 | <skill-name> | ✓/✗ |
-
 
 ### Deliberately Skipped Skills
 
@@ -123,7 +120,6 @@ Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
 > - 是否有任何我预期会发生但没发生的事？
 > - 是否有任何我没预期但发生了的事？
 > 两条都 No → 写 `(none observed)`
-
 
 ---
 

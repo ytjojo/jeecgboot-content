@@ -80,7 +80,6 @@ grep -cE '^\s*- \[x\]' openspec/changes/<name>/tasks.md   # 仅 openspec
 grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 ```
 
-
 > `Active hours`：从提交时间戳首尾间隔估算，标注 `(估算)`
 > `Subagent dispatches`：从对话上下文提取创建的子代理次数，标注 `(上下文提取)` 或 `n/a`
 
@@ -163,7 +162,6 @@ grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 - 「理性化自查」清单
 - 「常见理性化借口对照」表
 - 「Red Flags」列表
-
 
 ---
 
