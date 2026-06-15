@@ -76,7 +76,7 @@ Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
 |-----------|--------------|-----|
 | <task-id> | <变化描述>   | <原因> |
 
-> 通用模式：若无正式计划，写 `(无正式计划可供对比)`。
+> 通用降级模式：若无正式计划，写 `(无正式计划可供对比)`。
 
 ---
 
@@ -109,7 +109,7 @@ Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
     - `n/a — skip justified` — 仅当 Why 引用了 AGENTS.md/CLAUDE.md 的明确跳过规则
     - `one-off — schema boundary case` — 需说明为何是边界
 
-> 通用模式：标注 `(无 openspec schema，跳过)`。
+> 通用降级模式：标注 `(无 openspec schema，跳过)`。
 
 ---
 
