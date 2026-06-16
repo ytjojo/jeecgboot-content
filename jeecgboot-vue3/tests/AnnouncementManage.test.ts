@@ -223,4 +223,173 @@ describe('AnnouncementManage', () => {
       }),
     );
   });
+
+  // ======================== onOk 回调执行测试 ========================
+
+  it('发布 onOk 应调用 saveAnnouncement 并刷新历史', async () => {
+    const { Modal } = await import('ant-design-vue');
+    const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const buttons = wrapper.findAll('button');
+    const publishBtn = buttons.find((b) => b.text().includes('发布公告'));
+    await publishBtn!.trigger('click');
+
+    // 重置 mount 阶段的调用计数，确保断言只测 onOk 触发的调用
+    mockGetAnnouncementHistory.mockClear();
+
+    const callArgs = vi.mocked(Modal.confirm).mock.calls[0][0] as any;
+    await callArgs.onOk();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(mockSaveAnnouncement).toHaveBeenCalledWith(
+      expect.objectContaining({
+        channelId: 'ch1',
+        title: '频道公告',
+        content: '<p>公告内容</p>',
+        expireAt: undefined,
+        version: 2,
+      }),
+    );
+    expect(mockGetAnnouncementHistory).toHaveBeenCalled();
+    expect((await import('ant-design-vue')).message.success).toHaveBeenCalledWith('公告已发布');
+  });
+
+  it('删除 onOk 应调用 deleteAnnouncement 并显示成功消息', async () => {
+    const { Modal } = await import('ant-design-vue');
+    const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const buttons = wrapper.findAll('button');
+    const deleteBtn = buttons.find((b) => b.text().includes('删除公告'));
+    await deleteBtn!.trigger('click');
+
+    // 重置 mount 阶段的调用计数
+    mockGetAnnouncementHistory.mockClear();
+
+    const callArgs = vi.mocked(Modal.confirm).mock.calls[0][0] as any;
+    await callArgs.onOk();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(mockDeleteAnnouncement).toHaveBeenCalledWith('a1');
+    expect(mockGetAnnouncementHistory).toHaveBeenCalled();
+    expect((await import('ant-design-vue')).message.success).toHaveBeenCalledWith('公告已删除');
+  });
+
+  // ======================== 保存草稿 / 预览 / 恢复按钮测试 ========================
+
+  it('点击保存草稿应调用 saveAnnouncement', async () => {
+    const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const buttons = wrapper.findAll('button');
+    const saveBtn = buttons.find((b) => b.text().includes('保存草稿'));
+    await saveBtn!.trigger('click');
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(mockSaveAnnouncement).toHaveBeenCalledWith(
+      expect.objectContaining({ channelId: 'ch1' }),
+    );
+    expect((await import('ant-design-vue')).message.success).toHaveBeenCalledWith('草稿已保存');
+  });
+
+  it('点击预览应调用 previewAnnouncement 并弹出 Modal.info', async () => {
+    const { Modal } = await import('ant-design-vue');
+    const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const buttons = wrapper.findAll('button');
+    const previewBtn = buttons.find((b) => b.text().includes('预览'));
+    await previewBtn!.trigger('click');
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(mockPreviewAnnouncement).toHaveBeenCalledWith({ content: '<p>公告内容</p>' });
+    expect(Modal.info).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: '公告预览',
+        width: 600,
+      }),
+    );
+  });
+
+  it('点击恢复应弹出确认框', async () => {
+    const { Modal } = await import('ant-design-vue');
+    const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const restoreButtons = wrapper.findAll('button').filter((b) => b.text() === '恢复');
+    expect(restoreButtons.length).toBeGreaterThanOrEqual(1);
+    await restoreButtons[0].trigger('click');
+
+    expect(Modal.confirm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: '确认恢复',
+        onOk: expect.any(Function),
+      }),
+    );
+  });
+
+  it('恢复 onOk 应调用 restoreAnnouncementVersion 并刷新', async () => {
+    const { Modal } = await import('ant-design-vue');
+    const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const restoreButtons = wrapper.findAll('button').filter((b) => b.text() === '恢复');
+    await restoreButtons[0].trigger('click');
+
+    // 重置 mount 阶段的调用计数
+    mockGetAnnouncementHistory.mockClear();
+
+    const callArgs = vi.mocked(Modal.confirm).mock.calls[0][0] as any;
+    await callArgs.onOk();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(mockRestoreAnnouncementVersion).toHaveBeenCalledWith('h1');
+    expect(mockGetAnnouncementHistory).toHaveBeenCalled();
+    expect((await import('ant-design-vue')).message.success).toHaveBeenCalledWith('版本已恢复');
+  });
+
+  // ======================== 状态与错误处理测试 ========================
+
+  it('无公告时显示"未发布"Tag', async () => {
+    mockGetAnnouncement.mockResolvedValue(null);
+    const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.text()).toContain('未发布');
+  });
+
+  it('加载历史失败时显示错误消息', async () => {
+    mockGetAnnouncementHistory.mockRejectedValue(new Error('Network error'));
+    const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    expect((await import('ant-design-vue')).message.error).toHaveBeenCalledWith('加载历史版本失败');
+  });
+
+  it('发布失败时显示错误消息', async () => {
+    const { Modal } = await import('ant-design-vue');
+    mockSaveAnnouncement.mockRejectedValue(new Error('Network error'));
+    const wrapper = mount(AnnouncementManage, { props: { channelId: 'ch1' } });
+    await new Promise((r) => setTimeout(r, 0));
+    await wrapper.vm.$nextTick();
+
+    const buttons = wrapper.findAll('button');
+    const publishBtn = buttons.find((b) => b.text().includes('发布公告'));
+    await publishBtn!.trigger('click');
+
+    const callArgs = vi.mocked(Modal.confirm).mock.calls[0][0] as any;
+    await callArgs.onOk();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect((await import('ant-design-vue')).message.error).toHaveBeenCalledWith('发布失败，请重试');
+  });
 });
