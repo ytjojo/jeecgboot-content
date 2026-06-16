@@ -8,7 +8,10 @@
         <img :src="circle.iconUrl" :alt="circle.name" class="circle-card-icon" />
         <div class="circle-card-info">
           <h3 class="circle-card-name">{{ circle.name }}</h3>
-          <PrivacyBadge :type="circle.privacyType" />
+          <span class="circle-card-badges">
+            <PrivacyBadge :type="circle.privacyType" />
+            <a-tag v-if="isGovernor" color="blue" class="governance-badge" @click.stop="handleGovernance">治理</a-tag>
+          </span>
         </div>
       </div>
       <p class="circle-card-desc">{{ circle.description }}</p>
@@ -24,18 +27,28 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
 import type { CircleVO } from '/@/api/content/model/circleModel';
 import PrivacyBadge from './PrivacyBadge.vue';
 import JoinStatusButton from './JoinStatusButton.vue';
 
-defineProps<{
+const props = defineProps<{
   circle: CircleVO;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   click: [];
   'join-success': [];
+  governance: [circleId: string];
 }>();
+
+const isGovernor = computed(() => {
+  return props.circle.myRole === 'CREATOR' || props.circle.myRole === 'MODERATOR';
+});
+
+function handleGovernance() {
+  emit('governance', props.circle.id);
+}
 </script>
 
 <style lang="less" scoped>
@@ -102,6 +115,13 @@ defineEmits<{
     white-space: nowrap;
   }
 
+  &-badges {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
   &-desc {
     margin: 10px 0 12px;
     font-size: 13px;
@@ -133,6 +153,17 @@ defineEmits<{
     padding: 1px 6px;
     background: var(--background-color-base, #f5f5f5);
     border-radius: 4px;
+  }
+}
+
+.governance-badge {
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  padding: 1px 6px;
+
+  &:hover {
+    opacity: 0.8;
   }
 }
 
