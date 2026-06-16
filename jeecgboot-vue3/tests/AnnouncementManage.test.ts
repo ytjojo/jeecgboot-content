@@ -109,6 +109,14 @@ vi.mock('ant-design-vue', async () => {
         return () => h('input', { class: 'input' });
       },
     }),
+    DatePicker: defineComponent({
+      name: 'DatePicker',
+      props: { value: String, showTime: Boolean, valueFormat: String, placeholder: String, style: [String, Object] },
+      emits: ['update:value'],
+      setup() {
+        return () => h('input', { class: 'date-picker' });
+      },
+    }),
     Table: defineComponent({
       name: 'Table',
       props: { dataSource: Array, columns: Array, loading: Boolean, rowKey: [String, Function], size: String },

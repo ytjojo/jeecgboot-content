@@ -5,7 +5,9 @@ import com.auth0.jwt.algorithms.Algorithm;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.circle.biz.CircleReportBizService;
+import org.jeecg.modules.content.circle.entity.CircleMember;
 import org.jeecg.modules.content.circle.entity.CircleReport;
+import org.jeecg.modules.content.circle.service.ICircleMemberService;
 import org.jeecg.modules.content.circle.service.ICircleReportService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -61,6 +63,9 @@ class CircleReportControllerWebMvcTest {
 
     @Mock
     private ICircleReportService circleReportService;
+
+    @Mock
+    private ICircleMemberService circleMemberService;
 
     @InjectMocks
     private CircleReportController controller;
@@ -149,9 +154,17 @@ class CircleReportControllerWebMvcTest {
     @DisplayName("getReports")
     class GetReports {
 
+        private void mockManagePermission() {
+            CircleMember manager = new CircleMember();
+            manager.setRole(CircleMember.Role.CREATOR);
+            when(circleMemberService.findByCircleAndUser("c_001", TEST_OPERATOR_ID))
+                    .thenReturn(manager);
+        }
+
         @Test
         @DisplayName("without status - returns all reports")
         void withoutStatus_returnsAll() throws Exception {
+            mockManagePermission();
             CircleReport r1 = new CircleReport();
             r1.setId("r_001");
             r1.setCircleId("c_001");
@@ -177,6 +190,7 @@ class CircleReportControllerWebMvcTest {
         @Test
         @DisplayName("with status filter - forwards status to service")
         void withStatusFilter_forwardsStatus() throws Exception {
+            mockManagePermission();
             when(circleReportService.getReports("c_001", "PENDING"))
                     .thenReturn(Collections.emptyList());
 
@@ -188,6 +202,23 @@ class CircleReportControllerWebMvcTest {
                     .andExpect(jsonPath("$.result.length()").value(0));
 
             verify(circleReportService).getReports("c_001", "PENDING");
+        }
+
+        @Test
+        @DisplayName("operator is MEMBER - returns permission error")
+        void operatorIsMember_returnsPermissionError() throws Exception {
+            CircleMember member = new CircleMember();
+            member.setRole(CircleMember.Role.MEMBER);
+            when(circleMemberService.findByCircleAndUser("c_001", TEST_OPERATOR_ID))
+                    .thenReturn(member);
+
+            mockMvc.perform(get("/api/v1/content/circle/report/list/c_001")
+                            .header("X-Access-Token", validOperatorToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value("权限不足，仅创建者和版主可查看举报列表"));
+
+            verifyNoInteractions(circleReportService);
         }
     }
 

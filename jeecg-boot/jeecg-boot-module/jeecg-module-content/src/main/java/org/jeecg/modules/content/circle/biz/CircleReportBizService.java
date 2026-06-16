@@ -1,10 +1,13 @@
 package org.jeecg.modules.content.circle.biz;
 
 import jakarta.annotation.Resource;
+import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.circle.entity.CircleAuditLog;
+import org.jeecg.modules.content.circle.entity.CircleMember;
 import org.jeecg.modules.content.circle.entity.CircleReport;
 import org.jeecg.modules.content.circle.enums.CircleAuditActionEnum;
 import org.jeecg.modules.content.circle.service.ICircleAuditLogService;
+import org.jeecg.modules.content.circle.service.ICircleMemberService;
 import org.jeecg.modules.content.circle.service.ICircleReportService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,9 @@ public class CircleReportBizService {
     @Resource
     private ICircleAuditLogService circleAuditLogService;
 
+    @Resource
+    private ICircleMemberService circleMemberService;
+
     /**
      * 提交举报。
      *
@@ -29,7 +35,6 @@ public class CircleReportBizService {
      * @param reporterId 举报人ID
      */
     public void submitReport(CircleReport report, String reporterId) {
-        // TODO: 权限校验
         report.setReporterId(reporterId);
         circleReportService.submitReport(report);
     }
@@ -43,7 +48,7 @@ public class CircleReportBizService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleDeleteContent(String reportId, String operatorId, String circleId) {
-        // TODO: 权限校验
+        checkManagePermission(circleId, operatorId);
         circleReportService.handleDeleteContent(reportId, operatorId);
         writeAuditLog(circleId, operatorId, reportId, CircleAuditActionEnum.DELETE_REPORTED);
     }
@@ -57,7 +62,7 @@ public class CircleReportBizService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleIgnore(String reportId, String operatorId, String circleId) {
-        // TODO: 权限校验
+        checkManagePermission(circleId, operatorId);
         circleReportService.handleIgnore(reportId, operatorId);
         writeAuditLog(circleId, operatorId, reportId, CircleAuditActionEnum.IGNORE_REPORT);
     }
@@ -71,9 +76,23 @@ public class CircleReportBizService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void handleMute(String reportId, String operatorId, String circleId) {
-        // TODO: 权限校验
+        checkManagePermission(circleId, operatorId);
         circleReportService.handleMute(reportId, operatorId);
         writeAuditLog(circleId, operatorId, reportId, CircleAuditActionEnum.MUTE_FROM_REPORT);
+    }
+
+    /**
+     * 校验操作人是否有管理权限（创建者或版主）。
+     *
+     * @param circleId   圈子ID
+     * @param operatorId 操作人ID
+     * @throws JeecgBootException 权限不足时抛出
+     */
+    private void checkManagePermission(String circleId, String operatorId) {
+        CircleMember operator = circleMemberService.findByCircleAndUser(circleId, operatorId);
+        if (operator == null || operator.getRole() == CircleMember.Role.MEMBER) {
+            throw new JeecgBootException("权限不足，仅创建者和版主可管理举报");
+        }
     }
 
     private void writeAuditLog(String circleId, String operatorId, String targetId,

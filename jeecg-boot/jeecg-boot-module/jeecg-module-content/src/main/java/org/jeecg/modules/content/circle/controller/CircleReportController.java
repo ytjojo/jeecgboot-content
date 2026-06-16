@@ -7,10 +7,13 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.common.system.util.JwtUtil;
 import org.jeecg.modules.content.circle.biz.CircleReportBizService;
+import org.jeecg.modules.content.circle.entity.CircleMember;
 import org.jeecg.modules.content.circle.entity.CircleReport;
 import org.jeecg.modules.content.circle.req.CircleReportReq;
+import org.jeecg.modules.content.circle.service.ICircleMemberService;
 import org.jeecg.modules.content.circle.service.ICircleReportService;
 import org.jeecg.modules.content.circle.vo.CircleReportVO;
 import org.springframework.beans.BeanUtils;
@@ -33,6 +36,9 @@ public class CircleReportController {
     @Resource
     private ICircleReportService circleReportService;
 
+    @Resource
+    private ICircleMemberService circleMemberService;
+
     @Operation(summary = "提交举报")
     @PostMapping("/")
     public Result<String> submitReport(@RequestBody @Valid CircleReportReq req,
@@ -48,7 +54,13 @@ public class CircleReportController {
     @GetMapping("/list/{circleId}")
     public Result<List<CircleReportVO>> getReports(
             @PathVariable @Parameter(description = "圈子ID") String circleId,
-            @RequestParam(required = false) @Parameter(description = "状态过滤") String status) {
+            @RequestParam(required = false) @Parameter(description = "状态过滤") String status,
+            HttpServletRequest request) {
+        String userId = JwtUtil.getUserNameByToken(request);
+        CircleMember member = circleMemberService.findByCircleAndUser(circleId, userId);
+        if (member == null || member.getRole() == CircleMember.Role.MEMBER) {
+            throw new JeecgBootException("权限不足，仅创建者和版主可查看举报列表");
+        }
         List<CircleReport> reports = circleReportService.getReports(circleId, status);
         List<CircleReportVO> voList = reports.stream().map(r -> {
             CircleReportVO vo = new CircleReportVO();

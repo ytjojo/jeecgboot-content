@@ -1,9 +1,12 @@
 package org.jeecg.modules.content.circle.biz;
 
+import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.circle.entity.CircleAuditLog;
+import org.jeecg.modules.content.circle.entity.CircleMember;
 import org.jeecg.modules.content.circle.entity.CircleReport;
 import org.jeecg.modules.content.circle.enums.CircleAuditActionEnum;
 import org.jeecg.modules.content.circle.service.ICircleAuditLogService;
+import org.jeecg.modules.content.circle.service.ICircleMemberService;
 import org.jeecg.modules.content.circle.service.ICircleReportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +18,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * 圈子内容举报业务编排服务测试。
@@ -28,6 +34,9 @@ class CircleReportBizServiceTest {
 
     @Mock
     private ICircleAuditLogService circleAuditLogService;
+
+    @Mock
+    private ICircleMemberService circleMemberService;
 
     @InjectMocks
     private CircleReportBizService circleReportBizService;
@@ -67,9 +76,18 @@ class CircleReportBizServiceTest {
     @DisplayName("handleDeleteContent - 删除被举报内容")
     class HandleDeleteContent {
 
+        private void mockManagePermission() {
+            CircleMember manager = new CircleMember();
+            manager.setRole(CircleMember.Role.CREATOR);
+            when(circleMemberService.findByCircleAndUser(TEST_CIRCLE_ID, TEST_OPERATOR_ID))
+                    .thenReturn(manager);
+        }
+
         @Test
         @DisplayName("删除内容 - 调用服务并写入DELETE_REPORTED审计日志")
         void handleDeleteContent_callsServiceAndWritesAuditLog() {
+            mockManagePermission();
+
             // when
             circleReportBizService.handleDeleteContent(TEST_REPORT_ID, TEST_OPERATOR_ID, TEST_CIRCLE_ID);
 
@@ -86,6 +104,22 @@ class CircleReportBizServiceTest {
             assertThat(capturedLog.getTargetType()).isEqualTo("REPORT");
             assertThat(capturedLog.getResult()).isEqualTo("SUCCESS");
         }
+
+        @Test
+        @DisplayName("操作人是普通成员 - 抛出权限不足异常")
+        void operatorIsMember_throwsPermissionError() {
+            CircleMember member = new CircleMember();
+            member.setRole(CircleMember.Role.MEMBER);
+            when(circleMemberService.findByCircleAndUser(TEST_CIRCLE_ID, TEST_OPERATOR_ID))
+                    .thenReturn(member);
+
+            assertThatThrownBy(() ->
+                    circleReportBizService.handleDeleteContent(TEST_REPORT_ID, TEST_OPERATOR_ID, TEST_CIRCLE_ID))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("权限不足，仅创建者和版主可管理举报");
+
+            verifyNoInteractions(circleReportService, circleAuditLogService);
+        }
     }
 
     // ==================== handleIgnore ====================
@@ -94,9 +128,18 @@ class CircleReportBizServiceTest {
     @DisplayName("handleIgnore - 忽略举报")
     class HandleIgnore {
 
+        private void mockManagePermission() {
+            CircleMember manager = new CircleMember();
+            manager.setRole(CircleMember.Role.MODERATOR);
+            when(circleMemberService.findByCircleAndUser(TEST_CIRCLE_ID, TEST_OPERATOR_ID))
+                    .thenReturn(manager);
+        }
+
         @Test
         @DisplayName("忽略举报 - 调用服务并写入IGNORE_REPORT审计日志")
         void handleIgnore_callsServiceAndWritesAuditLog() {
+            mockManagePermission();
+
             // when
             circleReportBizService.handleIgnore(TEST_REPORT_ID, TEST_OPERATOR_ID, TEST_CIRCLE_ID);
 
@@ -109,6 +152,22 @@ class CircleReportBizServiceTest {
             assertThat(capturedLog.getAction()).isEqualTo(CircleAuditActionEnum.IGNORE_REPORT.getCode());
             assertThat(capturedLog.getTargetType()).isEqualTo("REPORT");
         }
+
+        @Test
+        @DisplayName("操作人是普通成员 - 抛出权限不足异常")
+        void operatorIsMember_throwsPermissionError() {
+            CircleMember member = new CircleMember();
+            member.setRole(CircleMember.Role.MEMBER);
+            when(circleMemberService.findByCircleAndUser(TEST_CIRCLE_ID, TEST_OPERATOR_ID))
+                    .thenReturn(member);
+
+            assertThatThrownBy(() ->
+                    circleReportBizService.handleIgnore(TEST_REPORT_ID, TEST_OPERATOR_ID, TEST_CIRCLE_ID))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("权限不足，仅创建者和版主可管理举报");
+
+            verifyNoInteractions(circleReportService, circleAuditLogService);
+        }
     }
 
     // ==================== handleMute ====================
@@ -117,9 +176,18 @@ class CircleReportBizServiceTest {
     @DisplayName("handleMute - 禁言用户")
     class HandleMute {
 
+        private void mockManagePermission() {
+            CircleMember manager = new CircleMember();
+            manager.setRole(CircleMember.Role.CREATOR);
+            when(circleMemberService.findByCircleAndUser(TEST_CIRCLE_ID, TEST_OPERATOR_ID))
+                    .thenReturn(manager);
+        }
+
         @Test
         @DisplayName("禁言用户 - 调用服务并写入MUTE_FROM_REPORT审计日志")
         void handleMute_callsServiceAndWritesAuditLog() {
+            mockManagePermission();
+
             // when
             circleReportBizService.handleMute(TEST_REPORT_ID, TEST_OPERATOR_ID, TEST_CIRCLE_ID);
 
@@ -131,6 +199,22 @@ class CircleReportBizServiceTest {
             CircleAuditLog capturedLog = logCaptor.getValue();
             assertThat(capturedLog.getAction()).isEqualTo(CircleAuditActionEnum.MUTE_FROM_REPORT.getCode());
             assertThat(capturedLog.getTargetType()).isEqualTo("REPORT");
+        }
+
+        @Test
+        @DisplayName("操作人是普通成员 - 抛出权限不足异常")
+        void operatorIsMember_throwsPermissionError() {
+            CircleMember member = new CircleMember();
+            member.setRole(CircleMember.Role.MEMBER);
+            when(circleMemberService.findByCircleAndUser(TEST_CIRCLE_ID, TEST_OPERATOR_ID))
+                    .thenReturn(member);
+
+            assertThatThrownBy(() ->
+                    circleReportBizService.handleMute(TEST_REPORT_ID, TEST_OPERATOR_ID, TEST_CIRCLE_ID))
+                    .isInstanceOf(JeecgBootException.class)
+                    .hasMessage("权限不足，仅创建者和版主可管理举报");
+
+            verifyNoInteractions(circleReportService, circleAuditLogService);
         }
     }
 }

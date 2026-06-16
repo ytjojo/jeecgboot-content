@@ -60,7 +60,7 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted, defineAsyncComponent } from 'vue';
 import { Form, Button, Space, Tag, Divider, Table, Input, DatePicker, Modal, message } from 'ant-design-vue';
-const Tinymce = defineAsyncComponent(() => import('/@/components/Tinymce/index.vue'));
+const Tinymce = defineAsyncComponent(() => import('/@/components/Tinymce/index'));
 import {
   getAnnouncement,
   saveAnnouncement,
