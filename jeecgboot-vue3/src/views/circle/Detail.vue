@@ -102,7 +102,15 @@
           <!-- 内容区 Tab（动态/成员） -->
           <a-tabs class="detail-tabs">
             <a-tab-pane key="feed" tab="动态">
-              <a-empty description="暂无动态" />
+              <a-empty v-if="feedItems.length === 0" description="暂无动态" />
+              <div v-else class="feed-list">
+                <CircleContentCard
+                  v-for="item in feedItems"
+                  :key="item.id"
+                  :content="item"
+                  @governance-action="handleGovernanceAction"
+                />
+              </div>
             </a-tab-pane>
             <a-tab-pane key="members" tab="成员">
               <div class="member-preview">
@@ -162,6 +170,9 @@ import JoinStatusButton from './components/JoinStatusButton.vue';
 import MemberAvatar from './components/MemberAvatar.vue';
 import JoinCircleModal from './components/JoinCircleModal.vue';
 import GovernanceConfirmModal from './components/GovernanceConfirmModal.vue';
+import CircleContentCard from './components/CircleContentCard.vue';
+import type { CircleContentItem } from './components/CircleContentCard.vue';
+import { executeGovernance } from '/@/api/content/channel/governance';
 
 const route = useRoute();
 const router = useRouter();
@@ -177,6 +188,26 @@ const previewMembers = ref<CircleMemberVO[]>([]);
 const showApplyModal = ref(false);
 const showPasswordModal = ref(false);
 const showLeaveModal = ref(false);
+const feedItems = ref<CircleContentItem[]>([]);
+
+async function handleGovernanceAction(action: string, contentId: string) {
+  const actionMap: Record<string, string> = {
+    pin: "PIN",
+    unpin: "UNPIN",
+    feature: "FEATURE",
+    unfeature: "UNFEATURE",
+    delete: "DELETE",
+    move: "MOVE",
+  };
+  const govAction = actionMap[action];
+  if (!govAction) return;
+  try {
+    await executeGovernance({ contentId, channelId: circle.value!.id, action: govAction });
+    createMessage.success("操作成功");
+  } catch (e: any) {
+    createMessage.error(e?.message || "操作失败");
+  }
+}
 const passwordModalRef = ref();
 
 // 简介展开
@@ -444,6 +475,7 @@ onMounted(() => fetchDetail());
   }
 }
 
+.feed-list { display: flex; flex-direction: column; }
 .member-preview {
   display: flex;
   flex-direction: column;
