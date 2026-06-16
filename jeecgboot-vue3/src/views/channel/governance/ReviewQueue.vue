@@ -4,35 +4,73 @@
       <span>待审区</span>
       <Tag color="red" v-if="stats.timeoutCount > 0">超时 {{ stats.timeoutCount }}</Tag>
     </div>
-    <div class="filter-bar">
-      <Space>
-        <Select v-model:value="filter.contentType" placeholder="内容类型" allowClear style="width: 120px">
+    <!-- 桌面端：筛选栏 + 表格 -->
+    <div class="desktop-view">
+      <div class="filter-bar">
+        <Space>
+          <Select v-model:value="filter.contentType" placeholder="内容类型" allowClear style="width: 120px">
+            <Select.Option value="article">文章</Select.Option>
+            <Select.Option value="post">图文帖子</Select.Option>
+            <Select.Option value="video">视频</Select.Option>
+            <Select.Option value="note">笔记</Select.Option>
+            <Select.Option value="question">问答问题</Select.Option>
+          </Select>
+          <Input v-model:value="filter.keyword" placeholder="搜索" style="width: 200px" allowClear />
+        </Space>
+      </div>
+      <Table
+        :dataSource="reviewList"
+        :columns="columns"
+        :loading="loading"
+        :rowSelection="{ selectedRowKeys: selectedIds, onChange: onSelectChange }"
+        rowKey="id"
+        :row-class-name="rowClassName"
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'action'">
+            <Space>
+              <Button size="small" type="primary" @click="handleApprove(record.id)">通过</Button>
+              <Button size="small" danger class="reject-btn" @click="handleReject(record.id)">拒绝</Button>
+            </Space>
+          </template>
+        </template>
+      </Table>
+    </div>
+
+    <!-- 移动端：下拉筛选 + 卡片列表 -->
+    <div class="mobile-view">
+      <div class="mobile-filter">
+        <Select v-model:value="filter.contentType" placeholder="筛选类型" allowClear style="width: 100%">
           <Select.Option value="article">文章</Select.Option>
           <Select.Option value="post">图文帖子</Select.Option>
           <Select.Option value="video">视频</Select.Option>
           <Select.Option value="note">笔记</Select.Option>
           <Select.Option value="question">问答问题</Select.Option>
         </Select>
-        <Input v-model:value="filter.keyword" placeholder="搜索" style="width: 200px" allowClear />
-      </Space>
-    </div>
-    <Table
-      :dataSource="reviewList"
-      :columns="columns"
-      :loading="loading"
-      :rowSelection="{ selectedRowKeys: selectedIds, onChange: onSelectChange }"
-      rowKey="id"
-      :row-class-name="rowClassName"
-    >
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.key === 'action'">
-          <Space>
+      </div>
+      <a-spin :spinning="loading">
+        <div v-if="reviewList.length === 0" class="mobile-empty">
+          <a-empty description="暂无待审内容" />
+        </div>
+        <div v-for="record in reviewList" :key="record.id" class="review-card">
+          <div class="review-card-header">
+            <span class="review-card-title">{{ record.title }}</span>
+            <Tag color="orange" v-if="record.isTimeout">超时</Tag>
+          </div>
+          <div class="review-card-meta">
+            <span>{{ record.contentType || '-' }}</span>
+            <span>{{ record.submitter || '-' }}</span>
+            <span>{{ record.submitTime || '-' }}</span>
+          </div>
+          <div class="review-card-actions">
             <Button size="small" type="primary" @click="handleApprove(record.id)">通过</Button>
-            <Button size="small" danger class="reject-btn" @click="handleReject(record.id)">拒绝</Button>
-          </Space>
-        </template>
-      </template>
-    </Table>
+            <Button size="small" danger @click="handleReject(record.id)">拒绝</Button>
+          </div>
+        </div>
+      </a-spin>
+    </div>
+
+    <!-- 底部固定操作栏 -->
     <div class="batch-bar" v-if="selectedIds.length > 0">
       <Space>
         <span>已选 {{ selectedIds.length }} 条</span>
@@ -146,7 +184,62 @@ onUnmounted(() => clearInterval(statsTimer));
 .review-queue {
   .queue-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 600; }
   .filter-bar { margin-bottom: 12px; }
-  .batch-bar { position: sticky; bottom: 0; background: #fff; padding: 12px; border-top: 1px solid #e8e8e8; display: flex; justify-content: flex-end; }
+  .batch-bar { position: sticky; bottom: 0; background: #fff; padding: 12px; border-top: 1px solid #e8e8e8; display: flex; justify-content: flex-end; z-index: 10; }
   :deep(.timeout-row) { background: #fff2f0; }
+
+  .mobile-view { display: none; }
+
+  @media (max-width: 768px) {
+    .desktop-view { display: none; }
+    .mobile-view { display: block; }
+
+    .mobile-filter { margin-bottom: 12px; }
+
+    .review-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+
+      &-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      &-title {
+        font-size: 15px;
+        font-weight: 500;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      &-meta {
+        display: flex;
+        gap: 12px;
+        font-size: 12px;
+        color: #999;
+        margin-bottom: 10px;
+      }
+      &-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+    }
+
+    .mobile-empty { padding: 40px 0; }
+
+    .batch-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 16px;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+    }
+  }
 }
 </style>
