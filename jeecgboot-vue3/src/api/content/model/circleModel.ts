@@ -86,6 +86,8 @@ export interface CircleSearchReq {
 export interface CircleMemberVO {
   id: string;
   userId: string;
+  nickname?: string;
+  avatar?: string;
   role: MemberRole;
   status: MemberStatus;
   muteEndTime: string | null;
