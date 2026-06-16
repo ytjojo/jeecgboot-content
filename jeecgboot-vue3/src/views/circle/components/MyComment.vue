@@ -31,7 +31,6 @@ import { ref, computed, toRef } from 'vue';
 import { useMention } from '../composables/useMention';
 import type { MentionMember } from '../composables/useMention';
 import MentionMemberPicker from './MentionMemberPicker.vue';
-import { useMessage } from '/@/hooks/web/useMessage';
 
 const props = withDefaults(defineProps<{
   circleId: string;
@@ -46,7 +45,6 @@ const emit = defineEmits<{
   submit: [content: string];
 }>();
 
-const { createMessage } = useMessage();
 const containerRef = ref<HTMLElement | null>(null);
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
 const commentText = ref('');
