@@ -13,7 +13,25 @@
         <Input v-model:value="form.title" placeholder="请输入公告标题" />
       </Form.Item>
       <Form.Item label="公告内容">
-        <Tinymce v-model="form.content" :height="300" />
+        <Suspense>
+          <template #default>
+            <Tinymce v-model="form.content" :height="300" />
+          </template>
+          <template #fallback>
+            <div class="editor-loading">
+              <a-spin tip="编辑器加载中..." />
+            </div>
+          </template>
+        </Suspense>
+      </Form.Item>
+      <Form.Item label="有效期截止时间" required>
+        <DatePicker
+          v-model:value="form.expireAt"
+          show-time
+          value-format="YYYY-MM-DD HH:mm:ss"
+          placeholder="请选择截止时间"
+          style="width: 100%"
+        />
       </Form.Item>
     </Form>
 
@@ -40,9 +58,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue';
-import { Form, Button, Space, Tag, Divider, Table, Input, Modal, message } from 'ant-design-vue';
-import { Tinymce } from '/@/components/Tinymce';
+import { ref, reactive, onMounted, defineAsyncComponent } from 'vue';
+import { Form, Button, Space, Tag, Divider, Table, Input, DatePicker, Modal, message } from 'ant-design-vue';
+const Tinymce = defineAsyncComponent(() => import('/@/components/Tinymce/index.vue'));
 import {
   getAnnouncement,
   saveAnnouncement,
@@ -58,7 +76,7 @@ const announcement = ref<any>(null);
 const historyList = ref<any[]>([]);
 const historyLoading = ref(false);
 
-const form = reactive({ title: '', content: '' });
+const form = reactive({ title: '', content: '', expireAt: undefined as string | undefined });
 
 const historyColumns = [
   { title: '版本号', dataIndex: 'version', key: 'version', width: 80 },
@@ -75,6 +93,7 @@ const loadAnnouncement = async () => {
       announcement.value = res;
       form.title = res.title || '';
       form.content = res.content || '';
+      form.expireAt = res.expireAt || undefined as string | undefined;
     }
   } catch {
     // No existing announcement, keep form empty
@@ -114,6 +133,7 @@ const handleSaveDraft = async () => {
       channelId: props.channelId,
       title: form.title,
       content: form.content,
+      expireAt: form.expireAt,
       version: announcement.value?.version,
     });
     message.success('草稿已保存');
@@ -133,6 +153,7 @@ const handlePublish = () => {
           channelId: props.channelId,
           title: form.title,
           content: form.content,
+          expireAt: form.expireAt,
           version: announcement.value?.version,
         });
         message.success('公告已发布');
@@ -155,6 +176,7 @@ const handleDelete = () => {
         announcement.value = null;
         form.title = '';
         form.content = '';
+        form.expireAt = undefined;
         message.success('公告已删除');
         await loadHistory();
       } catch {

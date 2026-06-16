@@ -28,7 +28,6 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { Drawer, Descriptions, Tag, Empty } from 'ant-design-vue';
 import type { CircleReportVO } from '/@/api/content/circle/report';
 
 const props = defineProps<{

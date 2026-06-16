@@ -1,71 +1,77 @@
 <template>
   <div class="report-list-page">
-    <div class="report-header">
-      <h3>举报处理</h3>
-    </div>
-    <Tabs v-model:activeKey="activeTab" @change="onTabChange">
-      <Tabs.TabPane key="PENDING" tab="待处理" />
-      <Tabs.TabPane key="RESOLVED" tab="已处理" />
-      <Tabs.TabPane key="IGNORED" tab="已忽略" />
-    </Tabs>
-    <!-- 桌面端 -->
-    <div class="desktop-view">
-      <Table
-        :dataSource="reportList"
-        :columns="columns"
-        :loading="loading"
-        rowKey="id"
-      >
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'reason'">
-            <Tag>{{ record.reason }}</Tag>
-          </template>
-          <template v-else-if="column.key === 'status'">
-            <Tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</Tag>
-          </template>
-          <template v-else-if="column.key === 'action'">
-            <Space>
-              <Button size="small" @click="handleDetail(record)">查看</Button>
-              <Button v-if="record.status === 'PENDING'" size="small" type="primary" danger @click="handleDeleteContent(record)">
-                删除内容
-              </Button>
-              <Button v-if="record.status === 'PENDING'" size="small" @click="handleIgnoreReport(record)">
-                忽略
-              </Button>
-              <Button v-if="record.status === 'PENDING'" size="small" @click="handleMuteUser(record)">
-                禁言
-              </Button>
-            </Space>
-          </template>
-        </template>
-      </Table>
-    </div>
+    <!-- 无权限访问 -->
+    <a-result v-if="!hasPermission" status="403" title="无权限访问" sub-title="仅圈主和版主可以管理举报" />
 
-    <!-- 移动端 -->
-    <div class="mobile-view">
-      <a-spin :spinning="loading">
-        <a-empty v-if="reportList.length === 0" description="暂无举报" />
-        <ReportCard
-          v-for="report in reportList"
-          :key="report.id"
-          :report="report"
-          @detail="handleDetail"
-          @delete-content="handleDeleteContent"
-          @ignore="handleIgnoreReport"
-          @mute="handleMuteUser"
-        />
-      </a-spin>
-    </div>
+    <!-- 有权限 -->
+    <template v-else>
+      <div class="report-header">
+        <h3>举报处理</h3>
+      </div>
+      <Tabs v-model:activeKey="activeTab" @change="onTabChange">
+        <Tabs.TabPane key="PENDING" tab="待处理" />
+        <Tabs.TabPane key="RESOLVED" tab="已处理" />
+        <Tabs.TabPane key="IGNORED" tab="已忽略" />
+      </Tabs>
+      <!-- 桌面端 -->
+      <div class="desktop-view">
+        <Table
+          :dataSource="reportList"
+          :columns="columns"
+          :loading="loading"
+          rowKey="id"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'reason'">
+              <Tag>{{ record.reason }}</Tag>
+            </template>
+            <template v-else-if="column.key === 'status'">
+              <Tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</Tag>
+            </template>
+            <template v-else-if="column.key === 'action'">
+              <Space>
+                <Button size="small" @click="handleDetail(record)">查看</Button>
+                <Button v-if="record.status === 'PENDING'" size="small" type="primary" danger @click="handleDeleteContent(record)">
+                  删除内容
+                </Button>
+                <Button v-if="record.status === 'PENDING'" size="small" @click="handleIgnoreReport(record)">
+                  忽略
+                </Button>
+                <Button v-if="record.status === 'PENDING'" size="small" @click="handleMuteUser(record)">
+                  禁言
+                </Button>
+              </Space>
+            </template>
+          </template>
+        </Table>
+      </div>
 
-    <ReportDetailDrawer
-      v-model:visible="detailVisible"
-      :report="selectedReport"
-    />
+      <!-- 移动端 -->
+      <div class="mobile-view">
+        <a-spin :spinning="loading">
+          <a-empty v-if="reportList.length === 0" description="暂无举报" />
+          <ReportCard
+            v-for="report in reportList"
+            :key="report.id"
+            :report="report"
+            @detail="handleDetail"
+            @delete-content="handleDeleteContent"
+            @ignore="handleIgnoreReport"
+            @mute="handleMuteUser"
+          />
+        </a-spin>
+      </div>
+
+      <ReportDetailDrawer
+        v-model:visible="detailVisible"
+        :report="selectedReport"
+      />
+    </template>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { Tabs, Table, Button, Space, Tag, Modal, message } from 'ant-design-vue';
 import {
   getCircleReportList,
@@ -74,10 +80,14 @@ import {
   muteReportUser,
 } from '/@/api/content/circle/report';
 import type { CircleReportVO } from '/@/api/content/circle/report';
+import { useCircleStoreWithOut } from '/@/store/modules/circle';
 import ReportCard from './ReportCard.vue';
 import ReportDetailDrawer from './ReportDetailDrawer.vue';
 
 const props = defineProps<{ circleId: string }>();
+
+const circleStore = useCircleStoreWithOut();
+const hasPermission = computed(() => circleStore.canManageMember);
 
 const activeTab = ref('PENDING');
 const reportList = ref<CircleReportVO[]>([]);
@@ -185,7 +195,11 @@ function handleMuteUser(record: CircleReportVO) {
   });
 }
 
-onMounted(() => fetchList());
+onMounted(() => {
+  if (hasPermission.value) {
+    fetchList();
+  }
+});
 </script>
 
 <style lang="less" scoped>
