@@ -47,6 +47,7 @@
         :circle="circle"
         @click="goDetail(circle.id)"
         @join-success="handleJoinSuccess"
+        @governance="goGovernance"
       />
     </div>
 
@@ -167,6 +168,10 @@ function goCreate() {
 
 function goDetail(id: string) {
   router.push(`/circle/${id}`);
+}
+
+function goGovernance(id: string) {
+  router.push(`/channel/${id}/governance`);
 }
 
 // 加入/退出后刷新两个 Tab
