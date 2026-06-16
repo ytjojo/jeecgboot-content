@@ -30,7 +30,7 @@ description: "当用户完成开发变更后需要过程复盘时使用。触发
 
 ### openspec 完整模式
 前置校验 (`test -f` + `! grep -q 'FAIL'` verify.md) → 任一失败停止。
-输出：`openspec/changes/<change-name>/retrospective.md`
+输出：`openspec/changes/<name>/retrospective.md`
 
 ### 通用降级模式
 前置：git log 可识别提交范围。
@@ -86,19 +86,19 @@ grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 
 ### Step 3: 写入输出
 
-将完整内容写入 `retrospective.md`。具体格式参见 `template.md`。
+写入 `retrospective.md`，格式见 `template.md`。
 
 ---
 
 ## 跳过条件
 
-以下情况可跳过完整复盘。**必须同时满足条件 2 和 (条件 1 或 条件 3)**，单一条件不构成跳过理由：
+可跳过完整复盘（须条件 2 + (条件 1 或 3)）：
 
 1. 单提交的琐碎修复（linter fix、typo、格式调整）
 2. 变更量 < 10 行，且 `git diff` 不涉及 `*.java`/`*.ts`/`*.vue`/`*.py` 业务逻辑文件
 3. 纯粹的配置修改（`.yml`/`.properties`/`.env` 中无逻辑变更的配置项调整）
 
-跳过输出必须附带 `git diff --stat <base>..HEAD` 实际输出：
+跳过时必须输出 `git diff --stat` 结果：
 
 ```markdown
 # Retrospective: <change-name> — SKIPPED
@@ -112,7 +112,7 @@ grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 
 > 完整边界红线表、越界关键词清单和子串匹配指引见 `checklist.md` 中的「越界红线参考」和「越界扫描」段。
 
-以下内容绝对不能出现在 retrospective.md 中：
+禁止内容：
 - 代码质量、架构设计、设计文档、测试覆盖率、提交粒度、命名/风格
 - 每个领域有对应的「过程视角替代」，将 "代码写得不好" 转化为 "过程哪里出了问题"
 - 提交粒度判断规则：可评价「是否因未遵守 subagent 编排规则」，不可评价「提交内容本身的好坏」
@@ -129,7 +129,7 @@ grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 
 ## 向前指针策略
 
-事实变化时 **不重写** retrospective.md — 增加向前指针保留审计线索：
+不重写已有 retrospective.md，追加 Update 指针：
 ```markdown
 > **Update YYYY-MM-DD**：§X 中的 <声明> 已被 <链接> 取代
 ```
@@ -143,7 +143,7 @@ grep -A 5 '^- \[ \]' openspec/changes/archive/*/retrospective.md
 grep -A 5 '^- \[ \]' docs/review/*/retrospective.md
 ```
 
-逐条判断未勾选 candidate：仍相关 → carry-forward / 已过时 → stale / 可执行 → 勾选 `[x]`。
+未勾选 candidate 判断：仍相关 → carry-forward / 已过时 → stale / 可执行 → 勾选 `[x]`。
 
 ---
 
