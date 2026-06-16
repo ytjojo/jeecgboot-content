@@ -139,7 +139,7 @@ class UserStatusControllerWebMvcTest {
         void valid_returnsVO() throws Exception {
             when(userProfileMapper.selectByUserId("u1")).thenReturn(profile("u1", "NORMAL"));
 
-            mockMvc.perform(get("/api/content/user-status/current").param("userId", "u1"))
+            mockMvc.perform(get("/api/v1/content/user-status/current").param("userId", "u1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result.userId").value("u1"))
@@ -152,7 +152,7 @@ class UserStatusControllerWebMvcTest {
         void userNotFound_returnsBusinessError() throws Exception {
             when(userProfileMapper.selectByUserId("ghost")).thenReturn(null);
 
-            mockMvc.perform(get("/api/content/user-status/current").param("userId", "ghost"))
+            mockMvc.perform(get("/api/v1/content/user-status/current").param("userId", "ghost"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("用户资料不存在")));
@@ -163,7 +163,7 @@ class UserStatusControllerWebMvcTest {
         void dirtyStatus_shouldThrowJeecgBootException() throws Exception {
             when(userProfileMapper.selectByUserId("u1")).thenReturn(profile("u1", "INVALID_STATUS"));
 
-            mockMvc.perform(get("/api/content/user-status/current").param("userId", "u1"))
+            mockMvc.perform(get("/api/v1/content/user-status/current").param("userId", "u1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("用户状态值不合法")));
@@ -179,7 +179,7 @@ class UserStatusControllerWebMvcTest {
         void adminQuery_returnsVO() throws Exception {
             when(userProfileMapper.selectByUserId("u2")).thenReturn(profile("u2", "MUTED"));
 
-            mockMvc.perform(get("/api/content/user-status/u2"))
+            mockMvc.perform(get("/api/v1/content/user-status/u2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result.userId").value("u2"))
@@ -192,7 +192,7 @@ class UserStatusControllerWebMvcTest {
         void userNotFound_returnsBusinessError() throws Exception {
             when(userProfileMapper.selectByUserId("ghost")).thenReturn(null);
 
-            mockMvc.perform(get("/api/content/user-status/ghost"))
+            mockMvc.perform(get("/api/v1/content/user-status/ghost"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false));
         }
@@ -214,7 +214,7 @@ class UserStatusControllerWebMvcTest {
             req.setRemark("首次警告");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/u1/change")
+            mockMvc.perform(post("/api/v1/content/user-status/u1/change")
                     .param("operatorId", "admin001")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
@@ -241,7 +241,7 @@ class UserStatusControllerWebMvcTest {
             String body = objectMapper.writeValueAsString(req);
 
             // @Valid + @NotBlank 校验：reason 为空直接返回 400
-            mockMvc.perform(post("/api/content/user-status/u1/change")
+            mockMvc.perform(post("/api/v1/content/user-status/u1/change")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isBadRequest());
@@ -255,7 +255,7 @@ class UserStatusControllerWebMvcTest {
             String body = objectMapper.writeValueAsString(req);
 
             // @Valid + @NotNull 校验：toStatus 为空直接返回 400
-            mockMvc.perform(post("/api/content/user-status/u1/change")
+            mockMvc.perform(post("/api/v1/content/user-status/u1/change")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isBadRequest());
@@ -271,7 +271,7 @@ class UserStatusControllerWebMvcTest {
             req.setReason("违规");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/ghost/change")
+            mockMvc.perform(post("/api/v1/content/user-status/ghost/change")
                     .param("operatorId", "admin001")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
@@ -293,7 +293,7 @@ class UserStatusControllerWebMvcTest {
             req.setReason("违规");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/u1/change")
+            mockMvc.perform(post("/api/v1/content/user-status/u1/change")
                     .param("operatorId", "admin001")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
@@ -320,7 +320,7 @@ class UserStatusControllerWebMvcTest {
             req.setReason("违规");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/u1/change")
+            mockMvc.perform(post("/api/v1/content/user-status/u1/change")
                     .param("operatorId", "admin001")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
@@ -348,7 +348,7 @@ class UserStatusControllerWebMvcTest {
                 .setCreatedAt(new Date());
             when(auditLogService.queryByUserId("u1")).thenReturn(List.of(log));
 
-            mockMvc.perform(get("/api/content/user-status/u1/history"))
+            mockMvc.perform(get("/api/v1/content/user-status/u1/history"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result[0].logId").value("log-1"))
@@ -363,7 +363,7 @@ class UserStatusControllerWebMvcTest {
         void noHistory_returnsEmptyList() throws Exception {
             when(auditLogService.queryByUserId("u1")).thenReturn(List.of());
 
-            mockMvc.perform(get("/api/content/user-status/u1/history"))
+            mockMvc.perform(get("/api/v1/content/user-status/u1/history"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result").isArray())
@@ -385,7 +385,7 @@ class UserStatusControllerWebMvcTest {
             req.setReason("管理员人工解禁");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/u1/release")
+            mockMvc.perform(post("/api/v1/content/user-status/u1/release")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isOk())
@@ -411,7 +411,7 @@ class UserStatusControllerWebMvcTest {
             String body = objectMapper.writeValueAsString(req);
 
             // @Valid + @NotBlank 校验：reason 为空直接返回 400
-            mockMvc.perform(post("/api/content/user-status/u1/release")
+            mockMvc.perform(post("/api/v1/content/user-status/u1/release")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isBadRequest());
@@ -427,7 +427,7 @@ class UserStatusControllerWebMvcTest {
             req.setReason("解禁");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/ghost/release")
+            mockMvc.perform(post("/api/v1/content/user-status/ghost/release")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isOk())
@@ -448,7 +448,7 @@ class UserStatusControllerWebMvcTest {
         @Test
         @DisplayName("合法状态 → 返回允许转换的状态集合")
         void validStatus_returnsAllowedTransitions() throws Exception {
-            mockMvc.perform(get("/api/content/user-status/transitions/NORMAL"))
+            mockMvc.perform(get("/api/v1/content/user-status/transitions/NORMAL"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result").isArray())
@@ -458,7 +458,7 @@ class UserStatusControllerWebMvcTest {
         @Test
         @DisplayName("FROZEN 状态 → 返回 NORMAL 和 BANNED")
         void frozenStatus_returnsNormalAndBanned() throws Exception {
-            mockMvc.perform(get("/api/content/user-status/transitions/FROZEN"))
+            mockMvc.perform(get("/api/v1/content/user-status/transitions/FROZEN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result").isArray())
@@ -468,7 +468,7 @@ class UserStatusControllerWebMvcTest {
         @Test
         @DisplayName("DEACTIVATED 状态 → 返回空集合（终态）")
         void deactivatedStatus_returnsEmptySet() throws Exception {
-            mockMvc.perform(get("/api/content/user-status/transitions/DEACTIVATED"))
+            mockMvc.perform(get("/api/v1/content/user-status/transitions/DEACTIVATED"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result").isArray())
@@ -478,7 +478,7 @@ class UserStatusControllerWebMvcTest {
         @Test
         @DisplayName("非法状态名 → 业务错误")
         void invalidStatus_returnsBusinessError() throws Exception {
-            mockMvc.perform(get("/api/content/user-status/transitions/INVALID"))
+            mockMvc.perform(get("/api/v1/content/user-status/transitions/INVALID"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("用户状态值不合法")));
@@ -502,7 +502,7 @@ class UserStatusControllerWebMvcTest {
                     return page;
                 });
 
-            mockMvc.perform(get("/api/content/user-status/list")
+            mockMvc.perform(get("/api/v1/content/user-status/list")
                     .param("page", "1")
                     .param("pageSize", "10"))
                 .andExpect(status().isOk())
@@ -520,7 +520,7 @@ class UserStatusControllerWebMvcTest {
                     return page;
                 });
 
-            mockMvc.perform(get("/api/content/user-status/list")
+            mockMvc.perform(get("/api/v1/content/user-status/list")
                     .param("status", "MUTED")
                     .param("page", "1")
                     .param("pageSize", "10"))
@@ -544,7 +544,7 @@ class UserStatusControllerWebMvcTest {
                     return page;
                 });
 
-            mockMvc.perform(get("/api/content/user-status/list")
+            mockMvc.perform(get("/api/v1/content/user-status/list")
                     .param("userId", "u1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
@@ -567,7 +567,7 @@ class UserStatusControllerWebMvcTest {
             req.setPhone("13800138000");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/send-verify-code")
+            mockMvc.perform(post("/api/v1/content/user-status/send-verify-code")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isOk())
@@ -586,7 +586,7 @@ class UserStatusControllerWebMvcTest {
             req.setPhone("13800138000");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/send-verify-code")
+            mockMvc.perform(post("/api/v1/content/user-status/send-verify-code")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isOk())
@@ -604,7 +604,7 @@ class UserStatusControllerWebMvcTest {
             String body = objectMapper.writeValueAsString(req);
 
             // @Valid + @NotBlank 校验：phone 为空直接返回 400
-            mockMvc.perform(post("/api/content/user-status/send-verify-code")
+            mockMvc.perform(post("/api/v1/content/user-status/send-verify-code")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isBadRequest());
@@ -631,7 +631,7 @@ class UserStatusControllerWebMvcTest {
             req.setVerifyCode("123456");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/verify-security")
+            mockMvc.perform(post("/api/v1/content/user-status/verify-security")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isOk())
@@ -661,7 +661,7 @@ class UserStatusControllerWebMvcTest {
             req.setVerifyCode("999999");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/verify-security")
+            mockMvc.perform(post("/api/v1/content/user-status/verify-security")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isOk())
@@ -681,7 +681,7 @@ class UserStatusControllerWebMvcTest {
             req.setVerifyCode("123456");
             String body = objectMapper.writeValueAsString(req);
 
-            mockMvc.perform(post("/api/content/user-status/verify-security")
+            mockMvc.perform(post("/api/v1/content/user-status/verify-security")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(body))
                 .andExpect(status().isOk())
@@ -706,7 +706,7 @@ class UserStatusControllerWebMvcTest {
                     return page;
                 });
 
-            mockMvc.perform(get("/api/content/user-status/audit-logs")
+            mockMvc.perform(get("/api/v1/content/user-status/audit-logs")
                     .param("page", "1")
                     .param("pageSize", "10"))
                 .andExpect(status().isOk())
@@ -728,7 +728,7 @@ class UserStatusControllerWebMvcTest {
                     return page;
                 });
 
-            mockMvc.perform(get("/api/content/user-status/audit-logs")
+            mockMvc.perform(get("/api/v1/content/user-status/audit-logs")
                     .param("userId", "u1")
                     .param("operatorType", "ADMIN")
                     .param("page", "1")
@@ -760,7 +760,7 @@ class UserStatusControllerWebMvcTest {
                 .setCreatedAt(new Date());
             when(auditLogMapper.selectById("log-1")).thenReturn(log);
 
-            mockMvc.perform(get("/api/content/user-status/audit-logs/log-1"))
+            mockMvc.perform(get("/api/v1/content/user-status/audit-logs/log-1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result.logId").value("log-1"))
@@ -774,7 +774,7 @@ class UserStatusControllerWebMvcTest {
         void logNotFound_returnsBusinessError() throws Exception {
             when(auditLogMapper.selectById("ghost")).thenReturn(null);
 
-            mockMvc.perform(get("/api/content/user-status/audit-logs/ghost"))
+            mockMvc.perform(get("/api/v1/content/user-status/audit-logs/ghost"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("审计日志不存在")));
@@ -793,7 +793,7 @@ class UserStatusControllerWebMvcTest {
             when(userProfileMapper.selectByUserId("u1")).thenReturn(profile("u1", "MUTED"));
             when(userProfileMapper.selectByUserId("u2")).thenReturn(profile("u2", "FROZEN"));
 
-            mockMvc.perform(post("/api/content/user-status/batch-release")
+            mockMvc.perform(post("/api/v1/content/user-status/batch-release")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(Arrays.asList("u1", "u2")))
                     .param("reason", "批量解禁")
@@ -815,7 +815,7 @@ class UserStatusControllerWebMvcTest {
             when(userProfileMapper.selectByUserId("u1")).thenReturn(profile("u1", "MUTED"));
             when(userProfileMapper.selectByUserId("ghost")).thenReturn(null);
 
-            mockMvc.perform(post("/api/content/user-status/batch-release")
+            mockMvc.perform(post("/api/v1/content/user-status/batch-release")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(Arrays.asList("u1", "ghost")))
                     .param("reason", "批量解禁")
@@ -830,7 +830,7 @@ class UserStatusControllerWebMvcTest {
         @Test
         @DisplayName("空列表 → 业务错误")
         void emptyList_returnsBusinessError() throws Exception {
-            mockMvc.perform(post("/api/content/user-status/batch-release")
+            mockMvc.perform(post("/api/v1/content/user-status/batch-release")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("[]")
                     .param("reason", "批量解禁")
@@ -849,7 +849,7 @@ class UserStatusControllerWebMvcTest {
                 .when(bizManageService).changeStatus(
                     eq("u1"), any(), any(), any(), any(), any(), any());
 
-            mockMvc.perform(post("/api/content/user-status/batch-release")
+            mockMvc.perform(post("/api/v1/content/user-status/batch-release")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(Arrays.asList("u1", "u2")))
                     .param("reason", "批量解禁")
@@ -874,7 +874,7 @@ class UserStatusControllerWebMvcTest {
         void noFilters_returnsLogList() throws Exception {
             when(auditLogMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(List.of());
 
-            mockMvc.perform(get("/api/content/user-status/audit-logs/export"))
+            mockMvc.perform(get("/api/v1/content/user-status/audit-logs/export"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.result").isArray());
@@ -890,7 +890,7 @@ class UserStatusControllerWebMvcTest {
                 .setToStatus("MUTED");
             when(auditLogMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(List.of(log));
 
-            mockMvc.perform(get("/api/content/user-status/audit-logs/export")
+            mockMvc.perform(get("/api/v1/content/user-status/audit-logs/export")
                     .param("userId", "u1")
                     .param("format", "csv"))
                 .andExpect(status().isOk())
@@ -924,7 +924,7 @@ class UserStatusControllerWebMvcTest {
                     return page;
                 });
 
-            mockMvc.perform(get("/api/content/user-status/users/u1/audit-logs")
+            mockMvc.perform(get("/api/v1/content/user-status/users/u1/audit-logs")
                     .param("page", "1")
                     .param("pageSize", "10"))
                 .andExpect(status().isOk())
@@ -944,7 +944,7 @@ class UserStatusControllerWebMvcTest {
                     return page;
                 });
 
-            mockMvc.perform(get("/api/content/user-status/users/u1/audit-logs"))
+            mockMvc.perform(get("/api/v1/content/user-status/users/u1/audit-logs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
         }
