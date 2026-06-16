@@ -102,13 +102,20 @@
           <!-- 内容区 Tab（动态/成员） -->
           <a-tabs class="detail-tabs">
             <a-tab-pane key="feed" tab="动态">
+              <!-- 公告栏 -->
+              <CircleAnnouncementBar
+                v-if="circle"
+                :circle-id="circle.id"
+                ref="announcementBarRef"
+                @manage="showAnnouncementManage = true"
+              />
               <a-empty v-if="feedItems.length === 0" description="暂无动态" />
               <div v-else class="feed-list">
                 <CircleContentCard
                   v-for="item in feedItems"
                   :key="item.id"
                   :content="item"
-                  @governance-action="handleGovernanceAction"
+                  @action="handleContentAction"
                 />
               </div>
             </a-tab-pane>
@@ -154,6 +161,14 @@
       :member-name="circle?.name"
       @confirm="confirmLeave"
     />
+
+    <!-- 公告管理弹窗 -->
+    <CircleAnnouncementManage
+      v-model:visible="showAnnouncementManage"
+      :circle-id="circle?.id ?? ''"
+      @published="handleAnnouncementPublished"
+      @deleted="handleAnnouncementDeleted"
+    />
   </div>
 </template>
 
@@ -172,7 +187,9 @@ import JoinCircleModal from './components/JoinCircleModal.vue';
 import GovernanceConfirmModal from './components/GovernanceConfirmModal.vue';
 import CircleContentCard from './components/CircleContentCard.vue';
 import type { CircleContentItem } from './components/CircleContentCard.vue';
-import { executeGovernance } from '/@/api/content/channel/governance';
+import CircleAnnouncementBar from './components/CircleAnnouncementBar.vue';
+import CircleAnnouncementManage from './components/CircleAnnouncementManage.vue';
+import { togglePin, toggleFeatured } from '/@/api/content/circle/content';
 
 const route = useRoute();
 const router = useRouter();
@@ -188,26 +205,71 @@ const previewMembers = ref<CircleMemberVO[]>([]);
 const showApplyModal = ref(false);
 const showPasswordModal = ref(false);
 const showLeaveModal = ref(false);
+const showAnnouncementManage = ref(false);
 const feedItems = ref<CircleContentItem[]>([]);
 
-async function handleGovernanceAction(action: string, contentId: string) {
-  const actionMap: Record<string, string> = {
-    pin: "PIN",
-    unpin: "UNPIN",
-    feature: "FEATURE",
-    unfeature: "UNFEATURE",
-    delete: "DELETE",
-    move: "MOVE",
-  };
-  const govAction = actionMap[action];
-  if (!govAction) return;
+const announcementBarRef = ref<InstanceType<typeof CircleAnnouncementBar>>();
+const actionLoading = ref<Record<string, boolean>>({});
+
+async function handleContentAction(action: string, contentId: string) {
+  const circleId = circle.value!.id;
+  const loadingKey = `${action}-${contentId}`;
+  actionLoading.value[loadingKey] = true;
+
   try {
-    await executeGovernance({ contentId, channelId: circle.value!.id, action: govAction });
-    createMessage.success("操作成功");
+    switch (action) {
+      case 'pin':
+        await togglePin(contentId, circleId);
+        createMessage.success('已置顶');
+        break;
+      case 'unpin':
+        await togglePin(contentId, circleId);
+        createMessage.success('已取消置顶');
+        break;
+      case 'feature':
+        await toggleFeatured(contentId, circleId);
+        createMessage.success('已标记精华');
+        break;
+      case 'unfeature':
+        await toggleFeatured(contentId, circleId);
+        createMessage.success('已取消精华');
+        break;
+      case 'report':
+        // 举报逻辑——打开 ReportModal（Phase 6 W3 实现）
+        createMessage.info('举报功能开发中');
+        break;
+      case 'delete':
+        createMessage.info('删除功能开发中');
+        break;
+      default:
+        createMessage.warning('未知操作');
+    }
+    // 刷新内容列表
+    await fetchFeedItems();
   } catch (e: any) {
-    createMessage.error(e?.message || "操作失败");
+    createMessage.error(e?.message || '操作失败，请重试');
+  } finally {
+    delete actionLoading.value[loadingKey];
   }
 }
+
+function handleAnnouncementPublished() {
+  announcementBarRef.value?.refresh();
+}
+
+function handleAnnouncementDeleted() {
+  announcementBarRef.value?.refresh();
+}
+
+async function fetchFeedItems() {
+  try {
+    // 降级为空列表，后续对接 GET /api/v1/content/circle/{circleId}/posts
+    feedItems.value = [];
+  } catch {
+    feedItems.value = [];
+  }
+}
+
 const passwordModalRef = ref();
 
 // 简介展开

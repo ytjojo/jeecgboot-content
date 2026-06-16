@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { getActiveCircleAnnouncement } from '/@/api/content/circle/announcement';
 import type { CircleAnnouncementVO } from '/@/api/content/circle/model/circleAnnouncementModel';
 
@@ -36,10 +36,19 @@ const props = defineProps<{
 
 const announcement = ref<CircleAnnouncementVO | null>(null);
 const collapsed = ref(true);
+let expiryTimer: ReturnType<typeof setInterval> | null = null;
 
 const needsToggle = computed(() => {
   return (announcement.value?.content?.length ?? 0) > 150;
 });
+
+function checkExpiry() {
+  if (announcement.value?.expireAt) {
+    if (Date.now() > new Date(announcement.value.expireAt).getTime()) {
+      announcement.value = null;
+    }
+  }
+}
 
 async function loadAnnouncement() {
   try {
@@ -64,7 +73,25 @@ async function loadAnnouncement() {
   }
 }
 
-onMounted(() => loadAnnouncement());
+// 外部可调用刷新（如发布/删除公告后）
+function refresh() {
+  loadAnnouncement();
+}
+
+defineExpose({ refresh });
+
+onMounted(() => {
+  loadAnnouncement();
+  // 每 60 秒检查一次是否过期
+  expiryTimer = setInterval(checkExpiry, 60000);
+});
+
+onUnmounted(() => {
+  if (expiryTimer) {
+    clearInterval(expiryTimer);
+    expiryTimer = null;
+  }
+});
 </script>
 
 <style lang="less" scoped>

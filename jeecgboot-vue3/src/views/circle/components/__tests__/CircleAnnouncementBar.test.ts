@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import CircleAnnouncementBar from '../CircleAnnouncementBar.vue';
@@ -55,7 +55,6 @@ describe('CircleAnnouncementBar', () => {
     });
 
     const wrapper = mountBar();
-    // 等待 API 返回
     await vi.dynamicImportSettled();
     await nextTick();
     await nextTick();
@@ -104,5 +103,50 @@ describe('CircleAnnouncementBar', () => {
     await nextTick();
 
     expect(wrapper.find('.alert-stub').exists()).toBe(false);
+  });
+
+  // 5. 已过期公告不应展示
+  it('已过期公告不应展示', async () => {
+    const pastExpireAt = new Date(Date.now() - 10000).toISOString();
+    mockGetActive.mockResolvedValue({
+      id: 'a1',
+      circleId: 'circle-1',
+      content: '过期公告',
+      expireAt: pastExpireAt,
+    });
+
+    const wrapper = mountBar();
+    await vi.dynamicImportSettled();
+    await nextTick();
+    await nextTick();
+
+    expect(wrapper.find('.alert-stub').exists()).toBe(false);
+  });
+
+  // 6. refresh() 方法可被外部调用
+  it('refresh() 可刷新公告内容', async () => {
+    // 首次加载：无公告
+    mockGetActive.mockResolvedValue(null);
+    const wrapper = mountBar();
+    await vi.dynamicImportSettled();
+    await nextTick();
+    expect(wrapper.find('.alert-stub').exists()).toBe(false);
+
+    // 模拟新公告发布后调用 refresh
+    mockGetActive.mockResolvedValue({
+      id: 'a3',
+      circleId: 'circle-1',
+      content: '新公告',
+      expireAt: null,
+    });
+
+    // 调用 expose 的 refresh 方法
+    (wrapper.vm as any).refresh();
+    await vi.dynamicImportSettled();
+    await nextTick();
+    await nextTick();
+
+    expect(wrapper.find('.alert-stub').exists()).toBe(true);
+    expect(wrapper.text()).toContain('新公告');
   });
 });

@@ -12,20 +12,18 @@
         <span>{{ content.publishTime }}</span>
       </div>
     </div>
-    <div class="content-actions" v-if="isAdmin">
-      <GovernanceActionMenu
+    <div class="content-actions">
+      <CircleContentActionMenu
         :is-pinned="!!content.isPinned"
         :is-featured="!!content.isFeatured"
-        @action="$emit('governanceAction', $event, content.id)"
+        @action="$emit('action', $event, content.id)"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
-import GovernanceActionMenu from '/@/views/channel/components/GovernanceActionMenu.vue';
-import { useCircleStoreWithOut } from '/@/store/modules/circle';
+import CircleContentActionMenu from './CircleContentActionMenu.vue';
 
 export interface CircleContentItem {
   id: string;
@@ -37,16 +35,13 @@ export interface CircleContentItem {
   isFeatured?: boolean;
 }
 
-const props = defineProps<{
+defineProps<{
   content: CircleContentItem;
 }>();
 
 defineEmits<{
-  governanceAction: [action: string, contentId: string];
+  action: [action: string, contentId: string];
 }>();
-
-const circleStore = useCircleStoreWithOut();
-const isAdmin = computed(() => circleStore.isCreator || circleStore.isModerator);
 </script>
 
 <style lang="less" scoped>
