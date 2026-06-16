@@ -24,4 +24,12 @@ public interface ICircleAnnouncementService extends IService<CircleAnnouncement>
      * @return 有效公告，无则返回null
      */
     CircleAnnouncement getActiveByCircleId(String circleId);
+
+    /**
+     * 查询圈子历史公告（状态为 INACTIVE），按创建时间倒序
+     *
+     * @param circleId 圈子ID
+     * @return 历史公告列表
+     */
+    java.util.List<CircleAnnouncement> getHistoryByCircleId(String circleId);
 }

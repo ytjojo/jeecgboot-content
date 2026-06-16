@@ -16,6 +16,9 @@ import org.jeecg.modules.content.circle.vo.CircleAnnouncementVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * 圈子公告控制器。
  */
@@ -59,5 +62,18 @@ public class CircleAnnouncementController {
         CircleAnnouncementVO vo = new CircleAnnouncementVO();
         BeanUtils.copyProperties(announcement, vo);
         return Result.OK(vo);
+    }
+
+    @Operation(summary = "获取圈子历史公告列表")
+    @GetMapping("/history/{circleId}")
+    public Result<List<CircleAnnouncementVO>> getHistory(
+            @PathVariable @Parameter(description = "圈子ID") String circleId) {
+        List<CircleAnnouncement> list = circleAnnouncementService.getHistoryByCircleId(circleId);
+        List<CircleAnnouncementVO> vos = list.stream().map(a -> {
+            CircleAnnouncementVO vo = new CircleAnnouncementVO();
+            BeanUtils.copyProperties(a, vo);
+            return vo;
+        }).collect(Collectors.toList());
+        return Result.OK(vos);
     }
 }

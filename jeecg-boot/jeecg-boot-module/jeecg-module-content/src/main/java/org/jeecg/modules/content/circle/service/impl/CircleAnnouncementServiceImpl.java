@@ -34,4 +34,13 @@ public class CircleAnnouncementServiceImpl extends ServiceImpl<CircleAnnouncemen
     public CircleAnnouncement getActiveByCircleId(String circleId) {
         return baseMapper.selectActiveByCircleId(circleId);
     }
+
+    @Override
+    public java.util.List<CircleAnnouncement> getHistoryByCircleId(String circleId) {
+        return lambdaQuery()
+                .eq(CircleAnnouncement::getCircleId, circleId)
+                .eq(CircleAnnouncement::getStatus, "INACTIVE")
+                .orderByDesc(CircleAnnouncement::getCreateTime)
+                .list();
+    }
 }
