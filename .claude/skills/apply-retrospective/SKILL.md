@@ -43,7 +43,7 @@ description: "当用户完成开发变更后需要过程复盘时使用。触发
 - `verify.md` → §0 验证状态 | `git log <base>..HEAD` → §0 量化数据
 
 ### 通用降级模式
-- `git log <base>..HEAD` → §0 量化数据 | 对话上下文 → 任务目标、计划（如有）
+- `git log <base>..HEAD` → §0 量化数据 | 对话上下文 → 任务目标、计划（如有）+ §7 调度记录 + §8 阶段信息 + §9 操作序列
 
 > 所有 openspec 文件路径前缀为 `openspec/changes/<name>/`。
 
@@ -62,12 +62,18 @@ grep -cE '^\s*- \[x\]' openspec/changes/<name>/tasks.md   # 仅 openspec
 grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 ```
 
+# §7 agent dispatch: 从对话上下文提取 subagent 调度记录（agent 类型、目的、时序、边界遵守情况）
+# §8 session workflow: 从对话上下文 + commit 时间戳提取阶段信息
+# §9 git worktree:
+git worktree list
+git log --oneline --graph <base>..HEAD
+
 > `Active hours`：从提交时间戳首尾间隔估算，标注 `(估算)`
 > `Subagent dispatches`：从对话上下文提取创建的子代理次数，标注 `(上下文提取)` 或 `n/a`
 
 按 `template.md` 中的 **§0 Evidence** 格式汇总。条目可根据实际情况动态增删。
 
-### Step 2: 分析 → 编写 §1–§6
+### Step 2: 分析 → 编写 §1–§9
 
 按 `template.md` 中对应章节格式编写：
 
@@ -79,6 +85,9 @@ grep -cE '^\s*- \[ \]' openspec/changes/<name>/tasks.md   # 仅 openspec
 | §4 Skill compliance | apply 阶段技能合规 + 跳过三问 | 标注无 schema 跳过 |
 | §5 Surprises | 被证伪的假设 | 不变 |
 | §6 Promote candidates | 晋升候选（Why/How to apply） | 不变 |
+| §7 Agent dispatch | agent 调度编排回顾（dispatch log + 四维分析） | 无 agent dispatch 时写占位 |
+| §8 Session recap | 整个 session 的高层时间线总结 + 摘要 | 不变 |
+| §9 Git worktree | worktree 生命周期操作正确性 | 无 worktree 时写占位 |
 
 **§4 注意事项**：仅列出 apply 阶段技能（从 schema 动态获取）。每个 ✗ 回答三问（What/Why/How to prevent）。Why 必须引用具体 trigger（git log --stat 或规则原文），禁止模糊理由（完整禁止清单见 checklist.md §4）。
 

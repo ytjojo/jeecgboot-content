@@ -145,4 +145,76 @@ Commit chain (时序) — `git log --oneline <base>..HEAD` 输出:
 | **schema** | 修改 openspec 工作流定义 | 流程层面的改进 |
 | **skill** | 改进现有技能定义 | 技能描述不够精确 |
 | **one-off** | 仅记录，不晋升 | 确认是一次性事件 |
+
+---
+
+## §7 Agent dispatch orchestration
+
+> 回顾 subagent 调度编排的合理性。
+
+### Dispatch log
+
+| # | Agent type | Purpose | Timing | Boundary respected? | Notes |
+|---|-----------|---------|--------|---------------------|-------|
+| 1 | `<type>` | `<task description>` | `<phase>` | ✓/✗ | `<optional note>` |
+
+### Analysis
+
+- **Parallel opportunities**: <是否有多 agent 可并行但被串行化了？或 parallel 用得好？>
+- **Type appropriateness**: <agent 类型选择是否合适？有无用错 agent 类型的情况？>
+- **Boundary violations**: <是否有 agent 越界操作（如只读 agent 尝试写代码）？>
+- **Count efficiency**: <agent 数量是否合理？有无过度拆分（N 个 agent 做一件事）或过度集中（1 个 agent 做 N 件事）？>
+
+> 若无 agent dispatch：写 `(本次变更未使用 subagent，通过主 agent 直接完成)`。
+
+---
+
+## §8 Session workflow recap
+
+> 整个 session 的高层时间线总结，为 §0 提供叙事背景。
+
+### Timeline
+
+| Phase | Approx time | Duration | Key events / decisions |
+|-------|-------------|----------|------------------------|
+| `<plan/implement/review/verify/merge>` | `<HH:MM>` | `<估算耗时>` | `<关键事件或决策点>` |
+
+### Flow quality
+
+- **Workflow adherence**: <是否按标准流程执行？有无跳过关键阶段？>
+- **Pivots**: <过程中是否有重大方向调整或策略变更？>
+- **Blockers**: <是否有阻塞事件？如何解决的？>
+
+> **摘要**：<用 3-5 句话简述本次 session 从头到尾做了什么，什么阶段花了最多时间，是否顺利>。
+
+---
+
+## §9 Git worktree operations
+
+> 回顾 worktree 生命周期操作的正确性。关注操作过程而非 commit 内容。
+
+### Worktree lifecycle
+
+- **Worktree name**: `<name>` (预期格式: `<描述>-<6位hex>`, 如 `circle-gov-7b9e4d`)
+- **Owner file**: ✓ 已创建 / ✗ 未创建 / n/a
+- **Created from branch**: `<source branch>`
+- **Merged to**: `<target branch>` (预期: 与 source branch 一致，禁止跨分支合并)
+- **Cleanup**: ✓ 已清理 / ✗ 未清理 / n/a（说明原因）
+- **Cherry-pick operations**: <列表 or "none">
+
+### Commit topology
+
+```
+<git log --oneline --graph <base>..HEAD 输出>
+```
+
+### Operation quality
+
+- **Name convention**: ✓/✗ — <是否符合 `<描述>-<6位hex>` 格式>
+- **Owner file compliance**: ✓/✗ — <创建 worktree 后是否立即写入 .worktree-owner>
+- **Merge target correctness**: ✓/✗ — <是否合到正确分支（source branch = target branch）>
+- **Cleanup completeness**: ✓/✗ — <是否遗留未清理的 worktree>
+- **Commit process anomalies**: <是否有意外 rebase、amend、cherry-pick 等操作？如有，描述操作和原因>
+
+> 若无 worktree 操作：写 `(本次变更未使用 worktree)`。
 ```
