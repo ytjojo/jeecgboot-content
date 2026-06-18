@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -144,6 +145,31 @@ public class MemberGrowthServiceImpl extends ServiceImpl<CircleMemberGrowthMappe
                 .sum();
         vo.setTodayExp(todayExp);
         vo.setDailyExpLimit(GrowthConstant.DAILY_EXP_CAP);
+
+        // 最近获得的徽章（最多3枚）
+        LambdaQueryWrapper<CircleMemberAchievement> badgeQw = new LambdaQueryWrapper<>();
+        badgeQw.eq(CircleMemberAchievement::getCircleId, circleId)
+               .eq(CircleMemberAchievement::getUserId, userId)
+               .eq(CircleMemberAchievement::getRevoked, false)
+               .orderByDesc(CircleMemberAchievement::getCreateTime)
+               .last("LIMIT 3");
+        List<CircleMemberAchievement> recentEarned = memberAchievementMapper.selectList(badgeQw);
+        List<AchievementVO> recentBadges = new ArrayList<>();
+        for (CircleMemberAchievement ma : recentEarned) {
+            CircleAchievement def = achievementMapper.selectOne(
+                    new LambdaQueryWrapper<CircleAchievement>()
+                            .eq(CircleAchievement::getAchievementType, ma.getAchievementType()));
+            if (def != null) {
+                AchievementVO badgeVo = new AchievementVO();
+                badgeVo.setAchievementType(def.getAchievementType());
+                badgeVo.setName(def.getName());
+                badgeVo.setDescription(def.getDescription());
+                badgeVo.setIconUrl(def.getIconUrl());
+                badgeVo.setEarned(true);
+                recentBadges.add(badgeVo);
+            }
+        }
+        vo.setRecentBadges(recentBadges);
 
         return vo;
     }

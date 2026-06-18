@@ -3,6 +3,8 @@ package org.jeecg.modules.content.user.growth.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Schema(description = "成员成长信息")
 public class MemberGrowthVO {
