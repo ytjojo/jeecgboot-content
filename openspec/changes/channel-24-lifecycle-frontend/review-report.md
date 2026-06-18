@@ -117,14 +117,14 @@ PRD 第 5.4 节"生命周期管理 API"列出了 11 个操作 API，但缺少两
 
 | 功能 | 前端 PRD 路径 | 后端实际路径 | 匹配 |
 |------|-------------|-------------|------|
-| 冻结 | `POST /channel/{channelId}/lifecycle/freeze` | `POST /api/v1/content/channel/lifecycle/freeze` | ❌ |
-| 解冻 | `POST /channel/{channelId}/lifecycle/unfreeze` | `POST /api/v1/content/channel/lifecycle/unfreeze` | ❌ |
-| 限制推荐 | `POST /channel/{channelId}/lifecycle/restrict` | `POST /api/v1/content/channel/lifecycle/restrict-recommend` | ❌ |
-| 强制隐藏 | `POST /channel/{channelId}/lifecycle/hide` | `POST /api/v1/content/channel/lifecycle/hide` | ❌ |
-| 恢复可见 | `POST /channel/{channelId}/lifecycle/restore` | (待实现) | ❌ |
-| 永久关闭 | `POST /channel/{channelId}/lifecycle/close` | `POST /api/v1/content/channel/lifecycle/close` | ❌ |
-| 归档 | `POST /channel/{channelId}/lifecycle/archive` | `POST /api/v1/content/channel/lifecycle/archive` | ❌ |
-| 合并 | `POST /channel/{channelId}/lifecycle/merge` | (待确认) | ❌ |
+| 冻结 | `POST /api/v1/content/channel/{channelId}/lifecycle/freeze` | `POST /api/v1/content/channel/lifecycle/freeze` | ❌ |
+| 解冻 | `POST /api/v1/content/channel/{channelId}/lifecycle/unfreeze` | `POST /api/v1/content/channel/lifecycle/unfreeze` | ❌ |
+| 限制推荐 | `POST /api/v1/content/channel/{channelId}/lifecycle/restrict` | `POST /api/v1/content/channel/lifecycle/restrict-recommend` | ❌ |
+| 强制隐藏 | `POST /api/v1/content/channel/{channelId}/lifecycle/hide` | `POST /api/v1/content/channel/lifecycle/hide` | ❌ |
+| 恢复可见 | `POST /api/v1/content/channel/{channelId}/lifecycle/restore` | (待实现) | ❌ |
+| 永久关闭 | `POST /api/v1/content/channel/{channelId}/lifecycle/close` | `POST /api/v1/content/channel/lifecycle/close` | ❌ |
+| 归档 | `POST /api/v1/content/channel/{channelId}/lifecycle/archive` | `POST /api/v1/content/channel/lifecycle/archive` | ❌ |
+| 合并 | `POST /api/v1/content/channel/{channelId}/lifecycle/merge` | (待确认) | ❌ |
 
 **不一致根因**:
 1. 前端 PRD 使用 RESTful 风格路径（资源 ID 在路径中），后端使用 RPC 风格路径（操作名在路径中）
