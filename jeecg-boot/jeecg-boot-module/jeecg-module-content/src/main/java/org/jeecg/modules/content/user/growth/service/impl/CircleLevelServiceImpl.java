@@ -10,7 +10,9 @@ import org.jeecg.modules.content.user.growth.enums.CircleLevelEnum;
 import org.jeecg.modules.content.user.growth.mapper.CircleLevelMapper;
 import org.jeecg.modules.content.user.growth.mapper.CircleMemberGrowthMapper;
 import org.jeecg.modules.content.user.growth.service.ICircleLevelService;
+import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.modules.content.user.growth.vo.CircleLevelVO;
+import org.jeecg.modules.content.user.growth.vo.LevelConditionVO;
 import org.jeecg.modules.content.user.service.IContentNotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,8 @@ public class CircleLevelServiceImpl extends ServiceImpl<CircleLevelMapper, Circl
     private CircleMemberGrowthMapper growthMapper;
     @Resource
     private IContentNotificationService notificationService;
+    @Resource
+    private ISysBaseAPI sysBaseAPI;
 
     @Override
     public void calculateGrowthScore(String circleId) {
@@ -90,6 +94,16 @@ public class CircleLevelServiceImpl extends ServiceImpl<CircleLevelMapper, Circl
         vo.setMemberScore(level.getMemberScore());
         vo.setContentScore(level.getContentScore());
         vo.setActivityScore(level.getActivityScore());
+
+        // 下一等级各项条件（维度上限与 calculateMemberScore/contentScore/activityScore 保持一致）
+        List<LevelConditionVO> conditions = new ArrayList<>();
+        int memberCap = 400;
+        int contentCap = 300;
+        int interactionCap = 300;
+        conditions.add(buildCondition("MEMBER", "成员规模", level.getMemberScore(), memberCap));
+        conditions.add(buildCondition("CONTENT", "内容贡献", level.getContentScore(), contentCap));
+        conditions.add(buildCondition("INTERACTION", "活跃互动", level.getActivityScore(), interactionCap));
+        vo.setNextLevelConditions(conditions);
 
         return vo;
     }
@@ -168,10 +182,20 @@ public class CircleLevelServiceImpl extends ServiceImpl<CircleLevelMapper, Circl
         return new ArrayList<>(all.subList(0, Math.min(level, all.size())));
     }
 
+    private LevelConditionVO buildCondition(String type, String label, Integer current, int cap) {
+        LevelConditionVO c = new LevelConditionVO();
+        c.setType(type);
+        c.setLabel(label);
+        c.setCurrent(current != null ? current : 0);
+        c.setRequired(cap);
+        c.setGap(Math.max(0, cap - (current != null ? current : 0)));
+        return c;
+    }
+
     private void notifyLevelUpgrade(String circleId, CircleLevelEnum newLevel) {
         // NOTE: sendNotification 的第一个参数在接口声明中为 userId，此处传入 circleId。
-        // ContentNotificationServiceImpl 当前仅将参数写入审计日志 ContentNotificationAuditLog.userId 字段，
-        // 不会实际向用户推送通知。后续接入真实通知通道时，应将 circleId 替换为圈子创建者或全体成员的 userId。
+        // ContentNotificationServiceImpl 当前仅将参数写入审计日志 ContentNotificationAuditLog.userId 字段。
+        // 实时推送通过 sysBaseAPI.sendWebSocketMsg 向圈子全体成员发送。
         try {
             notificationService.sendNotification(
                     circleId,
@@ -181,6 +205,27 @@ public class CircleLevelServiceImpl extends ServiceImpl<CircleLevelMapper, Circl
             );
         } catch (Exception e) {
             log.warn("发送等级提升通知失败: circleId={}", circleId, e);
+        }
+
+        // WebSocket 实时推送给圈子全体成员
+        try {
+            List<CircleMemberGrowth> members = loadCircleMembers(circleId);
+            if (!members.isEmpty()) {
+                String[] userIds = members.stream()
+                        .map(CircleMemberGrowth::getUserId)
+                        .distinct()
+                        .toArray(String[]::new);
+                com.alibaba.fastjson.JSONObject cmd = new com.alibaba.fastjson.JSONObject();
+                cmd.put("type", "CIRCLE_LEVEL_UP");
+                cmd.put("circleId", circleId);
+                cmd.put("level", newLevel.getLevel());
+                cmd.put("levelName", newLevel.getName());
+                cmd.put("title", "圈子等级提升");
+                cmd.put("content", "恭喜！您的圈子已提升至" + newLevel.getName());
+                sysBaseAPI.sendWebSocketMsg(userIds, cmd.toJSONString());
+            }
+        } catch (Exception e) {
+            log.warn("WebSocket推送等级提升通知失败: circleId={}", circleId, e);
         }
     }
 }

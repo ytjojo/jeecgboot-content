@@ -1,8 +1,10 @@
 package org.jeecg.modules.content.user.growth.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.modules.content.user.growth.constant.GrowthConstant;
 import org.jeecg.modules.content.user.growth.entity.CircleGrowthLog;
 import org.jeecg.modules.content.user.growth.entity.CircleLeaderboardSnapshot;
@@ -29,6 +31,8 @@ public class LeaderboardServiceImpl extends ServiceImpl<CircleLeaderboardSnapsho
 
     @Resource
     private CircleGrowthLogMapper growthLogMapper;
+    @Resource
+    private ISysBaseAPI sysBaseAPI;
 
     @Override
     public List<LeaderboardEntryVO> getLeaderboard(String circleId, String dimension, String period, String currentUserId) {
@@ -77,6 +81,31 @@ public class LeaderboardServiceImpl extends ServiceImpl<CircleLeaderboardSnapsho
                 userEntry.setHighlighted(true);
                 userEntry.setGap(prevScore != null ? prevScore - userScore : 0);
                 entries.add(userEntry);
+            }
+        }
+
+        // 批量查询用户信息，填充 username 和 avatar
+        if (!entries.isEmpty()) {
+            String ids = entries.stream()
+                    .map(LeaderboardEntryVO::getUserId)
+                    .distinct()
+                    .collect(Collectors.joining(","));
+            try {
+                List<JSONObject> users = sysBaseAPI.queryUsersByIds(ids);
+                Map<String, JSONObject> userMap = users.stream()
+                        .collect(Collectors.toMap(
+                                u -> u.getString("id"),
+                                u -> u,
+                                (u1, u2) -> u1));
+                for (LeaderboardEntryVO entry : entries) {
+                    JSONObject user = userMap.get(entry.getUserId());
+                    if (user != null) {
+                        entry.setUsername(user.getString("username"));
+                        entry.setAvatar(user.getString("avatar"));
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("批量查询排行榜用户信息失败: circleId={}, dimension={}, period={}", circleId, dimension, period, e);
             }
         }
 

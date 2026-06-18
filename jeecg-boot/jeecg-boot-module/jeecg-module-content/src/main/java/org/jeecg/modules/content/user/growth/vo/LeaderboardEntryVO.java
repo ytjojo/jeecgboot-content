@@ -21,4 +21,10 @@ public class LeaderboardEntryVO {
 
     @Schema(description = "与上一名得分差值")
     private Integer gap;
+
+    @Schema(description = "用户名")
+    private String username;
+
+    @Schema(description = "用户头像URL")
+    private String avatar;
 }

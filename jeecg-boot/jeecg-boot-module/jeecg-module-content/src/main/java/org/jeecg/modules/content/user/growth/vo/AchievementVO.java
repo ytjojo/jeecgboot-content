@@ -3,6 +3,8 @@ package org.jeecg.modules.content.user.growth.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 @Schema(description = "成就徽章信息")
 public class AchievementVO {
@@ -21,6 +23,9 @@ public class AchievementVO {
 
     @Schema(description = "是否已获得")
     private Boolean earned;
+
+    @Schema(description = "获得时间")
+    private Date earnedDate;
 
     @Schema(description = "达成条件描述")
     private String conditionDesc;

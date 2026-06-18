@@ -3,6 +3,7 @@ package org.jeecg.modules.content.user.growth.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.modules.content.user.growth.entity.CircleAchievement;
 import org.jeecg.modules.content.user.growth.entity.CircleMemberAchievement;
 import org.jeecg.modules.content.user.growth.entity.CircleMemberGrowth;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,8 @@ public class AchievementServiceImpl extends ServiceImpl<CircleMemberAchievementM
     private IMemberGrowthService memberGrowthService;
     @Resource
     private IContentNotificationService notificationService;
+    @Resource
+    private ISysBaseAPI sysBaseAPI;
 
     @Override
     @Async
@@ -94,6 +98,11 @@ public class AchievementServiceImpl extends ServiceImpl<CircleMemberAchievementM
         Set<String> earnedTypes = earned.stream()
                 .map(CircleMemberAchievement::getAchievementType)
                 .collect(Collectors.toSet());
+        Map<String, java.util.Date> earnedDateMap = earned.stream()
+                .collect(Collectors.toMap(
+                        CircleMemberAchievement::getAchievementType,
+                        CircleMemberAchievement::getCreateTime,
+                        (d1, d2) -> d1));
 
         // 加载用户成长数据用于计算进度
         CircleMemberGrowth growth = getGrowth(circleId, userId);
@@ -116,6 +125,7 @@ public class AchievementServiceImpl extends ServiceImpl<CircleMemberAchievementM
             vo.setIconUrl(a.getIconUrl());
             vo.setConditionDesc(a.getConditionDesc());
             vo.setEarned(earnedTypes.contains(a.getAchievementType()));
+            vo.setEarnedDate(earnedDateMap.get(a.getAchievementType()));
 
             // 计算进度与状态
             if (growth != null) {
@@ -188,6 +198,20 @@ public class AchievementServiceImpl extends ServiceImpl<CircleMemberAchievementM
             );
         } catch (Exception e) {
             log.warn("发送徽章通知失败: userId={}, type={}", userId, type, e);
+        }
+
+        // WebSocket 实时推送给该用户
+        try {
+            com.alibaba.fastjson.JSONObject cmd = new com.alibaba.fastjson.JSONObject();
+            cmd.put("type", "ACHIEVEMENT_EARNED");
+            cmd.put("circleId", circleId);
+            cmd.put("achievementType", type.getCode());
+            cmd.put("achievementName", type.getDescription());
+            cmd.put("title", "获得新徽章");
+            cmd.put("content", "恭喜获得「" + type.getDescription() + "」徽章！");
+            sysBaseAPI.sendWebSocketMsg(new String[]{userId}, cmd.toJSONString());
+        } catch (Exception e) {
+            log.warn("WebSocket推送徽章通知失败: userId={}, type={}", userId, type, e);
         }
     }
 

@@ -35,4 +35,7 @@ public class CircleLevelVO {
 
     @Schema(description = "活跃互动得分")
     private Integer activityScore;
+
+    @Schema(description = "下一等级各项条件")
+    private List<LevelConditionVO> nextLevelConditions;
 }
