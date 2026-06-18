@@ -1,6 +1,6 @@
 # circle-11-content-interaction-frontend 修复计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 修复 verify 报告中的 4 个 CRITICAL 问题和 4 个 WARNING 问题，纠正 Circle ID 错当 Channel ID 使用的架构级 Bug。
 
@@ -36,7 +36,7 @@ PUT /api/v1/content/circle/content/{contentId}/featured?circleId={circleId}
 - Reference: `jeecgboot-vue3/src/api/content/circle/announcement.ts` (风格参考)
 - Reference: `jeecg-boot/.../circle/controller/CircleContentPinController.java` (后端端点)
 
-- [ ] **Step 1: 创建 API 文件**
+- [x] **Step 1: 创建 API 文件**
 
 ```typescript
 import { defHttp } from '/@/utils/http/axios';
@@ -54,7 +54,7 @@ export const toggleFeatured = (contentId: string, circleId: string) =>
   defHttp.put({ url: `${Api.content}/${contentId}/featured`, params: { circleId } });
 ```
 
-- [ ] **Step 2: 运行类型检查**
+- [x] **Step 2: 运行类型检查**
 
 ```bash
 cd jeecgboot-vue3 && npx vue-tsc --noEmit src/api/content/circle/content.ts
@@ -62,7 +62,7 @@ cd jeecgboot-vue3 && npx vue-tsc --noEmit src/api/content/circle/content.ts
 
 Expected: 无类型错误。
 
-- [ ] **Step 3: 创建 API 层测试**
+- [x] **Step 3: 创建 API 层测试**
 
 ```bash
 # 创建 tests/api/content/circle/content.spec.ts 或 src/api/content/circle/__tests__/content.spec.ts
@@ -79,7 +79,7 @@ Expected: 无类型错误。
 - Reference: `jeecgboot-vue3/src/views/channel/components/GovernanceActionMenu.vue` (菜单结构参考)
 - Spec: `specs/content-pin-featured/spec.md` — "普通成员仅显示举报选项"、"操作按钮显示 loading 状态"
 
-- [ ] **Step 1: 创建组件文件**
+- [x] **Step 1: 创建组件文件**
 
 ```vue
 <template>
@@ -126,7 +126,7 @@ const handleMenuClick = ({ key }: { key: string }) => emit('action', key);
 </script>
 ```
 
-- [ ] **Step 2: 运行类型检查**
+- [x] **Step 2: 运行类型检查**
 
 ```bash
 cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/circle/components/CircleContentActionMenu.vue
@@ -140,7 +140,7 @@ Expected: 无类型错误。
 - Create: `jeecgboot-vue3/src/views/circle/components/__tests__/CircleContentActionMenu.test.ts`
 - Reference: `jeecgboot-vue3/src/views/circle/components/__tests__/CircleAnnouncementBar.test.ts` (测试风格参考)
 
-- [ ] **Step 1: 编写测试文件**
+- [x] **Step 1: 编写测试文件**
 
 ```typescript
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -240,7 +240,7 @@ describe('CircleContentActionMenu', () => {
 });
 ```
 
-- [ ] **Step 2: 运行测试验证**
+- [x] **Step 2: 运行测试验证**
 
 ```bash
 cd jeecgboot-vue3 && npx vitest run src/views/circle/components/__tests__/CircleContentActionMenu.test.ts
@@ -257,7 +257,7 @@ Expected: 5/5 测试通过。
 **Files:**
 - Modify: `jeecgboot-vue3/src/views/circle/components/CircleContentCard.vue`
 
-- [ ] **Step 1: 替换 GovernanceActionMenu → CircleContentActionMenu**
+- [x] **Step 1: 替换 GovernanceActionMenu → CircleContentActionMenu**
 
 ```vue
 <template>
@@ -314,7 +314,7 @@ defineEmits<{
 4. 事件名从 `governanceAction` 改为 `action`
 5. 操作菜单始终显示（普通成员看到"举报"，管理员看到置顶/精华/删除）
 
-- [ ] **Step 2: 验证类型检查**
+- [x] **Step 2: 验证类型检查**
 
 ```bash
 cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/circle/components/CircleContentCard.vue
@@ -325,7 +325,7 @@ cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/circle/components/CircleCont
 **Files:**
 - Modify: `jeecgboot-vue3/src/views/circle/Detail.vue`
 
-- [ ] **Step 1: 替换 API 调用和事件处理**
+- [x] **Step 1: 替换 API 调用和事件处理**
 
 在 `<script lang="ts" setup>` 中做以下修改：
 
@@ -409,7 +409,7 @@ async function handleContentAction(action: string, contentId: string) {
 > ```
 > 并在 `onMounted`/`fetchDetail` 中调用。若后端 `GET /api/v1/content/circle/{circleId}/posts` 不存在，前端降级为空列表。
 
-- [ ] **Step 2: 验证类型检查**
+- [x] **Step 2: 验证类型检查**
 
 ```bash
 cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/circle/Detail.vue
@@ -424,7 +424,7 @@ cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/circle/Detail.vue
 **Files:**
 - Modify: `jeecgboot-vue3/src/views/circle/Detail.vue`
 
-- [ ] **Step 1: 在 feed Tab 顶部添加公告栏**
+- [x] **Step 1: 在 feed Tab 顶部添加公告栏**
 
 在 `Detail.vue` 的 `<a-tab-pane key="feed" tab="动态">` 内，`<a-empty>` / `<div class="feed-list">` 之前添加：
 
@@ -467,7 +467,7 @@ import CircleAnnouncementManage from './components/CircleAnnouncementManage.vue'
 
 > **check**: `CircleAnnouncementManage.vue` 已存在，包含 expireAt 字段、替换确认、删除确认和 loading 状态。
 
-- [ ] **Step 2: 验证**
+- [x] **Step 2: 验证**
 
 ```bash
 cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/circle/Detail.vue
@@ -478,7 +478,7 @@ cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/circle/Detail.vue
 **Files:**
 - Modify: `jeecgboot-vue3/src/views/circle/components/CircleAnnouncementBar.vue`
 
-- [ ] **Step 1: 添加 setInterval 定时器和清理逻辑**
+- [x] **Step 1: 添加 setInterval 定时器和清理逻辑**
 
 在 `<script lang="ts" setup>` 中修改：
 
@@ -553,7 +553,7 @@ onUnmounted(() => {
 4. `onMounted` 启动 60 秒间隔定时器
 5. `onUnmounted` 清理定时器
 
-- [ ] **Step 2: 更新测试文件**
+- [x] **Step 2: 更新测试文件**
 
 更新 `jeecgboot-vue3/src/views/circle/components/__tests__/CircleAnnouncementBar.test.ts`，添加定时过期测试。
 
@@ -596,7 +596,7 @@ it('公告到达过期时间后自动隐藏（定时器检查）', async () => {
 });
 ```
 
-- [ ] **Step 3: 运行测试**
+- [x] **Step 3: 运行测试**
 
 ```bash
 cd jeecgboot-vue3 && npx vitest run src/views/circle/components/__tests__/CircleAnnouncementBar.test.ts
@@ -613,7 +613,7 @@ Expected: 全部测试通过（含新增的定时过期测试）。
 **Files:**
 - Modify: `jeecgboot-vue3/src/views/channel/governance/AnnouncementManage.vue`
 
-- [ ] **Step 1: 将静态 import 改为 defineAsyncComponent**
+- [x] **Step 1: 将静态 import 改为 defineAsyncComponent**
 
 ```typescript
 // 删除这行：
@@ -625,7 +625,7 @@ const Tinymce = defineAsyncComponent(() => import('/@/components/Tinymce/index.v
 
 > **check**: Tinymce 组件路径需确认。常见路径为 `/@/components/Tinymce/index.vue`。若实际路径不同，调整 import 路径。
 
-- [ ] **Step 2: 添加加载占位**
+- [x] **Step 2: 添加加载占位**
 
 在 template 中 Tinymce 使用处包裹 `<Suspense>`：
 
@@ -644,7 +644,7 @@ const Tinymce = defineAsyncComponent(() => import('/@/components/Tinymce/index.v
 </Form.Item>
 ```
 
-- [ ] **Step 3: 验证**
+- [x] **Step 3: 验证**
 
 ```bash
 cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/channel/governance/AnnouncementManage.vue
@@ -655,7 +655,7 @@ cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/channel/governance/Announcem
 **Files:**
 - Modify: `jeecgboot-vue3/src/views/channel/governance/AnnouncementManage.vue`
 
-- [ ] **Step 1: 添加 DatePicker 到表单**
+- [x] **Step 1: 添加 DatePicker 到表单**
 
 在 `<Form layout="vertical">` 内、公告内容 Form.Item 之后添加：
 
@@ -698,7 +698,7 @@ await saveAnnouncement({
 
 > **警告**: 后端 `ChannelAnnouncement` 需支持 `expireAt` 字段（BE-04）。若后端暂不支持，前端传递后后端忽略，功能降级但不报错。
 
-- [ ] **Step 2: 验证**
+- [x] **Step 2: 验证**
 
 ```bash
 cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/channel/governance/AnnouncementManage.vue
@@ -714,7 +714,7 @@ cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/channel/governance/Announcem
 - Modify: `jeecgboot-vue3/src/views/support/report/components/ReportModal.vue`
 - Spec: `specs/content-report/spec.md` — "选择'其他'原因时补充说明变为必填"
 
-- [ ] **Step 1: 更新 reportTypes 枚举对齐 spec**
+- [x] **Step 1: 更新 reportTypes 枚举对齐 spec**
 
 ```typescript
 // 当前枚举已正确实现（porn/violence/fraud/harassment/other），保留不修改
@@ -724,7 +724,7 @@ cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/channel/governance/Announcem
 
 > **决策**: 当前 `porn/violence/fraud/harassment/other` 枚举比 spec 定义的 `AD/PORNO/ATTACK/OTHER` 更语义化。保持当前枚举不变，更新 spec 描述以匹配实现。无需代码修改。
 
-- [ ] **Step 2: 添加"其他"必填校验**
+- [x] **Step 2: 添加"其他"必填校验**
 
 修改 `handleSubmit` 函数：
 
@@ -743,7 +743,7 @@ const handleSubmit = async () => {
 };
 ```
 
-- [ ] **Step 3: 添加"其他"描述字段的视觉提示**
+- [x] **Step 3: 添加"其他"描述字段的视觉提示**
 
 在 `handleTypeChange` 中（当选择"其他"时），动态改变描述字段的 placeholder：
 
@@ -772,7 +772,7 @@ const handleTypeChange = () => {
 </a-form-item>
 ```
 
-- [ ] **Step 4: 更新测试**
+- [x] **Step 4: 更新测试**
 
 更新 `src/views/support/report/components/__tests__/ReportModal.test.ts`，添加"其他"必填校验测试：
 
@@ -787,7 +787,7 @@ it('选择"其他"时 description 必填', async () => {
 });
 ```
 
-- [ ] **Step 5: 运行测试**
+- [x] **Step 5: 运行测试**
 
 ```bash
 cd jeecgboot-vue3 && npx vitest run src/views/support/report/components/__tests__/ReportModal.test.ts
@@ -798,7 +798,7 @@ cd jeecgboot-vue3 && npx vitest run src/views/support/report/components/__tests_
 **Files:**
 - Modify: `jeecgboot-vue3/src/views/channel/components/GovernanceActionMenu.vue`
 
-- [ ] **Step 1: 添加 loading prop 和状态**
+- [x] **Step 1: 添加 loading prop 和状态**
 
 ```vue
 <template>
@@ -827,7 +827,7 @@ const handleMenuClick = ({ key }: { key: string }) => emit('action', key);
 
 > **注意**: `CircleContentActionMenu.vue`（Phase 2 创建）已包含 `loading` prop。此处同步修复 Channel 侧组件。
 
-- [ ] **Step 2: 验证**
+- [x] **Step 2: 验证**
 
 ```bash
 cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/channel/components/GovernanceActionMenu.vue
@@ -839,7 +839,7 @@ cd jeecgboot-vue3 && npx vue-tsc --noEmit src/views/channel/components/Governanc
 
 #### Task 7.1: 运行前端全量测试
 
-- [ ] **Step 1: 运行全量测试**
+- [x] **Step 1: 运行全量测试**
 
 ```bash
 cd jeecgboot-vue3 && npx vitest run
@@ -847,7 +847,7 @@ cd jeecgboot-vue3 && npx vitest run
 
 Expected: 所有已有测试通过 + 新增测试通过，覆盖率 ≥ 90%。
 
-- [ ] **Step 2: 运行覆盖率检查**
+- [x] **Step 2: 运行覆盖率检查**
 
 ```bash
 cd jeecgboot-vue3 && npx vitest run --coverage
@@ -855,7 +855,7 @@ cd jeecgboot-vue3 && npx vitest run --coverage
 
 Expected: 行覆盖率 ≥ 90%。
 
-- [ ] **Step 3: 运行类型检查**
+- [x] **Step 3: 运行类型检查**
 
 ```bash
 cd jeecgboot-vue3 && npx vue-tsc --noEmit
@@ -867,13 +867,13 @@ Expected: 无类型错误。
 
 ## 完成标准（DoD）
 
-- [ ] Phase 1-6 所有代码修改完成
-- [ ] 流程确认 — subagent + TDD
-- [ ] Code Review
-- [ ] 覆盖率 ≥ 90%
-- [ ] 前端全量测试 100% 通过（`npx vitest run`）
-- [ ] 类型检查通过（`npx vue-tsc --noEmit`）
-- [ ] 合并 + 验证 + 清理 worktree
+- [x] Phase 1-6 所有代码修改完成
+- [x] 流程确认 — subagent + TDD
+- [x] Code Review
+- [x] 覆盖率 ≥ 90%
+- [x] 前端全量测试 100% 通过（`npx vitest run`）
+- [x] 类型检查通过（`npx vue-tsc --noEmit`）
+- [x] 合并 + 验证 + 清理 worktree
 
 ---
 

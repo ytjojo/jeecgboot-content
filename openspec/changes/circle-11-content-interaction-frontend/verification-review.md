@@ -54,7 +54,7 @@
 
 | 前端 Spec 引用 | 后端实际 | 状态 |
 |---------------|---------|------|
-| `GET /circle/{circleId}/mentionable-members` | **不存在** | **缺失**：后端有 `ICircleMentionService.getMentionCandidates()` 方法，但**无对应 Controller 端点** |
+| `GET /api/v1/content/circle/{circleId}/mentionable-members` | **不存在** | **缺失**：后端有 `ICircleMentionService.getMentionCandidates()` 方法，但**无对应 Controller 端点** |
 
 ### 1.5 公告（circle-announcement） - 缺失 spec 和 API
 
@@ -95,7 +95,7 @@
 
 ### 2.5 specs/mention-member/spec.md 问题
 
-1. `GET /circle/{circleId}/mentionable-members` 接口后端不存在，仅有 Service 层方法，需标注为后端遗留
+1. `GET /api/v1/content/circle/{circleId}/mentionable-members` 接口后端不存在，仅有 Service 层方法，需标注为后端遗留
 
 ### 2.6 proposal.md 问题
 
@@ -118,7 +118,7 @@
 
 | 编号 | 问题 | 严重程度 | 影响范围 |
 |------|------|---------|---------|
-| BE-01 | 缺少 `GET /circle/{circleId}/mentionable-members` Controller 端点 | 高 | @成员功能完全依赖此接口 |
+| BE-01 | 缺少 `GET /api/v1/content/circle/{circleId}/mentionable-members` Controller 端点 | 高 | @成员功能完全依赖此接口 |
 | BE-02 | 缺少 `DELETE /circle-announcement/{id}` 接口 | 中 | 公告删除功能无法实现 |
 | BE-03 | 缺少 `pendingJoinRequestCount` 查询接口 | 中 | 管理入口角标无法实现 |
 | BE-04 | `handleMute` 不接受禁言时长参数，且实现为 TODO | 中 | 禁言功能无法正常工作 |

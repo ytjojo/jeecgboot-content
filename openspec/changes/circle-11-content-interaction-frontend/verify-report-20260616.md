@@ -121,7 +121,7 @@
 
 ### 已知局限（非阻塞）
 
-1. **Circle 内容 Feed** — `feedItems` 初始化为空数组，需 `GET /circle/{id}/feed` 后端端点
+1. **Circle 内容 Feed** — `feedItems` 初始化为空数组，需 `GET /api/v1/content/circle/{id}/feed` 后端端点
 2. **CircleAnnouncementManage UI** — API 已封装（`publishCircleAnnouncement`/`deleteCircleAnnouncement`），但管理组件未建
 3. **`channelId: circle.value!.id`** — Detail.vue 中 `executeGovernance` 使用 circle.id 作为 channelId，需确认 circle↔channel ID 映射关系
 4. **Report mute 时长** — 后端 `mute` 端点不接受 duration 参数
