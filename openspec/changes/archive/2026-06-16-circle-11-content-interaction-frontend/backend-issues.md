@@ -9,7 +9,7 @@
 
 | 编号 | 问题 | 严重程度 | 影响范围 | 状态 |
 |------|------|---------|---------|------|
-| BE-01 | 缺少 `GET /circle/{circleId}/mentionable-members` Controller 端点 | 高 | @成员功能完全依赖此接口 | 待实现 |
+| BE-01 | 缺少 `GET /api/v1/content/circle/{circleId}/mentionable-members` Controller 端点 | 高 | @成员功能完全依赖此接口 | 待实现 |
 | BE-02 | 缺少 `DELETE /circle-announcement/{id}` 接口 | 中 | 公告删除功能无法实现 | 待实现 |
 | BE-03 | 缺少 `pendingJoinRequestCount` 查询接口 | 中 | 管理入口角标无法实现 | 待实现 |
 | BE-04 | `handleMute` 不接受禁言时长参数，且实现为 TODO | 中 | 禁言功能无法正常工作 | 待实现 |
@@ -25,7 +25,7 @@
 
 **期望接口**:
 ```
-GET /circle/{circleId}/mentionable-members
+GET /api/v1/content/circle/{circleId}/mentionable-members
 ```
 
 **影响**: @成员选择浮层无法获取成员列表，功能完全不可用。
@@ -55,7 +55,7 @@ DELETE /circle-announcement/{id}
 
 **期望接口**:
 ```
-GET /circle/{circleId}/pending-join-request-count
+GET /api/v1/content/circle/{circleId}/pending-join-request-count
 返回: { count: number }
 ```
 

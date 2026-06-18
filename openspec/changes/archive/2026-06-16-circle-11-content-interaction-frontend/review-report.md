@@ -202,7 +202,7 @@
 | 7 | `PUT /circle-join-request/{id}/approve` | `POST /circle-join-review/approve?circleId=xxx`（body: requestId） | **BLOCK** | 路径前缀完全不同 + 方法错误 + 参数传递方式不同 |
 | 8 | `PUT /circle-join-request/{id}/reject` | `POST /circle-join-review/reject?circleId=xxx`（body: requestId + rejectReason） | **BLOCK** | 路径前缀完全不同 + 方法错误 + 参数传递方式不同 |
 | 9 | `GET /circle-join-request/list` | 后端 spec 中无此端点定义 | **FLAG** | 后端 spec 中未定义此端点 |
-| 10 | `GET /circle/{circleId}/mentionable-members` | 后端无 Controller 端点 | **FLAG** | Service 层已有，Controller 端点缺失 |
+| 10 | `GET /api/v1/content/circle/{circleId}/mentionable-members` | 后端无 Controller 端点 | **FLAG** | Service 层已有，Controller 端点缺失 |
 | 11 | `DELETE /circle-announcement/{id}` | 后端无此接口 | **FLAG** | 后端仅 publish 和 getActive，无 delete |
 
 ### 5.2 接口契约问题清单
@@ -404,7 +404,7 @@
 #### FLAG-C001: @成员查询 API 后端缺失
 
 - **前端 Spec**: `specs/mention-member/spec.md` 成员列表 Scenario
-- **引用 API**: `GET /circle/{circleId}/mentionable-members`
+- **引用 API**: `GET /api/v1/content/circle/{circleId}/mentionable-members`
 - **问题**: 后端 `ICircleMentionService.getMentionCandidates()` 已存在但无 Controller 端点
 - **影响**: @成员功能完全不可用
 - **建议**: 后端补充 Controller 端点，前端先使用圈子成员列表接口替代
@@ -533,7 +533,7 @@ Step 2 依赖检查: P0 依赖阻塞=5 → NEEDS_DEPENDENCIES
 
 #### 需要完善的依赖模块（共 5 项）
 
-- [P0] 后端 API 缺失: `GET /circle/{circleId}/mentionable-members` Controller 端点
+- [P0] 后端 API 缺失: `GET /api/v1/content/circle/{circleId}/mentionable-members` Controller 端点
 - [P0] 后端 API 缺失: `DELETE /circle-announcement/{id}` 删除公告接口
 - [P0] 后端 API 缺失: `pendingJoinRequestCount` 待审核申请计数接口
 - [P0] 后端 API 未完成: `handleMute` 禁言时长参数未实现

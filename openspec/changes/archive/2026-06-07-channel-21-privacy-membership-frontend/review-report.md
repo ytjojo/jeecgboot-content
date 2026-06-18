@@ -116,14 +116,14 @@
 - 响应式策略（表格转卡片）符合移动端最佳实践 ✅
 
 **FLAG-4** ✅ 已修复: 6 个 P0 后端 API 端点已在后端实现：
-1. `GET /channel/subscription/status/{channelId}` — ChannelSubscriptionController ✅
-2. `GET /channel/governance/blacklist/list` — ChannelGovernanceController ✅
-3. `GET /channel/governance/log` — ChannelGovernanceController ✅
+1. `GET /api/v1/content/channel/subscription/status/{channelId}` — ChannelSubscriptionController ✅
+2. `GET /api/v1/content/channel/governance/blacklist/list` — ChannelGovernanceController ✅
+3. `GET /api/v1/content/channel/governance/log` — ChannelGovernanceController ✅
 4. `PUT /api/v1/content/channels/privacy` — ChannelController ✅
 5. `PUT /api/v1/content/channels/join-method` — ChannelController ✅
-6. `GET /channel/member/relation` — ChannelMemberController ✅
+6. `GET /api/v1/content/channel/member/relation` — ChannelMemberController ✅
 
-**ADVISORY-4** ✅ 已修复: plan.md 中的 TODO 注释已移除。`useChannelContext` 可直接调用后端端点：`GET /api/v1/content/channels/{id}` 获取频道信息，`GET /channel/member/relation` 获取用户频道关系。
+**ADVISORY-4** ✅ 已修复: plan.md 中的 TODO 注释已移除。`useChannelContext` 可直接调用后端端点：`GET /api/v1/content/channels/{id}` 获取频道信息，`GET /api/v1/content/channel/member/relation` 获取用户频道关系。
 
 ---
 
@@ -161,41 +161,41 @@
 
 | 前端 API | 前端路径 | 后端端点 | 状态 |
 |---------|---------|---------|------|
-| subscribeChannel | POST /channel/subscription/subscribe | POST /channel/subscription/subscribe | ✅ |
-| unsubscribeChannel | POST /channel/subscription/unsubscribe | POST /channel/subscription/unsubscribe | ✅ |
-| getSubscriptionStatus | GET /channel/subscription/status/{id} | GET /channel/subscription/status/{channelId} | ✅ |
-| getSubscriptionList | GET /channel/subscription/list | GET /channel/subscription/list | ✅ |
-| createSubscriptionGroup | POST /channel/subscription/group/create | POST /channel/subscription/group/create | ✅ |
-| renameSubscriptionGroup | POST /channel/subscription/group/rename | POST /channel/subscription/group/rename | ✅ |
-| deleteSubscriptionGroup | POST /channel/subscription/group/delete | POST /channel/subscription/group/delete | ✅ |
-| getSubscriptionGroupList | GET /channel/subscription/group/list | GET /channel/subscription/group/list | ✅ |
-| updateSubscriptionReminder | PUT /channel/subscription/reminder | ❌ 不存在 | FLAG-6 (P2) |
-| applyToJoin | POST /channel/member/join/apply | POST /channel/member/join/apply | ✅ |
-| getPendingApplications | GET /channel/member/applications/pending | GET /channel/member/applications/pending | ✅ |
-| approveApplications | POST /channel/member/applications/approve | POST /channel/member/applications/approve | ✅ |
-| rejectApplications | POST /channel/member/applications/reject | POST /channel/member/applications/reject | ✅ |
-| getMemberList | GET /channel/member/list | GET /channel/member/list | ✅ |
-| updateMemberRole | POST /channel/member/assign-role | POST /channel/member/assign-role | ✅ |
-| removeMembers | POST /channel/governance/remove | POST /channel/governance/remove | ✅ |
-| muteMember | POST /channel/governance/mute | POST /channel/governance/mute | ✅ |
-| unmuteMember | POST /channel/governance/unmute | POST /channel/governance/unmute | ✅ |
-| addToBlacklist | POST /channel/governance/blacklist/add | POST /channel/governance/blacklist/add | ✅ |
-| removeFromBlacklist | POST /channel/governance/blacklist/remove | POST /channel/governance/blacklist/remove | ✅ |
-| getBlacklist | GET /channel/governance/blacklist/list | GET /channel/governance/blacklist/list | ✅ |
-| createInvite | POST /channel/invite/create | POST /channel/invite/create | ✅ |
-| getInviteList | GET /channel/invite/list | GET /channel/invite/list | ✅ |
-| revokeInvite | POST /channel/invite/revoke | POST /channel/invite/revoke | ✅ |
-| joinByInvite | POST /channel/invite/use | POST /channel/invite/use | ✅ |
+| subscribeChannel | POST /api/v1/content/channel/subscription/subscribe | POST /api/v1/content/channel/subscription/subscribe | ✅ |
+| unsubscribeChannel | POST /api/v1/content/channel/subscription/unsubscribe | POST /api/v1/content/channel/subscription/unsubscribe | ✅ |
+| getSubscriptionStatus | GET /api/v1/content/channel/subscription/status/{id} | GET /api/v1/content/channel/subscription/status/{channelId} | ✅ |
+| getSubscriptionList | GET /api/v1/content/channel/subscription/list | GET /api/v1/content/channel/subscription/list | ✅ |
+| createSubscriptionGroup | POST /api/v1/content/channel/subscription/group/create | POST /api/v1/content/channel/subscription/group/create | ✅ |
+| renameSubscriptionGroup | POST /api/v1/content/channel/subscription/group/rename | POST /api/v1/content/channel/subscription/group/rename | ✅ |
+| deleteSubscriptionGroup | POST /api/v1/content/channel/subscription/group/delete | POST /api/v1/content/channel/subscription/group/delete | ✅ |
+| getSubscriptionGroupList | GET /api/v1/content/channel/subscription/group/list | GET /api/v1/content/channel/subscription/group/list | ✅ |
+| updateSubscriptionReminder | PUT /api/v1/content/channel/subscription/reminder | ❌ 不存在 | FLAG-6 (P2) |
+| applyToJoin | POST /api/v1/content/channel/member/join/apply | POST /api/v1/content/channel/member/join/apply | ✅ |
+| getPendingApplications | GET /api/v1/content/channel/member/applications/pending | GET /api/v1/content/channel/member/applications/pending | ✅ |
+| approveApplications | POST /api/v1/content/channel/member/applications/approve | POST /api/v1/content/channel/member/applications/approve | ✅ |
+| rejectApplications | POST /api/v1/content/channel/member/applications/reject | POST /api/v1/content/channel/member/applications/reject | ✅ |
+| getMemberList | GET /api/v1/content/channel/member/list | GET /api/v1/content/channel/member/list | ✅ |
+| updateMemberRole | POST /api/v1/content/channel/member/assign-role | POST /api/v1/content/channel/member/assign-role | ✅ |
+| removeMembers | POST /api/v1/content/channel/governance/remove | POST /api/v1/content/channel/governance/remove | ✅ |
+| muteMember | POST /api/v1/content/channel/governance/mute | POST /api/v1/content/channel/governance/mute | ✅ |
+| unmuteMember | POST /api/v1/content/channel/governance/unmute | POST /api/v1/content/channel/governance/unmute | ✅ |
+| addToBlacklist | POST /api/v1/content/channel/governance/blacklist/add | POST /api/v1/content/channel/governance/blacklist/add | ✅ |
+| removeFromBlacklist | POST /api/v1/content/channel/governance/blacklist/remove | POST /api/v1/content/channel/governance/blacklist/remove | ✅ |
+| getBlacklist | GET /api/v1/content/channel/governance/blacklist/list | GET /api/v1/content/channel/governance/blacklist/list | ✅ |
+| createInvite | POST /api/v1/content/channel/invite/create | POST /api/v1/content/channel/invite/create | ✅ |
+| getInviteList | GET /api/v1/content/channel/invite/list | GET /api/v1/content/channel/invite/list | ✅ |
+| revokeInvite | POST /api/v1/content/channel/invite/revoke | POST /api/v1/content/channel/invite/revoke | ✅ |
+| joinByInvite | POST /api/v1/content/channel/invite/use | POST /api/v1/content/channel/invite/use | ✅ |
 | updateChannelPrivacy | PUT /api/v1/content/channels/privacy | PUT /api/v1/content/channels/privacy | ✅ |
 | updateJoinMethod | PUT /api/v1/content/channels/join-method | PUT /api/v1/content/channels/join-method | ✅ |
-| getGovernanceLog | GET /channel/governance/log | GET /channel/governance/log | ✅ |
+| getGovernanceLog | GET /api/v1/content/channel/governance/log | GET /api/v1/content/channel/governance/log | ✅ |
 
 **BLOCK-2** ✅ 已修复: 3 个核心 API 端点已在后端实现：
-- `GET /channel/subscription/status/{channelId}` — ChannelSubscriptionController
-- `GET /channel/governance/log` — ChannelGovernanceController
-- `GET /channel/member/relation` — ChannelMemberController
+- `GET /api/v1/content/channel/subscription/status/{channelId}` — ChannelSubscriptionController
+- `GET /api/v1/content/channel/governance/log` — ChannelGovernanceController
+- `GET /api/v1/content/channel/member/relation` — ChannelMemberController
 
-**BLOCK-3** ✅ 已修复: `GET /channel/governance/blacklist/list` 已在 ChannelGovernanceController 中实现。
+**BLOCK-3** ✅ 已修复: `GET /api/v1/content/channel/governance/blacklist/list` 已在 ChannelGovernanceController 中实现。
 
 **FLAG-6**: 更新提醒设置 API (`/channel/subscription/reminder`) 后端未实现。plan.md 中已标注为 P2，不影响核心功能。移动频道到分组 (`moveGroup`) 已注释为 P2。
 

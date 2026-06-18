@@ -184,8 +184,8 @@ import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
   // ADVISORY-8: RESTful 规范建议使用 HTTP 方法代替路径动词：
-  //   add → POST /channel/governance/blacklist
-  //   remove → DELETE /channel/governance/blacklist
+  //   add → POST /api/v1/content/channel/governance/blacklist
+  //   remove → DELETE /api/v1/content/channel/governance/blacklist
   // 当前后端路径需确认是否支持 RESTful 风格后再调整
   add = '/channel/governance/blacklist/add',
   remove = '/channel/governance/blacklist/remove',
