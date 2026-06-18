@@ -40,6 +40,8 @@ public class LeaderboardServiceImpl extends ServiceImpl<CircleLeaderboardSnapsho
           .last("LIMIT " + GrowthConstant.LEADERBOARD_TOP_N);
         List<CircleLeaderboardSnapshot> snapshots = this.list(qw);
 
+        boolean userInList = false;
+        Integer prevScore = null;
         List<LeaderboardEntryVO> entries = new ArrayList<>();
         for (CircleLeaderboardSnapshot s : snapshots) {
             LeaderboardEntryVO vo = new LeaderboardEntryVO();
@@ -47,9 +49,61 @@ public class LeaderboardServiceImpl extends ServiceImpl<CircleLeaderboardSnapsho
             vo.setScore(s.getScore());
             vo.setRankNum(s.getRankNum());
             vo.setHighlighted(s.getUserId().equals(currentUserId));
+            vo.setGap(prevScore != null ? prevScore - s.getScore() : 0);
+            prevScore = s.getScore();
+            if (s.getUserId().equals(currentUserId)) {
+                userInList = true;
+            }
             entries.add(vo);
         }
+
+        // 当前用户不在 Top 50 中，查询其排名和得分并追加到列表末尾
+        if (!userInList && currentUserId != null) {
+            int userScore = computeUserScore(circleId, dimension, period, currentUserId);
+            if (userScore > 0) {
+                // 查询快照中得分高于当前用户的条目数量作为最低排名估计
+                LambdaQueryWrapper<CircleLeaderboardSnapshot> countQw = new LambdaQueryWrapper<>();
+                countQw.eq(CircleLeaderboardSnapshot::getCircleId, circleId)
+                       .eq(CircleLeaderboardSnapshot::getDimension, dimension)
+                       .eq(CircleLeaderboardSnapshot::getPeriod, period)
+                       .gt(CircleLeaderboardSnapshot::getScore, userScore);
+                long higherCountInSnapshot = this.count(countQw);
+                int rank = (int) higherCountInSnapshot + 1;
+
+                LeaderboardEntryVO userEntry = new LeaderboardEntryVO();
+                userEntry.setUserId(currentUserId);
+                userEntry.setScore(userScore);
+                userEntry.setRankNum(rank);
+                userEntry.setHighlighted(true);
+                userEntry.setGap(prevScore != null ? prevScore - userScore : 0);
+                entries.add(userEntry);
+            }
+        }
+
         return entries;
+    }
+
+    private int computeUserScore(String circleId, String dimension, String period, String userId) {
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = switch (period) {
+            case "WEEK" -> today.minusDays(6);
+            case "MONTH" -> today.minusDays(29);
+            default -> LocalDate.of(2000, 1, 1);
+        };
+
+        LambdaQueryWrapper<CircleGrowthLog> logQw = new LambdaQueryWrapper<>();
+        logQw.eq(CircleGrowthLog::getCircleId, circleId)
+             .eq(CircleGrowthLog::getUserId, userId)
+             .eq(CircleGrowthLog::getRevoked, false)
+             .ge(CircleGrowthLog::getBizDate, startDate);
+        List<CircleGrowthLog> logs = growthLogMapper.selectList(logQw);
+
+        return logs.stream().mapToInt(log -> switch (dimension) {
+            case "EXP" -> log.getExpPoints() != null ? log.getExpPoints() : 0;
+            case "CONTRIBUTION" -> log.getContributionPoints() != null ? log.getContributionPoints() : 0;
+            case "POST" -> "POST".equals(log.getActionType()) ? 1 : 0;
+            default -> 0;
+        }).sum();
     }
 
     @Override

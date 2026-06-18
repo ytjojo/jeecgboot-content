@@ -16,9 +16,21 @@ public class AchievementVO {
     @Schema(description = "徽章描述")
     private String description;
 
+    @Schema(description = "徽章图标URL")
+    private String iconUrl;
+
     @Schema(description = "是否已获得")
     private Boolean earned;
 
     @Schema(description = "达成条件描述")
     private String conditionDesc;
+
+    @Schema(description = "当前进度数值")
+    private Integer currentProgress;
+
+    @Schema(description = "目标数值")
+    private Integer targetProgress;
+
+    @Schema(description = "状态: EARNED/CLOSE/UNEARNED")
+    private String status;
 }

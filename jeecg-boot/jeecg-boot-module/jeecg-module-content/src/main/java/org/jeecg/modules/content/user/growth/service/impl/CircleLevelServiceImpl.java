@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -80,6 +82,14 @@ public class CircleLevelServiceImpl extends ServiceImpl<CircleLevelMapper, Circl
         int range = nextThreshold - prevThreshold;
         int progress = range > 0 ? (level.getGrowthScore() - prevThreshold) * 100 / range : 100;
         vo.setProgressPercent(Math.min(progress, 100));
+
+        // 已解锁权益
+        vo.setBenefits(buildBenefits(currentEnum.getLevel()));
+
+        // 分项得分
+        vo.setMemberScore(level.getMemberScore());
+        vo.setContentScore(level.getContentScore());
+        vo.setActivityScore(level.getActivityScore());
 
         return vo;
     }
@@ -153,7 +163,15 @@ public class CircleLevelServiceImpl extends ServiceImpl<CircleLevelMapper, Circl
         this.saveOrUpdate(level);
     }
 
+    private List<String> buildBenefits(int level) {
+        List<String> all = Arrays.asList("基础展示", "排行榜入口", "徽章墙", "推荐权重提升", "全部权益");
+        return new ArrayList<>(all.subList(0, Math.min(level, all.size())));
+    }
+
     private void notifyLevelUpgrade(String circleId, CircleLevelEnum newLevel) {
+        // NOTE: sendNotification 的第一个参数在接口声明中为 userId，此处传入 circleId。
+        // ContentNotificationServiceImpl 当前仅将参数写入审计日志 ContentNotificationAuditLog.userId 字段，
+        // 不会实际向用户推送通知。后续接入真实通知通道时，应将 circleId 替换为圈子创建者或全体成员的 userId。
         try {
             notificationService.sendNotification(
                     circleId,

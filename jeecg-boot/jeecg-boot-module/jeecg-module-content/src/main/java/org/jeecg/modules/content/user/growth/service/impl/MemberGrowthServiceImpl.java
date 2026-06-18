@@ -4,12 +4,17 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.modules.content.user.growth.constant.GrowthConstant;
+import org.jeecg.modules.content.user.growth.entity.CircleAchievement;
 import org.jeecg.modules.content.user.growth.entity.CircleGrowthLog;
+import org.jeecg.modules.content.user.growth.entity.CircleMemberAchievement;
 import org.jeecg.modules.content.user.growth.entity.CircleMemberGrowth;
 import org.jeecg.modules.content.user.growth.enums.GrowthActionEnum;
+import org.jeecg.modules.content.user.growth.mapper.CircleAchievementMapper;
 import org.jeecg.modules.content.user.growth.mapper.CircleGrowthLogMapper;
+import org.jeecg.modules.content.user.growth.mapper.CircleMemberAchievementMapper;
 import org.jeecg.modules.content.user.growth.mapper.CircleMemberGrowthMapper;
 import org.jeecg.modules.content.user.growth.service.IMemberGrowthService;
+import org.jeecg.modules.content.user.growth.vo.AchievementVO;
 import org.jeecg.modules.content.user.growth.vo.MemberGrowthVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +30,10 @@ public class MemberGrowthServiceImpl extends ServiceImpl<CircleMemberGrowthMappe
 
     @Resource
     private CircleGrowthLogMapper growthLogMapper;
+    @Resource
+    private CircleMemberAchievementMapper memberAchievementMapper;
+    @Resource
+    private CircleAchievementMapper achievementMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -101,6 +110,41 @@ public class MemberGrowthServiceImpl extends ServiceImpl<CircleMemberGrowthMappe
         vo.setLevel(growth.getLevel());
         vo.setPostCount(growth.getPostCount());
         vo.setParticipationDays(getParticipationDays(circleId, userId));
+
+        // 计算圈子内排名：经验值高于当前用户的成员数 + 1
+        LambdaQueryWrapper<CircleMemberGrowth> rankQw = new LambdaQueryWrapper<>();
+        rankQw.eq(CircleMemberGrowth::getCircleId, circleId)
+              .gt(CircleMemberGrowth::getExpPoints, growth.getExpPoints());
+        long higherCount = this.baseMapper.selectCount(rankQw);
+        vo.setRank((int) higherCount + 1);
+
+        // 计算下一等级进度
+        int currentLevel = growth.getLevel() != null ? growth.getLevel() : 1;
+        int currentThreshold = GrowthConstant.LEVEL_THRESHOLDS[Math.min(currentLevel - 1, GrowthConstant.LEVEL_THRESHOLDS.length - 1)];
+        int nextThreshold = currentLevel < GrowthConstant.LEVEL_THRESHOLDS.length
+                ? GrowthConstant.LEVEL_THRESHOLDS[currentLevel]
+                : currentThreshold;
+        vo.setNextLevelThreshold(nextThreshold);
+        if (nextThreshold > currentThreshold) {
+            int exp = growth.getExpPoints() != null ? growth.getExpPoints() : 0;
+            vo.setProgressPercent(Math.min((exp - currentThreshold) * 100 / (nextThreshold - currentThreshold), 100));
+        } else {
+            vo.setProgressPercent(100);
+        }
+
+        // 今日已获经验值
+        LocalDate today = LocalDate.now();
+        LambdaQueryWrapper<CircleGrowthLog> todayQw = new LambdaQueryWrapper<>();
+        todayQw.eq(CircleGrowthLog::getCircleId, circleId)
+               .eq(CircleGrowthLog::getUserId, userId)
+               .eq(CircleGrowthLog::getBizDate, today)
+               .eq(CircleGrowthLog::getRevoked, false);
+        int todayExp = growthLogMapper.selectList(todayQw).stream()
+                .mapToInt(log -> log.getExpPoints() != null ? log.getExpPoints() : 0)
+                .sum();
+        vo.setTodayExp(todayExp);
+        vo.setDailyExpLimit(GrowthConstant.DAILY_EXP_CAP);
+
         return vo;
     }
 

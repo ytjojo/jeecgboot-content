@@ -18,4 +18,7 @@ public class LeaderboardEntryVO {
 
     @Schema(description = "是否高亮当前用户")
     private Boolean highlighted;
+
+    @Schema(description = "与上一名得分差值")
+    private Integer gap;
 }

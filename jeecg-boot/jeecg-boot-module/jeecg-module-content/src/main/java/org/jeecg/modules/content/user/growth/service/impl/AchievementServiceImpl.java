@@ -62,6 +62,8 @@ public class AchievementServiceImpl extends ServiceImpl<CircleMemberAchievementM
             long higherCount = growthMapper.selectCount(rankQw);
             if (higherCount < 10) {
                 tryAward(circleId, userId, AchievementTypeEnum.RISING_STAR);
+            } else {
+                revoke(circleId, userId, AchievementTypeEnum.RISING_STAR);
             }
         }
     }
@@ -93,14 +95,70 @@ public class AchievementServiceImpl extends ServiceImpl<CircleMemberAchievementM
                 .map(CircleMemberAchievement::getAchievementType)
                 .collect(Collectors.toSet());
 
+        // 加载用户成长数据用于计算进度
+        CircleMemberGrowth growth = getGrowth(circleId, userId);
+        int participationDays = memberGrowthService.getParticipationDays(circleId, userId);
+        // RISING_STAR 需要排名：查询经验值高于当前用户的成员数
+        long higherCount = 0;
+        if (growth != null && growth.getExpPoints() != null) {
+            LambdaQueryWrapper<CircleMemberGrowth> rankQw = new LambdaQueryWrapper<>();
+            rankQw.eq(CircleMemberGrowth::getCircleId, circleId)
+                  .gt(CircleMemberGrowth::getExpPoints, growth.getExpPoints());
+            higherCount = growthMapper.selectCount(rankQw);
+        }
+
         List<AchievementVO> result = new ArrayList<>();
         for (CircleAchievement a : allAchievements) {
             AchievementVO vo = new AchievementVO();
             vo.setAchievementType(a.getAchievementType());
             vo.setName(a.getName());
             vo.setDescription(a.getDescription());
+            vo.setIconUrl(a.getIconUrl());
             vo.setConditionDesc(a.getConditionDesc());
             vo.setEarned(earnedTypes.contains(a.getAchievementType()));
+
+            // 计算进度与状态
+            if (growth != null) {
+                int progress = 0;
+                int target = 0;
+                switch (a.getAchievementType()) {
+                    case "CONTINUOUS_CREATOR":
+                        target = 10;
+                        progress = Math.min(growth.getPostCount() != null ? growth.getPostCount() : 0, 10);
+                        break;
+                    case "QUALITY_CONTRIBUTOR":
+                        target = 5;
+                        progress = Math.min(growth.getFeaturedCount() != null ? growth.getFeaturedCount() : 0, 5);
+                        break;
+                    case "ACTIVE_PARTICIPANT":
+                        target = 3;
+                        progress = Math.min(participationDays, 3);
+                        break;
+                    case "RISING_STAR":
+                        target = 10;
+                        int rank = (int) higherCount + 1;
+                        // rank 越低越好，直接用原始排名，status 计算时用 target/current 判定
+                        progress = rank;
+                        break;
+                    default:
+                        break;
+                }
+                vo.setCurrentProgress(progress);
+                vo.setTargetProgress(target);
+
+                // 状态计算：RISING_STAR 排名越低越好，用 target/current 判定
+                if (Boolean.TRUE.equals(vo.getEarned())) {
+                    vo.setStatus("EARNED");
+                } else if (target > 0 && progress > 0) {
+                    double ratio = "RISING_STAR".equals(a.getAchievementType())
+                            ? (double) target / progress
+                            : (double) progress / target;
+                    vo.setStatus(ratio >= 0.8 ? "CLOSE" : "UNEARNED");
+                } else {
+                    vo.setStatus("UNEARNED");
+                }
+            }
+
             result.add(vo);
         }
         return result;
