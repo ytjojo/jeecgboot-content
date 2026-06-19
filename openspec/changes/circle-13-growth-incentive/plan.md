@@ -1,5 +1,7 @@
 # 圈子成长激励 Implementation Plan
 
+> **Verification Fixes (2026-06-19)**: 验证报告 W-2/W-5/W-6/W-7/S-1/S-2/CRITICAL#2 已修复，VO 字段已补充，WebSocket 实时推送已集成。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 建立圈子等级、成员经验值/贡献值、成就徽章和排行榜体系，形成可感知、可持续的正向激励循环。
@@ -632,7 +634,7 @@ git commit -m "feat(growth): add continuous participation tracking"
 - Create: `src/main/java/org/jeecg/modules/content/user/growth/vo/MemberGrowthVO.java`
 - Create: `src/main/java/org/jeecg/modules/content/user/growth/controller/MemberGrowthController.java`
 
-- [ ] **Step 1: Create MemberGrowthVO**
+- [x] **Step 1: Create MemberGrowthVO**
 
 ```java
 @Data
@@ -652,6 +654,16 @@ public class MemberGrowthVO {
     private Integer participationDays;
     @Schema(description = "圈内排名")
     private Integer rank;
+    @Schema(description = "下一等级门槛")
+    private Integer nextLevelThreshold;
+    @Schema(description = "等级进度百分比")
+    private Integer progressPercent;
+    @Schema(description = "今日已获经验值")
+    private Integer todayExp;
+    @Schema(description = "每日经验值上限")
+    private Integer dailyExpLimit;
+    @Schema(description = "最近获得的徽章（最多3枚）")
+    private List<AchievementVO> recentBadges;
 }
 ```
 
@@ -850,7 +862,7 @@ public class CircleLevelServiceImpl extends ServiceImpl<CircleLevelMapper, Circl
 Run: `mvn test -pl jeecg-boot-module/jeecg-module-content -Dtest=CircleLevelServiceTest#updateLevel_score100_promotesToL2 -q`
 Expected: PASS
 
-- [ ] **Step 6: Create CircleLevelVO and CircleLevelController**
+- [x] **Step 6: Create CircleLevelVO, LevelConditionVO, and CircleLevelController**
 
 ```java
 @Data
@@ -866,6 +878,28 @@ public class CircleLevelVO {
     private Integer nextLevelThreshold;
     @Schema(description = "进度百分比")
     private Integer progressPercent;
+    @Schema(description = "已解锁权益列表")
+    private List<String> benefits;
+    @Schema(description = "成员规模得分")
+    private Integer memberScore;
+    @Schema(description = "内容贡献得分")
+    private Integer contentScore;
+    @Schema(description = "活跃互动得分")
+    private Integer activityScore;
+    @Schema(description = "下一等级各项条件")
+    private List<LevelConditionVO> nextLevelConditions;
+}
+```
+
+```java
+@Data
+@Schema(description = "等级条件项")
+public class LevelConditionVO {
+    private String type;      // MEMBER / CONTENT / INTERACTION
+    private String label;
+    private Integer current;
+    private Integer required;  // 维度上限
+    private Integer gap;       // required - current
 }
 ```
 
@@ -1101,7 +1135,7 @@ void revoke_success() {
 Run: `mvn test -pl jeecg-boot-module/jeecg-module-content -Dtest=AchievementServiceTest -q`
 Expected: ALL PASS
 
-- [ ] **Step 9: Create AchievementVO and AchievementController**
+- [x] **Step 9: Create AchievementVO and AchievementController**
 
 ```java
 @Data
@@ -1113,10 +1147,20 @@ public class AchievementVO {
     private String name;
     @Schema(description = "徽章描述")
     private String description;
+    @Schema(description = "徽章图标URL")
+    private String iconUrl;
     @Schema(description = "是否已获得")
     private Boolean earned;
+    @Schema(description = "获得时间")
+    private Date earnedDate;
     @Schema(description = "达成条件描述")
     private String conditionDesc;
+    @Schema(description = "当前进度数值")
+    private Integer currentProgress;
+    @Schema(description = "目标数值")
+    private Integer targetProgress;
+    @Schema(description = "状态: EARNED/CLOSE/UNEARNED")
+    private String status;
 }
 ```
 
@@ -1310,7 +1354,7 @@ void getLeaderboard_userNotInTop50_noHighlight() {
 }
 ```
 
-- [ ] **Step 7: Create LeaderboardEntryVO and LeaderboardController**
+- [x] **Step 7: Create LeaderboardEntryVO and LeaderboardController**
 
 ```java
 @Data
@@ -1324,6 +1368,12 @@ public class LeaderboardEntryVO {
     private Integer rankNum;
     @Schema(description = "是否高亮当前用户")
     private Boolean highlighted;
+    @Schema(description = "与上一名得分差值")
+    private Integer gap;
+    @Schema(description = "用户名")
+    private String username;
+    @Schema(description = "用户头像URL")
+    private String avatar;
 }
 ```
 
