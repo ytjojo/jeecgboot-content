@@ -28,4 +28,16 @@ public enum CircleLevelEnum {
         }
         return result;
     }
+
+    /**
+     * 根据等级数值返回对应枚举，用于 levelName 与 DB 存储的 level 字段保持一致。
+     */
+    public static CircleLevelEnum ofLevel(int level) {
+        for (CircleLevelEnum e : values()) {
+            if (e.getLevel() == level) {
+                return e;
+            }
+        }
+        return L1;
+    }
 }

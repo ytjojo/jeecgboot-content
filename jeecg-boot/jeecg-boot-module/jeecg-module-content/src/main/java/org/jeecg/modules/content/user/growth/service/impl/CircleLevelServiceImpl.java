@@ -72,7 +72,8 @@ public class CircleLevelServiceImpl extends ServiceImpl<CircleLevelMapper, Circl
 
         CircleLevelVO vo = new CircleLevelVO();
         vo.setLevel(level.getLevel());
-        vo.setLevelName(currentEnum.getName());
+        // levelName 基于 DB 存储的 level 字段，保证与 level 始终一致
+        vo.setLevelName(CircleLevelEnum.ofLevel(level.getLevel()).getName());
         vo.setGrowthScore(level.getGrowthScore());
 
         CircleLevelEnum[] values = CircleLevelEnum.values();
