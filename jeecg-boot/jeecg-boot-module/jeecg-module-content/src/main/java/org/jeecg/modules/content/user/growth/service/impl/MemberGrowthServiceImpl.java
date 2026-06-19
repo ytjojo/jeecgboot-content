@@ -8,6 +8,7 @@ import org.jeecg.modules.content.user.growth.entity.CircleAchievement;
 import org.jeecg.modules.content.user.growth.entity.CircleGrowthLog;
 import org.jeecg.modules.content.user.growth.entity.CircleMemberAchievement;
 import org.jeecg.modules.content.user.growth.entity.CircleMemberGrowth;
+import org.jeecg.modules.content.user.growth.enums.CircleLevelEnum;
 import org.jeecg.modules.content.user.growth.enums.GrowthActionEnum;
 import org.jeecg.modules.content.user.growth.mapper.CircleAchievementMapper;
 import org.jeecg.modules.content.user.growth.mapper.CircleGrowthLogMapper;
@@ -109,6 +110,7 @@ public class MemberGrowthServiceImpl extends ServiceImpl<CircleMemberGrowthMappe
         vo.setExpPoints(growth.getExpPoints());
         vo.setContributionPoints(growth.getContributionPoints());
         vo.setLevel(growth.getLevel());
+        vo.setLevelName(CircleLevelEnum.ofLevel(growth.getLevel() != null ? growth.getLevel() : 1).getName());
         vo.setPostCount(growth.getPostCount());
         vo.setParticipationDays(getParticipationDays(circleId, userId));
 

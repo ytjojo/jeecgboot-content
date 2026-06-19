@@ -21,6 +21,9 @@ public class MemberGrowthVO {
     @Schema(description = "成员等级")
     private Integer level;
 
+    @Schema(description = "等级名称")
+    private String levelName;
+
     @Schema(description = "发帖数")
     private Integer postCount;
 
