@@ -6,7 +6,9 @@ import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.jeecg.modules.content.user.growth.entity.CircleGrowthLog;
 import org.jeecg.modules.content.user.growth.entity.CircleMemberGrowth;
 import org.jeecg.modules.content.user.growth.enums.GrowthActionEnum;
+import org.jeecg.modules.content.user.growth.mapper.CircleAchievementMapper;
 import org.jeecg.modules.content.user.growth.mapper.CircleGrowthLogMapper;
+import org.jeecg.modules.content.user.growth.mapper.CircleMemberAchievementMapper;
 import org.jeecg.modules.content.user.growth.mapper.CircleMemberGrowthMapper;
 import org.jeecg.modules.content.user.growth.service.impl.MemberGrowthServiceImpl;
 import org.junit.jupiter.api.BeforeAll;
@@ -130,5 +132,44 @@ class MemberGrowthServiceTest {
         int days = service.getParticipationDays(CIRCLE_ID, USER_ID);
 
         assertThat(days).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("获取成长信息返回完整的VO数据")
+    void getGrowthInfo_returnsCompleteVO() {
+        CircleMemberGrowth growth = new CircleMemberGrowth()
+                .setCircleId(CIRCLE_ID).setUserId(USER_ID)
+                .setExpPoints(150).setContributionPoints(80)
+                .setLevel(2).setPostCount(5).setCommentCount(3).setFeaturedCount(1);
+        doReturn(growth).when(growthMapper).selectOne(any(), anyBoolean());
+
+        // baseMapper.selectCount for rank: return 0 (rank = 0 + 1 = 1)
+        when(growthMapper.selectCount(any())).thenReturn(0L);
+
+        // todayExp: one log with 15 exp today
+        CircleGrowthLog todayLog = new CircleGrowthLog()
+                .setCircleId(CIRCLE_ID).setUserId(USER_ID)
+                .setExpPoints(15).setRevoked(false).setBizDate(LocalDate.now());
+        when(growthLogMapper.selectList(any()))
+                .thenReturn(java.util.List.of(            // first call: getParticipationDays
+                        new CircleGrowthLog().setBizDate(LocalDate.now()),
+                        new CircleGrowthLog().setBizDate(LocalDate.now().minusDays(1))))
+                .thenReturn(java.util.List.of(todayLog));  // second call: todayExp
+
+        var vo = service.getGrowthInfo(CIRCLE_ID, USER_ID);
+
+        assertThat(vo.getCircleId()).isEqualTo(CIRCLE_ID);
+        assertThat(vo.getExpPoints()).isEqualTo(150);
+        assertThat(vo.getContributionPoints()).isEqualTo(80);
+        assertThat(vo.getLevel()).isEqualTo(2);
+        assertThat(vo.getPostCount()).isEqualTo(5);
+        assertThat(vo.getRank()).isEqualTo(1);
+        // L2: threshold = LEVEL_THRESHOLDS[2] = 300, current threshold = 100
+        // progress% = (150 - 100) * 100 / (300 - 100) = 25
+        assertThat(vo.getNextLevelThreshold()).isEqualTo(300);
+        assertThat(vo.getProgressPercent()).isEqualTo(25);
+        assertThat(vo.getParticipationDays()).isEqualTo(2);
+        assertThat(vo.getTodayExp()).isEqualTo(15);
+        assertThat(vo.getDailyExpLimit()).isEqualTo(100);
     }
 }

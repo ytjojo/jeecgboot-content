@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,12 +26,19 @@ class AchievementControllerTest {
     private AchievementController controller;
 
     @Test
-    @DisplayName("获取徽章列表返回200和徽章数据")
+    @DisplayName("获取徽章列表返回200和完整字段数据")
     void getAchievements_returnsOkWithBadges() {
         AchievementVO badge = new AchievementVO();
         badge.setAchievementType("CONTINUOUS_CREATOR");
         badge.setName("持续创作者");
+        badge.setDescription("累计发布10篇内容");
+        badge.setIconUrl("/icons/creator.png");
         badge.setEarned(true);
+        badge.setEarnedDate(new Date());
+        badge.setConditionDesc("发布10篇内容");
+        badge.setCurrentProgress(10);
+        badge.setTargetProgress(10);
+        badge.setStatus("EARNED");
         when(achievementService.getMemberAchievements("c1", "u1"))
                 .thenReturn(List.of(badge));
 
@@ -38,8 +46,17 @@ class AchievementControllerTest {
 
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.getResult()).hasSize(1);
-        assertThat(result.getResult().get(0).getAchievementType()).isEqualTo("CONTINUOUS_CREATOR");
-        assertThat(result.getResult().get(0).getEarned()).isTrue();
+        var res = result.getResult().get(0);
+        assertThat(res.getAchievementType()).isEqualTo("CONTINUOUS_CREATOR");
+        assertThat(res.getName()).isEqualTo("持续创作者");
+        assertThat(res.getDescription()).isEqualTo("累计发布10篇内容");
+        assertThat(res.getIconUrl()).isEqualTo("/icons/creator.png");
+        assertThat(res.getEarned()).isTrue();
+        assertThat(res.getEarnedDate()).isNotNull();
+        assertThat(res.getConditionDesc()).isEqualTo("发布10篇内容");
+        assertThat(res.getCurrentProgress()).isEqualTo(10);
+        assertThat(res.getTargetProgress()).isEqualTo(10);
+        assertThat(res.getStatus()).isEqualTo("EARNED");
         verify(achievementService).getMemberAchievements("c1", "u1");
     }
 }

@@ -23,7 +23,7 @@ class MemberGrowthControllerTest {
     private MemberGrowthController controller;
 
     @Test
-    @DisplayName("获取成长信息返回200和正确数据")
+    @DisplayName("获取成长信息返回200和完整字段数据")
     void getGrowthInfo_returnsOkWithData() {
         MemberGrowthVO vo = new MemberGrowthVO();
         vo.setCircleId("c1");
@@ -32,13 +32,28 @@ class MemberGrowthControllerTest {
         vo.setLevel(2);
         vo.setPostCount(5);
         vo.setParticipationDays(3);
+        vo.setRank(5);
+        vo.setNextLevelThreshold(300);
+        vo.setProgressPercent(25);
+        vo.setTodayExp(15);
+        vo.setDailyExpLimit(100);
         when(memberGrowthService.getGrowthInfo("c1", "u1")).thenReturn(vo);
 
         var result = controller.getGrowthInfo("c1", "u1");
 
         assertThat(result.getCode()).isEqualTo(200);
-        assertThat(result.getResult().getCircleId()).isEqualTo("c1");
-        assertThat(result.getResult().getExpPoints()).isEqualTo(50);
+        var res = result.getResult();
+        assertThat(res.getCircleId()).isEqualTo("c1");
+        assertThat(res.getExpPoints()).isEqualTo(50);
+        assertThat(res.getContributionPoints()).isEqualTo(30);
+        assertThat(res.getLevel()).isEqualTo(2);
+        assertThat(res.getPostCount()).isEqualTo(5);
+        assertThat(res.getParticipationDays()).isEqualTo(3);
+        assertThat(res.getRank()).isEqualTo(5);
+        assertThat(res.getNextLevelThreshold()).isEqualTo(300);
+        assertThat(res.getProgressPercent()).isEqualTo(25);
+        assertThat(res.getTodayExp()).isEqualTo(15);
+        assertThat(res.getDailyExpLimit()).isEqualTo(100);
         verify(memberGrowthService).getGrowthInfo("c1", "u1");
     }
 

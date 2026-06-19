@@ -25,13 +25,16 @@ class LeaderboardControllerTest {
     private LeaderboardController controller;
 
     @Test
-    @DisplayName("获取排行榜返回200和条目列表")
+    @DisplayName("获取排行榜返回200和完整条目字段")
     void getLeaderboard_returnsOkWithEntries() {
         LeaderboardEntryVO entry = new LeaderboardEntryVO();
         entry.setUserId("u1");
         entry.setScore(100);
         entry.setRankNum(1);
         entry.setHighlighted(true);
+        entry.setGap(0);
+        entry.setUsername("测试用户");
+        entry.setAvatar("/avatar/u1.png");
         when(leaderboardService.getLeaderboard("c1", "EXP", "WEEK", "u1"))
                 .thenReturn(List.of(entry));
 
@@ -39,8 +42,14 @@ class LeaderboardControllerTest {
 
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.getResult()).hasSize(1);
-        assertThat(result.getResult().get(0).getUserId()).isEqualTo("u1");
-        assertThat(result.getResult().get(0).getHighlighted()).isTrue();
+        var res = result.getResult().get(0);
+        assertThat(res.getUserId()).isEqualTo("u1");
+        assertThat(res.getScore()).isEqualTo(100);
+        assertThat(res.getRankNum()).isEqualTo(1);
+        assertThat(res.getHighlighted()).isTrue();
+        assertThat(res.getGap()).isEqualTo(0);
+        assertThat(res.getUsername()).isEqualTo("测试用户");
+        assertThat(res.getAvatar()).isEqualTo("/avatar/u1.png");
         verify(leaderboardService).getLeaderboard("c1", "EXP", "WEEK", "u1");
     }
 
