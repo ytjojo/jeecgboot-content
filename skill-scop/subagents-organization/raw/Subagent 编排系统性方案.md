@@ -545,25 +545,31 @@ OUTPUT:
 职责互斥
 输出独立
 
+并行派发时，Dispatch Gate 中的 Coordination Check 为最高优先级——文件重叠或职责重叠将导致冲突，必须在派发前消解。
+
 ⸻
 
 并行集成流程
 
+Dispatch Gate（每个 Subagent 独立通过）
+↓
 Dispatch
 ↓
-Execute
+Execute（并行）
 ↓
 Collect
+↓
+Acceptance Gate（每个 Subagent 结果独立验证）
 ↓
 Conflict Detection
 ↓
 Merge
 ↓
-Validation
-↓
-Review
+Integration Validation
 ↓
 Accept
+↓
+Ledger
 
 ⸻
 
