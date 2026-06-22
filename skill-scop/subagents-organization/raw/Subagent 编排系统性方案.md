@@ -528,6 +528,49 @@ OUTPUT:
 
 ⸻
 
+Template B：分析/研究任务派发
+
+ROLE:
+Analyst
+GOAL:
+[研究/分析/定位目标]
+CONTEXT:
+- 相关文件或模块
+- 背景信息
+SCOPE:
+Read Only
+OUTPUT:
+发现
+分析
+建议
+STOP_RULE:
+BLOCKED
+NEEDS_CONTEXT
+NEEDS_DECISION
+
+⸻
+
+Template C：审查任务派发
+
+ROLE:
+Reviewer
+GOAL:
+[审查目标：代码质量 / 架构 / 安全性]
+CONTEXT:
+- 待审查内容
+- 审查标准或规范
+SCOPE:
+Read Only
+OUTPUT:
+审查意见
+问题清单
+改进建议
+STOP_RULE:
+BLOCKED
+NEEDS_CONTEXT
+
+⸻
+
 六、并行协调
 
 ⸻
@@ -570,6 +613,10 @@ Integration Validation
 Accept
 ↓
 Ledger
+
+说明：
+
+Acceptance Gate 作用于每个 Subagent 的输出，在合并前独立验证；Integration Validation 作用于合并后的整体，验证集成正确性。两者不重复——前者阻止不合格的个体结果进入合并，后者阻止合并引入的新问题被接受。
 
 ⸻
 
@@ -679,13 +726,15 @@ Subagent 执行任务。
 
 4. Review
 
-主 Agent 审查结果。
+主 Agent 审查结果，判断是否进入验收阶段。
 
 检查：
 
-目标是否达成
-范围是否越界
+目标是否达成（定性初判）
+范围是否越界（定性初判）
 测试是否通过
+
+Review 是快速定性判断；Acceptance Gate 是完整 Checklist 验证。Review 通过只意味着"值得验收"，最终结论由 Acceptance Gate 决定。
 
 ⸻
 
@@ -786,7 +835,7 @@ Integration Validation（集成验证）
 [ ] 无冲突
 [ ] 能正常合并
 [ ] 不影响其它模块
-[ ] 已完成 Review
+[ ] 已通过 Reviewer 审查（如适用）
 
 ⸻
 
@@ -850,7 +899,7 @@ Acceptance Gate（派发后）
 [ ] Lint通过
 [ ] 类型检查通过
 [ ] 无冲突
-[ ] 已完成 Review
+[ ] 已通过 Reviewer 审查（如适用）
 [ ] 已记录 Ledger
 
 ⸻
