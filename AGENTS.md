@@ -98,29 +98,11 @@ echo "<worktree-path>" >> .claude/worktree-registry.txt
 ```
 该文件是会话结束清理的唯一依据——只清理本文件内列出的 worktree，绝不可凭 `git worktree list` 输出自行判断。
 
-**会话结束时清理**：所有 subagent 执行完毕、会话即将退出前，主 agent 必须执行清理流程：
-
-1. 读取 `.claude/worktree-registry.txt`，逐行处理每个 worktree 路径
-2. 对每个 worktree 执行**安全校验**（全通过才可清理）：
-   ```bash
-   # a. 存在 .worktree-owner 且 session= 与当前会话匹配
-   grep -q "session=$WORKTREE_SESSION_MARKER" <worktree-path>/.worktree-owner
-   # b. 未被 lock（lock 表示其他 session 仍在使用）
-   git worktree list | grep <worktree-path> | grep -v locked
-   # c. 已合并回来源分支
-   git branch --merged $(grep -o 'source=\S*' <worktree-path>/.worktree-owner | cut -d= -f2) | grep <branch>
-   # d. 无未提交改动
-   git -C <worktree-path> status --short | wc -l | grep -q '^0$'
-   ```
-3. 任一校验失败 → **停止清理该 worktree**，保留并报告用户
-4. 全部通过 → `git worktree remove <worktree-path> && git branch -d <branch>`
-5. 清理完成后删除 `.claude/worktree-registry.txt`
-
-**清理红线**（触犯任一条立即停止）：
-- ❌ 绝不可清理 `.worktree-owner` 中 `session=` 与当前会话不匹配的 worktree
-- ❌ 绝不可清理 `git worktree list` 中状态为 `locked` 的 worktree
-- ❌ 绝不可清理无 `.worktree-owner` 文件的 worktree（归其他 session 或手工创建）
-- ❌ 绝不可凭 `git worktree list` 全量输出直接清理——必须以 registry 文件为唯一依据
+**会话结束时清理**：subagent 全部结束后，主 agent 按 registry 文件逐行清理，每条执行 4 项校验（全通过才清理）：
+- `session=` 匹配当前会话 → `git worktree list` 中未 locked → 已合并回 source 分支 → 无未提交改动
+- 任一失败：保留并报告用户。全通过：`git worktree remove <path> && git branch -d <branch>`
+- 清理后删除 registry 文件
+- **红线**：不匹配 session 不碰、locked 不碰、无 `.worktree-owner` 不碰、不以 `git worktree list` 全量输出为依据
 
 ## 代码实现 Workflow
 
