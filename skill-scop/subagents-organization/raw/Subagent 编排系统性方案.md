@@ -387,7 +387,7 @@ Lint
 
 ⸻
 
-三、Subagent 角色模型
+三、角色模型
 
 ⸻
 
@@ -438,7 +438,67 @@ Read Only
 
 ⸻
 
-四、标准派发模板
+四、Dispatch Gate（启动门）
+
+⸻
+
+成熟 Agent 编排系统（Codex、Claude Code、Google Borg、Kubernetes Controller、航空检查单）的共同特点：关键节点 Checklist 化。导致 Agent 失控的，往往不是规则不存在，而是规则没有被执行。
+
+Dispatch Gate 是主 Agent 的责任。目的：判断任务是否具备派发条件。在创建 Subagent 之前，必须通过以下检查。
+
+⸻
+
+Goal Check（目标检查）
+
+[ ] 目标是否明确
+[ ] 是否只有一个主要目标
+[ ] 是否可验证完成
+[ ] 目标是否具体可衡量
+
+⸻
+
+Scope Check（范围检查）
+
+[ ] 是否定义允许修改范围
+[ ] 是否定义禁止修改范围
+[ ] 是否避免跨模块任务
+
+⸻
+
+Context Check（上下文检查）
+
+[ ] 是否提供必要上下文
+[ ] 是否提供相关文件
+[ ] 是否提供错误信息
+[ ] 是否提供项目规范入口（AGENTS.md / RULES.md）
+
+⸻
+
+Contract Check（契约检查）
+
+[ ] 是否指定角色
+[ ] 是否定义 DoD
+[ ] 是否定义 STOP 条件
+[ ] 是否定义输出格式
+
+⸻
+
+Coordination Check（协调检查）
+
+[ ] 是否与其它 Subagent 冲突
+[ ] 是否存在文件重叠
+[ ] 是否存在职责重叠
+[ ] 是否存在并发冲突风险
+
+⸻
+
+若任何一项检查失败：DO NOT DISPATCH。
+
+⸻
+
+五、派发模板
+
+⸻
 
 Template A：单任务派发
 
@@ -467,7 +527,11 @@ OUTPUT:
 
 ⸻
 
-五、并行派发模板
+六、并行协调
+
+⸻
+
+并行派发模板
 
 主任务
 ├─ Subagent A
@@ -502,7 +566,7 @@ Accept
 
 ⸻
 
-六、质量模式（Quality Mode）
+七、质量模式
 
 注意：
 
@@ -564,25 +628,51 @@ REFACTOR
 
 ⸻
 
-七、派发后生命周期
+八、执行生命周期
 
 ⸻
 
-1. Dispatch
+完整生命周期：
 
-创建任务
+Dispatch Gate
+↓
+Dispatch
+↓
+Execute
+↓
+Review
+↓
+Acceptance Gate
+├─ PASS → Accept
+└─ FAIL → Reject
+             ↓
+          Rework
+             ↓
+       Re-dispatch
 
 ⸻
 
-2. Execute
+1. Dispatch Gate
 
-Subagent 执行
+派发前强制检查。未通过不得派发。详见第四章 Dispatch Gate。
 
 ⸻
 
-3. Review
+2. Dispatch
 
-主 Agent 审查
+创建任务，派发至 Subagent。
+
+⸻
+
+3. Execute
+
+Subagent 执行任务。
+
+⸻
+
+4. Review
+
+主 Agent 审查结果。
 
 检查：
 
@@ -592,23 +682,34 @@ Subagent 执行
 
 ⸻
 
-4. Rework
+5. Acceptance Gate
 
-不通过：
+验收门检查。详见第九章 Acceptance Gate。
 
-重新派发
-
-⸻
-
-5. Accept
-
-通过：
-
-进入集成
+PASS：结果被接受，进入 Accept。
+FAIL：结果被拒绝，进入 Reject。
 
 ⸻
 
-6. Ledger
+6. Accept
+
+通过验收，进入集成。
+
+⸻
+
+7. Reject → Rework → Re-dispatch
+
+验收失败时：
+
+Reject：拒绝当前结果。
+Rework：分析失败原因，调整任务定义。
+Re-dispatch：重新通过 Dispatch Gate 派发。
+
+形成完整闭环，确保质量问题不会被遗漏。
+
+⸻
+
+8. Ledger
 
 记录：
 
@@ -620,44 +721,77 @@ Subagent 执行
 
 作用：
 
-防止：
-
-重复派发
-重复修复
-上下文压缩丢失
+防止重复派发
+防止重复修复
+防止上下文压缩丢失
 
 ⸻
 
-八、派发检查清单
-
-派发前
-
-[ ] 目标是否具体可衡量
-[ ] 是否指定角色
-[ ] 是否定义文件范围
-[ ] 是否定义 DoD
-[ ] 是否定义 STOP 条件
-[ ] 是否提供必要上下文
-[ ] 是否提供项目规范入口
-    (AGENTS.md / RULES.md)
-[ ] 是否存在并发冲突风险
+九、Acceptance Gate（验收门）
 
 ⸻
 
-派发后
+Acceptance Gate 是 Subagent 编排中最关键的控制点。
 
-[ ] 返回格式正确
-[ ] 修改范围合法
+Subagent 完成 ≠ 任务完成。
+
+在接受结果之前必须通过以下验证。
+
+⸻
+
+Goal Validation（目标验证）
+
+[ ] 原目标是否完成
+[ ] 是否满足 DoD
+[ ] 是否产生额外未授权功能
+[ ] 返回格式是否正确
+
+⸻
+
+Scope Validation（范围验证）
+
+[ ] 是否超出授权范围
+[ ] 是否修改禁止区域
+[ ] 是否新增未授权文件
+[ ] 修改范围是否合法
+
+⸻
+
+Quality Validation（质量验证）
+
 [ ] 测试通过
-[ ] Lint通过
+[ ] Lint 通过
 [ ] 类型检查通过
-[ ] 无冲突
-[ ] 已完成 Review
-[ ] 已记录 Ledger
+[ ] 构建通过
 
 ⸻
 
-九、常见反模式
+Safety Validation（安全验证）
+
+[ ] 无敏感信息泄漏
+[ ] 无危险操作
+[ ] 无破坏性修改
+
+⸻
+
+Integration Validation（集成验证）
+
+[ ] 无冲突
+[ ] 能正常合并
+[ ] 不影响其它模块
+[ ] 已完成 Review
+
+⸻
+
+若任何一项验证失败：
+
+REJECT
+
+进入 Rework → Re-dispatch 闭环。
+
+⸻
+
+十、常见反模式
 
 ❌ 修复所有问题
 
@@ -683,7 +817,38 @@ Subagent 执行
 
 ⸻
 
-十、核心结论
+十一、检查清单汇总
+
+⸻
+
+Dispatch Gate（派发前）
+
+[ ] 目标是否具体可衡量
+[ ] 是否指定角色
+[ ] 是否定义文件范围
+[ ] 是否定义 DoD
+[ ] 是否定义 STOP 条件
+[ ] 是否提供必要上下文
+[ ] 是否提供项目规范入口
+    (AGENTS.md / RULES.md)
+[ ] 是否存在并发冲突风险
+
+⸻
+
+Acceptance Gate（派发后）
+
+[ ] 返回格式正确
+[ ] 修改范围合法
+[ ] 测试通过
+[ ] Lint通过
+[ ] 类型检查通过
+[ ] 无冲突
+[ ] 已完成 Review
+[ ] 已记录 Ledger
+
+⸻
+
+十二、核心结论
 
 Subagent 编排的本质不是控制执行过程，而是建立：
 
@@ -697,263 +862,13 @@ Subagent 编排的本质不是控制执行过程，而是建立：
 ↓
 协调规则
 
+Dispatch Gate
+↓
+Acceptance Gate
+
 最终原则：
 
 用原则指导，而非用规则束缚。
 
 信任 Subagent 的执行能力，
 保留主 Agent 的最终决策权。
-
-
-
-
-有必要，而且我认为应该保留。
-
-但需要升级一下定位。
-
-很多 Agent 编排文档的问题是：
-
-* 只有原则（Policy）
-* 只有约束（Constraint）
-* 只有模板（Template）
-
-缺少：
-
-* 执行前 Gate
-* 执行后 Gate
-
-而成熟系统（Codex、Claude Code、Google Borg、Kubernetes Controller、航空检查单）都有一个共同特点：
-
-关键节点 Checklist 化
-
-因为真正导致 Agent 失控的，不是规则不存在，而是规则没有被执行。
-
-⸻
-
-建议保留，但升级名称
-
-不要叫：
-
-派发前检查
-派发后检查
-
-更专业的是：
-
-Dispatch Gate
-Acceptance Gate
-
-即：
-
-启动门
-验收门
-
-这样就形成完整生命周期：
-
-Task
-↓
-Dispatch Gate
-↓
-Dispatch
-↓
-Execute
-↓
-Review
-↓
-Acceptance Gate
-↓
-Accept
-↓
-Ledger
-
-⸻
-
-Dispatch Gate（启动前检查）
-
-这是主 Agent 的责任。
-
-目的：
-
-判断任务是否具备派发条件。
-
-⸻
-
-建议加入文档：
-
-Dispatch Gate
-
-在创建 Subagent 之前，必须通过以下检查。
-
-Goal Check
-
-[ ] 目标是否明确
-[ ] 是否只有一个主要目标
-[ ] 是否可验证完成
-
-⸻
-
-Scope Check
-
-[ ] 是否定义允许修改范围
-[ ] 是否定义禁止修改范围
-[ ] 是否避免跨模块任务
-
-⸻
-
-Context Check
-
-[ ] 是否提供必要上下文
-[ ] 是否提供相关文件
-[ ] 是否提供错误信息
-
-⸻
-
-Contract Check
-
-[ ] 是否定义 DoD
-[ ] 是否定义 STOP 条件
-[ ] 是否定义输出格式
-
-⸻
-
-Coordination Check
-
-[ ] 是否与其它 Subagent 冲突
-[ ] 是否存在文件重叠
-[ ] 是否存在职责重叠
-
-⸻
-
-如果有任何一项失败：
-
-DO NOT DISPATCH
-
-⸻
-
-Acceptance Gate（完成后检查）
-
-这个更重要。
-
-很多 Agent 系统失败就在这里。
-
-Subagent 完成 ≠ 任务完成
-
-必须经过 Acceptance Gate。
-
-⸻
-
-Acceptance Gate
-
-在接受结果之前必须通过。
-
-⸻
-
-Goal Validation
-
-[ ] 原目标是否完成
-[ ] 是否满足 DoD
-[ ] 是否产生额外未授权功能
-
-⸻
-
-Scope Validation
-
-[ ] 是否超出授权范围
-[ ] 是否修改禁止区域
-[ ] 是否新增未授权文件
-
-⸻
-
-Quality Validation
-
-[ ] 测试通过
-[ ] Lint通过
-[ ] 类型检查通过
-[ ] 构建通过
-
-⸻
-
-Safety Validation
-
-[ ] 无敏感信息泄漏
-[ ] 无危险操作
-[ ] 无破坏性修改
-
-⸻
-
-Integration Validation
-
-[ ] 无冲突
-[ ] 能正常合并
-[ ] 不影响其它模块
-
-⸻
-
-若失败：
-
-REJECT
-
-进入：
-
-Rework
-
-⸻
-
-更进一步：加入 Reject 机制
-
-这是原文还缺的一块。
-
-生命周期建议改为：
-
-Dispatch Gate
-↓
-Dispatch
-↓
-Execute
-↓
-Review
-↓
-Acceptance Gate
-├─ PASS → Accept
-└─ FAIL → Reject
-             ↓
-          Rework
-             ↓
-       Re-dispatch
-
-这样就形成真正闭环。
-
-⸻
-
-最终建议
-
-我会把文档结构调整成：
-
-1. Principles
-2. Five-Layer Constraint Model
-3. Role Model
-4. Dispatch Gate      ← 新增
-5. Dispatch Templates
-6. Execution Lifecycle
-7. Acceptance Gate    ← 新增
-8. Parallel Coordination
-9. Quality Modes
-10. Anti-Patterns
-11. Checklist Summary
-
-这样逻辑上就变成：
-
-约束体系
-    ↓
-启动检查
-    ↓
-任务派发
-    ↓
-执行
-    ↓
-验收检查
-    ↓
-接受/拒绝
-    ↓
-归档
-
-对于 Claude Code、Codex、Cursor Agent、OpenAI Agents 这类生产级 Agent 编排体系来说，Dispatch Gate 和 Acceptance Gate 的价值实际上高于大部分规则本身，因为它们把“原则”变成了真正会被执行的控制点。
