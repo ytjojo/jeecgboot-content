@@ -1,4 +1,4 @@
-# subagent 约束系统性方案
+# subagent 约束系统性方案(subagent-constraints-framework)
 
 约束体系分为 **5 层**，从硬性边界到执行契约层层递进。
 
