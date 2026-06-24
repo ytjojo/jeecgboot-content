@@ -1,7 +1,32 @@
 # circle-13-growth-incentive-frontend 验证审核报告
 
 **审核日期**: 2026-06-04
+**最后重审**: 2026-06-24（基于 main 分支 commit 84e8297d）
 **审核范围**: design.md, proposal.md, specs/*.md 中的后端 API 引用与实际代码库一致性
+
+---
+
+## 🔄 2026-06-24 重审结论
+
+> **原报告中的大部分问题已由后端代码迭代修复，但 API 路径发生新变更。**
+
+| 项目 | 2026-06-04 状态 | 2026-06-24 状态 |
+|------|---------------|---------------|
+| 后端 API 路径 | 严重不匹配（4个RESTful路径错误） | ⚠️ 路径已修正到 `/user/growth/` 前缀后，**CircleLevelController 又迁移至 `/circle/growth/` 前缀**，其余 3 个仍在 `/user/growth/`，前缀不一致 |
+| VO 字段定义 | 严重不匹配（4个VO缺字段） | ✅ **已全部修复** — 原报告列出的所有缺失字段后端已补充 |
+| 文档完整性 | 基本完整 | 基本完整，但 design.md D9 降级策略现已过时（字段已存在，无需降级） |
+| 前后端接口一致性 | 不通过 | ⚠️ 需更新前端文档中的圈子等级路径为 `/api/v1/content/circle/growth/level/info`，并更新 VO 字段映射 |
+
+**关键变更**:
+1. ✅ CircleLevelVO 已补充 `benefits(List<String>)`, `memberScore`, `contentScore`, `activityScore`, `nextLevelConditions(List<LevelConditionVO>)`
+2. ✅ MemberGrowthVO 已补充 `levelName`, `nextLevelThreshold`, `progressPercent`, `todayExp`, `dailyExpLimit`, `recentBadges(List<AchievementVO>)`
+3. ✅ AchievementVO 已补充 `iconUrl`, `earnedDate`, `currentProgress`, `targetProgress`, `status(EARNED/CLOSE/UNEARNED)`
+4. ✅ LeaderboardEntryVO 已补充 `gap`, `username`, `avatar`
+5. ⚠️ CircleLevelController 路径从 `/api/v1/content/user/growth/level/info` 改为 `/api/v1/content/circle/growth/level/info`
+
+**注意字段名差异**（与原建议不同）:
+- AchievementVO: `iconUrl`（非 `icon`）, `currentProgress/targetProgress`（非 `progress/targetValue`）, `achievementType`（无 `badgeId`）, `status` 枚举为 EARNED/CLOSE/UNEARNED（非 ACTIVE/REVOKED）
+- CircleLevelVO.benefits: `List<String>`（非 `List<LevelBenefitVO>`，无 unlocked 状态）
 
 ---
 
@@ -9,219 +34,222 @@
 
 | 项目 | 状态 | 说明 |
 |------|------|------|
-| 后端 API 路径 | 严重不匹配 | 4 个 API 路径全部与实际后端不一致 |
-| VO 字段定义 | 严重不匹配 | 4 个 VO 均缺少前端文档引用的多个字段 |
+| 后端 API 路径 | ⚠️ 部分变更 | CircleLevelController 迁移至 `/circle/growth/`，其余保持 `/user/growth/` |
+| VO 字段定义 | ✅ 已修复 | 所有原缺失字段后端已补充（字段名有少量差异，见上文） |
 | 文档完整性 | 基本完整 | design.md、proposal.md、4 个 spec.md 结构规范 |
-| 前后端接口一致性 | 不通过 | 需修正所有 API 路径和 VO 映射 |
+| 前后端接口一致性 | ⚠️ 需更新 | 圈子等级路径需更正为 `/circle/growth/level/info`，D9 降级策略需移除 |
 
 ---
 
 ## 二、后端 API 验证详情
 
-### 2.1 API 路径对照表
+### 2.1 API 路径对照表（2026-06-24 更新）
 
-| # | 前端文档引用的路径 | 实际后端路径 | 状态 |
-|---|-------------------|-------------|------|
-| 1 | `GET /api/v1/content/circle/{circleId}/level` | `GET /api/v1/content/user/growth/level/info?circleId={circleId}` | 不匹配 |
-| 2 | `GET /api/v1/content/circle/{circleId}/growth/me` | `GET /api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` | 不匹配 |
-| 3 | `GET /api/v1/content/circle/{circleId}/badges` | `GET /api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` | 不匹配 |
-| 4 | `GET /api/v1/content/circle/{circleId}/leaderboard` | `GET /api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | 不匹配 |
+| # | 前端文档当前引用路径 | 后端实际路径（2026-06-24） | 状态 |
+|---|-------------------|------------------------|------|
+| 1 | `GET /api/v1/content/user/growth/level/info?circleId=` | `GET /api/v1/content/circle/growth/level/info?circleId=` | ⚠️ 需修正为 `/circle/growth/` |
+| 2 | `GET /api/v1/content/user/growth/info?circleId=&userId=` | `GET /api/v1/content/user/growth/info?circleId=&userId=` | ✅ 一致 |
+| 3 | `GET /api/v1/content/user/growth/achievement/list?circleId=&userId=` | `GET /api/v1/content/user/growth/achievement/list?circleId=&userId=` | ✅ 一致 |
+| 4 | `GET /api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | `GET /api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ✅ 一致 |
 
-### 2.2 后端 Controller 位置
+> 注: 前端文档中的路径已在 review-report.md（2026-06-06）中从旧 RESTful 风格修正为 `/user/growth/` 前缀，但尚未反映 CircleLevelController 的最新迁移。
+
+### 2.2 后端 Controller 位置（2026-06-24 更新）
 
 | 功能 | Controller 类 | 基础路径 |
 |------|--------------|---------|
-| 圈子等级 | `CircleLevelController` | `/api/v1/content/user/growth/level` |
+| 圈子等级 | `CircleLevelController` | `/api/v1/content/circle/growth/level` ⚠️ 已迁移 |
 | 成员成长 | `MemberGrowthController` | `/api/v1/content/user/growth` |
 | 成就徽章 | `AchievementController` | `/api/v1/content/user/growth/achievement` |
 | 排行榜 | `LeaderboardController` | `/api/v1/content/user/growth/leaderboard` |
 
-所有 Controller 均位于: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/api/v1/content/user/growth/controller/`
+所有 Controller 均位于: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/controller/`
+
+**待确认**: CircleLevelController 迁移至 `/circle/growth/` 是否是前缀统一的第一步？其余 3 个 Controller 是否也会迁移？
 
 ### 2.3 补充发现的额外 API
 
 后端还提供了以下前端文档未提及的接口:
 
-| 接口 | 路径 | 说明 |
-|------|------|------|
-| 连续参与天数 | `GET /api/v1/content/user/growth/participation?circleId=&userId=` | MemberGrowthController |
-| 成长汇总 | `GET /api/v1/content/user/growth/summary?userId=` | ContentUserGrowthController |
-| 勋章分类目录 | `GET /api/v1/content/user/growth/badge/catalog?userId=` | ContentUserGrowthController |
-| 勋章详情 | `GET /api/v1/content/user/growth/badge/detail?userId=&badgeCode=` | ContentUserGrowthController |
-| 佩戴勋章 | `POST /api/v1/content/user/growth/badge/wear` | ContentUserGrowthController |
-| 查询佩戴勋章 | `GET /api/v1/content/user/growth/badge/worn?userId=` | ContentUserGrowthController |
-| 等级权益摘要 | `GET /api/v1/content/user/growth/level/benefit?userId=` | ContentUserGrowthController |
-| 等级配置 | `GET /api/v1/content/user/growth/level/config` | ContentUserGrowthController |
+| 接口 | 路径 | 归属 Controller | 说明 |
+|------|------|----------------|------|
+| 连续参与天数 | `GET /api/v1/content/user/growth/participation?circleId=&userId=` | MemberGrowthController | 返回 `Result<Integer>`，圈子成长相关 |
+| 等级权益摘要 | `GET /api/v1/content/circle/growth/level/benefit?userId=` | CircleLevelController | 返回 `Result<ContentUserLevelBenefitSummaryVO>`，注意路径为 `/circle/growth/` 前缀 |
+| 等级配置列表 | `GET /api/v1/content/circle/growth/level/config` | CircleLevelController | 返回 `Result<List<ContentUserLevelConfigVO>>`，注意路径为 `/circle/growth/` 前缀 |
+| 成长汇总 | `GET /api/v1/content/user/growth/summary?userId=` | ContentUserGrowthController | 用户全局成长，非圈子 |
+| 勋章分类目录 | `GET /api/v1/content/user/growth/badge/catalog?userId=` | ContentUserGrowthController | 用户全局成长 |
+| 勋章详情 | `GET /api/v1/content/user/growth/badge/detail?userId=&badgeCode=` | ContentUserGrowthController | 用户全局成长 |
+| 佩戴勋章 | `POST /api/v1/content/user/growth/badge/wear` | ContentUserGrowthController | 用户全局成长 |
+| 查询佩戴勋章 | `GET /api/v1/content/user/growth/badge/worn?userId=` | ContentUserGrowthController | 用户全局成长 |
 
 ---
 
-## 三、VO 字段不匹配详情
+## 三、VO 字段验证详情（2026-06-24 更新）
 
-### 3.1 CircleLevelVO (圈子等级)
+### 3.1 CircleLevelVO (圈子等级) — ✅ 已修复
 
-**前端文档期望字段**:
-- level, levelName, growthScore, nextLevelThreshold, progressPercent
-- nextLevelConditions (成员数、内容数、互动数差距)
-- benefits (权益列表: 已解锁/未解锁)
-
-**实际后端字段**:
+**后端实际字段（2026-06-24）**:
 ```java
 private Integer level;
 private String levelName;
 private Integer growthScore;
 private Integer nextLevelThreshold;
 private Integer progressPercent;
+private List<String> benefits;           // ✅ 新增
+private Integer memberScore;             // ✅ 新增
+private Integer contentScore;            // ✅ 新增
+private Integer activityScore;           // ✅ 新增
+private List<LevelConditionVO> nextLevelConditions;  // ✅ 新增
 ```
 
-**缺失字段**: `nextLevelConditions`, `benefits`
+`LevelConditionVO` 结构: `type(String)`, `label(String)`, `current(Integer)`, `required(Integer)`, `gap(Integer)`
 
-### 3.2 MemberGrowthVO (成员成长)
+**注意**: `benefits` 为 `List<String>`（权益名称列表），不是 `List<LevelBenefitVO>`，无 unlocked/locked 状态区分。
 
-**前端文档期望字段**:
-- expPoints, contributionPoints, rank, level
-- dailyExpLimit, todayExp (每日经验上限/今日经验)
-- levelProgress (等级进度)
-- recentBadges (最近徽章摘要)
+### 3.2 MemberGrowthVO (成员成长) — ✅ 已修复
 
-**实际后端字段**:
+**后端实际字段（2026-06-24）**:
 ```java
 private String circleId;
 private Integer expPoints;
 private Integer contributionPoints;
 private Integer level;
+private String levelName;                // ✅ 新增
 private Integer postCount;
 private Integer participationDays;
 private Integer rank;
+private Integer nextLevelThreshold;      // ✅ 新增
+private Integer progressPercent;         // ✅ 新增
+private Integer todayExp;                // ✅ 新增
+private Integer dailyExpLimit;           // ✅ 新增
+private List<AchievementVO> recentBadges; // ✅ 新增
 ```
 
-**缺失字段**: `dailyExpLimit`, `todayExp`, `levelProgress`, `recentBadges`
-**额外字段**: `postCount`, `participationDays` (前端文档未提及但后端已提供)
+### 3.3 AchievementVO (成就徽章) — ✅ 已修复（字段名有差异）
 
-### 3.3 AchievementVO (成就徽章)
-
-**前端文档期望字段**:
-- badgeId, name, icon, description
-- earned, earnedDate (获得时间)
-- progress, targetValue (进度/目标值)
-- status (active/revoked)
-- conditionDesc (达成条件)
-
-**实际后端字段**:
+**后端实际字段（2026-06-24）**:
 ```java
 private String achievementType;
 private String name;
 private String description;
+private String iconUrl;                  // ✅ 新增（原建议名 icon）
 private Boolean earned;
+private Date earnedDate;                 // ✅ 新增
 private String conditionDesc;
+private Integer currentProgress;         // ✅ 新增（原建议名 progress）
+private Integer targetProgress;          // ✅ 新增（原建议名 targetValue）
+private String status;                   // ✅ 新增（枚举: EARNED/CLOSE/UNEARNED）
 ```
 
-**缺失字段**: `badgeId`, `icon`, `earnedDate`, `progress`, `targetValue`, `status`
+**字段名差异**:
+- 无 `badgeId`，使用 `achievementType` 作为唯一标识
+- `iconUrl` 而非 `icon`
+- `currentProgress/targetProgress` 而非 `progress/targetValue`
+- `status` 枚举为 `EARNED/CLOSE/UNEARNED`（已获得/即将达成/未获得），非 `ACTIVE/REVOKED`
 
-### 3.4 LeaderboardEntryVO (排行榜条目)
+### 3.4 LeaderboardEntryVO (排行榜条目) — ✅ 已修复
 
-**前端文档期望字段**:
-- userId, username, avatar, score, rankNum
-- highlighted (当前用户高亮)
-
-**实际后端字段**:
+**后端实际字段（2026-06-24）**:
 ```java
 private String userId;
 private Integer score;
 private Integer rankNum;
 private Boolean highlighted;
+private Integer gap;                     // ✅ 新增（与上一名得分差值）
+private String username;                 // ✅ 新增
+private String avatar;                   // ✅ 新增
 ```
-
-**缺失字段**: `username`, `avatar`
 
 ---
 
-## 四、前端文档问题列表
+## 四、前端文档问题列表（2026-06-24 更新状态）
 
 ### 4.1 design.md 问题
 
-| 编号 | 问题 | 严重度 | 位置 |
-|------|------|--------|------|
-| D1 | API 路径全部使用 RESTful 风格 `/api/v1/content/circle/{circleId}/xxx`，与实际后端 `/api/v1/content/user/growth/xxx?circleId=` 不一致 | 高 | Risks / Trade-offs 第1条 |
-| D2 | 未提及后端已有 `participation` 接口可直接获取连续参与天数 | 中 | Decisions D3 |
-| D3 | 未区分「圈子等级」(CircleLevel) 和「用户成长」(ContentUserGrowth) 两套独立体系 | 中 | Context |
+| 编号 | 问题 | 严重度 | 2026-06-24 状态 |
+|------|------|--------|---------------|
+| D1 | API 路径使用 RESTful 风格，与后端不一致 | 高 | ✅ 已在 review-report 中修复路径；⚠️ 需更新圈子等级路径为 `/circle/growth/level/info` |
+| D2 | 未提及后端已有 `participation` 接口 | 中 | ⚠️ 待更新 |
+| D3 | 未区分「圈子成长」和「用户全局成长」两套体系 | 中 | ⚠️ 待更新 |
+| D9 | 缺失字段降级策略 — 现大部分字段已存在，降级策略需移除/更新 | 高 | 🔴 **需修正**: D9 中 todayExp/dailyExpLimit/recentBadges/badgeIcon/earnedDate/progress/username/avatar/benefits/nextLevelConditions 的降级说明均已过时 |
 
 ### 4.2 proposal.md 问题
 
-| 编号 | 问题 | 严重度 | 位置 |
-|------|------|--------|------|
-| P1 | API 依赖描述为「4 个新接口」，实际后端路径和参数与文档不符 | 高 | Impact > API 依赖 |
-| P2 | 未提及 `AchievementController` 的存在，文档中使用「徽章」但后端使用「成就(Achievement)」 | 中 | Capabilities > badge-system |
+| 编号 | 问题 | 严重度 | 2026-06-24 状态 |
+|------|------|--------|---------------|
+| P1 | API 依赖描述路径与实际不符 | 高 | ✅ 已在 review-report 中修复 |
+| P2 | 术语 Badge vs Achievement 不一致 | 中 | ✅ 已在 review-report 中修复（D7 术语映射） |
 
 ### 4.3 specs/circle-level/spec.md 问题
 
-| 编号 | 问题 | 严重度 | 位置 |
-|------|------|--------|------|
-| S1 | API 路径 `GET /api/v1/content/circle/{circleId}/level` 应为 `GET /api/v1/content/user/growth/level/info?circleId=` | 高 | Requirement: 圈子等级信息 API 对接 |
-| S2 | 期望 `CircleLevelVO` 包含 `nextLevelConditions` 和 `benefits`，后端 VO 缺失 | 高 | Scenario: 展示差距条件 / 展示已解锁权益 |
-| S3 | 进度条「分项指标展开」功能后端无对应数据支撑 | 中 | Scenario: 点击进度条展开分项指标 |
+| 编号 | 问题 | 严重度 | 2026-06-24 状态 |
+|------|------|--------|---------------|
+| S1 | API 路径错误 | 高 | ✅ 已修复；⚠️ 需更新为 `/circle/growth/level/info` |
+| S2 | 期望 nextLevelConditions/benefits，后端 VO 缺失 | 高 | ✅ 后端已补充字段 |
+| S3 | 分项指标展开无数据支撑 | 中 | ✅ 后端已提供 nextLevelConditions，可支持展开 |
 
 ### 4.4 specs/member-growth/spec.md 问题
 
-| 编号 | 问题 | 严重度 | 位置 |
-|------|------|--------|------|
-| S4 | API 路径 `GET /api/v1/content/circle/{circleId}/growth/me` 应为 `GET /api/v1/content/user/growth/info?circleId=&userId=` | 高 | Requirement: 成员成长信息 API 对接 |
-| S5 | 期望 `MemberGrowthVO` 包含 `dailyExpLimit`, `todayExp`，后端 VO 缺失 | 高 | Requirement: 每日经验上限展示 |
-| S6 | 期望包含 `recentBadges`，后端 VO 缺失 | 中 | Requirement: 徽章摘要展示 |
-| S7 | 后端已有 `participationDays` 字段，但文档仍描述为需前端计算 | 低 | Requirement: 连续参与进度展示 |
+| 编号 | 问题 | 严重度 | 2026-06-24 状态 |
+|------|------|--------|---------------|
+| S4 | API 路径错误 | 高 | ✅ 已修复 |
+| S5 | 期望 dailyExpLimit/todayExp，后端 VO 缺失 | 高 | ✅ 后端已补充字段 |
+| S6 | 期望 recentBadges，后端 VO 缺失 | 中 | ✅ 后端已补充字段 |
+| S7 | participationDays 文档描述需前端计算 | 低 | ✅ 后端已提供字段 |
 
 ### 4.5 specs/badge-system/spec.md 问题
 
-| 编号 | 问题 | 严重度 | 位置 |
-|------|------|--------|------|
-| S8 | API 路径 `GET /api/v1/content/circle/{circleId}/badges` 应为 `GET /api/v1/content/user/growth/achievement/list?circleId=&userId=` | 高 | Requirement: 徽章列表 API 对接 |
-| S9 | 期望 `BadgeVO` 包含 `icon`, `earnedDate`, `progress`, `targetValue`, `status`，后端 `AchievementVO` 缺失 | 高 | 多个 Scenario |
-| S10 | 后端使用 `Achievement` 命名而非 `Badge`，文档术语不一致 | 中 | 全文 |
+| 编号 | 问题 | 严重度 | 2026-06-24 状态 |
+|------|------|--------|---------------|
+| S8 | API 路径错误 | 高 | ✅ 已修复 |
+| S9 | 期望 icon/earnedDate/progress/targetValue/status，后端 VO 缺失 | 高 | ✅ 后端已补充字段（注意字段名差异: iconUrl/currentProgress/targetProgress, status 枚举为 EARNED/CLOSE/UNEARNED） |
+| S10 | Badge vs Achievement 术语不一致 | 中 | ✅ 已在 review-report 中修复 |
 
 ### 4.6 specs/leaderboard/spec.md 问题
 
-| 编号 | 问题 | 严重度 | 位置 |
-|------|------|--------|------|
-| S11 | API 路径 `GET /api/v1/content/circle/{circleId}/leaderboard` 应为 `GET /api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | 高 | Requirement: 排行榜样 API 对接 |
-| S12 | 期望 `LeaderboardVO` 包含 `username`, `avatar`，后端 `LeaderboardEntryVO` 缺失 | 高 | Scenario: 展示 Top 50 列表 |
-| S13 | 排行榜样接口需传 `currentUserId` 参数，文档未提及 | 中 | Requirement: 排行榜样 API 对接 |
+| 编号 | 问题 | 严重度 | 2026-06-24 状态 |
+|------|------|--------|---------------|
+| S11 | API 路径错误 | 高 | ✅ 已修复 |
+| S12 | 期望 username/avatar，后端 VO 缺失 | 高 | ✅ 后端已补充字段；额外补充了 gap 字段 |
+| S13 | 缺少 currentUserId 参数说明 | 中 | ✅ 已在 review-report 中修复 |
 
 ---
 
-## 五、建议修复方案
+## 五、建议修复方案（2026-06-24 更新）
 
-### 5.1 高优先级修复 (API 路径)
+### 5.1 需立即修正（路径变更）
 
-**修复方式**: 更新所有 spec.md 和 design.md 中的 API 路径，使其与实际后端一致。
+| 文档 | 当前路径 | 修正后路径 |
+|------|--------|----------|
+| tasks.md 1.1 | `/api/v1/content/user/growth/level/info` | `/api/v1/content/circle/growth/level/info` |
+| design.md D9 字段映射表 | 旧路径 | 更新为 `/circle/growth/level/info` |
 
-| 文档 | 旧路径 | 新路径 |
-|------|--------|--------|
-| circle-level/spec.md | `GET /api/v1/content/circle/{circleId}/level` | `GET /api/v1/content/user/growth/level/info?circleId={circleId}` |
-| member-growth/spec.md | `GET /api/v1/content/circle/{circleId}/growth/me` | `GET /api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` |
-| badge-system/spec.md | `GET /api/v1/content/circle/{circleId}/badges` | `GET /api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` |
-| leaderboard/spec.md | `GET /api/v1/content/circle/{circleId}/leaderboard` | `GET /api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` |
+### 5.2 需修正（D9 降级策略过时）
 
-### 5.2 高优先级修复 (VO 字段)
+design.md D9 中以下降级策略已过时，应改为直接使用后端字段：
+- `benefits` → 后端已提供 `List<String> benefits`，可展示已解锁权益列表
+- `nextLevelConditions` → 后端已提供 `List<LevelConditionVO>`，可支持分项进度展开
+- `todayExp`/`dailyExpLimit` → 后端已提供，可直接展示今日经验条
+- `recentBadges` → MemberGrowthVO 已包含（最多3枚），无需额外调接口
+- `iconUrl` → AchievementVO 已提供 `iconUrl`，无需本地图标映射兜底（仍可保留本地兜底作为降级）
+- `earnedDate` → 后端已提供，可展示获得时间
+- `currentProgress/targetProgress` → 后端已提供数值，可展示进度条
+- `status=CLOSE` → 可直接判断"即将达成"状态，无需解析 conditionDesc
+- `username`/`avatar` → 后端已批量返回，无需额外调用户接口
+- `gap` → 后端已提供，可展示距上一名差距
+- `memberScore/contentScore/activityScore` → 后端已提供分项得分
+- `levelName/nextLevelThreshold/progressPercent` → 后端已提供
 
-**方案 A (推荐)**: 修改后端 VO 补充缺失字段
-- CircleLevelVO: 增加 `nextLevelConditions`, `benefits`
-- MemberGrowthVO: 增加 `dailyExpLimit`, `todayExp`, `recentBadges`
-- AchievementVO: 增加 `badgeId`, `icon`, `earnedDate`, `progress`, `targetValue`, `status`
-- LeaderboardEntryVO: 增加 `username`, `avatar`
+> 仍可保留本地图标映射作为 `iconUrl` 加载失败时的兜底，但不应作为默认方案。
 
-**方案 B**: 修改前端文档适配现有 VO 字段，降级 UI 设计
+### 5.3 仍待确认
 
-### 5.3 中优先级修复 (术语统一)
-
-- 统一使用后端术语「Achievement(成就)」替代文档中的「Badge(徽章)」
-- 或在 API 封装层做术语映射
-
-### 5.4 低优先级修复
-
-- 更新 design.md 补充后端已有接口说明
-- 更新 proposal.md 的 Impact 部分反映实际 API 路径
+1. CircleLevelController 迁移至 `/circle/growth/` 后，其余 3 个 Controller 是否会统一迁移？
+2. `benefits` 为 `List<String>` 无 unlocked 状态，如果需要展示"未解锁权益"，需后端改 VO 结构。
+3. WebSocket 通知机制仍未实现。
 
 ---
 
 ## 六、后端遗留代码清单
 
-详见 `backend-issues.md`。
+详见 `backend-issues.md`（2026-06-24 已更新）。

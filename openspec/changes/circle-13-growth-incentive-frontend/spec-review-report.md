@@ -1,8 +1,11 @@
 # 前端成长激励 Spec 审查报告
 
-审查日期: 2026-06-24
+审查日期: 2026-06-24（基于 main 分支 commit 84e8297d）
+最后重审: 2026-06-25（重新核对 main 分支最新代码）
 审查范围: `circle-13-growth-incentive-frontend` 的 proposal.md / design.md / specs/ / tasks.md
 审查依据: 后端实际 Controller/VO 代码 + 前端已有代码结构
+
+> **⚠️ 重要发现**: `CircleLevelController` 路径已从 `/api/v1/content/user/growth/level/info` 迁移至 `/api/v1/content/circle/growth/level/info`，并新增 `/benefit` 和 `/config` 两个接口；其余 3 个 Controller 仍在 `/api/v1/content/user/growth/` 下，路径前缀不一致。
 
 ---
 
@@ -13,7 +16,7 @@
 | 维度 | 用户全局成长（已存在） | 圈子内成长激励（本次 change） |
 |------|----------------------|--------------------------|
 | Controller 包 | `content.user.controller.ContentUserGrowthController` | `content.user.growth.controller` 下 4 个 Controller |
-| 路径前缀 | `/api/v1/content/user/growth` | `/api/v1/content/user/growth`（前缀相同，子路径不同） |
+| 路径前缀 | `/api/v1/content/user/growth` | 混合：圈子等级为 `/api/v1/content/circle/growth/level`，其余 3 个为 `/api/v1/content/user/growth` ⚠️ |
 | 关键参数 | 必传 `userId`，无 `circleId` | 必传 `circleId`，部分传 `userId` |
 | 功能范围 | 全局积分兑换、勋章佩戴、成长衰减、等级权益 | 圈子等级(L1-L5)、圈内经验/贡献、圈内成就徽章、圈内排行榜 |
 | 前端已对接 | `src/api/content/growth/` 目录 + `src/store/modules/growth.ts` | 未实现 |

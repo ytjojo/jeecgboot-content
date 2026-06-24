@@ -1,11 +1,26 @@
 # circle-13-growth-incentive-frontend 审核报告
 
 **审核日期**: 2026-06-06
+**最后重审**: 2026-06-24（基于 main 分支 commit 84e8297d）
 **审核人**: AI Agent (opsx:review)
 **Change 类型**: 前端 change
 **Domain**: Circle (圈子域)
 **Epic**: EPIC-13
 **配对后端 Change**: circle-13-growth-incentive (已存在)
+
+---
+
+## 🔄 2026-06-24 重审补充
+
+> **后端代码迭代已修复了原报告中通过"降级策略"解决的 VO 字段缺失问题。**
+
+原 B3（AchievementVO 缺失字段）、B4（LeaderboardEntryVO 缺失字段）、B6（dailyExpLimit 缺失）的修复方式是"D9 降级策略"，但截至 2026-06-24，**后端已实际补充了这些字段**，降级策略不再需要。此外：
+
+- **新发现问题**: `CircleLevelController` 路径已从 `/api/v1/content/user/growth/level/info` 迁移至 `/api/v1/content/circle/growth/level/info`，文档中引用的圈子等级 API 路径需更新。
+- **字段名差异**: 后端实际字段名与本报告建议略有不同（如 `iconUrl` 而非 `icon`，`currentProgress/targetProgress` 而非 `progress/targetValue`，`benefits` 为 `List<String>` 而非 `List<LevelBenefitVO>`），实现时需以实际 VO 字段为准。
+- **D9 降级策略需大幅更新**: 原 D9 中 todayExp/dailyExpLimit/recentBadges/iconUrl/earnedDate/progress/username/avatar/benefits/nextLevelConditions/gap 的降级处理已过时，应直接使用后端字段。
+
+详见各问题表的"2026-06-24 状态"列。
 
 ---
 
@@ -192,16 +207,16 @@
 
 **后端已有但前端未引用的接口**:
 
-| 接口 | 路径 | 可能用途 |
-|------|------|---------|
-| 连续参与 | `GET /api/v1/content/user/growth/participation?circleId=&userId=` | ParticipationStreak 组件数据源 |
-| 成长汇总 | `GET /api/v1/content/user/growth/summary?userId=` | 概览数据 |
-| 勋章分类目录 | `GET /api/v1/content/user/growth/badge/catalog?userId=` | 徽章分类展示 |
-| 勋章详情 | `GET /api/v1/content/user/growth/badge/detail?userId=&badgeCode=` | BadgeDetailModal 数据源 |
-| 佩戴勋章 | `POST /api/v1/content/user/growth/badge/wear` | 徽章佩戴功能 |
-| 查询佩戴勋章 | `GET /api/v1/content/user/growth/badge/worn?userId=` | 个人主页展示 |
-| 等级权益摘要 | `GET /api/v1/content/user/growth/level/benefit?userId=` | 权益展示 |
-| 等级配置 | `GET /api/v1/content/user/growth/level/config` | 等级门槛配置 |
+| 接口 | 路径 | 归属 | 可能用途 |
+|------|------|------|---------|
+| 连续参与 | `GET /api/v1/content/user/growth/participation?circleId=&userId=` | MemberGrowthController | ParticipationStreak 组件数据源（圈子成长） |
+| 等级权益摘要 | `GET /api/v1/content/circle/growth/level/benefit?userId=` | CircleLevelController | 权益展示（注意路径: `/circle/growth/` 前缀） |
+| 等级配置列表 | `GET /api/v1/content/circle/growth/level/config` | CircleLevelController | 等级门槛配置（注意路径: `/circle/growth/` 前缀） |
+| 成长汇总 | `GET /api/v1/content/user/growth/summary?userId=` | ContentUserGrowthController | 用户全局成长，非圈子 |
+| 勋章分类目录 | `GET /api/v1/content/user/growth/badge/catalog?userId=` | ContentUserGrowthController | 用户全局成长 |
+| 勋章详情 | `GET /api/v1/content/user/growth/badge/detail?userId=&badgeCode=` | ContentUserGrowthController | 用户全局成长 |
+| 佩戴勋章 | `POST /api/v1/content/user/growth/badge/wear` | ContentUserGrowthController | 用户全局成长 |
+| 查询佩戴勋章 | `GET /api/v1/content/user/growth/badge/worn?userId=` | ContentUserGrowthController | 用户全局成长 |
 
 ### 3.3 数据模型一致性
 
@@ -329,27 +344,28 @@
 
 ### BLOCK (必须修复)
 
-| # | 维度 | 问题 | 修复建议 | 修复状态 |
-|---|------|------|---------|---------|
-| B1 | 一致性 | 4 个 API 路径全部与后端不匹配 | 更新所有 spec.md 和 design.md 中的 API 路径为后端实际路径 | ✅ 已修复：tasks.md 4 处路径已更正 |
-| B2 | 一致性 | 前端使用 Badge 术语，后端使用 Achievement 术语 | 统一术语：前端 API 封装层做映射，或全文替换为 Achievement | ✅ 已修复：design.md 新增 D7 术语映射决策 |
-| B3 | 可实现性 | AchievementVO 缺失 icon/earnedDate/progress/targetValue/status | 后端补充字段，或前端降级 UI 设计 | ✅ 已修复：design.md 新增 D9 降级策略，badge-system/spec.md 已更新 |
-| B4 | 可实现性 | LeaderboardEntryVO 缺失 username/avatar | 后端补充字段，或前端额外调用用户信息接口 | ✅ 已修复：leaderboard/spec.md 已更新为通过 userId 调用用户接口 |
-| B5 | 接口契约 | 排行榜响应结构不匹配（前端期望包装对象，后端返回扁平数组） | 前后端协商统一响应结构 | ✅ 已修复：design.md 新增 D8 前端包装策略，leaderboard/spec.md 已更新 |
-| B6 | 完整性 | member-growth/spec.md 依赖 dailyExpLimit 字段，后端未提供 | 后端补充字段或 spec 改为前端硬编码 100 | ✅ 已修复：member-growth/spec.md 改为前端硬编码 100 |
+| # | 维度 | 问题 | 原修复方式（2026-06-06） | 2026-06-24 状态 |
+|---|------|------|----------------------|---------------|
+| B1 | 一致性 | 4 个 API 路径全部与后端不匹配 | 更新路径为 `/user/growth/` 前缀 | ✅ 已修复；⚠️ **新变更**: CircleLevelController 路径已迁移至 `/circle/growth/level/info`，需再次更新 |
+| B2 | 一致性 | 前端使用 Badge 术语，后端使用 Achievement 术语 | design.md 新增 D7 术语映射 | ✅ 已修复 |
+| B3 | 可实现性 | AchievementVO 缺失 icon/earnedDate/progress/targetValue/status | D9 降级策略（本地图标、不展示进度/日期、解析文本判断状态） | ✅ **后端已实际补充字段**: `iconUrl`, `earnedDate`, `currentProgress`, `targetProgress`, `status(EARNED/CLOSE/UNEARNED)`；D9 降级策略可移除，直接使用后端字段 |
+| B4 | 可实现性 | LeaderboardEntryVO 缺失 username/avatar | 通过 userId 额外调用用户接口 | ✅ **后端已实际补充字段**: `username`, `avatar`, `gap`；无需额外调用用户接口 |
+| B5 | 接口契约 | 排行榜响应结构不匹配（前端期望包装对象，后端返回扁平数组） | D8 前端包装策略 | ✅ 已修复 |
+| B6 | 完整性 | member-growth/spec.md 依赖 dailyExpLimit 字段，后端未提供 | spec 改为前端硬编码 100 | ✅ **后端已实际补充字段**: `dailyExpLimit`, `todayExp`, `recentBadges`, `levelName`, `nextLevelThreshold`, `progressPercent`；无需前端硬编码 |
 
 ### FLAG (建议修复)
 
-| # | 维度 | 问题 | 修复建议 | 修复状态 |
-|---|------|------|---------|---------|
+| # | 维度 | 问题 | 修复建议 | 修复状态（2026-06-24更新） |
+|---|------|------|---------|------------------------|
 | F1 | 完整性 | PRD「社交分享能力」未在 proposal/specs 中覆盖 | 补充 spec 和 task，或移至 Non-Goals | ✅ 已修复：design.md Non-Goals 已明确标注 |
 | F2 | 完整性 | 6 种徽章仅覆盖 4 种（缺内容里程碑、社交达人） | 补充 2 种徽章的 spec，或明确标注为后续迭代 | ✅ 已修复：badge-system/spec.md 改为由后端接口返回数据决定 |
-| F3 | 可实现性 | WebSocket 通知消息体格式未确认 | 与后端确认消息体结构，补充到 design.md | ✅ 已修复：design.md Risks 已更新降级策略 |
-| F4 | 可实现性 | 排行榜 currentUser 获取方式未确认 | 与后端确认，更新 design.md Q3 | ✅ 已修复：design.md Q3 已确认后端通过 highlighted 字段标识 |
-| F5 | 可实现性 | 徽章图标资源来源未确认 | 与产品/设计确认，更新 design.md Q4 | ✅ 已修复：design.md Q4 已确认前端使用本地图标映射 |
+| F3 | 可实现性 | WebSocket 通知消息体格式未确认 | 与后端确认消息体结构，补充到 design.md | ⚠️ 仍待确认：后端未发现 WebSocket 端点 |
+| F4 | 可实现性 | 排行榜 currentUser 获取方式未确认 | 与后端确认，更新 design.md Q3 | ✅ 已修复：后端通过 highlighted 字段标识 |
+| F5 | 可实现性 | 徽章图标资源来源未确认 | 与产品/设计确认，更新 design.md Q4 | ✅ **后端已提供 iconUrl 字段**，可直接使用；本地图标映射可作为加载失败兜底 |
 | F6 | 边界 | 排行榜维度/周期快速切换可能导致请求竞态 | 在 API 封装层增加请求取消逻辑 | ⏳ 待实现时处理 |
 | F7 | 边界 | WebSocket 断线重连后通知丢失 | 增加重连后主动拉取最新数据的逻辑 | ⏳ 待实现时处理 |
-| F8 | 一致性 | MemberGrowthVO 前端字段名与后端差异较大 | 在 API 封装层统一做字段名映射 | ✅ 已修复：design.md 已新增完整字段映射表 |
+| F8 | 一致性 | MemberGrowthVO 前端字段名与后端差异较大 | 在 API 封装层统一做字段名映射 | ✅ 已修复：design.md 有字段映射表；⚠️ 字段映射表需更新为后端最新字段 |
+| F9 | 一致性 | CircleLevelController 路径已迁移至 `/circle/growth/` | 更新 tasks.md/design.md/specs 中圈子等级 API 路径 | 🔴 **新发现需修复** |
 
 ### ADVISORY (改进建议)
 
@@ -364,29 +380,29 @@
 
 ## 六、最终结论
 
-### 6.1 审核结论: 通过 (PASS with flags)
+### 6.1 审核结论（2026-06-24 更新）: 需要修正文档后 APPROVED
 
-所有 6 个 BLOCK 级别问题已修复，8 个 FLAG 问题中 6 个已修复，2 个留待实现时处理。
+**2026-06-06 原结论**: 通过 (PASS with flags) — 所有 6 个 BLOCK 级别问题通过文档修正和降级策略已修复。
 
-**修复方案总结**:
-1. **API 路径** — tasks.md 4 处路径已更正为后端实际路径
-2. **术语映射** — design.md 新增 D7 决策，前端 UI 保留「徽章」，API 层用 Achievement
-3. **VO 字段降级** — design.md 新增 D9 降级策略，各 spec 已更新为后端实际字段
-4. **排行榜结构** — design.md 新增 D8 前端包装策略，leaderboard/spec.md 已适配扁平数组
-5. **dailyExpLimit** — member-growth/spec.md 改为前端硬编码 100
+**2026-06-24 更新**: 后端代码迭代已实际补充了原本缺失的 VO 字段（B3/B4/B6 不再需要降级策略），但引入了 1 个新的 BLOCK 级问题：
+- 🔴 **B1（新）**: `CircleLevelController` 路径已迁移至 `/api/v1/content/circle/growth/level/info`，文档中引用的旧路径 `/api/v1/content/user/growth/level/info` 需更新
+- 📝 **D9 降级策略需重写**: 原本为弥补字段缺失制定的降级方案已过时，应改为直接使用后端字段
+
+其余原 BLOCK 和 FLAG 问题已全部修复或确认。
+
+### 6.2 修复方案总结（2026-06-24 更新）
+
+1. **API 路径** — 已从 RESTful 风格修正为 `/user/growth/` 前缀；⚠️ 圈子等级接口需再次修正为 `/circle/growth/level/info`
+2. **术语映射** — design.md D7 决策保留
+3. **VO 字段** — 原降级策略已过时，后端已提供完整字段；注意字段名差异（iconUrl/currentProgress/targetProgress/status 枚举/List&lt;String&gt; benefits）
+4. **排行榜结构** — D8 前端包装策略保留（后端仍返回扁平数组）
+5. **dailyExpLimit** — 后端已提供字段，无需前端硬编码
 6. **社交分享能力** — 移至 Non-Goals
-7. **徽章种类** — 改为由后端接口返回数据决定
-8. **字段映射** — design.md 已新增完整 VO 字段映射表
+7. **徽章种类** — 由后端接口返回数据决定
+8. **字段映射** — design.md 字段映射表需更新为后端最新字段
 
-### 6.2 修复优先级
+### 6.3 修复优先级（2026-06-24 更新）
 
-1. **P0 — 已修复**: API 路径 (B1)、AchievementVO 降级 (B3)、LeaderboardEntryVO 降级 (B4)
-2. **P1 — 已修复**: 术语映射 (B2)、dailyExpLimit (B6)、排行榜结构 (B5)
-3. **P2 — 部分修复**: FLAG 问题 6/8 已修复，F6(请求竞态) 和 F7(断线重连) 留待实现时处理
-
-### 6.3 修复后指标
-
-- API 契约完整率: 0% → 100% (4/4 路径正确)
-- PRD AC 覆盖率: 78% → 90%+ (缺失字段已降级处理)
-- 边界覆盖率: 65% → 75% (部分 FLAG 边界已覆盖)
-- 总体评级: BLOCKED → PASS (with flags)
+1. **P0 — 必须修正**: CircleLevelController 路径更新 (F9/B1)、design.md D9 降级策略重写、design.md 字段映射表更新
+2. **P1 — 已完成**: 术语映射 (B2)、排行榜结构 (B5)
+3. **P2 — 待实现时处理**: F6(请求竞态)、F7(断线重连)、F3(WebSocket 确认)

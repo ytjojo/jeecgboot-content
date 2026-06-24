@@ -1,120 +1,142 @@
 # 后端遗留代码问题清单
 
 **创建日期**: 2026-06-04
+**最后审核**: 2026-06-24（基于 main 分支 commit 84e8297d 重新审核）
 **关联 Change**: circle-13-growth-incentive-frontend
+
+---
+
+## 2026-06-24 重审结论
+
+**原 8 个 VO 字段缺失问题中，7 个已由后端修复，1 个部分修复。原 2 个接口能力缺失问题均已修复。**
+
+新增发现：
+1. `CircleLevelController` 路径已从 `/api/v1/content/user/growth/level/info` 迁移至 `/api/v1/content/circle/growth/level/info`，但其余 3 个 Controller 仍在 `/api/v1/content/user/growth/` 下，路径前缀不一致（待确认是否后续统一迁移）。
+2. `benefits` 字段实现为 `List<String>`（权益名称列表），而非建议的 `List<LevelBenefitVO>`（无 unlocked 状态区分）。
+3. AchievementVO 字段名与建议有差异：`iconUrl` 而非 `icon`，`currentProgress/targetProgress` 而非 `progress/targetValue`，`status` 枚举为 `EARNED/CLOSE/UNEARNED` 而非 `ACTIVE/REVOKED`。
 
 ---
 
 ## 一、VO 字段缺失问题
 
-前端 UI 设计需要的字段在后端 VO 中不存在，需要后端补充。
-
-### 1.1 CircleLevelVO 缺失字段
+### 1.1 CircleLevelVO 缺失字段 — ✅ 已修复（2026-06-24 确认）
 
 **文件**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/vo/CircleLevelVO.java`
 
-| 缺失字段 | 类型 | 用途 | 影响的前端组件 |
-|----------|------|------|--------------|
-| `nextLevelConditions` | `List<LevelConditionVO>` | 展示距下一等级还需补足的条件（成员数+X, 内容+Y, 互动+Z） | CircleLevelProgress |
-| `benefits` | `List<LevelBenefitVO>` | 展示已解锁/未解锁权益列表 | 圈子详情页等级区块 |
+| 原缺失字段 | 建议类型 | 实际后端字段 | 状态 |
+|----------|------|------|------|
+| `nextLevelConditions` | `List<LevelConditionVO>` | `List<LevelConditionVO> nextLevelConditions` | ✅ 已实现 |
+| `benefits` | `List<LevelBenefitVO>` | `List<String> benefits`（权益名称列表，无 unlocked 字段） | ⚠️ 部分实现（见下） |
 
-**建议 LevelConditionVO 结构**:
+**额外补充字段**（原文档未提及，后端已实现）:
+- `memberScore: Integer` — 成员规模得分
+- `contentScore: Integer` — 内容贡献得分
+- `activityScore: Integer` — 活跃互动得分
+
+**LevelConditionVO 实际结构**（与建议一致）:
 ```java
 @Data
 public class LevelConditionVO {
     private String type;      // MEMBER, CONTENT, INTERACTION
     private String label;     // "成员数", "内容数", "互动数"
     private Integer current;  // 当前值
-    private Integer required; // 要求值
-    private Integer gap;      // 差距值
+    private Integer required; // 上限值
+    private Integer gap;      // 差距值 (required - current)
 }
 ```
 
-**建议 LevelBenefitVO 结构**:
-```java
-@Data
-public class LevelBenefitVO {
-    private String name;        // 权益名称
-    private String description; // 权益描述
-    private Boolean unlocked;   // 是否已解锁
-}
-```
+**LevelBenefitVO 未实现**: 后端使用 `List<String>` 表示权益名称列表，没有 `name/description/unlocked` 结构。前端无法区分"已解锁/未解锁"权益，只能展示已解锁权益列表。如果需要未解锁权益展示，需后端补充。
 
-### 1.2 MemberGrowthVO 缺失字段
+### 1.2 MemberGrowthVO 缺失字段 — ✅ 已修复（2026-06-24 确认）
 
 **文件**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/vo/MemberGrowthVO.java`
 
-| 缺失字段 | 类型 | 用途 | 影响的前端组件 |
-|----------|------|------|--------------|
-| `dailyExpLimit` | `Integer` | 每日经验值上限（固定 100） | DailyExpBar |
-| `todayExp` | `Integer` | 今日已获经验值 | DailyExpBar |
-| `recentBadges` | `List<AchievementVO>` | 最近获得的 3 枚徽章摘要 | 个人成长页徽章摘要区 |
+| 原缺失字段 | 建议类型 | 实际后端字段 | 状态 |
+|----------|------|------|------|
+| `dailyExpLimit` | `Integer` | `Integer dailyExpLimit` | ✅ 已实现 |
+| `todayExp` | `Integer` | `Integer todayExp` | ✅ 已实现 |
+| `recentBadges` | `List<AchievementVO>` | `List<AchievementVO> recentBadges`（最多3枚） | ✅ 已实现 |
 
-**说明**: `dailyExpLimit` 可由后端配置返回或前端硬编码；`todayExp` 需后端查询当日积分记录汇总；`recentBadges` 需后端按获得时间倒序取前 3 条。
+**额外补充字段**（原文档未提及，后端已实现）:
+- `levelName: String` — 等级名称
+- `nextLevelThreshold: Integer` — 下一等级门槛
+- `progressPercent: Integer` — 等级进度百分比
 
-### 1.3 AchievementVO 缺失字段
+### 1.3 AchievementVO 缺失字段 — ✅ 已修复（2026-06-24 确认，字段名有差异）
 
 **文件**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/vo/AchievementVO.java`
 
-| 缺失字段 | 类型 | 用途 | 影响的前端组件 |
-|----------|------|------|--------------|
-| `badgeId` | `String` | 徽章唯一标识 | BadgeCard, BadgeDetailModal |
-| `icon` | `String` | 徽章图标 URL | BadgeCard, BadgeWall |
-| `earnedDate` | `Date` | 获得时间 | BadgeDetailModal |
-| `progress` | `Integer` | 当前进度值 | BadgeCard (未获得状态) |
-| `targetValue` | `Integer` | 目标值 | BadgeCard (进度 7/10) |
-| `status` | `String` | 状态: ACTIVE / REVOKED | BadgeWall (撤销状态展示) |
+| 原建议字段 | 建议类型 | 实际后端字段 | 状态 |
+|----------|------|------|------|
+| `badgeId` | `String` | 无（使用 `achievementType` 作为唯一标识） | ⚠️ 字段名不同 |
+| `icon` | `String` | `String iconUrl`（徽章图标URL） | ⚠️ 字段名不同 |
+| `earnedDate` | `Date` | `Date earnedDate` | ✅ 已实现 |
+| `progress` | `Integer` | `Integer currentProgress` | ⚠️ 字段名不同 |
+| `targetValue` | `Integer` | `Integer targetProgress` | ⚠️ 字段名不同 |
+| `status` | `String` (ACTIVE/REVOKED) | `String status`（枚举值: EARNED/CLOSE/UNEARNED） | ⚠️ 枚举值不同 |
 
-### 1.4 LeaderboardEntryVO 缺失字段
+**字段映射说明**:
+- 唯一标识用 `achievementType`，不需要 `badgeId`
+- 图标字段为 `iconUrl`（不是 `icon`）
+- 进度字段为 `currentProgress`/`targetProgress`（不是 `progress`/`targetValue`）
+- 状态枚举: `EARNED`(已获得) / `CLOSE`(即将达成) / `UNEARNED`(未获得)，**没有** REVOKED(撤销) 状态；"即将达成"通过 `status=CLOSE` 判断，不需要前端解析 `conditionDesc`
+
+### 1.4 LeaderboardEntryVO 缺失字段 — ✅ 已修复（2026-06-24 确认）
 
 **文件**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/vo/LeaderboardEntryVO.java`
 
-| 缺失字段 | 类型 | 用途 | 影响的前端组件 |
-|----------|------|------|--------------|
-| `username` | `String` | 用户名 | LeaderboardList |
-| `avatar` | `String` | 用户头像 URL | LeaderboardList |
+| 原缺失字段 | 建议类型 | 实际后端字段 | 状态 |
+|----------|------|------|------|
+| `username` | `String` | `String username` | ✅ 已实现 |
+| `avatar` | `String` | `String avatar` | ✅ 已实现 |
 
-**说明**: 当前 VO 只有 `userId`，前端需要额外调用用户信息接口获取头像和用户名，或由后端在排行榜接口中直接返回。
+**额外补充字段**（原文档未提及，后端已实现）:
+- `gap: Integer` — 与上一名得分差值
 
 ---
 
 ## 二、接口能力缺失问题
 
-### 2.1 圈子等级分项指标数据
+### 2.1 圈子等级分项指标数据 — ✅ 已修复
 
-**需求**: 前端需要展示「成员规模、内容贡献、活跃互动」三类分项指标数据，用于进度条展开详情。
+`CircleLevelVO` 已包含 `memberScore/contentScore/activityScore` 分项得分和 `nextLevelConditions` 详细条件，进度条展开功能可直接支持。
 
-**现状**: `CircleLevelController` 只返回汇总的成长分和进度百分比，无分项数据。
+### 2.2 徽章进度查询 — ✅ 已修复
 
-**建议**: 在 `CircleLevelVO` 中增加分项指标，或新增 `GET /api/v1/content/user/growth/level/detail?circleId=` 接口返回分项数据。
-
-### 2.2 徽章进度查询
-
-**需求**: 前端需要展示未获得徽章的当前进度（如「7/10」）。
-
-**现状**: `AchievementVO` 只有 `earned` (Boolean) 和 `conditionDesc` (String)，无结构化的进度数据。
-
-**建议**: 在 `AchievementVO` 中增加 `progress` 和 `targetValue` 字段，或后端在 `conditionDesc` 中返回结构化进度信息。
+`AchievementVO` 已包含 `currentProgress/targetProgress/status` 字段，可直接展示「7/10」进度和即将达成状态。
 
 ---
 
-## 三、术语不一致问题
+## 三、API 路径变更（2026-06-24 新发现）
 
-| 前端文档术语 | 后端代码术语 | 建议 |
-|------------|------------|------|
-| Badge (徽章) | Achievement (成就) | 统一为「成就徽章」，前端 API 封装层做术语映射 |
-| BadgeVO | AchievementVO | 前端类型定义使用后端实际名称 |
-| badgeId | achievementType | 前端适配后端字段名 |
+| 接口 | 旧路径（review-report 中已修正的） | 最新路径（2026-06-25 重审确认） | 状态 |
+|------|------|------|------|
+| 圈子等级信息 | `/api/v1/content/user/growth/level/info?circleId=` | `/api/v1/content/circle/growth/level/info?circleId=` | ⚠️ 已变更 |
+| 等级权益摘要 | — | `/api/v1/content/circle/growth/level/benefit?userId=` | 🆕 新增接口 |
+| 等级配置列表 | — | `/api/v1/content/circle/growth/level/config` | 🆕 新增接口 |
+| 成员成长 | `/api/v1/content/user/growth/info?circleId=&userId=` | `/api/v1/content/user/growth/info?circleId=&userId=` | ✅ 未变 |
+| 连续参与 | `/api/v1/content/user/growth/participation?circleId=&userId=` | `/api/v1/content/user/growth/participation?circleId=&userId=` | ✅ 未变 |
+| 成就徽章 | `/api/v1/content/user/growth/achievement/list?circleId=&userId=` | `/api/v1/content/user/growth/achievement/list?circleId=&userId=` | ✅ 未变 |
+| 排行榜 | `/api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | `/api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ✅ 未变 |
+
+**待确认**: `CircleLevelController` 已迁移至 `/circle/growth/` 前缀并新增 2 个接口，其余 3 个 Controller 是否也会统一迁移？需与后端确认。目前前端需对圈子等级相关接口使用不同前缀。
 
 ---
 
-## 四、优先级排序
+## 四、术语不一致问题
+
+| 前端文档术语 | 后端代码术语 | 建议 | 状态 |
+|------------|------------|------|------|
+| Badge (徽章) | Achievement (成就) | 统一为「成就徽章」，前端 API 封装层做术语映射 | 仍需处理 |
+| BadgeVO | AchievementVO | 前端类型定义使用后端实际名称 | 仍需处理 |
+| badgeId | achievementType | 前端适配后端字段名 | 仍需处理 |
+
+---
+
+## 五、剩余问题清单（2026-06-24 更新后）
 
 | 优先级 | 问题 | 原因 |
 |--------|------|------|
-| P0 | AchievementVO 缺失 icon/earnedDate/progress/targetValue/status | 徽章墙核心功能无法实现 |
-| P0 | LeaderboardEntryVO 缺失 username/avatar | 排行榜样列表无法展示用户信息 |
-| P1 | CircleLevelVO 缺失 nextLevelConditions/benefits | 等级详情展示受限 |
-| P1 | MemberGrowthVO 缺失 todayExp/dailyExpLimit | 每日经验进度条无法实现 |
-| P2 | MemberGrowthVO 缺失 recentBadges | 徽章摘要区可降级为独立请求 |
-| P2 | 圈子等级分项指标数据 | 进度条展开为增强功能 |
+| P1 | CircleLevelController 路径与其它 Controller 前缀不一致（/circle/growth/ vs /user/growth/） | 需确认是否统一迁移，前端对接需注意 |
+| P2 | benefits 字段为 List<String>，无 unlocked 状态区分 | 无法展示未解锁权益，如需要求后端改为 List<LevelBenefitVO> |
+| P3 | WebSocket 通知机制未实现 | §6 通知功能方案待确认 |
