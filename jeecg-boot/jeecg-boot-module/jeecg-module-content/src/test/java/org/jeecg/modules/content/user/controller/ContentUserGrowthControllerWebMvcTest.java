@@ -10,6 +10,7 @@ import org.jeecg.modules.content.user.service.IContentUserBadgeService;
 import org.jeecg.modules.content.user.service.IContentUserGrowthDecayStateService;
 import org.jeecg.modules.content.user.service.IContentUserGrowthService;
 import org.jeecg.modules.content.user.service.IContentUserLevelBenefitService;
+import org.jeecg.modules.content.user.service.IContentUserLevelConfigService;
 import org.jeecg.modules.content.user.service.IContentUserPointSpendService;
 import org.jeecg.modules.content.user.vo.ContentUserBadgeVO;
 import org.jeecg.modules.content.user.vo.ContentUserDistributionWeightVO;
@@ -61,6 +62,9 @@ class ContentUserGrowthControllerWebMvcTest {
 
     @Mock
     private IContentUserLevelBenefitService levelBenefitService;
+
+    @Mock
+    private IContentUserLevelConfigService levelConfigService;
 
     @Mock
     private IContentUserGrowthDecayStateService growthDecayStateService;
@@ -307,6 +311,40 @@ class ContentUserGrowthControllerWebMvcTest {
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.total").value(0))
             .andExpect(jsonPath("$.result.size").value(10));
+    }
+
+    @Test
+    void shouldReturnLevelBenefit() throws Exception {
+        when(levelBenefitService.getBenefitSummary("u1"))
+            .thenReturn(new ContentUserLevelBenefitSummaryVO()
+                .setUploadSizeLimitMb(200)
+                .setHdVideoEnabled(true)
+                .setTopicQuota(10));
+
+        mockMvc.perform(get("/content/user/growth/level/benefit").param("userId", "u1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result.uploadSizeLimitMb").value(200))
+            .andExpect(jsonPath("$.result.hdVideoEnabled").value(true))
+            .andExpect(jsonPath("$.result.topicQuota").value(10));
+    }
+
+    @Test
+    void shouldListLevelConfigs() throws Exception {
+        when(levelConfigService.listValidEnabledLevels())
+            .thenReturn(List.of(
+                new org.jeecg.modules.content.user.entity.ContentUserLevelConfig()
+                    .setLevel(1).setLevelName("新手").setGrowthThreshold(0).setBadgeStyleKey("lv1"),
+                new org.jeecg.modules.content.user.entity.ContentUserLevelConfig()
+                    .setLevel(2).setLevelName("进阶").setGrowthThreshold(500).setBadgeStyleKey("lv2")
+            ));
+
+        mockMvc.perform(get("/content/user/growth/level/config"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.result[0].level").value(1))
+            .andExpect(jsonPath("$.result[0].levelName").value("新手"))
+            .andExpect(jsonPath("$.result[1].growthThreshold").value(500));
     }
 
     @Test

@@ -9,8 +9,8 @@ import type {
 
 enum Api {
   summary = '/api/v1/content/user/growth/summary',
-  levelConfig = '/api/v1/content/circle/growth/level/config',
-  levelBenefit = '/api/v1/content/circle/growth/level/benefit',
+  levelConfig = '/api/v1/content/user/growth/level/config',
+  levelBenefit = '/api/v1/content/user/growth/level/benefit',
   decayRule = '/api/v1/content/user/growth/decay/rule',
   decayStatus = '/api/v1/content/user/growth/decay/status',
 }

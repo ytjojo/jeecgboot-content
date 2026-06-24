@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.user.dto.ContentUserPointLedgerQueryDTO;
+import org.jeecg.modules.content.user.entity.ContentUserLevelConfig;
 import org.jeecg.modules.content.user.req.growth.ContentUserBadgeRecycleReq;
 import org.jeecg.modules.content.user.req.growth.ContentUserBadgeWearReq;
 import org.jeecg.modules.content.user.req.growth.ContentUserExchangeReq;
@@ -20,6 +21,7 @@ import org.jeecg.modules.content.user.service.IContentUserBadgeService;
 import org.jeecg.modules.content.user.service.IContentUserGrowthDecayStateService;
 import org.jeecg.modules.content.user.service.IContentUserGrowthService;
 import org.jeecg.modules.content.user.service.IContentUserLevelBenefitService;
+import org.jeecg.modules.content.user.service.IContentUserLevelConfigService;
 import org.jeecg.modules.content.user.service.IContentUserPointSpendService;
 import org.jeecg.modules.content.user.vo.ContentUserBadgeVO;
 import org.jeecg.modules.content.user.vo.ContentUserDistributionWeightVO;
@@ -28,6 +30,8 @@ import org.jeecg.modules.content.user.vo.ContentUserFeatureUnlockVO;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayRuleVO;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthDecayStatusVO;
 import org.jeecg.modules.content.user.vo.ContentUserGrowthVO;
+import org.jeecg.modules.content.user.vo.ContentUserLevelBenefitSummaryVO;
+import org.jeecg.modules.content.user.vo.ContentUserLevelConfigVO;
 import org.jeecg.modules.content.user.vo.ContentUserPointLedgerPageVO;
 import org.jeecg.modules.content.user.vo.ContentUserPointSpendResultVO;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -64,6 +68,9 @@ public class ContentUserGrowthController {
 
     @Resource
     private IContentUserLevelBenefitService levelBenefitService;
+
+    @Resource
+    private IContentUserLevelConfigService levelConfigService;
 
     @Resource
     private IContentUserGrowthDecayStateService growthDecayStateService;
@@ -254,6 +261,28 @@ public class ContentUserGrowthController {
     }
 
     /**
+     * 查询当前等级权益摘要。
+     */
+    @Operation(summary = "查询等级权益摘要")
+    @GetMapping("/level/benefit")
+    public Result<ContentUserLevelBenefitSummaryVO> levelBenefit(
+        @Parameter(description = "用户ID", required = true)
+        @NotBlank(message = "用户ID不能为空")
+        @Size(max = 64, message = "用户ID长度不能超过64位")
+        @RequestParam("userId") String userId) {
+        return Result.OK(levelBenefitService.getBenefitSummary(userId));
+    }
+
+    /**
+     * 查询可用等级阈值配置。
+     */
+    @Operation(summary = "查询等级配置")
+    @GetMapping("/level/config")
+    public Result<List<ContentUserLevelConfigVO>> levelConfigs() {
+        return Result.OK(levelConfigService.listValidEnabledLevels().stream().map(this::toLevelConfigVO).toList());
+    }
+
+    /**
      * 查询等级推荐分发加权信号。
      */
     @Operation(summary = "查询等级推荐分发权重")
@@ -291,4 +320,11 @@ public class ContentUserGrowthController {
         return Result.OK(growthDecayStateService.getDecayStatus(userId));
     }
 
+    private ContentUserLevelConfigVO toLevelConfigVO(ContentUserLevelConfig config) {
+        return new ContentUserLevelConfigVO()
+            .setLevel(config.getLevel())
+            .setLevelName(config.getLevelName())
+            .setGrowthThreshold(config.getGrowthThreshold())
+            .setBadgeStyleKey(config.getBadgeStyleKey());
+    }
 }
