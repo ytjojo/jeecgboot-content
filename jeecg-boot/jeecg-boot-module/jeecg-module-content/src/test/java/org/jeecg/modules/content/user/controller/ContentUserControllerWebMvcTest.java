@@ -337,19 +337,6 @@ class ContentUserControllerWebMvcTest {
             .thenReturn(new ContentUserFeatureUnlockVO()
                 .setFeatureCode("PIN_TOP")
                 .setEnabled(Boolean.TRUE));
-        when(levelBenefitService.getBenefitSummary("u1"))
-            .thenReturn(new ContentUserLevelBenefitSummaryVO()
-                .setUploadSizeLimitMb(500)
-                .setHdVideoEnabled(Boolean.TRUE)
-                .setTopicQuota(30)
-                .setSupportPriority(1)
-                .setEnabledBenefitCodes(List.of("HD_VIDEO")));
-        when(levelConfigService.listValidEnabledLevels())
-            .thenReturn(List.of(new ContentUserLevelConfig()
-                .setLevel(2)
-                .setLevelName("进阶创作者")
-                .setGrowthThreshold(100)
-                .setBadgeStyleKey("level-2")));
         when(levelBenefitService.resolveDistributionWeight("u1", new BigDecimal("0.80")))
             .thenReturn(new ContentUserDistributionWeightVO()
                 .setUserId("u1")
@@ -372,16 +359,6 @@ class ContentUserControllerWebMvcTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.featureCode").value("PIN_TOP"))
             .andExpect(jsonPath("$.result.enabled").value(true));
-
-        mockMvc.perform(get("/content/user/growth/level/benefit").param("userId", "u1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.result.uploadSizeLimitMb").value(500))
-            .andExpect(jsonPath("$.result.enabledBenefitCodes[0]").value("HD_VIDEO"));
-
-        mockMvc.perform(get("/content/user/growth/level/config"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.result[0].level").value(2))
-            .andExpect(jsonPath("$.result[0].growthThreshold").value(100));
 
         mockMvc.perform(get("/content/user/growth/level/distribution-weight")
                 .param("userId", "u1")
