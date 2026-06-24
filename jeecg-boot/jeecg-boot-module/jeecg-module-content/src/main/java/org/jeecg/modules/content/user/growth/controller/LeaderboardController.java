@@ -12,7 +12,7 @@ import java.util.List;
 
 @Tag(name = "圈子排行榜")
 @RestController
-@RequestMapping("/api/v1/content/circle/growth/leaderboard")
+@RequestMapping("/api/v1/content/user/growth/leaderboard")
 public class LeaderboardController {
 
     @Resource
