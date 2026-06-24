@@ -11,7 +11,7 @@
 **原 8 个 VO 字段缺失问题中，7 个已由后端修复，1 个部分修复。原 2 个接口能力缺失问题均已修复。**
 
 新增发现：
-1. `CircleLevelController` 路径已从 `/api/v1/content/user/growth/level/info` 迁移至 `/api/v1/content/circle/growth/level/info`，但其余 3 个 Controller 仍在 `/api/v1/content/user/growth/` 下，路径前缀不一致（待确认是否后续统一迁移）。
+1. `CircleLevelController` 路径已从 `/api/v1/content/user/growth/level/info` 迁移至 `/api/v1/content/circle/growth/level/info`。其余 3 个 Controller（MemberGrowthController、AchievementController、LeaderboardController）仍使用 `/api/v1/content/user/growth/` 前缀，符合 D7 设计决策——圈子成长与用户成长使用不同前缀。
 2. `benefits` 字段实现为 `List<String>`（权益名称列表），而非建议的 `List<LevelBenefitVO>`（无 unlocked 状态区分）。
 3. AchievementVO 字段名与建议有差异：`iconUrl` 而非 `icon`，`currentProgress/targetProgress` 而非 `progress/targetValue`，`status` 枚举为 `EARNED/CLOSE/UNEARNED` 而非 `ACTIVE/REVOKED`。
 
