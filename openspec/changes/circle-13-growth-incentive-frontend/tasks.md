@@ -9,7 +9,7 @@
 - [ ] 2.1 实现 `CircleLevelBadge` 组件 — 圈子等级标识（L1-L5 图标 + 名称 + 颜色映射）
 - [ ] 2.2 实现 `CircleLevelProgress` 组件 — 等级进度条（当前等级 → 下一等级 + 百分比 + 分项指标展开）
 - [ ] 2.3 在圈子详情页嵌入等级与成长区块（等级标识 + 进度条 + 已解锁权益）
-- [ ] 2.4 对接 GET `/api/v1/content/user/growth/level/info?circleId={circleId}` 接口，处理加载态、成功态、失败态
+- [ ] 2.4 对接 GET `/api/v1/content/circle/growth/level/info?circleId={circleId}` 接口，处理加载态、成功态、失败态
 
 ## 3. 成员个人成长信息页
 
