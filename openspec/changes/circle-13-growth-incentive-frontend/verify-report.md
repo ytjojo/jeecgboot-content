@@ -247,7 +247,7 @@
 
 ### 5.1 后端 Controller 路径分布
 
-注意：**CircleLevelController 已迁移至 `/circle/growth/` 前缀**，其余 Controller 仍在 `/user/growth/` 下，路径前缀不一致（待确认是否后续统一迁移）：
+注意：**CircleLevelController 已迁移至 `/circle/growth/` 前缀**（数据主体是圈子），其余 Controller 保持在 `/user/growth/` 下（数据主体是用户）。双前缀是有意设计，不会统一迁移。详见 `docs/agent-context/circle-growth-api-conventions.md`。
 
 ```
 /api/v1/content/circle/growth/
@@ -267,7 +267,7 @@
 └── /point/*                ← ContentUserGrowthController (用户成长) [GET/POST]
 ```
 
-> ⚠️ **路径不统一**: CircleLevelController 使用 `/circle/growth/` 前缀，其余 3 个圈子成长接口使用 `/user/growth/` 前缀。前端对接时需注意此差异。待确认后端是否会统一迁移。
+> ⚠️ **双前缀设计**: CircleLevelController 使用 `/circle/growth/` 前缀（数据主体是圈子），其余 3 个成长接口使用 `/user/growth/` 前缀（数据主体是用户）。前端对接时需注意此差异。这是有意设计，不会统一迁移。规范见 `docs/agent-context/circle-growth-api-conventions.md`。
 
 ### 5.2 参考价值
 
@@ -403,5 +403,5 @@ Spec §6 依赖 WebSocket 通知实现等级提升和徽章获得的实时提示
 2. 更新 tasks.md 中 API 文件路径为 `src/api/content/growth/circle.ts`
 3. 更新 specs 中"暂不支持/暂不展示"的场景描述
 4. 确认 WebSocket 方案（§6）
-5. 确认其余 3 个 Controller 是否也会迁移至 `/circle/growth/` 前缀
+5. ~~确认其余 3 个 Controller 是否也会迁移至 `/circle/growth/` 前缀~~ **已确认：不迁移。双前缀设计，见 circle-growth-api-conventions.md**
 6. 按 spec 任务顺序开始实现 §1 基础设施搭建
