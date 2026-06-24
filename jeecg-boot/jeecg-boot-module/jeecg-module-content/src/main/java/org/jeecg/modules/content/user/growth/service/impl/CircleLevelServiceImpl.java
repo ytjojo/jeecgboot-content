@@ -11,6 +11,7 @@ import org.jeecg.modules.content.user.growth.mapper.CircleLevelMapper;
 import org.jeecg.modules.content.user.growth.mapper.CircleMemberGrowthMapper;
 import org.jeecg.modules.content.user.growth.service.ICircleLevelService;
 import org.jeecg.common.system.api.ISysBaseAPI;
+import org.jeecg.modules.content.user.growth.vo.CircleBenefitVO;
 import org.jeecg.modules.content.user.growth.vo.CircleLevelVO;
 import org.jeecg.modules.content.user.growth.vo.LevelConditionVO;
 import org.jeecg.modules.content.user.service.IContentNotificationService;
@@ -178,9 +179,16 @@ public class CircleLevelServiceImpl extends ServiceImpl<CircleLevelMapper, Circl
         this.saveOrUpdate(level);
     }
 
-    private List<String> buildBenefits(int level) {
+    private List<CircleBenefitVO> buildBenefits(int level) {
         List<String> all = Arrays.asList("基础展示", "排行榜入口", "徽章墙", "推荐权重提升", "全部权益");
-        return new ArrayList<>(all.subList(0, Math.min(level, all.size())));
+        List<CircleBenefitVO> result = new ArrayList<>();
+        for (int i = 0; i < all.size(); i++) {
+            CircleBenefitVO benefit = new CircleBenefitVO();
+            benefit.setName(all.get(i));
+            benefit.setUnlocked(i < level);
+            result.add(benefit);
+        }
+        return result;
     }
 
     private LevelConditionVO buildCondition(String type, String label, Integer current, int cap) {

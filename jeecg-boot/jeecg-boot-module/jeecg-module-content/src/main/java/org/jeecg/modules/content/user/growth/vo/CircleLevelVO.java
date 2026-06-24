@@ -24,8 +24,8 @@ public class CircleLevelVO {
     @Schema(description = "进度百分比")
     private Integer progressPercent;
 
-    @Schema(description = "已解锁权益列表")
-    private List<String> benefits;
+    @Schema(description = "全部权益列表（含已解锁/未解锁状态）")
+    private List<CircleBenefitVO> benefits;
 
     @Schema(description = "成员规模得分")
     private Integer memberScore;
