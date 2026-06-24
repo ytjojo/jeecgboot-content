@@ -34,7 +34,7 @@
 
 ### Requirement: 徽章种类定义
 
-系统 SHALL 支持展示后端已定义的徽章种类。PRD 定义 6 种徽章（持续创作者、优质贡献者、活跃参与者、圈内新星、内容里程碑、社交达人），实际展示种类由后端 `GET /api/v1/content/user/growth/achievement/list` 接口返回的数据决定。后端还提供 `GET /api/v1/content/user/growth/badge/catalog` 接口可查询完整徽章分类目录。
+系统 SHALL 支持展示后端已定义的徽章种类。PRD 定义 6 种徽章（持续创作者、优质贡献者、活跃参与者、圈内新星、内容里程碑、社交达人），实际展示种类由后端 `GET /api/v1/content/circle/growth/achievement/list` 接口返回的数据决定。后端还提供 `GET /api/v1/content/user/growth/badge/catalog` 接口可查询完整徽章分类目录。
 
 #### Scenario: 展示全部徽章
 - **WHEN** 用户进入徽章墙页
@@ -70,11 +70,11 @@
 
 ### Requirement: 徽章列表 API 对接
 
-系统 SHALL 通过 GET `/api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` 接口获取成就徽章列表数据。
+系统 SHALL 通过 GET `/api/v1/content/circle/growth/achievement/list?circleId={circleId}&userId={userId}` 接口获取成就徽章列表数据。
 
 #### Scenario: 接口请求成功
 - **WHEN** 徽章墙页加载
-- **THEN** 调用成就徽章列表接口 `GET /api/v1/content/user/growth/achievement/list`，解析 AchievementVO 数组并渲染到页面
+- **THEN** 调用成就徽章列表接口 `GET /api/v1/content/circle/growth/achievement/list`，解析 AchievementVO 数组并渲染到页面
 
 #### Scenario: 接口请求失败
 - **WHEN** 徽章列表接口请求失败
