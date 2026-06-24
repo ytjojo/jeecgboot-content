@@ -22,4 +22,28 @@ public class CircleLevelController {
     public Result<CircleLevelVO> getLevelInfo(@RequestParam String circleId) {
         return Result.OK(circleLevelService.getLevelInfo(circleId));
     }
+
+    @Operation(summary = "查询当前等级权益摘要")
+    @GetMapping("/benefit")
+    public Result<ContentUserLevelBenefitSummaryVO> levelBenefit(
+        @Parameter(description = "用户ID", required = true)
+        @NotBlank(message = "用户ID不能为空")
+        @Size(max = 64, message = "用户ID长度不能超过64位")
+        @RequestParam("userId") String userId) {
+        return Result.OK(levelBenefitService.getBenefitSummary(userId));
+    }
+
+    @Operation(summary = "查询可用等级阈值配置")
+    @GetMapping("/config")
+    public Result<List<ContentUserLevelConfigVO>> levelConfigs() {
+        return Result.OK(levelConfigService.listValidEnabledLevels().stream().map(this::toLevelConfigVO).toList());
+    }
+
+    private ContentUserLevelConfigVO toLevelConfigVO(ContentUserLevelConfig config) {
+        return new ContentUserLevelConfigVO()
+            .setLevel(config.getLevel())
+            .setLevelName(config.getLevelName())
+            .setGrowthThreshold(config.getGrowthThreshold())
+            .setBadgeStyleKey(config.getBadgeStyleKey());
+    }
 }
