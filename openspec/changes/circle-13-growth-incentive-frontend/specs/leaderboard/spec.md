@@ -86,7 +86,7 @@
 
 ### Requirement: 排行榜 API 对接
 
-系统 SHALL 通过 GET `/api/v1/content/circle/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` 接口获取排行榜数据，支持 dimension 和 period 查询参数。
+系统 SHALL 通过 GET `/api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` 接口获取排行榜数据，支持 dimension 和 period 查询参数。
 
 #### Scenario: 接口请求成功
 - **WHEN** 排行榜页加载或切换维度/周期

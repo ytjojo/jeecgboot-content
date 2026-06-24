@@ -119,7 +119,7 @@ public class LevelConditionVO {
 | 成就徽章 | `/api/v1/content/user/growth/achievement/list?circleId=&userId=` | `/api/v1/content/user/growth/achievement/list?circleId=&userId=` | ✅ 未变 |
 | 排行榜 | `/api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | `/api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ✅ 未变 |
 
-**待确认**: `CircleLevelController` 已迁移至 `/circle/growth/` 前缀并新增 2 个接口，其余 3 个 Controller 是否也会统一迁移？需与后端确认。目前前端需对圈子等级相关接口使用不同前缀。
+**已确认**: `CircleLevelController` 已迁移至 `/circle/growth/` 前缀（数据主体是圈子），其余 3 个 Controller（成员成长、成就徽章、排行榜）保持在 `/user/growth/` 前缀（数据主体是用户）。双前缀是有意设计，不会统一迁移。详见 `docs/agent-context/circle-growth-api-conventions.md`。
 
 ---
 
@@ -137,6 +137,6 @@ public class LevelConditionVO {
 
 | 优先级 | 问题 | 原因 |
 |--------|------|------|
-| P1 | CircleLevelController 路径与其它 Controller 前缀不一致（/circle/growth/ vs /user/growth/） | 需确认是否统一迁移，前端对接需注意 |
+| P1 | CircleLevelController 路径与其它 Controller 前缀不同（/circle/growth/ vs /user/growth/） | 已确认：双前缀是有意设计，数据主体不同。见 circle-growth-api-conventions.md |
 | P2 | benefits 字段为 List<String>，无 unlocked 状态区分 | 无法展示未解锁权益，如需要求后端改为 List<LevelBenefitVO> |
 | P3 | WebSocket 通知机制未实现 | §6 通知功能方案待确认 |
