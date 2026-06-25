@@ -1,6 +1,6 @@
 ## 1. 基础设施搭建
 
-- [ ] 1.1 创建 API 封装文件 `src/api/content/growth.ts`，定义 `getCircleLevel`、`getMemberGrowth`、`getCircleBadges`、`getLeaderboard` 四个接口函数和对应 TypeScript 类型
+- [ ] 1.1 创建 API 封装文件 `src/api/content/growth.ts`，定义 `getCircleLevelInfo`、`getCircleLevelConfig`、`getCircleLevelBenefit`、`getMemberGrowth`、`getParticipationDays`、`getAchievements`、`getLeaderboard` 七个接口函数和对应 TypeScript 类型
 - [ ] 1.2 创建 Pinia Store `src/store/modules/circleGrowth.ts`，定义 `CircleGrowthState` 状态结构和缓存策略（按 circleId 缓存）
 - [ ] 1.3 创建组件目录 `src/components/circle/growth/` 和页面目录结构
 
@@ -17,7 +17,7 @@
 - [ ] 3.2 实现 `ParticipationStreak` 组件 — 连续参与进度（7 天时间轴，实心圆/空心圆/横线三种状态）
 - [ ] 3.3 实现 `DailyExpBar` 组件 — 今日经验进度条（当前/100 上限，满格状态）
 - [ ] 3.4 创建个人成长信息页 `src/views/circle/growth/index.vue`，组合上述组件 + 徽章摘要区域
-- [ ] 3.5 对接 GET `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` 接口，使用 `Promise.all` 并行请求等级和成长信息
+- [ ] 3.5 对接 GET `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` 和 GET `/api/v1/content/user/growth/participation?circleId={circleId}&userId={userId}` 接口，使用 `Promise.all` 并行请求等级信息、成长信息和连续参与天数
 - [ ] 3.6 配置路由 `/circle/:id/growth` 挂载到圈子详情页子路由
 
 ## 4. 徽章系统
