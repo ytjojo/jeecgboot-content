@@ -2,6 +2,7 @@
 
 **创建日期**: 2026-06-04
 **最后审核**: 2026-06-24（基于 main 分支 commit 84e8297d 重新审核）
+**最终修正**: 2026-06-25 — 文档腐化修正完成，所有原列出的 VO 字段缺失已由后端修复，benefits 类型确认为 `List<CircleBenefitVO>`（`{name, unlocked}`）。仅剩 P3（WebSocket）待后端实现。
 **关联 Change**: circle-13-growth-incentive-frontend
 
 ---
@@ -12,7 +13,7 @@
 
 新增发现：
 1. `CircleLevelController` 路径已从 `/api/v1/content/user/growth/level/info` 迁移至 `/api/v1/content/circle/growth/level/info`。其余 3 个 Controller（MemberGrowthController、AchievementController、LeaderboardController）仍使用 `/api/v1/content/user/growth/` 前缀，符合 D7 设计决策——圈子成长与用户成长使用不同前缀。
-2. `benefits` 字段实现为 `List<String>`（权益名称列表），而非建议的 `List<LevelBenefitVO>`（无 unlocked 状态区分）。
+2. `benefits` 字段实现为 `List<CircleBenefitVO>`（`{name, unlocked}`），已含 unlocked 状态区分。✅ 完全符合需求。
 3. AchievementVO 字段名与建议有差异：`iconUrl` 而非 `icon`，`currentProgress/targetProgress` 而非 `progress/targetValue`，`status` 枚举为 `EARNED/CLOSE/UNEARNED` 而非 `ACTIVE/REVOKED`。
 
 ---
@@ -26,7 +27,7 @@
 | 原缺失字段 | 建议类型 | 实际后端字段 | 状态 |
 |----------|------|------|------|
 | `nextLevelConditions` | `List<LevelConditionVO>` | `List<LevelConditionVO> nextLevelConditions` | ✅ 已实现 |
-| `benefits` | `List<LevelBenefitVO>` | `List<String> benefits`（权益名称列表，无 unlocked 字段） | ⚠️ 部分实现（见下） |
+| `benefits` | `List<CircleBenefitVO>` | `List<CircleBenefitVO> benefits`（含 name, unlocked） | ✅ 已实现 |
 
 **额外补充字段**（原文档未提及，后端已实现）:
 - `memberScore: Integer` — 成员规模得分
@@ -45,7 +46,17 @@ public class LevelConditionVO {
 }
 ```
 
-**LevelBenefitVO 未实现**: 后端使用 `List<String>` 表示权益名称列表，没有 `name/description/unlocked` 结构。前端无法区分"已解锁/未解锁"权益，只能展示已解锁权益列表。如果需要未解锁权益展示，需后端补充。
+**CircleBenefitVO 实际结构**（与建议一致）:
+```java
+@Data
+@Accessors(chain = true)
+public class CircleBenefitVO {
+    private String name;     // 权益名称
+    private Boolean unlocked; // 是否已解锁
+}
+```
+
+`benefits` 为 `List<CircleBenefitVO>`，前端可直接区分"已解锁/未解锁"权益。
 
 ### 1.2 MemberGrowthVO 缺失字段 — ✅ 已修复（2026-06-24 确认）
 
@@ -138,5 +149,5 @@ public class LevelConditionVO {
 | 优先级 | 问题 | 原因 |
 |--------|------|------|
 | P1 | CircleLevelController 路径与其它 Controller 前缀不同（/circle/growth/ vs /user/growth/） | 已确认：双前缀是有意设计，数据主体不同。见 circle-growth-api-conventions.md |
-| P2 | benefits 字段为 List<String>，无 unlocked 状态区分 | 无法展示未解锁权益，如需要求后端改为 List<LevelBenefitVO> |
+| P2 | benefits 字段为 List<CircleBenefitVO>（{name, unlocked}） | ✅ 已完整实现，可直接区分已解锁/未解锁权益 |
 | P3 | WebSocket 通知机制未实现 | §6 通知功能方案待确认 |

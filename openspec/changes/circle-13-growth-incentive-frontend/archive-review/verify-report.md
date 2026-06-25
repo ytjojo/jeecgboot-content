@@ -233,7 +233,7 @@
 | "即将达成"判断 | 解析 conditionDesc 文本 | ✅ AchievementVO 已有 `status=CLOSE` 枚举值 | 🔴 **过时** — 直接判断 status 字段 |
 | `username/userAvatar` | 通过 userId 额外调用用户接口 | ✅ LeaderboardEntryVO 已有 `username/avatar` 字段 | 🔴 **过时** — 直接使用后端返回值 |
 | `gapToPrev` | 暂不展示 | ✅ LeaderboardEntryVO 已有 `gap` 字段 | 🔴 **过时** — 可展示距上一名差距 |
-| `benefits` | 暂不展示权益列表 | ✅ CircleLevelVO 已有 `List<String> benefits` 字段 | 🔴 **过时** — 可展示已解锁权益名称列表（注意：无 unlocked 状态区分，为 List<String>） |
+| `benefits` | 暂不展示权益列表 | ✅ CircleLevelVO 已有 `List<CircleBenefitVO> benefits` 字段（`{name, unlocked}`） | ✅ **已对接** — 可直接区分已解锁/未解锁权益 |
 | `nextLevelConditions` | 不支持展开分项 | ✅ CircleLevelVO 已有 `nextLevelConditions`（含 LevelConditionVO） | 🔴 **过时** — 可支持分项进度展开 |
 | `memberScore/contentScore/activityScore` | D9 未提及 | ✅ CircleLevelVO 已提供三项分项得分 | 🆕 **spec 未描述但后端已提供** |
 | `levelName/nextLevelThreshold/progressPercent` (MemberGrowthVO) | D9 未提及 | ✅ MemberGrowthVO 已提供 | 🆕 **spec 未描述但后端已提供** |
