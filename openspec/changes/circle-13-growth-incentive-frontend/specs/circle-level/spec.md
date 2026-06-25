@@ -18,7 +18,7 @@
 
 ### Requirement: 圈子等级进度展示
 
-系统 SHALL 在圈子详情页展示等级进度条，包含当前等级、下一等级、成长分百分比。后端 CircleLevelVO 提供 `level`、`levelName`、`growthScore`、`nextLevelThreshold`、`progressPercent` 五个字段。未提供 `memberGap`、`contentGap`、`interactionGap` 分项差距字段，差距条件展示降级为仅显示成长分和进度百分比。
+系统 SHALL 在圈子详情页展示等级进度条，包含当前等级、下一等级、成长分百分比。后端 CircleLevelVO 提供 `level`、`levelName`、`growthScore`、`nextLevelThreshold`、`progressPercent`、`memberScore`、`contentScore`、`activityScore`、`nextLevelConditions` 等字段。`nextLevelConditions` 为 `LevelConditionVO[]`，每项包含 `type`、`label`、`current`、`required`、`gap`，可直接展示各项差距。
 
 #### Scenario: 展示等级进度
 - **WHEN** 用户进入圈子详情页
@@ -26,23 +26,23 @@
 
 #### Scenario: 展示差距条件
 - **WHEN** 圈子未达到最高等级
-- **THEN** 进度条下方展示「成长分 `growthScore` / `nextLevelThreshold`」（注：后端未提供分项差距字段，暂不展示成员/内容/互动分项差距）
+- **THEN** 进度条下方展示各维度当前得分和差距：「成员 `memberScore`」「内容 `contentScore`」「活跃 `activityScore`」；若 `nextLevelConditions` 有值，按条件项展示 `label`、`current`/`required` 和 `gap`。
 
 #### Scenario: 点击进度条展开分项指标
 - **WHEN** 用户点击等级进度条
-- **THEN** 暂不支持展开分项指标（后端未提供 `memberGap`、`contentGap`、`interactionGap` 字段）
+- **THEN** 展开显示详细的成员规模（`memberScore`）、内容贡献（`contentScore`）、活跃互动（`activityScore`）三类指标分项及 `nextLevelConditions` 各项差距
 
 ### Requirement: 圈子等级权益展示
 
-系统 SHALL 在圈子详情页展示等级相关信息。后端 CircleLevelVO 未提供 `benefits` 和 `nextBenefits` 字段，权益列表展示暂不支持，仅展示等级标识和进度条。
+系统 SHALL 在圈子详情页展示等级权益信息。后端 CircleLevelVO 提供 `benefits`（`CircleBenefitVO[]`：`{name, unlocked}`）和 `nextLevelConditions`（`LevelConditionVO[]`：`{type, label, current, required, gap}`）字段，可直接对接展示。
 
 #### Scenario: 展示已解锁权益
 - **WHEN** 用户进入圈子详情页
-- **THEN** 暂不展示权益列表（后端未提供 `benefits` 字段），仅展示等级标识和进度条
+- **THEN** 展示已解锁权益列表（从 `benefits` 字段获取）：已解锁权益（`unlocked: true`）用勾选图标，未解锁权益用锁定图标并置灰
 
 #### Scenario: 展示未解锁权益
 - **WHEN** 圈子未达到最高等级
-- **THEN** 暂不展示下一等级权益（后端未提供 `nextBenefits` 字段）
+- **THEN** 展示下一等级条件（从 `nextLevelConditions` 字段获取）：按条件项展示 `label`、`current`/`required` 和 `gap`
 
 #### Scenario: 私有圈子未加入成员
 - **WHEN** 未加入私有圈子的用户访问圈子详情页

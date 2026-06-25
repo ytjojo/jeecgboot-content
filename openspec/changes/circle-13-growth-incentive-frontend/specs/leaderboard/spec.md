@@ -34,11 +34,11 @@
 
 ### Requirement: 排行榜样列表展示
 
-系统 SHALL 展示 Top 50 成员列表，包含排名、头像、用户名、对应维度数值。排名前三名使用金银铜色序号标识。后端返回 `List<LeaderboardEntryVO>` 扁平数组，每个元素包含 `userId`、`score`、`rankNum`、`highlighted` 四个字段。用户名和头像需通过 `userId` 额外调用用户信息接口获取。
+系统 SHALL 展示 Top 50 成员列表，包含排名、头像、用户名、对应维度数值。排名前三名使用金银铜色序号标识。后端返回 `Result<List<LeaderboardEntryVO>>` 扁平数组，每个元素包含 `userId`、`username`、`avatar`、`score`、`rankNum`、`highlighted`、`gap` 七个字段。用户名和头像由后端直接返回，无需额外调用用户信息接口。
 
 #### Scenario: 展示 Top 50 列表
 - **WHEN** 排行榜数据加载成功
-- **THEN** 展示最多 50 名成员的排名列表，包含排名序号（`rankNum`）、头像（通过 `userId` 获取）、用户名（通过 `userId` 获取）、数值（`score`）
+- **THEN** 展示最多 50 名成员的排名列表，包含排名序号（`rankNum`）、头像（`avatar`）、用户名（`username`）、数值（`score`）
 
 #### Scenario: 不足 50 人展示全部
 - **WHEN** 符合条件的成员不足 50 人
@@ -54,7 +54,7 @@
 
 ### Requirement: 当前用户排名高亮
 
-系统 SHALL 在排行榜中高亮当前用户排名。后端通过 `highlighted` 字段标识当前用户（`true` 表示当前用户）。Top 50 内使用主题色背景高亮，Top 50 外在榜单底部固定展示「我的排名」区域。后端返回扁平数组，不含包装对象和 `currentUserGapToPrev` 字段，距上一名差距功能暂不展示。
+系统 SHALL 在排行榜中高亮当前用户排名。后端通过 `highlighted` 字段标识当前用户（`true` 表示当前用户）。Top 50 内使用主题色背景高亮，Top 50 外在榜单底部固定展示「我的排名」区域。后端返回每个 entry 的 `gap` 字段（距上一名得分差值），可直接展示差距。
 
 #### Scenario: 当前用户在 Top 50 内
 - **WHEN** 当前用户排名在 Top 50 以内（`highlighted === true`）
@@ -62,11 +62,11 @@
 
 #### Scenario: 当前用户未进入 Top 50
 - **WHEN** 当前用户排名在 Top 50 以外
-- **THEN** 榜单底部固定展示「我的排名」区域，包含排名、头像、用户名、数值（注：后端未返回 Top 50 外的当前用户数据，需前端判断列表中无 `highlighted=true` 时展示提示）
+- **THEN** 榜单底部固定展示「我的排名」区域，包含排名（`rankNum`）、头像（`avatar`）、用户名（`username`）、数值（`score`）
 
 #### Scenario: 距上一名差距展示
 - **WHEN** 当前用户未进入 Top 50
-- **THEN** 暂不展示距上一名差距（后端未提供 `gapToPrev` 字段）
+- **THEN** 展示距上一名差距（从当前用户 entry 的 `gap` 字段取值）
 
 ### Requirement: 排行榜样空状态
 

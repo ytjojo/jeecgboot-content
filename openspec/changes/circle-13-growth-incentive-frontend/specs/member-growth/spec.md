@@ -46,23 +46,23 @@
 
 ### Requirement: 每日经验上限展示
 
-系统 SHALL 在个人成长信息页展示今日已获经验值和每日上限。后端 MemberGrowthVO 未提供 `todayExp` 和 `dailyExpLimit` 字段，每日上限 100 点为前端硬编码（PRD 定义），今日经验值暂不展示（后续后端补充 `todayExp` 字段后启用）。
+系统 SHALL 在个人成长信息页展示今日已获经验值和每日上限。后端 MemberGrowthVO 提供 `todayExp`（今日已获经验值）和 `dailyExpLimit`（每日经验上限）字段，直接使用无需前端硬编码。
 
 #### Scenario: 展示今日经验进度
 - **WHEN** 用户进入个人成长信息页
-- **THEN** 展示每日经验上限提示「每日上限 100 点」（注：后端未提供 `todayExp` 字段，今日已获经验值暂不展示，待后端补充后启用进度条）
+- **THEN** 展示今日经验进度条，显示「今日经验 `todayExp` / `dailyExpLimit`」
 
 #### Scenario: 达到每日上限
 - **WHEN** 今日经验值达到 100 点上限
-- **THEN** 进度条变为满格，显示「已达今日上限」（注：后端未提供 `todayExp` 字段，此场景待后端补充后启用）
+- **THEN** 进度条变为满格，显示「已达今日上限」（`todayExp >= dailyExpLimit`）
 
 ### Requirement: 徽章摘要展示
 
-系统 SHALL 在个人成长信息页展示最近获得的徽章摘要，并提供「查看全部徽章」入口。后端 MemberGrowthVO 未提供 `recentBadges` 字段，需单独调用 `GET /api/v1/content/user/growth/achievement/list` 接口获取徽章列表并筛选已获得的徽章。
+系统 SHALL 在个人成长信息页展示最近获得的徽章摘要，并提供「查看全部徽章」入口。后端 MemberGrowthVO 提供 `recentBadges` 字段（`List<AchievementVO>`，最多 3 枚），直接使用无需单独调接口。
 
 #### Scenario: 展示徽章摘要
 - **WHEN** 用户进入个人成长信息页
-- **THEN** 调用成就徽章列表接口获取已获得徽章，展示最近获得的 3 枚徽章卡片，点击「查看全部徽章」跳转徽章墙页
+- **THEN** 展示 `recentBadges` 中的最近 3 枚徽章卡片（`AchievementVO` 类型，含 `achievementType`、`name`、`iconUrl`、`earnedDate`），点击「查看全部徽章」跳转徽章墙页
 
 #### Scenario: 无已获得徽章
 - **WHEN** 用户未获得任何徽章
