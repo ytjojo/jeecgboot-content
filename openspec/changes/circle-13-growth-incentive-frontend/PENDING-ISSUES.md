@@ -112,7 +112,6 @@
 ## 六、相关文档索引
 
 - 文档腐化修正工作流: `docs/prompts/documentation-rot-fix-workflow.md`
-- API 对照表: `docs/agent-context/circle-growth-api-conventions.md`
 - 前端 PRD: `docs/requirements/prd/frontend/EPIC-13-circle-growth-incentive-frontend-prd.md`
 - 后端 PRD: `docs/requirements/prd/decomposition/circle/EPIC-13-circle-growth-incentive.md`
 - 后端 DDL: `V3.9.1_67__circle_growth_system.sql`
