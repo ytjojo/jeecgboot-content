@@ -8,7 +8,7 @@ import org.jeecg.modules.content.user.growth.entity.CircleAchievement;
 import org.jeecg.modules.content.user.growth.entity.CircleGrowthLog;
 import org.jeecg.modules.content.user.growth.entity.CircleMemberAchievement;
 import org.jeecg.modules.content.user.growth.entity.CircleMemberGrowth;
-import org.jeecg.modules.content.user.growth.enums.CircleLevelEnum;
+import org.jeecg.modules.content.user.growth.enums.MemberLevelEnum;
 import org.jeecg.modules.content.user.growth.enums.GrowthActionEnum;
 import org.jeecg.modules.content.user.growth.mapper.CircleAchievementMapper;
 import org.jeecg.modules.content.user.growth.mapper.CircleGrowthLogMapper;
@@ -69,6 +69,15 @@ public class MemberGrowthServiceImpl extends ServiceImpl<CircleMemberGrowthMappe
             growth.setFeaturedCount(growth.getFeaturedCount() + 1);
         }
         this.saveOrUpdate(growth);
+
+        // 根据经验值自动升级成员等级（不降级）
+        int oldLevel = growth.getLevel() != null ? growth.getLevel() : 1;
+        MemberLevelEnum newLevel = MemberLevelEnum.ofExp(growth.getExpPoints());
+        if (newLevel.getLevel() > oldLevel) {
+            growth.setLevel(newLevel.getLevel());
+            this.updateById(growth);
+            log.info("成员等级提升: circleId={}, userId={}, L{} -> {}", circleId, userId, oldLevel, newLevel.name());
+        }
     }
 
     @Override
@@ -110,7 +119,7 @@ public class MemberGrowthServiceImpl extends ServiceImpl<CircleMemberGrowthMappe
         vo.setExpPoints(growth.getExpPoints());
         vo.setContributionPoints(growth.getContributionPoints());
         vo.setLevel(growth.getLevel());
-        vo.setLevelName(CircleLevelEnum.ofLevel(growth.getLevel() != null ? growth.getLevel() : 1).getName());
+        vo.setLevelName(MemberLevelEnum.ofLevel(growth.getLevel() != null ? growth.getLevel() : 1).getName());
         vo.setPostCount(growth.getPostCount());
         vo.setParticipationDays(getParticipationDays(circleId, userId));
 
@@ -123,9 +132,9 @@ public class MemberGrowthServiceImpl extends ServiceImpl<CircleMemberGrowthMappe
 
         // 计算下一等级进度
         int currentLevel = growth.getLevel() != null ? growth.getLevel() : 1;
-        int currentThreshold = GrowthConstant.LEVEL_THRESHOLDS[Math.min(currentLevel - 1, GrowthConstant.LEVEL_THRESHOLDS.length - 1)];
-        int nextThreshold = currentLevel < GrowthConstant.LEVEL_THRESHOLDS.length
-                ? GrowthConstant.LEVEL_THRESHOLDS[currentLevel]
+        int currentThreshold = GrowthConstant.MEMBER_LEVEL_THRESHOLDS[Math.min(currentLevel - 1, GrowthConstant.MEMBER_LEVEL_THRESHOLDS.length - 1)];
+        int nextThreshold = currentLevel < GrowthConstant.MEMBER_LEVEL_THRESHOLDS.length
+                ? GrowthConstant.MEMBER_LEVEL_THRESHOLDS[currentLevel]
                 : currentThreshold;
         vo.setNextLevelThreshold(nextThreshold);
         if (nextThreshold > currentThreshold) {

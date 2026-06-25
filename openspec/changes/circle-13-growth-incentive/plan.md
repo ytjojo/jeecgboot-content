@@ -15,8 +15,8 @@
 ## Task 1: Flyway 迁移脚本与枚举
 
 **Files:**
-- Create: `jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/V3.9.1_63__circle_growth_system.sql`
-- Create: `jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/R3.9.1_63__circle_growth_system_rollback.sql`
+- Create: `jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/V3.9.1_67__circle_growth_system.sql`
+- Create: `jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/R3.9.1_67__circle_growth_system_rollback.sql`
 - Create: `src/main/java/org/jeecg/modules/content/user/growth/enums/CircleLevelEnum.java`
 - Create: `src/main/java/org/jeecg/modules/content/user/growth/enums/GrowthActionEnum.java`
 - Create: `src/main/java/org/jeecg/modules/content/user/growth/enums/AchievementTypeEnum.java`
@@ -26,7 +26,7 @@
 - [ ] **Step 1: Write the Flyway migration script**
 
 ```sql
--- V3.9.1_63__circle_growth_system.sql
+-- V3.9.1_67__circle_growth_system.sql
 
 -- 圈子等级配置表
 CREATE TABLE IF NOT EXISTS `circle_level` (
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS `circle_leaderboard_snapshot` (
 - [ ] **Step 2: Write the rollback script**
 
 ```sql
--- R3.9.1_63__circle_growth_system_rollback.sql
+-- R3.9.1_67__circle_growth_system_rollback.sql
 DROP TABLE IF EXISTS `circle_leaderboard_snapshot`;
 DROP TABLE IF EXISTS `circle_member_achievement`;
 DROP TABLE IF EXISTS `circle_achievement`;
@@ -245,8 +245,8 @@ Expected: BUILD SUCCESS
 - [ ] **Step 6: Commit**
 
 ```bash
-git add jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/V3.9.1_63__circle_growth_system.sql \
-        jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/R3.9.1_63__circle_growth_system_rollback.sql \
+git add jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/V3.9.1_67__circle_growth_system.sql \
+        jeecg-boot-module/jeecg-module-content/src/main/resources/flyway/sql/mysql/R3.9.1_67__circle_growth_system_rollback.sql \
         jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/enums/ \
         jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/constant/
 git commit -m "feat(growth): add Flyway migration and enums for circle growth system"
@@ -1488,7 +1488,7 @@ Expected: ALL PASS
 - [ ] **Step 2: Run Flyway migration locally**
 
 Run: `mvn spring-boot:run -pl jeecg-boot-module/jeecg-module-content -Dspring-boot.run.arguments="--spring.flyway.enabled=true"`
-Expected: Migration V3.9.1_63 applied successfully
+Expected: Migration V3.9.1_67 applied successfully
 
 - [ ] **Step 3: Verify table structure**
 

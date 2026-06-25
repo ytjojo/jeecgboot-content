@@ -164,7 +164,7 @@ class MemberGrowthServiceTest {
         assertThat(vo.getLevel()).isEqualTo(2);
         assertThat(vo.getPostCount()).isEqualTo(5);
         assertThat(vo.getRank()).isEqualTo(1);
-        // L2: threshold = LEVEL_THRESHOLDS[2] = 300, current threshold = 100
+        // L2: threshold = MEMBER_LEVEL_THRESHOLDS[2] = 300, current threshold = 100
         // progress% = (150 - 100) * 100 / (300 - 100) = 25
         assertThat(vo.getNextLevelThreshold()).isEqualTo(300);
         assertThat(vo.getProgressPercent()).isEqualTo(25);

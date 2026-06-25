@@ -17,7 +17,7 @@
 
 #### Scenario: Member level display in growth profile
 - **WHEN** 成员查看个人成长信息
-- **THEN** 系统 SHALL 展示当前等级标识（level）、等级名称（levelName，如 L3 圈内达人）、下一等级门槛（nextLevelExp）和升级进度百分比
+- **THEN** 系统 SHALL 展示当前等级标识（level）、等级名称（levelName，如 L3 圈内达人）、下一等级门槛（nextLevelThreshold）和升级进度百分比
 
 #### Scenario: Max level reached
 - **WHEN** 成员达到 L5 圈中领袖
@@ -93,11 +93,11 @@
 
 ### Requirement: Member Growth Profile Display
 
-成员查看个人资料时 SHALL 展示其在各圈子的经验值、贡献值、当前等级（level + levelName）、下一等级所需经验值（nextLevelExp）、升级进度百分比和圈内排名（rank）。
+成员查看个人资料时 SHALL 展示其在各圈子的经验值、贡献值、当前等级（level + levelName）、下一等级所需经验值（nextLevelThreshold）、升级进度百分比和圈内排名（rank）。
 
 #### Scenario: View growth info on profile
 - **WHEN** 成员查看个人资料
-- **THEN** 系统 SHALL 展示该成员在各圈子的经验值、贡献值、当前等级（level + levelName）、下一等级所需经验值（nextLevelExp）、升级进度百分比和圈内排名（rank）
+- **THEN** 系统 SHALL 展示该成员在各圈子的经验值、贡献值、当前等级（level + levelName）、下一等级所需经验值（nextLevelThreshold）、升级进度百分比和圈内排名（rank）
 
 #### Scenario: Growth info respects circle visibility
 - **WHEN** 私有圈子的成员查看成长信息

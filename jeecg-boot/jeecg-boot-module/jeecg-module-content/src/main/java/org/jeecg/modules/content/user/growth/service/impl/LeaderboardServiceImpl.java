@@ -154,7 +154,7 @@ public class LeaderboardServiceImpl extends ServiceImpl<CircleLeaderboardSnapsho
         LocalDateTime now = LocalDateTime.now();
         List<CircleLeaderboardSnapshot> batch = new ArrayList<>();
         for (LeaderboardDimensionEnum dim : LeaderboardDimensionEnum.values()) {
-            for (String period : new String[]{"WEEK", "MONTH", "ALL"}) {
+            for (String period : GrowthConstant.LEADERBOARD_PERIODS) {
                 batch.addAll(buildSnapshots(circleId, dim.getCode(), period, allLogs, today, now));
             }
         }
