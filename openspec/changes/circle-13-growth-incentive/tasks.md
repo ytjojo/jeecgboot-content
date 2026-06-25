@@ -1,7 +1,7 @@
 ## 1. 数据库迁移与基础实体
 
-- [x] 1.1 创建 Flyway 迁移脚本 V3.9.1_66__circle_growth_system.sql，包含 circle_level、circle_member_growth、circle_growth_log、circle_achievement、circle_member_achievement、circle_leaderboard_snapshot 6 张表
-- [x] 1.2 创建 Flyway 回滚脚本 R3.9.1_66__circle_growth_system_rollback.sql
+- [x] 1.1 创建 Flyway 迁移脚本 V3.9.1_67__circle_growth_system.sql，包含 circle_level、circle_member_growth、circle_growth_log、circle_achievement、circle_member_achievement、circle_leaderboard_snapshot 6 张表
+- [x] 1.2 创建 Flyway 回滚脚本 R3.9.1_67__circle_growth_system_rollback.sql
 - [x] 1.3 创建枚举类：CircleLevelEnum（L1-L5）、GrowthActionEnum（POST/COMMENT/LIKE/FEATURED）、AchievementTypeEnum、LeaderboardDimensionEnum
 - [x] 1.4 创建常量类 GrowthConstant，定义经验值规则（发帖10/评论3/加精30+50）、等级门槛（0/100/300/600/850）、每日上限100
 

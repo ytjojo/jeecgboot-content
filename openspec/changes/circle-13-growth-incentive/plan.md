@@ -879,7 +879,7 @@ public class CircleLevelVO {
     @Schema(description = "进度百分比")
     private Integer progressPercent;
     @Schema(description = "已解锁权益列表")
-    private List<String> benefits;
+    private List<CircleBenefitVO> benefits;  // {name, unlocked}
     @Schema(description = "成员规模得分")
     private Integer memberScore;
     @Schema(description = "内容贡献得分")

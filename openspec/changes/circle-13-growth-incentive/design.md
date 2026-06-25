@@ -2,7 +2,7 @@
 
 圈子基础功能（EPIC-10）和内容互动能力（EPIC-11）为设计前置依赖。当前代码库中尚无圈子相关 Java 代码，圈子功能以 spec 和 PRD 形式存在。模块代码将放在 `jeecg-module-content` 的 `content/user/` 包下，遵循已有分层架构：entity → mapper → service/impl → controller，辅以 dto/req/vo。
 
-数据库迁移使用 Flyway，最新版本号 V3.9.1_62，新表使用 V3.9.1_63+。通知系统已有完整基础设施（`IContentNotificationService`、`ContentUserNotificationSetting`），等级提升和徽章发放直接复用。
+数据库迁移使用 Flyway，最新版本号 V3.9.1_66，新表使用 V3.9.1_67+。通知系统已有完整基础设施（`IContentNotificationService`、`ContentUserNotificationSetting`），等级提升和徽章发放直接复用。
 
 ## Goals / Non-Goals
 
@@ -30,7 +30,7 @@
 - **计算方式**: 定时任务（30 分钟）批量聚合计算
 - **等级体系**: L1 新芽圈 → L2 活跃圈 → L3 优质圈 → L4 热门圈 → L5 标杆圈（成长分 0-1000）
 - **展示位置**: 圈子详情页、圈子列表卡片
-- **核心字段**: `CircleLevelVO` — level, levelName, growthScore, nextLevelThreshold, progressPercent
+- **核心字段**: `CircleLevelVO` — level, levelName, growthScore, nextLevelThreshold, progressPercent, memberScore, contentScore, activityScore, benefits (List\<CircleBenefitVO\>), nextLevelConditions (List\<LevelConditionVO\>)
 - **Controller**: `CircleLevelController`
 - **API 前缀**: `/api/v1/content/circle/growth/`
 
@@ -41,7 +41,7 @@
 - **计算方式**: 行为触发实时计算（发帖+10、评论+3、加精+30/50），每日上限 100 点
 - **等级体系**: L1 初来乍到 → L2 小有所成 → L3 圈内达人 → L4 资深成员 → L5 圈中领袖（经验值 0-1000）
 - **展示位置**: 个人成长信息页
-- **核心字段**: `MemberGrowthVO` — level, levelName, expPoints, nextLevelExp, contributionPoints, rank
+- **核心字段**: `MemberGrowthVO` — circleId, expPoints, contributionPoints, level, levelName, postCount, participationDays, rank, nextLevelThreshold, progressPercent, todayExp, dailyExpLimit, recentBadges (List\<AchievementVO\>)
 - **Controller**: `MemberGrowthController`
 - **API 前缀**: `/api/v1/content/user/growth/`
 
@@ -185,8 +185,8 @@ jeecg-boot-module/jeecg-module-content/src/main/
 │       ├── AchievementController.java
 │       └── LeaderboardController.java
 ├── resources/flyway/sql/mysql/
-│   ├── V3.9.1_63__circle_growth_system.sql
-│   └── R3.9.1_63__circle_growth_system_rollback.sql
+│   ├── V3.9.1_67__circle_growth_system.sql
+│   └── R3.9.1_67__circle_growth_system_rollback.sql
 
 jeecg-boot-module/jeecg-module-content/src/test/
 ├── java/org/jeecg/modules/content/user/growth/
@@ -209,10 +209,18 @@ jeecg-boot-module/jeecg-module-content/src/test/
 | `contributionPoints` | Integer | 贡献值 |
 | `level` | Integer | 当前等级(L1-L5) |
 | `levelName` | String | 等级名称（"初来乍到"/"小有所成"/"圈内达人"/"资深成员"/"圈中领袖"） |
-| `nextLevelExp` | Integer | 下一等级所需经验值（L5时为null） |
+| `expPoints` | Integer | 经验值 |
+| `contributionPoints` | Integer | 贡献值 |
+| `level` | Integer | 当前等级(L1-L5) |
+| `levelName` | String | 等级名称 |
+| `nextLevelThreshold` | Integer | 下一等级所需经验值（L5时为null） |
 | `postCount` | Integer | 发帖数 |
 | `participationDays` | Integer | 连续参与天数 |
 | `rank` | Integer | 圈内排名 |
+| `todayExp` | Integer | 今日已获经验值 |
+| `dailyExpLimit` | Integer | 每日经验值上限 |
+| `recentBadges` | List\<AchievementVO\> | 最近获得的徽章（最多3枚） |
+| `progressPercent` | Integer | 等级进度百分比 |
 
 ## Test Strategy
 
@@ -227,7 +235,7 @@ jeecg-boot-module/jeecg-module-content/src/test/
 
 ## Migration Plan
 
-1. 执行 Flyway 迁移 `V3.9.1_63__circle_growth_system.sql` 创建 6 张表
+1. 执行 Flyway 迁移 `V3.9.1_67__circle_growth_system.sql` 创建 6 张表
 2. 部署后端服务，验证等级计算和经验值服务可用
 3. 运行一次性历史数据初始化脚本（如有已有圈子和成员数据）
 4. 启用定时任务（等级 30 分钟、排行榜 1 小时）
