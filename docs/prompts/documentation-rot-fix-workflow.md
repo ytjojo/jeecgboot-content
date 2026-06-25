@@ -16,11 +16,30 @@
 | **圈子等级** | `circle_level` | `/api/v1/content/circle/growth/level/` | 只有 circleId，圈子本身的等级（L1-L5 新芽圈→标杆圈） |
 | **圈子内成员成长** | `circle_member_growth` 等 5 张表 | `/api/v1/content/user/growth/` | **有 circleId + userId**，用户在某个圈子内的经验/贡献/徽章/排名 |
 
-**关键区分规则**：
-- 涉及 `circleId` 参数 → 圈子内成员成长体系（第 3 列）
-- 只有 `circleId` 无 `userId` → 圈子等级体系（第 2 列）
-- 无 `circleId` 参数 → 全局用户成长体系（第 1 列）
-- 第 2 列和第 3 列的 API 前缀不同！第 2 列是 `/circle/growth/`，第 3 列是 `/user/growth/`
+**关键区分规则**（按「谁在成长」判断）：
+
+```
+谁是成长的主体？
+  ├── 用户（在整个平台的成长） → 第 1 列「全局用户成长」
+  │    特征: 无 circleId，只有 userId
+  │    数据: content_user_* 系列表
+  │    API:  /api/v1/content/user/growth/
+  │
+  ├── 圈子本身（圈子的等级成长） → 第 2 列「圈子等级」
+  │    特征: 有 circleId，无 userId（关注圈子这个主体）
+  │    数据: circle_level 表
+  │    API:  /api/v1/content/circle/growth/level/
+  │
+  └── 用户在圈子内的成长 → 第 3 列「圈子内成员成长」
+       特征: 同时有 circleId + userId（关注用户在特定圈子内的表现）
+       数据: circle_member_growth 等 5 张表
+       API:  /api/v1/content/user/growth/
+```
+
+**容易混淆的陷阱**：
+- 第 1 列和第 3 列的 API 前缀**相同**（都是 `/api/v1/content/user/growth/`），只能通过 **是否有 circleId 参数** 来区分
+- 第 2 列和第 3 列**都有 circleId**，但第 2 列关注「圈子本身的等级」，第 3 列关注「成员在圈子内的表现」
+- 判断口诀：**看表不看路径**——`circle_level` 表 = 第 2 列，`circle_member_growth` 表 = 第 3 列，`content_user_*` 表 = 第 1 列
 
 ---
 
