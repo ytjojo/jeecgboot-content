@@ -360,31 +360,46 @@
 
 ### 5.1 接口清单
 
-| 接口 | 方法 | 路径（建议） | 用途 | 调用时机 |
+| 接口 | 方法 | 路径 | 用途 | 调用时机 |
 |------|------|-------------|------|----------|
-| 获取圈子等级信息 | GET | `/api/v1/content/user/growth/level/info?circleId={circleId}` | 等级、成长分、下一等级条件、权益 | 圈子详情页加载 |
-| 获取成员成长信息 | GET | `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` | 经验值、贡献值、等级、排名、连续参与、今日经验 | 个人成长页加载 |
+| 获取圈子等级信息 | GET | `/api/v1/content/circle/growth/level/info?circleId={circleId}` | 等级、成长分、下一等级条件、权益 | 圈子详情页加载 |
+| 获取圈子等级配置列表 | GET | `/api/v1/content/circle/growth/level/config` | 所有等级配置（门槛、权益） | 等级说明页/首次加载 |
+| 获取等级权益摘要 | GET | `/api/v1/content/circle/growth/level/benefit?userId={userId}` | 用户当前等级权益摘要 | 个人成长页加载 |
+| 获取成员成长信息 | GET | `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` | 经验值、贡献值、等级、排名、今日经验、徽章摘要 | 个人成长页加载 |
+| 获取连续参与天数 | GET | `/api/v1/content/user/growth/participation?circleId={circleId}&userId={userId}` | 连续参与天数 | 个人成长页加载 |
 | 获取成员徽章列表 | GET | `/api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` | 已获得徽章、未获得徽章、进度 | 徽章墙页加载 |
 | 获取排行榜 | GET | `/api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | Top 50 列表、当前用户排名 | 排行榜页加载 / 维度或周期切换 |
 
 ### 5.2 接口参数与响应
 
-#### GET `/api/v1/content/user/growth/level/info?circleId={circleId}`
+#### GET `/api/v1/content/circle/growth/level/info?circleId={circleId}`
 
 **响应字段**:
 ```typescript
 interface CircleLevelVO {
-  circleId: string;
-  currentLevel: number;        // 1-5
-  levelName: string;           // "新芽圈" | "活跃圈" | "优质圈" | "热门圈" | "标杆圈"
-  growthScore: number;         // 0-1000
-  nextLevelScore: number;      // 下一等级门槛分数，最高等级时为 null
-  progressPercent: number;     // 0-100
-  memberGap: number;           // 距下一等级差多少成员
-  contentGap: number;          // 距下一等级差多少内容
-  interactionGap: number;      // 距下一等级差多少互动
-  benefits: string[];          // 已解锁权益列表
-  nextBenefits: string[];      // 下一等级权益列表
+  level: number;                 // 当前等级 1-5
+  levelName: string;             // "新芽圈" | "活跃圈" | "优质圈" | "热门圈" | "标杆圈"
+  growthScore: number;           // 成长分 0-1000
+  nextLevelThreshold: number | null;  // 下一等级门槛分数，最高等级时为 null
+  progressPercent: number;       // 进度百分比 0-100
+  memberScore: number;           // 成员规模得分
+  contentScore: number;          // 内容贡献得分
+  activityScore: number;         // 活跃互动得分
+  benefits: CircleBenefitVO[];   // 已解锁权益列表
+  nextLevelConditions: LevelConditionVO[]; // 下一等级条件列表
+}
+
+interface CircleBenefitVO {
+  name: string;                  // 权益名称
+  unlocked: boolean;             // 是否已解锁
+}
+
+interface LevelConditionVO {
+  type: string;                  // 条件类型
+  label: string;                 // 条件标签
+  current: number;               // 当前值
+  required: number;              // 目标值
+  gap: number;                   // 差距
 }
 ```
 
@@ -393,19 +408,18 @@ interface CircleLevelVO {
 **响应字段**:
 ```typescript
 interface MemberGrowthVO {
-  experience: number;          // 当前经验值
-  contribution: number;        // 当前贡献值
-  currentLevel: number;        // 成员等级
-  levelName: string;
-  nextLevelExp: number;        // 下一等级所需经验值
-  rank: number;                // 圈内排名
-  streakDays: number;          // 连续参与天数
-  streakDetail: boolean[];     // 近 7 天参与状态 [day1, day2, ..., day7]
-  todayExp: number;            // 今日已获经验值
-  dailyExpCap: number;         // 每日上限（100）
-  badges: BadgeSummary[];      // 已获得徽章摘要（最近 3 枚）
-  totalBadges: number;         // 已获得徽章总数
-  totalBadgeCount: number;     // 徽章总数
+  expPoints: number;             // 当前经验值
+  contributionPoints: number;    // 当前贡献值
+  level: number;                 // 成员等级 1-5
+  levelName: string;             // 等级名称
+  nextLevelThreshold: number | null; // 下一等级所需经验值（L5时为null）
+  rank: number;                  // 圈内排名
+  postCount: number;             // 发帖数
+  participationDays: number;     // 连续参与天数
+  todayExp: number;              // 今日已获经验值
+  dailyExpLimit: number;         // 每日经验上限
+  recentBadges: AchievementVO[]; // 最近获得徽章（最多 3 枚）
+  progressPercent: number;       // 等级进度百分比
 }
 ```
 
@@ -415,18 +429,21 @@ interface MemberGrowthVO {
 
 **响应字段**:
 ```typescript
-interface BadgeVO {
-  badgeId: string;
-  badgeName: string;           // "持续创作者" | "优质贡献者" | "活跃参与者" | "圈内新星"
-  badgeIcon: string;           // 图标 URL
-  description: string;         // 达成条件描述
-  earned: boolean;             // 是否已获得
-  earnedDate: string | null;   // 获得时间
-  progress: number;            // 当前进度值
-  target: number;              // 目标值
-  nearComplete: boolean;       // 进度 >= 80%
+interface AchievementVO {
+  achievementType: string;       // 徽章类型标识 (CONTINUOUS_CREATOR / QUALITY_CONTRIBUTOR / ACTIVE_PARTICIPANT / RISING_STAR / CONTENT_MILESTONE / SOCIAL_BUTTERFLY)
+  name: string;                  // 徽章名称 "持续创作者" | "优质贡献者" | "活跃参与者" | "圈内新星" | "内容里程碑" | "社交达人"
+  iconUrl: string;               // 徽章图标 URL（后端返回，无需前端本地兜底）
+  description: string;           // 达成条件描述
+  conditionDesc: string;         // 条件文本描述
+  earned: boolean;               // 是否已获得
+  earnedDate: string | null;     // 获得时间 (ISO 8601)
+  currentProgress: number;       // 当前进度值
+  targetProgress: number;        // 目标值
+  status: 'EARNED' | 'CLOSE' | 'UNEARNED';  // 徽章状态：已获得 / 即将达成 / 未获得
 }
 ```
+
+> **注意**: 后端命名体系为 Achievement（非 Badge）。前端 UI 层可使用「徽章」术语，但代码变量/类型命名使用 `AchievementVO` 与后端保持一致。`status === 'CLOSE'` 等价于原 PRD 中的 `nearComplete`（进度 >= 80%）。
 
 #### GET `/api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}`
 
@@ -435,30 +452,26 @@ interface BadgeVO {
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | circleId | string | 是 | 圈子ID |
-| dimension | string | 是 | `experience` / `contribution` / `postCount` |
-| period | string | 是 | `week` / `month` / `all` |
+| dimension | string | 是 | `EXP` / `CONTRIBUTION` / `POST` |
+| period | string | 是 | `WEEK` / `MONTH` / `ALL` |
 | currentUserId | string | 是 | 当前用户ID（用于高亮和排名计算） |
 
 **响应字段**:
 ```typescript
-interface LeaderboardVO {
-  dimension: string;
-  period: string;
-  entries: LeaderboardEntryVO[];     // Top 50
-  currentUser: LeaderboardEntryVO | null;  // 当前用户（可能在 Top 50 内或外）
-  currentUserGapToPrev: number | null;     // 距上一名差距
-  totalCount: number;                // 符合条件的总人数
-}
+// 后端返回扁平数组 Result<List<LeaderboardEntryVO>>，前端在 API 封装层包装结构
 
 interface LeaderboardEntryVO {
-  rank: number;
-  userId: string;
-  userName: string;
-  userAvatar: string;
-  value: number;                     // 对应维度的数值
-  isCurrentUser: boolean;
+  rankNum: number;               // 排名
+  userId: string;                // 用户ID
+  username: string;              // 用户名（后端已返回）
+  avatar: string;                // 用户头像（后端已返回）
+  score: number;                 // 对应维度的数值
+  highlighted: boolean;          // 是否当前用户
+  gap: number;                   // 距上一名差距
 }
 ```
+
+> **注意**: 后端返回 `Result<List<LeaderboardEntryVO>>` 扁平数组，不返回包装对象。前端在 API 封装层根据 `highlighted` 字段提取当前用户。`dimension` 枚举值为 `EXP`/`CONTRIBUTION`/`POST`（大写），`period` 为 `WEEK`/`MONTH`/`ALL`（大写），与后端枚举对齐。
 
 ### 5.3 API 封装
 
@@ -468,22 +481,39 @@ interface LeaderboardEntryVO {
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
-  CircleLevel = '/api/v1/content/user/growth/level/info',
+  // 圈子成长 — 圈子等级
+  CircleLevelInfo = '/api/v1/content/circle/growth/level/info',
+  CircleLevelConfig = '/api/v1/content/circle/growth/level/config',
+  CircleLevelBenefit = '/api/v1/content/circle/growth/level/benefit',
+  // 用户成长 — 成员经验值、徽章、排行榜
   MemberGrowth = '/api/v1/content/user/growth/info',
-  Badges = '/api/v1/content/user/growth/achievement/list',
+  Participation = '/api/v1/content/user/growth/participation',
+  Achievements = '/api/v1/content/user/growth/achievement/list',
   Leaderboard = '/api/v1/content/user/growth/leaderboard',
 }
 
-export function getCircleLevel(circleId: string) {
-  return defHttp.get({ url: Api.CircleLevel, params: { circleId } });
+export function getCircleLevelInfo(circleId: string) {
+  return defHttp.get({ url: Api.CircleLevelInfo, params: { circleId } });
+}
+
+export function getCircleLevelConfig() {
+  return defHttp.get({ url: Api.CircleLevelConfig });
+}
+
+export function getCircleLevelBenefit(userId: string) {
+  return defHttp.get({ url: Api.CircleLevelBenefit, params: { userId } });
 }
 
 export function getMemberGrowth(circleId: string, userId: string) {
   return defHttp.get({ url: Api.MemberGrowth, params: { circleId, userId } });
 }
 
-export function getCircleBadges(circleId: string, userId: string) {
-  return defHttp.get({ url: Api.Badges, params: { circleId, userId } });
+export function getParticipation(circleId: string, userId: string) {
+  return defHttp.get({ url: Api.Participation, params: { circleId, userId } });
+}
+
+export function getAchievements(circleId: string, userId: string) {
+  return defHttp.get({ url: Api.Achievements, params: { circleId, userId } });
 }
 
 export function getLeaderboard(circleId: string, dimension: string, period: string, currentUserId: string) {
@@ -512,7 +542,7 @@ interface CircleGrowthState {
   // 排行榜数据（按 circleId + dimension + period 缓存）
   leaderboardMap: Record<string, LeaderboardVO>;
   // 徽章数据（按 circleId 缓存）
-  badgeMap: Record<string, BadgeVO[]>;
+  badgeMap: Record<string, AchievementVO[]>;
 }
 ```
 
@@ -695,20 +725,20 @@ interface CircleGrowthState {
 
 | 编号 | 问题 | 影响范围 | 建议确认方 |
 |------|------|----------|-----------|
-| Q1 | 圈子基础表（EPIC-10）的圈子详情接口是否已存在，等级信息是新增接口还是扩展已有接口 | API 对接 | 后端 |
+| Q1 | 圈子基础表（EPIC-10）的圈子详情接口是否已存在，等级信息是新增接口还是扩展已有接口 | API 对接 | **已确认**: 独立接口 `GET /api/v1/content/circle/growth/level/info` |
 | Q2 | 站内通知 WebSocket 推送的消息体格式，是否包含圈子 ID 和通知类型字段 | 通知处理 | 后端 |
-| Q3 | 排行榜接口返回的 `currentUser` 字段是否由后端计算并返回，还是前端根据当前用户 ID 自行匹配 | 排行榜高亮逻辑 | 后端 |
-| Q4 | 徽章图标资源由后端接口返回 URL 还是前端本地维护 | 徽章展示 | 产品/设计 |
+| Q3 | 排行榜接口返回结构是包装对象还是扁平数组，当前用户如何识别 | 排行榜高亮逻辑 | **已确认**: 后端返回 `Result<List<LeaderboardEntryVO>>` 扁平数组，通过 `highlighted` 字段标识当前用户 |
+| Q4 | 徽章图标资源由后端接口返回 URL 还是前端本地维护 | 徽章展示 | **已确认**: 后端 `AchievementVO.iconUrl` 返回图标 URL |
 | Q5 | 连续参与进度的「7 天窗口」是否为自然周（周一到周日）还是滚动 7 天 | 连续参与展示 | 产品 |
 
 ### 默认假设
 
 | 编号 | 假设 | 依据 |
 |------|------|------|
-| A1 | 圈子详情接口已存在，等级信息通过新增接口 `/api/v1/content/user/growth/level/info?circleId={circleId}` 获取 | design.md 中独立服务设计 |
+| A1 | 圈子详情接口已存在，等级信息通过独立接口 `/api/v1/content/circle/growth/level/info?circleId={circleId}` 获取 | 后端已实现独立的 CircleLevelController |
 | A2 | 站内通知复用已有 `IContentNotificationService`，前端通过已有 WebSocket 通道接收 | design.md 中通知系统已有完整基础设施 |
-| A3 | 排行榜接口返回 `currentUser` 字段，包含当前用户排名（无论是否在 Top 50 内） | PRD 验收标准要求展示当前用户排名 |
-| A4 | 4 种徽章的图标资源由后端接口返回 URL | 便于运营调整，不依赖前端发版 |
+| A3 | 排行榜接口返回 `Result<List<LeaderboardEntryVO>>` 扁平数组，前端根据 `highlighted` 字段提取当前用户 | 后端通过 `highlighted` 字段标识当前用户 |
+| A4 | 6 种徽章（PRD 定义）的图标资源由后端 `AchievementVO.iconUrl` 返回 URL | 后端已返回 `iconUrl` 字段；注意数据库仅初始化 4 种，2 种待补充 |
 | A5 | 连续参与进度为滚动 7 天窗口（非自然周） | PRD 描述为「近 7 天」 |
 | A6 | 等级标识颜色方案遵循平台设计规范，前端通过等级枚举值映射 | 无特殊说明，按常规处理 |
 | A7 | 成长信息页面路由挂在圈子详情页子路由下 | 信息层级从属关系 |
