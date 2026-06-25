@@ -14,6 +14,23 @@
 - 新增 10 个 Vue 组件：`CircleLevelBadge`、`CircleLevelProgress`、`GrowthOverviewCard`、`ParticipationStreak`、`DailyExpBar`、`BadgeCard`、`BadgeWall`、`BadgeDetailModal`、`LeaderboardList`、`LeaderboardTabs`
 - 接入站内通知 WebSocket：等级提升和徽章获得时触发 Toast 提示和数据刷新
 
+## Scope Clarification — 三个独立成长体系
+
+本 change 涉及三个易混淆的成长体系，前端在页面设计、API 调用和数据模型中需严格区分：
+
+| 体系 | 数据库表 | API 前缀 | 前端展示场景 |
+|------|---------|---------|-------------|
+| **全局内容社区用户成长** | `content_user_*` 系列表 | `/api/v1/content/user/growth/` | 用户个人主页的全局积分/等级/勋章（跨圈子通用），有衰减降级机制（属于 EPIC-03，不在本 change 范围） |
+| **圈子等级** | `circle_level` | `/api/v1/content/circle/growth/level/` | 圈子详情页的等级标识、成长进度、权益展示（L1-L5） |
+| **圈子内成员成长** | `circle_member_growth` 等 5 张表 | `/api/v1/content/user/growth/` | 个人成长信息页的经验值、贡献值、徽章、排行榜（单圈子维度） |
+
+**前端区分要点**：
+- **API 路径区分**：全局用户成长与圈子内成员成长共享 `/api/v1/content/user/growth/` 前缀，通过 `circleId` 参数区分——无 circleId 走全局体系，有 circleId 走圈子内成员成长体系
+- **页面归属**：圈子详情页等级区块 → 圈子等级体系；个人成长信息页/徽章墙/排行榜 → 圈子内成员成长体系；用户个人主页全局积分/等级 → 全局用户成长体系（EPIC-03，不在本 change 范围）
+- **数据隔离**：同一用户在不同圈子有独立的经验值、贡献值、徽章和排名，需按 `circleId` 分别展示，不可跨圈子合并
+
+**本 change 范围**：仅覆盖后两个体系（圈子等级 + 圈子内成员成长）。
+
 ## Capabilities
 
 ### New Capabilities
