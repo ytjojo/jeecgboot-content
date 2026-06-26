@@ -42,11 +42,17 @@ const hasPermission = ref(false);
 const permissionError = ref<string | null>(null);
 
 function isForbiddenError(e: any): boolean {
-  return e?.code === 403001 || e?.response?.data?.code === 403001;
+  const code = e?.code ?? e?.response?.data?.code;
+  if (code === 403001 || code === 403) return true;
+  const msg = (e?.message ?? e?.response?.data?.message ?? '') as string;
+  return msg.includes('无权') || msg.includes('无权限') || msg.includes('没有权限') || msg.includes('权限不足') || e?.response?.status === 403;
 }
 
 function isNotFoundError(e: any): boolean {
-  return e?.code === 404001 || e?.code === 404002 || e?.response?.data?.code === 404001 || e?.response?.data?.code === 404002;
+  const code = e?.code ?? e?.response?.data?.code;
+  if (code === 404001 || code === 404002 || code === 404) return true;
+  const msg = (e?.message ?? e?.response?.data?.message ?? '') as string;
+  return msg.includes('不存在') || e?.response?.status === 404;
 }
 
 async function checkPermission() {
