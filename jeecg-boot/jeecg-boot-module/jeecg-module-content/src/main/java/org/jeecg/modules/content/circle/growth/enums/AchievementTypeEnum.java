@@ -12,7 +12,9 @@ public enum AchievementTypeEnum {
     CONTINUOUS_CREATOR("CONTINUOUS_CREATOR", "持续创作者"),
     QUALITY_CONTRIBUTOR("QUALITY_CONTRIBUTOR", "优质贡献者"),
     ACTIVE_PARTICIPANT("ACTIVE_PARTICIPANT", "活跃参与者"),
-    RISING_STAR("RISING_STAR", "圈内新星");
+    RISING_STAR("RISING_STAR", "圈内新星"),
+    CONTENT_MILESTONE("CONTENT_MILESTONE", "内容里程碑"),
+    SOCIAL_BUTTERFLY("SOCIAL_BUTTERFLY", "社交达人");
 
     private final String code;
     private final String description;
