@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.modules.content.circle.growth.entity.CircleMemberGrowth;
 import org.jeecg.modules.content.circle.growth.enums.GrowthActionEnum;
 import org.jeecg.modules.content.circle.growth.vo.MemberGrowthVO;
+import org.jeecg.modules.content.circle.growth.vo.ParticipationVO;
 
 public interface IMemberGrowthService extends IService<CircleMemberGrowth> {
 
@@ -14,4 +15,6 @@ public interface IMemberGrowthService extends IService<CircleMemberGrowth> {
     MemberGrowthVO getGrowthInfo(String circleId, String userId);
 
     int getParticipationDays(String circleId, String userId);
+
+    ParticipationVO getParticipationProgress(String circleId, String userId);
 }

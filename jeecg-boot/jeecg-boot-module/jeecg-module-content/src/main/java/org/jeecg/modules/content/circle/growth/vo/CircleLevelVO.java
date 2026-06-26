@@ -9,6 +9,9 @@ import java.util.List;
 @Schema(description = "圈子等级信息")
 public class CircleLevelVO {
 
+    @Schema(description = "圈子ID")
+    private String circleId;
+
     @Schema(description = "当前等级")
     private Integer level;
 

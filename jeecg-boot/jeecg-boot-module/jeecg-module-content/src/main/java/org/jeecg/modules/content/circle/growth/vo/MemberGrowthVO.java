@@ -47,4 +47,10 @@ public class MemberGrowthVO {
 
     @Schema(description = "最近获得的徽章（最多3枚）")
     private List<AchievementVO> recentBadges;
+
+    @Schema(description = "已获得徽章数")
+    private Integer totalBadges;
+
+    @Schema(description = "徽章总数（含未获得）")
+    private Integer totalBadgeCount;
 }
