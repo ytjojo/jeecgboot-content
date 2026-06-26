@@ -13,6 +13,7 @@ export const useCircleRecommendStore = defineStore('circle-recommend', () => {
   const newRankList = ref<CircleRankingItem[]>([]);
   const activeTab = ref<TabType>('recommend');
   const fallbackMode = ref(false);
+  const personalizationEnabled = ref(true);
 
   const loading = reactive<Record<TabType, boolean>>({
     recommend: false,
@@ -35,6 +36,7 @@ export const useCircleRecommendStore = defineStore('circle-recommend', () => {
     hotRankList.value = [];
     newRankList.value = [];
     fallbackMode.value = false;
+    personalizationEnabled.value = true;
     loaded.recommend = false;
     loaded.hot = false;
     loaded.new = false;
@@ -46,6 +48,7 @@ export const useCircleRecommendStore = defineStore('circle-recommend', () => {
     loading.recommend = true;
     try {
       const res = await getRecommendList();
+      personalizationEnabled.value = res.personalizationEnabled ?? true;
       if (res.items && res.items.length > 0) {
         recommendList.value = res.items;
         fallbackMode.value = false;
@@ -117,6 +120,7 @@ export const useCircleRecommendStore = defineStore('circle-recommend', () => {
     newRankList,
     activeTab,
     fallbackMode,
+    personalizationEnabled,
     loading,
     loaded,
     setActiveTab,

@@ -25,11 +25,13 @@ export interface CircleRecommendItem {
   category: string;
   privacyType: string;
   sourceId: string;
+  why?: string;
 }
 
 /** 推荐圈子响应 — 对应后端 CircleRecommendVO */
 export interface CircleRecommendVO {
   items: CircleRecommendItem[];
+  personalizationEnabled?: boolean;
 }
 
 /** 榜单圈子项 — 对应后端 CircleRankingVO.CircleRankingItem */
