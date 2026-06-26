@@ -55,7 +55,7 @@ mvn test -pl . -am
 
 **实现**:
 
-**Step 1**: 新建 Flyway 迁移脚本 `V3.9.1_68__circle_achievement_supplement.sql`
+**Step 1**: Flyway 迁移脚本 `V3.9.1_67__circle_growth_system.sql` 追加
 
 ```sql
 -- V3.9.1_68__circle_achievement_supplement.sql
@@ -67,10 +67,10 @@ VALUES
 (REPLACE(UUID(), '-', ''), 'SOCIAL_BUTTERFLY', '社交达人', '邀请 5 人加入圈子', '/icons/achievement/social_butterfly.png', '邀请 5 人加入圈子', NOW());
 ```
 
-**Step 2**: 新建回滚脚本 `R3.9.1_68__circle_achievement_supplement_rollback.sql`
+**Step 2**: 在回滚脚本 `R3.9.1_67__circle_growth_system_rollback.sql` 追加
 
 ```sql
--- R3.9.1_68__circle_achievement_supplement_rollback.sql
+-- R3.9.1_67__circle_growth_system_rollback.sql
 DELETE FROM `circle_member_achievement` WHERE `achievement_type` IN ('CONTENT_MILESTONE', 'SOCIAL_BUTTERFLY');
 DELETE FROM `circle_achievement` WHERE `achievement_type` IN ('CONTENT_MILESTONE', 'SOCIAL_BUTTERFLY');
 ```
@@ -140,7 +140,7 @@ private void checkSocialButterfly(String circleId, String userId) {
 
 **实现**:
 
-**Step 1**: 在 `V3.9.1_68__circle_achievement_supplement.sql` 中追加 DDL
+**Step 1**: 在 `V3.9.1_67__circle_growth_system.sql` 中追加 DDL
 
 ```sql
 -- 圈子邀请记录表
@@ -157,7 +157,11 @@ CREATE TABLE IF NOT EXISTS `circle_invite_record` (
     KEY `idx_circle_invitee` (`circle_id`, `invitee_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='圈子邀请记录';
 ```
+在回滚脚本 `R3.9.1_67__circle_growth_system_rollback.sql` 中追加
 
+```
+DROP TABLE IF EXISTS `circle_invite_record`;
+```
 **Step 2**: 创建 Entity + Mapper
 
 ```
