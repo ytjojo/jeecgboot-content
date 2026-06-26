@@ -1,7 +1,7 @@
 # circle-growth-api-conventions.md 文档审核报告
 
 **审核日期**: 2026-06-25
-**审核对象**: [docs/agent-context/circle-growth-api-conventions.md](file:///Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/docs/agent-context/circle-growth-api-conventions.md)
+**审核对象**: [openspec/changes/circle-13-growth-incentive]
 **审核依据**:
 - 实际数据库表结构（Flyway SQL）
 - 实际后端 Controller/Service/VO 代码

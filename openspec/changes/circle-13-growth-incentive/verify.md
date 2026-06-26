@@ -288,9 +288,9 @@ public enum MemberLevelEnum {
 **2 个 CRITICAL 问题必须修复后才能归档。**（CRITICAL #3 已并入 CRITICAL #2 统一修复）
 
 修复后验证项：
-- [ ] `MemberGrowthVO.levelName` 输出「初来乍到」而非「新芽圈」
-- [ ] 成员 L5 门槛为 1000 经验值
-- [ ] `addExperience()` 在经验值跨过门槛时自动更新 `level` 字段
-- [ ] `revokeExperience()` 扣减经验值但不降级
-- [ ] `CircleLevelController` 仅包含圈子等级相关方法，编译通过
+- [x] `MemberGrowthVO.levelName` 输出「初来乍到」而非「新芽圈」
+- [x] 成员 L5 门槛为 1000 经验值
+- [x] `addExperience()` 在经验值跨过门槛时自动更新 `level` 字段
+- [x] `revokeExperience()` 扣减经验值但不降级
+- [x] `CircleLevelController` 仅包含圈子等级相关方法，编译通过
 - [ ] 全量单元测试通过

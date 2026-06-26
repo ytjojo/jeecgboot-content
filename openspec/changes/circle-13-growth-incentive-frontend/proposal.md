@@ -47,7 +47,7 @@
 ## Impact
 
 - **前端路由**: 新增 3 个页面路由（个人成长页、徽章墙页、排行榜页），圈子详情页新增等级与成长区块
-- **API 依赖**: 依赖后端 4 个已有接口（`/api/v1/content/circle/growth/level/info`、`/api/v1/content/circle/growth/info`、`/api/v1/content/circle/growth/achievement/list`、`/api/v1/content/circle/growth/leaderboard`）
+- **API 依赖**: 依赖后端 4 个已有接口（`/api/v1/content/circle/growth/level/info`、`/api/v1/content/circle/member_growth/info`、`/api/v1/content/circle/member_growth/achievement/list`、`/api/v1/content/circle/growth/leaderboard`）
 - **状态管理**: 新增 `circleGrowth` Pinia Store，涉及缓存策略和 WebSocket 通知刷新
 - **组件库**: 新增 10 个 Vue 组件，复用项目已有 `Page`、`Description`、`Modal`、`CountTo`、`CardList` 等组件
 - **前置依赖**: EPIC-10 圈子基础能力、EPIC-11 圈子内容与互动前端部分已完成
