@@ -184,7 +184,7 @@ API 路径合规性修复计划
  ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
  │ CircleLevelController               │ /content/user/growth/level       │ /api/v1/content/user/growth/level       │
  ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
- │ LeaderboardController               │ /content/user/growth/leaderboard │ /api/v1/content/user/growth/leaderboard │
+ │ LeaderboardController               │ /content/user/growth/leaderboard │ /api/v1/content/circle/growth/leaderboard │
  ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
  │ MemberGrowthController              │ /content/user/growth             │ /api/v1/content/user/growth             │
  └─────────────────────────────────────┴──────────────────────────────────┴─────────────────────────────────────────┘
@@ -440,7 +440,7 @@ API 路径合规性修复计划
      ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
      │ CircleLevelController               │ /content/user/growth/level       │ /api/v1/content/user/growth/level       │
      ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
-     │ LeaderboardController               │ /content/user/growth/leaderboard │ /api/v1/content/user/growth/leaderboard │
+     │ LeaderboardController               │ /content/user/growth/leaderboard │ /api/v1/content/circle/growth/leaderboard │
      ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
      │ MemberGrowthController              │ /content/user/growth             │ /api/v1/content/user/growth             │
      └─────────────────────────────────────┴──────────────────────────────────┴─────────────────────────────────────────┘

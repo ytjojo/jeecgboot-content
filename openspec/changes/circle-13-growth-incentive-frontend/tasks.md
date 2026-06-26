@@ -34,7 +34,7 @@
 - [ ] 5.1 实现 `LeaderboardTabs` 组件 — 维度切换（经验值/贡献值/发帖数 Tab）+ 周期切换（本周/本月/累计 Segmented）
 - [ ] 5.2 实现 `LeaderboardList` 组件 — 排行榜列表（Top 50 列表 + 前三名金银铜色 + 当前用户高亮 + 底部我的排名）
 - [ ] 5.3 创建排行榜页 `src/views/circle/leaderboard/index.vue`
-- [ ] 5.4 对接 GET `/api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` 接口，支持 dimension 和 period 参数切换
+- [ ] 5.4 对接 GET `/api/v1/content/circle/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` 接口，支持 dimension 和 period 参数切换
 - [ ] 5.5 配置路由 `/circle/:id/leaderboard` 挂载到圈子详情页子路由
 
 ## 6. 通知与实时刷新

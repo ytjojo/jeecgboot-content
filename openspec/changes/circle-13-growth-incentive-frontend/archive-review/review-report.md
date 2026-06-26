@@ -84,7 +84,7 @@
 | `GET /api/v1/content/circle/{circleId}/level` | `GET /api/v1/content/user/growth/level/info?circleId={circleId}` | ❌ 不一致 |
 | `GET /api/v1/content/circle/{circleId}/growth/me` | `GET /api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` | ❌ 不一致 |
 | `GET /api/v1/content/circle/{circleId}/badges` | `GET /api/v1/content/circle/growth/achievement/list?circleId={circleId}&userId={userId}` | ❌ 不一致 |
-| `GET /api/v1/content/circle/{circleId}/leaderboard` | `GET /api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | ❌ 不一致 |
+| `GET /api/v1/content/circle/{circleId}/leaderboard` | `GET /api/v1/content/circle/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | ❌ 不一致 |
 
 **术语一致性**:
 
@@ -203,7 +203,7 @@
 | 圈子等级 | `GET /api/v1/content/circle/{circleId}/level` | `GET /api/v1/content/user/growth/level/info?circleId=` | ❌ 路径+参数不匹配 |
 | 成员成长 | `GET /api/v1/content/circle/{circleId}/growth/me` | `GET /api/v1/content/user/growth/info?circleId=&userId=` | ❌ 路径+参数不匹配 |
 | 成就徽章 | `GET /api/v1/content/circle/{circleId}/badges` | `GET /api/v1/content/circle/growth/achievement/list?circleId=&userId=` | ❌ 路径+参数不匹配 |
-| 排行榜样 | `GET /api/v1/content/circle/{circleId}/leaderboard` | `GET /api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ❌ 路径+参数不匹配 |
+| 排行榜样 | `GET /api/v1/content/circle/{circleId}/leaderboard` | `GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ❌ 路径+参数不匹配 |
 
 **后端已有但前端未引用的接口**:
 

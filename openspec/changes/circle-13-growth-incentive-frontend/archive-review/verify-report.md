@@ -120,7 +120,7 @@
 #### 排行榜
 | 项目 | Spec 设计 | 后端实际 | 对齐 |
 |------|---------|---------|------|
-| API 路径 | `GET /api/v1/content/user/growth/leaderboard` | 同 | ✅ |
+| API 路径 | `GET /api/v1/content/circle/growth/leaderboard` | 同 | ✅ |
 | 参数 | `?circleId=&dimension=&period=&currentUserId=` | 同，`period` 默认 `WEEK`，枚举值 WEEK/MONTH/ALL | ✅ |
 | 返回 | `Result<List<LeaderboardEntryVO>>` | 同 | ✅ |
 | Controller | — | `LeaderboardController.java` | ✅ |
@@ -370,7 +370,7 @@ Spec §6 依赖 WebSocket 通知实现等级提升和徽章获得的实时提示
 □ getMemberGrowth(circleId, userId)  → GET /api/v1/content/user/growth/info?circleId=&userId=
 □ getParticipationDays(circleId, userId) → GET /api/v1/content/user/growth/participation?circleId=&userId= (可选)
 □ getCircleBadges(circleId, userId)  → GET /api/v1/content/circle/growth/achievement/list?circleId=&userId=
-□ getLeaderboard(params)             → GET /api/v1/content/user/growth/leaderboard?circleId=&dimension=EXP|CONTRIBUTION|POST&period=WEEK|MONTH|ALL&currentUserId=
+□ getLeaderboard(params)             → GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=EXP|CONTRIBUTION|POST&period=WEEK|MONTH|ALL&currentUserId=
 ```
 
 ---

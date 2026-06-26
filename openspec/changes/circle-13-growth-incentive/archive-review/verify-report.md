@@ -22,7 +22,7 @@
 | MemberGrowthController | `GET /api/v1/content/user/growth/participation` | ✅ 已记录 | 一致 |
 | CircleLevelController | `GET /api/v1/content/user/growth/level/info` | ✅ 已记录 | 一致 |
 | AchievementController | `GET /api/v1/content/circle/growth/achievement/list` | ✅ 已记录 | 一致 |
-| LeaderboardController | `GET /api/v1/content/user/growth/leaderboard` | ✅ 已更新 | 一致 |
+| LeaderboardController | `GET /api/v1/content/circle/growth/leaderboard` | ✅ 已更新 | 一致 |
 
 ### 1.2 API 文档缺失详情
 
@@ -66,7 +66,7 @@
 
 #### ✅ WARNING-8 (已修复): API 文档 Leaderboard 端点缺失
 
-**修复**: `circle-level-apis.md` 补充 `GET /api/v1/content/user/growth/leaderboard` 端点完整信息
+**修复**: `circle-level-apis.md` 补充 `GET /api/v1/content/circle/growth/leaderboard` 端点完整信息
 
 ### 2.3 SUGGESTION 级漂移
 

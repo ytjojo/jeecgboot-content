@@ -50,7 +50,7 @@
 | 1 | `GET /api/v1/content/user/growth/level/info?circleId=` | `GET /api/v1/content/circle/growth/level/info?circleId=` | ⚠️ 需修正为 `/circle/growth/` |
 | 2 | `GET /api/v1/content/user/growth/info?circleId=&userId=` | `GET /api/v1/content/user/growth/info?circleId=&userId=` | ✅ 一致 |
 | 3 | `GET /api/v1/content/circle/growth/achievement/list?circleId=&userId=` | `GET /api/v1/content/circle/growth/achievement/list?circleId=&userId=` | ✅ 一致 |
-| 4 | `GET /api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | `GET /api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ✅ 一致 |
+| 4 | `GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | `GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ✅ 一致 |
 
 > 注: 前端文档中的路径已在 review-report.md（2026-06-06）中从旧 RESTful 风格修正为 `/user/growth/` 前缀，但尚未反映 CircleLevelController 的最新迁移。
 
@@ -61,7 +61,7 @@
 | 圈子等级 | `CircleLevelController` | `/api/v1/content/circle/growth/level` ⚠️ 已迁移 |
 | 成员成长 | `MemberGrowthController` | `/api/v1/content/user/growth` |
 | 成就徽章 | `AchievementController` | `/api/v1/content/circle/growth/achievement` |
-| 排行榜 | `LeaderboardController` | `/api/v1/content/user/growth/leaderboard` |
+| 排行榜 | `LeaderboardController` | `/api/v1/content/circle/growth/leaderboard` |
 
 所有 Controller 均位于: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/controller/`
 

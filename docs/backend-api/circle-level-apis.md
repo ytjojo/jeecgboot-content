@@ -2,11 +2,11 @@
 
 ## 圈子排行榜
 ### LeaderboardController (`/Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/controller/LeaderboardController.java`)
-**Base Path**: `/api/v1/content/user/growth/leaderboard`
+**Base Path**: `/api/v1/content/circle/growth/leaderboard`
 
 | 方法 | 路径 | 描述 | 入参 | 出参 | 行号 |
 |------|------|------|------|------|------|
-| GET | `/api/v1/content/user/growth/leaderboard` | 获取圈子排行榜 Top 50 + 当前用户位置 | circleId: String, dimension: String(EXP/CONTRIBUTION/POST), period: String(WEEK/MONTH/ALL, 默认WEEK), currentUserId: String | `List<LeaderboardEntryVO>` | 28 |
+| GET | `/api/v1/content/circle/growth/leaderboard` | 获取圈子排行榜 Top 50 + 当前用户位置 | circleId: String, dimension: String(EXP/CONTRIBUTION/POST), period: String(WEEK/MONTH/ALL, 默认WEEK), currentUserId: String | `List<LeaderboardEntryVO>` | 28 |
 
 ## 圈子等级信息
 ### CircleLevelController (`/Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/controller/CircleLevelController.java`)

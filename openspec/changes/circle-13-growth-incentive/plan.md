@@ -1380,7 +1380,7 @@ public class LeaderboardEntryVO {
 ```java
 @Tag(name = "圈子排行榜")
 @RestController
-@RequestMapping("/api/v1/content/user/growth/leaderboard")
+@RequestMapping("/api/v1/content/circle/growth/leaderboard")
 public class LeaderboardController {
     @Resource
     private ILeaderboardService leaderboardService;

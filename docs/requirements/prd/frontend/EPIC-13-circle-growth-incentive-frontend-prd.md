@@ -393,7 +393,7 @@
 | 获取成员成长信息 | GET | `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` | 经验值、贡献值、等级、排名、今日经验、徽章摘要 | 个人成长页加载 |
 | 获取连续参与天数 | GET | `/api/v1/content/user/growth/participation?circleId={circleId}&userId={userId}` | 连续参与天数 | 个人成长页加载 |
 | 获取成员徽章列表 | GET | `/api/v1/content/circle/growth/achievement/list?circleId={circleId}&userId={userId}` | 已获得徽章、未获得徽章、进度 | 徽章墙页加载 |
-| 获取排行榜 | GET | `/api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | Top 50 列表、当前用户排名 | 排行榜页加载 / 维度或周期切换 |
+| 获取排行榜 | GET | `/api/v1/content/circle/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | Top 50 列表、当前用户排名 | 排行榜页加载 / 维度或周期切换 |
 
 ### 5.2 接口参数与响应
 
@@ -470,7 +470,7 @@ interface AchievementVO {
 
 > **注意**: 后端命名体系为 Achievement（非 Badge）。前端 UI 层可使用「徽章」术语，但代码变量/类型命名使用 `AchievementVO` 与后端保持一致。`status === 'CLOSE'` 等价于原 PRD 中的 `nearComplete`（进度 >= 80%）。
 
-#### GET `/api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}`
+#### GET `/api/v1/content/circle/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}`
 
 **查询参数**:
 
@@ -514,7 +514,7 @@ enum Api {
   MemberGrowth = '/api/v1/content/user/growth/info',
   Participation = '/api/v1/content/user/growth/participation',
   Achievements = '/api/v1/content/circle/growth/achievement/list',
-  Leaderboard = '/api/v1/content/user/growth/leaderboard',
+  Leaderboard = '/api/v1/content/circle/growth/leaderboard',
 }
 
 export function getCircleLevelInfo(circleId: string) {
