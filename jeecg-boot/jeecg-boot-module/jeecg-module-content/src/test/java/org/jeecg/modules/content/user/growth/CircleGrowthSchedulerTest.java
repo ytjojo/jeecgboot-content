@@ -1,10 +1,10 @@
 package org.jeecg.modules.content.user.growth;
 
-import org.jeecg.modules.content.user.growth.entity.CircleLevel;
-import org.jeecg.modules.content.user.growth.mapper.CircleLevelMapper;
-import org.jeecg.modules.content.user.growth.service.ICircleLevelService;
-import org.jeecg.modules.content.user.growth.service.ILeaderboardService;
-import org.jeecg.modules.content.user.growth.task.CircleGrowthScheduler;
+import org.jeecg.modules.content.circle.growth.entity.CircleLevel;
+import org.jeecg.modules.content.circle.growth.mapper.CircleLevelMapper;
+import org.jeecg.modules.content.circle.growth.service.ICircleLevelService;
+import org.jeecg.modules.content.circle.growth.service.ILeaderboardService;
+import org.jeecg.modules.content.circle.growth.task.CircleGrowthScheduler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

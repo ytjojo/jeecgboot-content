@@ -1,7 +1,8 @@
 package org.jeecg.modules.content.user.growth.controller;
 
-import org.jeecg.modules.content.user.growth.service.IMemberGrowthService;
-import org.jeecg.modules.content.user.growth.vo.MemberGrowthVO;
+import org.jeecg.modules.content.circle.growth.controller.MemberGrowthController;
+import org.jeecg.modules.content.circle.growth.service.IMemberGrowthService;
+import org.jeecg.modules.content.circle.growth.vo.MemberGrowthVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

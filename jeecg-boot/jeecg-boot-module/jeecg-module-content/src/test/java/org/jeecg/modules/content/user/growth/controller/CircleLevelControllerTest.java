@@ -1,9 +1,10 @@
 package org.jeecg.modules.content.user.growth.controller;
 
-import org.jeecg.modules.content.user.growth.service.ICircleLevelService;
-import org.jeecg.modules.content.user.growth.vo.CircleBenefitVO;
-import org.jeecg.modules.content.user.growth.vo.CircleLevelVO;
-import org.jeecg.modules.content.user.growth.vo.LevelConditionVO;
+import org.jeecg.modules.content.circle.growth.controller.CircleLevelController;
+import org.jeecg.modules.content.circle.growth.service.ICircleLevelService;
+import org.jeecg.modules.content.circle.growth.vo.CircleBenefitVO;
+import org.jeecg.modules.content.circle.growth.vo.CircleLevelVO;
+import org.jeecg.modules.content.circle.growth.vo.LevelConditionVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
