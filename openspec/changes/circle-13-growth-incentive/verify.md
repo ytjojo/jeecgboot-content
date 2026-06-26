@@ -1,11 +1,13 @@
 ## 验证报告: circle-13-growth-incentive
 
+> **状态更新 (2026-06-26)**: 2 个 CRITICAL 问题已修复（代码层面），待全量单元测试验证。SUGGESTION 级别问题待处理。详见底部「当前状态」章节。
+
 ### 摘要
 
 | 维度 | 状态 |
 |------|------|
 | Completeness | 39/39 任务完成, 24 个 requirements |
-| Correctness | 21/24 requirements 已覆盖, **2 CRITICAL 差异** |
+| Correctness | **CRITICAL 已修复**，待测试验证 |
 | Coherence | 设计一致 |
 
 ---
@@ -283,14 +285,35 @@ public enum MemberLevelEnum {
 
 ---
 
-### 最终评估
+### 当前状态 (2026-06-26)
 
-**2 个 CRITICAL 问题必须修复后才能归档。**（CRITICAL #3 已并入 CRITICAL #2 统一修复）
+#### ✅ 已完成 (代码层面)
 
-修复后验证项：
-- [x] `MemberGrowthVO.levelName` 输出「初来乍到」而非「新芽圈」
-- [x] 成员 L5 门槛为 1000 经验值
-- [x] `addExperience()` 在经验值跨过门槛时自动更新 `level` 字段
-- [x] `revokeExperience()` 扣减经验值但不降级
-- [x] `CircleLevelController` 仅包含圈子等级相关方法，编译通过
-- [ ] 全量单元测试通过
+| 编号 | 修复项 | 状态 |
+|------|--------|------|
+| CRITICAL #2a | `MemberGrowthServiceImpl.getGrowthInfo()` 改用 `MemberLevelEnum` 获取等级名称 | ✅ 已修复 |
+| CRITICAL #2b | `GrowthConstant` 新增 `MEMBER_LEVEL_THRESHOLDS`，`LEVEL_THRESHOLDS` → `CIRCLE_LEVEL_THRESHOLDS` | ✅ 已修复 |
+| CRITICAL #2c | `addExperience()` 末尾增加等级自动升级逻辑 | ✅ 已修复 |
+| CRITICAL #1 | `CircleLevelController` 移除 `levelBenefit()`、`levelConfigs()` | ✅ 已修复 |
+| WARNING #1 | spec 中 `nextLevelExp` → `nextLevelThreshold` | ✅ 已修复 |
+| WARNING #2 | `revokeExperience()` 不降级逻辑确认正确 | ✅ 无需修改 |
+
+#### ⏳ 待完成
+
+| 编号 | 待办项 | 优先级 | 来源 |
+|------|--------|--------|------|
+| T-1 | 运行全量单元测试验证所有修复通过 | 🔴 P0 | verify.md |
+| T-2 | 同步 `plan.md` 中 Flyway 版本号 V3.9.1_63 → V3.9.1_67 | 🟢 P2 | SUGGESTION #1 |
+| T-3 | 排行榜周期常量提取到枚举/`GrowthConstant` | 🟢 P2 | SUGGESTION #2 |
+| DB-1 | 补充徽章初始化数据 ach_005 (CONTENT_MILESTONE) + ach_006 (SOCIAL_BUTTERFLY) | 🟡 P1 | PENDING-ISSUES |
+| DB-2 | 社交达人徽章缺少邀请追踪表 (circle_id) | 🟡 P1 | PENDING-ISSUES |
+| API-1 | `/participation` 扩展返回 7 天每日状态 | 🟡 P1 | PENDING-ISSUES |
+| VO-1 | `MemberGrowthVO` 补充 `totalBadges` 字段 | 🟢 P2 | PENDING-ISSUES |
+| VO-2 | `MemberGrowthVO` 补充 `totalBadgeCount` 字段 | 🟢 P2 | PENDING-ISSUES |
+| VO-3 | `CircleLevelVO` 补充 `circleId` 字段 | 🟢 P2 | PENDING-ISSUES |
+| FE-1 | 前端 41 个 tasks 全部未开始 | 🔴 P0 | review-report.md |
+| FE-2 | 前端 BLOCK-001: proposal.md API 路径修正 | 🔴 P0 | review-report.md |
+| FE-3 | 前端 BLOCK-002: 等级降级规则修正 | 🔴 P0 | review-report.md |
+| FE-4 | 前端 12 个 FLAG 问题修复 | 🟡 P1 | review-report.md |
+
+> 详细实现计划见 `implementation-plan.md`
