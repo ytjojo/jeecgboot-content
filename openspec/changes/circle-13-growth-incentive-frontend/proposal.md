@@ -8,7 +8,7 @@
 - 新增成员个人成长信息页：展示经验值、贡献值、当前等级、连续参与进度、徽章摘要、今日经验上限
 - 新增徽章墙页：分组展示已获得/未获得徽章，支持徽章详情弹窗
 - 新增排行榜页：支持经验值/贡献值/发帖数三维度、本周/本月/累计三周期切换，高亮当前用户排名
-- 新增成长相关 API 封装：圈子等级(`GET /api/v1/content/circle/growth/level/info`)、成员成长(`GET /api/v1/content/circle/growth/info`)、成就徽章列表(`GET /api/v1/content/circle/growth/achievement/list`)、排行榜(`GET /api/v1/content/circle/growth/leaderboard`)四个核心接口
+- 新增成长相关 API 封装：圈子等级(`GET /api/v1/content/circle/growth/level/info?circleId=`)、成员成长(`GET /api/v1/content/circle/member_growth/info?circleId=&userId=`)、成就徽章列表(`GET /api/v1/content/circle/growth/achievement/list?circleId=&userId=`)、排行榜(`GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId=`)、连续参与(`GET /api/v1/content/circle/member_growth/participation?circleId=&userId=`)五个核心接口
 - 后端已提供但本期可选对接的补充接口：连续参与(`GET /api/v1/content/circle/member_growth/participation`)、勋章分类目录(`GET /api/v1/content/user/growth/badge/catalog`)、勋章详情(`GET /api/v1/content/user/growth/badge/detail`)、佩戴勋章(`POST /api/v1/content/user/growth/badge/wear`)、等级权益摘要(`GET /api/v1/content/circle/growth/level/benefit`)、等级配置(`GET /api/v1/content/circle/growth/level/config`)
 - 新增 Pinia Store：`circleGrowth` 管理成长数据缓存
 - 新增 10 个 Vue 组件：`CircleLevelBadge`、`CircleLevelProgress`、`GrowthOverviewCard`、`ParticipationStreak`、`DailyExpBar`、`BadgeCard`、`BadgeWall`、`BadgeDetailModal`、`LeaderboardList`、`LeaderboardTabs`

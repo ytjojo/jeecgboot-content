@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.circle.growth.service.IMemberGrowthService;
 import org.jeecg.modules.content.circle.growth.vo.MemberGrowthVO;
+import org.jeecg.modules.content.circle.growth.vo.ParticipationVO;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
@@ -25,11 +26,11 @@ public class MemberGrowthController {
         return Result.OK(memberGrowthService.getGrowthInfo(circleId, userId));
     }
 
-    @Operation(summary = "获取连续参与进度")
+    @Operation(summary = "获取连续参与进度（含近 7 天每日状态）")
     @GetMapping("/participation")
-    public Result<Integer> getParticipationDays(
+    public Result<ParticipationVO> getParticipationProgress(
             @RequestParam String circleId,
             @RequestParam String userId) {
-        return Result.OK(memberGrowthService.getParticipationDays(circleId, userId));
+        return Result.OK(memberGrowthService.getParticipationProgress(circleId, userId));
     }
 }

@@ -9,6 +9,7 @@ import org.jeecg.modules.content.circle.growth.entity.CircleMemberAchievement;
 import org.jeecg.modules.content.circle.growth.entity.CircleMemberGrowth;
 import org.jeecg.modules.content.circle.growth.enums.AchievementTypeEnum;
 import org.jeecg.modules.content.circle.growth.mapper.CircleAchievementMapper;
+import org.jeecg.modules.content.circle.growth.mapper.CircleInviteRecordMapper;
 import org.jeecg.modules.content.circle.growth.mapper.CircleMemberAchievementMapper;
 import org.jeecg.modules.content.circle.growth.mapper.CircleMemberGrowthMapper;
 import org.jeecg.modules.content.circle.growth.service.IAchievementService;
@@ -35,6 +36,8 @@ public class AchievementServiceImpl extends ServiceImpl<CircleMemberAchievementM
     private CircleMemberGrowthMapper growthMapper;
     @Resource
     private CircleAchievementMapper achievementMapper;
+    @Resource
+    private CircleInviteRecordMapper inviteRecordMapper;
     @Resource
     private IMemberGrowthService memberGrowthService;
     @Resource
@@ -68,6 +71,23 @@ public class AchievementServiceImpl extends ServiceImpl<CircleMemberAchievementM
                 tryAward(circleId, userId, AchievementTypeEnum.RISING_STAR);
             } else {
                 revoke(circleId, userId, AchievementTypeEnum.RISING_STAR);
+            }
+        }
+
+        // 内容里程碑：累计发布 50 篇可见内容
+        if (growth.getPostCount() != null && growth.getPostCount() >= 50) {
+            tryAward(circleId, userId, AchievementTypeEnum.CONTENT_MILESTONE);
+        }
+
+        // 社交达人：邀请 5 人加入圈子
+        if (inviteRecordMapper != null) {
+            com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<org.jeecg.modules.content.circle.growth.entity.CircleInviteRecord> inviteQw = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+            inviteQw.eq(org.jeecg.modules.content.circle.growth.entity.CircleInviteRecord::getCircleId, circleId)
+                    .eq(org.jeecg.modules.content.circle.growth.entity.CircleInviteRecord::getInviterId, userId)
+                    .eq(org.jeecg.modules.content.circle.growth.entity.CircleInviteRecord::getStatus, "JOINED");
+            long inviteCount = inviteRecordMapper.selectCount(inviteQw);
+            if (inviteCount >= 5) {
+                tryAward(circleId, userId, AchievementTypeEnum.SOCIAL_BUTTERFLY);
             }
         }
     }
@@ -149,6 +169,21 @@ public class AchievementServiceImpl extends ServiceImpl<CircleMemberAchievementM
                         int rank = (int) higherCount + 1;
                         // rank 越低越好，直接用原始排名，status 计算时用 target/current 判定
                         progress = rank;
+                        break;
+                    case "CONTENT_MILESTONE":
+                        target = 50;
+                        progress = Math.min(growth.getPostCount() != null ? growth.getPostCount() : 0, 50);
+                        break;
+                    case "SOCIAL_BUTTERFLY":
+                        target = 5;
+                        if (inviteRecordMapper != null) {
+                            com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<org.jeecg.modules.content.circle.growth.entity.CircleInviteRecord> inviteQw2 = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+                            inviteQw2.eq(org.jeecg.modules.content.circle.growth.entity.CircleInviteRecord::getCircleId, circleId)
+                                    .eq(org.jeecg.modules.content.circle.growth.entity.CircleInviteRecord::getInviterId, userId)
+                                    .eq(org.jeecg.modules.content.circle.growth.entity.CircleInviteRecord::getStatus, "JOINED");
+                            long inviteCount2 = inviteRecordMapper.selectCount(inviteQw2);
+                            progress = Math.min((int) inviteCount2, 5);
+                        }
                         break;
                     default:
                         break;

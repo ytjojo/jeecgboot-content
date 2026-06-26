@@ -6,6 +6,20 @@
 
 ---
 
+## 实现进度 (2026-06-26)
+
+| Phase | 内容 | 状态 |
+|-------|------|------|
+| Phase 1: T-1 | 全量单元测试 | ✅ 21 tests pass |
+| Phase 2: DB-1+DB-2 | 徽章初始化 + 邀请追踪表 | ✅ 已完成 |
+| Phase 3: API-1 | /participation 扩展 | ✅ 已完成 |
+| Phase 4: VO-1~3 | VO 字段补充 | ✅ 已完成 |
+| Phase 5: T-2+T-3 | Flyway 版本号 + 常量提取 | ✅ 已自动完成 |
+| Phase 6: FE-2/FE-3/FLAG | 前端规范修复 | ✅ BLOCK 已修复 + 3 个 FLAG |
+| **Phase 7** | 前端编码实现 (64 tasks) | ⬜ 待实现（需前端开发环境） |
+
+---
+
 ## 一、当前状态总览
 
 | 类别 | 已完成 | 待完成 |
@@ -13,8 +27,8 @@
 | 后端 tasks (tasks.md) | 39/39 ✅ | 0 |
 | 后端 CRITICAL 修复 | 2/2 ✅ | 0 |
 | 后端 WARNING 修复 | 2/2 ✅ | 0 |
-| 后端 PENDING 事项 | — | 7 项 |
-| 后端 SUGGESTION | — | 2 项 |
+| 后端 PENDING 事项 | 7/7 ✅ | 0 |
+| 后端 SUGGESTION | 2/2 ✅ | 0 |
 | 前端 tasks (tasks.md) | 0/64 | 64 |
 | 前端 BLOCK 问题 | 0/2 | 2 |
 | 前端 FLAG 问题 | 0/12 | 12 |

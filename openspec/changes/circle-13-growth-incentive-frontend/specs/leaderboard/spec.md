@@ -84,7 +84,13 @@
 - **WHEN** 多名成员数值相同
 - **THEN** 按后端返回的 `rankNum` 顺序展示（后端已处理排序优先级）
 
-### Requirement: 排行榜 API 对接
+### Requirement: 排行榜数据时效提示
+
+系统 SHALL 向用户展示排行榜数据更新时间，明确排行榜为小时级快照非实时数据。
+
+#### Scenario: 展示排行榜更新时间
+- **WHEN** 用户查看排行榜
+- **THEN** 页面底部展示「榜单每小时更新一次，上次更新时间：{snapshotTime}」提示
 
 系统 SHALL 通过 GET `/api/v1/content/circle/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` 接口获取排行榜数据，支持 dimension 和 period 查询参数。
 

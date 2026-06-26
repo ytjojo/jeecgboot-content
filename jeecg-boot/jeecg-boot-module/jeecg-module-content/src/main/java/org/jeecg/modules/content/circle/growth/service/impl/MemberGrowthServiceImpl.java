@@ -17,6 +17,7 @@ import org.jeecg.modules.content.circle.growth.mapper.CircleMemberGrowthMapper;
 import org.jeecg.modules.content.circle.growth.service.IMemberGrowthService;
 import org.jeecg.modules.content.circle.growth.vo.AchievementVO;
 import org.jeecg.modules.content.circle.growth.vo.MemberGrowthVO;
+import org.jeecg.modules.content.circle.growth.vo.ParticipationVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -184,6 +185,17 @@ public class MemberGrowthServiceImpl extends ServiceImpl<CircleMemberGrowthMappe
         }
         vo.setRecentBadges(recentBadges);
 
+        // 徽章统计
+        if (memberAchievementMapper != null && achievementMapper != null) {
+            LambdaQueryWrapper<CircleMemberAchievement> countQw = new LambdaQueryWrapper<>();
+            countQw.eq(CircleMemberAchievement::getCircleId, circleId)
+                   .eq(CircleMemberAchievement::getUserId, userId)
+                   .eq(CircleMemberAchievement::getRevoked, false);
+            long earnedBadgeCount = memberAchievementMapper.selectCount(countQw);
+            vo.setTotalBadges((int) earnedBadgeCount);
+            vo.setTotalBadgeCount(Math.toIntExact(achievementMapper.selectCount(null)));
+        }
+
         return vo;
     }
 
@@ -200,6 +212,36 @@ public class MemberGrowthServiceImpl extends ServiceImpl<CircleMemberGrowthMappe
           .groupBy(CircleGrowthLog::getBizDate);
         List<CircleGrowthLog> logs = growthLogMapper.selectList(qw);
         return logs.size();
+    }
+
+    @Override
+    public ParticipationVO getParticipationProgress(String circleId, String userId) {
+        LocalDate today = LocalDate.now();
+        List<ParticipationVO.DayStatus> dailyStatus = new ArrayList<>();
+        int consecutiveDays = 0;
+        boolean inConsecutive = true;
+
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = today.minusDays(i);
+            LambdaQueryWrapper<CircleGrowthLog> qw = new LambdaQueryWrapper<>();
+            qw.eq(CircleGrowthLog::getCircleId, circleId)
+              .eq(CircleGrowthLog::getUserId, userId)
+              .eq(CircleGrowthLog::getBizDate, date)
+              .eq(CircleGrowthLog::getRevoked, false);
+            boolean participated = growthLogMapper.selectCount(qw) > 0;
+            dailyStatus.add(new ParticipationVO.DayStatus(date.toString(), participated));
+
+            if (participated && inConsecutive) {
+                consecutiveDays++;
+            } else {
+                inConsecutive = false;
+            }
+        }
+
+        ParticipationVO vo = new ParticipationVO();
+        vo.setDays(consecutiveDays);
+        vo.setDailyStatus(dailyStatus);
+        return vo;
     }
 
     private boolean isDailyCapReached(String circleId, String userId, LocalDate date) {
