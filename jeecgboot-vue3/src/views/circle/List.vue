@@ -24,48 +24,109 @@
       <a-tab-pane key="discover" tab="发现" />
     </a-tabs>
 
-    <!-- 加载骨架屏 -->
-    <div v-if="loading" class="circle-grid">
-      <a-skeleton v-for="i in 6" :key="i" active avatar :paragraph="{ rows: 2 }" />
-    </div>
+    <!-- 已加入 Tab 内容 -->
+    <template v-if="activeTab === 'joined'">
+      <!-- 加载骨架屏 -->
+      <div v-if="loading" class="circle-grid">
+        <a-skeleton v-for="i in 6" :key="i" active avatar :paragraph="{ rows: 2 }" />
+      </div>
 
-    <!-- 空状态 -->
-    <a-empty
-      v-else-if="!loading && listData.length === 0"
-      :description="activeTab === 'joined' ? '还没有加入任何圈子' : '暂无公开圈子'"
-    >
-      <a-button v-if="activeTab === 'joined'" type="primary" @click="activeTab = 'discover'">
-        发现圈子
-      </a-button>
-    </a-empty>
+      <!-- 空状态 -->
+      <a-empty
+        v-else-if="!loading && listData.length === 0"
+        description="还没有加入任何圈子"
+      >
+        <a-button type="primary" @click="activeTab = 'discover'">
+          发现圈子
+        </a-button>
+      </a-empty>
 
-    <!-- 圈子卡片网格 -->
-    <div v-else class="circle-grid">
-      <CircleCard
-        v-for="circle in listData"
-        :key="circle.id"
-        :circle="circle"
-        @click="goDetail(circle.id)"
-        @join-success="handleJoinSuccess"
-        @governance="goGovernance"
-      />
-    </div>
+      <!-- 圈子卡片网格 -->
+      <div v-else class="circle-grid">
+        <CircleCard
+          v-for="circle in listData"
+          :key="circle.id"
+          :circle="circle"
+          @click="goDetail(circle.id)"
+          @join-success="handleJoinSuccess"
+          @governance="goGovernance"
+        />
+      </div>
 
-    <!-- 加载更多 -->
-    <div v-if="hasMore && !loading" class="load-more">
-      <a-button :loading="loadingMore" @click="loadMore">加载更多</a-button>
-    </div>
+      <!-- 加载更多 -->
+      <div v-if="hasMore && !loading" class="load-more">
+        <a-button :loading="loadingMore" @click="loadMore">加载更多</a-button>
+      </div>
 
-    <!-- 网络错误 -->
-    <a-result
-      v-if="error"
-      status="error"
-      title="加载失败，请重试"
-    >
-      <template #extra>
-        <a-button type="primary" @click="fetchData">重试</a-button>
+      <!-- 网络错误 -->
+      <a-result
+        v-if="error"
+        status="error"
+        title="加载失败，请重试"
+      >
+        <template #extra>
+          <a-button type="primary" @click="fetchData">重试</a-button>
+        </template>
+      </a-result>
+    </template>
+
+    <!-- 发现 Tab 内容 -->
+    <div v-else class="discover-content">
+      <div class="discover-subtabs">
+        <a-radio-group v-model:value="discoverSubTab" button-style="solid" size="small" @change="handleDiscoverSubTabChange">
+          <a-radio-button value="recommend">为你推荐</a-radio-button>
+          <a-radio-button value="hot">热门榜</a-radio-button>
+          <a-radio-button value="new">最新圈</a-radio-button>
+          <a-radio-button value="all">全部</a-radio-button>
+        </a-radio-group>
+      </div>
+
+      <RecommendList v-if="discoverSubTab === 'recommend'" />
+      <HotRankList v-else-if="discoverSubTab === 'hot'" />
+      <NewRankList v-else-if="discoverSubTab === 'new'" />
+
+      <!-- 全部公开圈子 -->
+      <template v-else>
+        <!-- 加载骨架屏 -->
+        <div v-if="loading" class="circle-grid">
+          <a-skeleton v-for="i in 6" :key="i" active avatar :paragraph="{ rows: 2 }" />
+        </div>
+
+        <!-- 空状态 -->
+        <a-empty
+          v-else-if="!loading && listData.length === 0"
+          description="暂无公开圈子"
+        />
+
+        <!-- 圈子卡片网格 -->
+        <div v-else class="circle-grid">
+          <CircleCard
+            v-for="circle in listData"
+            :key="circle.id"
+            :circle="circle"
+            @click="goDetail(circle.id)"
+            @join-success="handleJoinSuccess"
+            @governance="goGovernance"
+          />
+        </div>
+
+        <!-- 加载更多 -->
+        <div v-if="hasMore && !loading" class="load-more">
+          <a-button :loading="loadingMore" @click="loadMore">加载更多</a-button>
+        </div>
+
+        <!-- 网络错误 -->
+        <a-result
+          v-if="error"
+          status="error"
+          title="加载失败，请重试"
+        >
+          <template #extra>
+            <a-button type="primary" @click="fetchData">重试</a-button>
+          </template>
+        </a-result>
       </template>
-    </a-result>
+    </div>
   </div>
 </template>
 
@@ -76,6 +137,9 @@ import { PlusOutlined } from '@ant-design/icons-vue';
 import { getMyCircleList, getPublicCircleList } from '/@/api/content/circle';
 import type { CircleVO } from '/@/api/content/model/circleModel';
 import CircleCard from './components/CircleCard.vue';
+import RecommendList from './discovery/components/RecommendList.vue';
+import HotRankList from './discovery/components/HotRankList.vue';
+import NewRankList from './discovery/components/NewRankList.vue';
 import { useCircleStoreWithOut } from '/@/store/modules/circle';
 
 const router = useRouter();
@@ -83,6 +147,7 @@ const circleStore = useCircleStoreWithOut();
 
 // 状态
 const activeTab = ref<'joined' | 'discover'>('joined');
+const discoverSubTab = ref<'recommend' | 'hot' | 'new' | 'all'>('recommend');
 const searchKeyword = ref('');
 const listData = ref<CircleVO[]>([]);
 const loading = ref(false);
@@ -112,7 +177,8 @@ async function fetchData(reset = true) {
 
   try {
     const params = { pageNum: pageNum.value, pageSize };
-    const fetcher = activeTab.value === 'joined' ? getMyCircleList : getPublicCircleList;
+    const isJoined = activeTab.value === 'joined';
+    const fetcher = isJoined ? getMyCircleList : getPublicCircleList;
     const result = await fetcher(params);
 
     if (result) {
@@ -123,7 +189,8 @@ async function fetchData(reset = true) {
       }
       total.value = result.total || 0;
       hasMore.value = listData.value.length < total.value;
-      cacheTimestamps[activeTab.value] = Date.now();
+      const cacheKey = isJoined ? 'joined' : 'all';
+      cacheTimestamps[cacheKey] = Date.now();
     }
   } catch {
     if (reset) {
@@ -144,12 +211,26 @@ function loadMore() {
 // Tab 切换
 function handleTabChange(key: string) {
   const tab = key as 'joined' | 'discover';
+  if (tab === 'discover') {
+    discoverSubTab.value = 'recommend';
+    return;
+  }
   const now = Date.now();
-  const cached = cacheTimestamps[tab];
-
-  // 缓存过期或首次加载
+  const cached = cacheTimestamps['joined'];
   if (!cached || (now - cached) > CACHE_TTL) {
     fetchData(true);
+  }
+}
+
+// 发现子 Tab 切换
+function handleDiscoverSubTabChange(key: string) {
+  const subTab = key as 'recommend' | 'hot' | 'new' | 'all';
+  if (subTab === 'all') {
+    const now = Date.now();
+    const cached = cacheTimestamps['all'];
+    if (!cached || (now - cached) > CACHE_TTL) {
+      fetchData(true);
+    }
   }
 }
 
@@ -176,11 +257,11 @@ function goGovernance(id: string) {
 
 // 加入/退出后刷新两个 Tab
 function handleJoinSuccess() {
-  // 刷新当前 Tab
-  fetchData(true);
-  // 清除另一个 Tab 缓存使其下次切换时重新加载
-  const otherTab = activeTab.value === 'joined' ? 'discover' : 'joined';
-  delete cacheTimestamps[otherTab];
+  if (activeTab.value === 'joined' || (activeTab.value === 'discover' && discoverSubTab.value === 'all')) {
+    fetchData(true);
+  }
+  delete cacheTimestamps['joined'];
+  delete cacheTimestamps['all'];
 }
 
 // 初始化
@@ -226,6 +307,11 @@ fetchData(true);
   text-align: center;
   margin-top: 24px;
   padding: 16px 0;
+}
+
+.discover-subtabs {
+  margin-bottom: 16px;
+  margin-top: 16px;
 }
 
 :deep(.ant-tabs) {
