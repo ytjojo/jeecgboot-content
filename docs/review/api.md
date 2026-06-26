@@ -180,7 +180,7 @@ API 路径合规性修复计划
  ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
  │ ContentUserThirdPartyAuthController │ /content/user/auth/third-party   │ /api/v1/content/user/auth/third-party   │
  ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
- │ AchievementController               │ /content/user/growth/achievement │ /api/v1/content/user/growth/achievement │
+ │ AchievementController               │ /content/user/growth/achievement │ /api/v1/content/circle/growth/achievement │
  ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
  │ CircleLevelController               │ /content/user/growth/level       │ /api/v1/content/user/growth/level       │
  ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
@@ -436,7 +436,7 @@ API 路径合规性修复计划
      ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
      │ ContentUserThirdPartyAuthController │ /content/user/auth/third-party   │ /api/v1/content/user/auth/third-party   │
      ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
-     │ AchievementController               │ /content/user/growth/achievement │ /api/v1/content/user/growth/achievement │
+     │ AchievementController               │ /content/user/growth/achievement │ /api/v1/content/circle/growth/achievement │
      ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤
      │ CircleLevelController               │ /content/user/growth/level       │ /api/v1/content/user/growth/level       │
      ├─────────────────────────────────────┼──────────────────────────────────┼─────────────────────────────────────────┤

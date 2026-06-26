@@ -127,7 +127,7 @@ public class CircleBenefitVO {
 | 等级配置列表 | — | `/api/v1/content/circle/growth/level/config` | 🆕 新增接口 |
 | 成员成长 | `/api/v1/content/user/growth/info?circleId=&userId=` | `/api/v1/content/user/growth/info?circleId=&userId=` | ✅ 未变 |
 | 连续参与 | `/api/v1/content/user/growth/participation?circleId=&userId=` | `/api/v1/content/user/growth/participation?circleId=&userId=` | ✅ 未变 |
-| 成就徽章 | `/api/v1/content/user/growth/achievement/list?circleId=&userId=` | `/api/v1/content/user/growth/achievement/list?circleId=&userId=` | ✅ 未变 |
+| 成就徽章 | `/api/v1/content/circle/growth/achievement/list?circleId=&userId=` | `/api/v1/content/circle/growth/achievement/list?circleId=&userId=` | ✅ 未变 |
 | 排行榜 | `/api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | `/api/v1/content/user/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ✅ 未变 |
 
 **已确认**: `CircleLevelController` 已迁移至 `/circle/growth/` 前缀（数据主体是圈子），其余 3 个 Controller（成员成长、成就徽章、排行榜）保持在 `/user/growth/` 前缀（数据主体是用户）。双前缀是有意设计，不会统一迁移。详见 `docs/agent-context/circle-growth-api-conventions.md`。

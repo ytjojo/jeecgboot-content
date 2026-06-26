@@ -21,7 +21,7 @@
 | MemberGrowthController | `GET /api/v1/content/user/growth/info` | ✅ 已记录 | 一致 |
 | MemberGrowthController | `GET /api/v1/content/user/growth/participation` | ✅ 已记录 | 一致 |
 | CircleLevelController | `GET /api/v1/content/user/growth/level/info` | ✅ 已记录 | 一致 |
-| AchievementController | `GET /api/v1/content/user/growth/achievement/list` | ✅ 已记录 | 一致 |
+| AchievementController | `GET /api/v1/content/circle/growth/achievement/list` | ✅ 已记录 | 一致 |
 | LeaderboardController | `GET /api/v1/content/user/growth/leaderboard` | ✅ 已更新 | 一致 |
 
 ### 1.2 API 文档缺失详情

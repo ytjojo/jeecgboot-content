@@ -392,7 +392,7 @@
 | 获取等级权益摘要 | GET | `/api/v1/content/circle/growth/level/benefit?userId={userId}` | 用户当前等级权益摘要 | 个人成长页加载 |
 | 获取成员成长信息 | GET | `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` | 经验值、贡献值、等级、排名、今日经验、徽章摘要 | 个人成长页加载 |
 | 获取连续参与天数 | GET | `/api/v1/content/user/growth/participation?circleId={circleId}&userId={userId}` | 连续参与天数 | 个人成长页加载 |
-| 获取成员徽章列表 | GET | `/api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` | 已获得徽章、未获得徽章、进度 | 徽章墙页加载 |
+| 获取成员徽章列表 | GET | `/api/v1/content/circle/growth/achievement/list?circleId={circleId}&userId={userId}` | 已获得徽章、未获得徽章、进度 | 徽章墙页加载 |
 | 获取排行榜 | GET | `/api/v1/content/user/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | Top 50 列表、当前用户排名 | 排行榜页加载 / 维度或周期切换 |
 
 ### 5.2 接口参数与响应
@@ -448,7 +448,7 @@ interface MemberGrowthVO {
 }
 ```
 
-#### GET `/api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}`
+#### GET `/api/v1/content/circle/growth/achievement/list?circleId={circleId}&userId={userId}`
 
 **查询参数**: circleId (圈子ID), userId (用户ID)
 
@@ -513,7 +513,7 @@ enum Api {
   // 用户成长 — 成员经验值、徽章、排行榜
   MemberGrowth = '/api/v1/content/user/growth/info',
   Participation = '/api/v1/content/user/growth/participation',
-  Achievements = '/api/v1/content/user/growth/achievement/list',
+  Achievements = '/api/v1/content/circle/growth/achievement/list',
   Leaderboard = '/api/v1/content/user/growth/leaderboard',
 }
 

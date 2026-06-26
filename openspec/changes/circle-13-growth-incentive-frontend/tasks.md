@@ -26,7 +26,7 @@
 - [ ] 4.2 实现 `BadgeWall` 组件 — 徽章墙（分组展示已获得/未获得徽章）
 - [ ] 4.3 实现 `BadgeDetailModal` 组件 — 徽章详情弹窗（Modal + 条件说明 + 进度 + 获得时间）
 - [ ] 4.4 创建徽章墙页 `src/views/circle/badges/index.vue`
-- [ ] 4.5 对接 GET `/api/v1/content/user/growth/achievement/list?circleId={circleId}&userId={userId}` 接口
+- [ ] 4.5 对接 GET `/api/v1/content/circle/growth/achievement/list?circleId={circleId}&userId={userId}` 接口
 - [ ] 4.6 配置路由 `/circle/:id/badges` 挂载到圈子详情页子路由
 
 ## 5. 排行榜

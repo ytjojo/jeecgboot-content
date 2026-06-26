@@ -185,7 +185,7 @@ org.jeecg.modules.content.user.growth.controller
 |------|------|------|------|
 | GET | `/api/v1/content/user/growth/info` | `circleId`, `userId` | ✅ 成员经验/贡献/等级/排名 |
 | GET | `/api/v1/content/user/growth/participation` | `circleId`, `userId` | ✅ 连续参与天数（仅返回Integer） |
-| GET | `/api/v1/content/user/growth/achievement/list` | `circleId`, `userId` | ✅ 徽章列表 |
+| GET | `/api/v1/content/circle/growth/achievement/list` | `circleId`, `userId` | ✅ 徽章列表 |
 | GET | `/api/v1/content/user/growth/leaderboard` | `circleId`, `dimension`, `period=WEEK`, `currentUserId` | ✅ 排行榜（返回List，无包装对象） |
 
 ### ❌ 不应在圈子成长中出现的接口（属于全局用户成长）

@@ -27,8 +27,8 @@
 
 ## 成就徽章
 ### AchievementController (`/Users/yangtengjiao/Documents/j2ee/JeecgBoot_sass/jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/user/growth/controller/AchievementController.java`)
-**Base Path**: `/api/v1/content/user/growth/achievement`
+**Base Path**: `/api/v1/content/circle/growth/achievement`
 
 | 方法 | 路径 | 描述 | 入参 | 出参 | 行号 |
 |------|------|------|------|------|------|
-| GET | `/api/v1/content/user/growth/achievement/list` | 获取成员在圈子的徽章列表 | circleId: String (query), userId: String (query) | `List<AchievementVO>` | 25 |
+| GET | `/api/v1/content/circle/growth/achievement/list` | 获取成员在圈子的徽章列表 | circleId: String (query), userId: String (query) | `List<AchievementVO>` | 25 |
