@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import java.util.List;
 
-@Tag(name = "圈子排行榜")
+@Tag(name = "圈子成员内排行榜")
 @RestController
 @RequestMapping("/api/v1/content/circle/growth/leaderboard")
 public class LeaderboardController {
@@ -18,7 +18,7 @@ public class LeaderboardController {
     @Resource
     private ILeaderboardService leaderboardService;
 
-    @Operation(summary = "获取圈子排行榜")
+    @Operation(summary = "获取圈子内成员排行榜")
     @GetMapping
     public Result<List<LeaderboardEntryVO>> getLeaderboard(
             @RequestParam String circleId,

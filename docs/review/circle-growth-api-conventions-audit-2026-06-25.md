@@ -18,7 +18,7 @@
 |------|---------|---------------|------|
 | **全局内容社区用户成长** | `content_user_*` 系列表 | `/api/v1/content/user/growth/` | **无circleId**，整个内容社区通用的积分/等级/勋章/兑换体系，有衰减降级机制 |
 | **圈子等级** | `circle_level` | `/api/v1/content/circle/growth/level/` | 只有circleId，圈子本身的等级（L1-L5新芽圈→标杆圈） |
-| **圈子内成员成长** | `circle_member_growth` 等5张表 | `/api/v1/content/user/growth/` | **有circleId+userId**，用户在某个圈子内的经验/贡献/徽章/排名 |
+| **圈子内成员成长** | `circle_member_growth` 等5张表 | `/api/v1/content/circle/member_growth/` | **有circleId+userId**，用户在某个圈子内的经验/贡献/徽章/排名 |
 
 > ⚠️ **致命冲突**：全局用户成长 和 圈子内成员成长 使用**完全相同的路径前缀** `/api/v1/content/user/growth/`！
 
@@ -143,12 +143,12 @@ org.jeecg.modules.content.user.growth.controller
 |------|------------|
 | 全局用户成长 | `/api/v1/content/user/growth/`（保持不变，前端已对接） |
 | 圈子等级 | `/api/v1/content/circle/growth/level/`（保持不变） |
-| 圈子内成员成长 | **改为** `/api/v1/content/circle/member/growth/` |
+| 圈子内成员成长 | **改为** `/api/v1/content/circle/member_growth/` |
 
 或者保持路径但在规范文档中明确：
 - `/user/growth/level/*` → 全局用户等级（有userId）
 - `/circle/growth/level/*` → 圈子等级（有circleId）
-- `/user/growth/info?circleId=&userId=` → 成员在圈内的成长信息
+- `/circle/member_growth/info?circleId=&userId=` → 成员在圈内的成长信息
 
 ### 建议3：补全缺失的数据库表或修正代码/文档
 
@@ -183,8 +183,8 @@ org.jeecg.modules.content.user.growth.controller
 ### 成员成长（已实现可运行）
 | 方法 | 路径 | 参数 | 说明 |
 |------|------|------|------|
-| GET | `/api/v1/content/user/growth/info` | `circleId`, `userId` | ✅ 成员经验/贡献/等级/排名 |
-| GET | `/api/v1/content/user/growth/participation` | `circleId`, `userId` | ✅ 连续参与天数（仅返回Integer） |
+| GET | `/api/v1/content/circle/member_growth/info` | `circleId`, `userId` | ✅ 成员经验/贡献/等级/排名 |
+| GET | `/api/v1/content/circle/member_growth/participation` | `circleId`, `userId` | ✅ 连续参与天数（仅返回Integer） |
 | GET | `/api/v1/content/circle/growth/achievement/list` | `circleId`, `userId` | ✅ 徽章列表 |
 | GET | `/api/v1/content/circle/growth/leaderboard` | `circleId`, `dimension`, `period=WEEK`, `currentUserId` | ✅ 排行榜（返回List，无包装对象） |
 

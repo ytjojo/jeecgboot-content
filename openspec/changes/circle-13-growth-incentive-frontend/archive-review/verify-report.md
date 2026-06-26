@@ -104,7 +104,7 @@
 #### 成员成长信息
 | 项目 | Spec 设计 | 后端实际 | 对齐 |
 |------|---------|---------|------|
-| API 路径 | `GET /api/v1/content/user/growth/info` | 同 | ✅ |
+| API 路径 | `GET /api/v1/content/circle/member_growth/info` | 同 | ✅ |
 | 参数 | `?circleId={circleId}&userId={userId}` | `?circleId&userId` | ✅ |
 | 返回 | `Result<MemberGrowthVO>` | `Result<MemberGrowthVO>` | ✅ |
 | Controller | — | `MemberGrowthController.java` | ✅ |
@@ -367,8 +367,8 @@ Spec §6 依赖 WebSocket 通知实现等级提升和徽章获得的实时提示
 □ getCircleLevel(circleId)           → GET /api/v1/content/circle/growth/level/info?circleId=  ⚠️ 路径已变更
 □ getLevelBenefit(userId)            → GET /api/v1/content/circle/growth/level/benefit?userId=  ⚠️ 新增接口，/circle/growth/ 前缀
 □ getLevelConfigs()                  → GET /api/v1/content/circle/growth/level/config           ⚠️ 新增接口，/circle/growth/ 前缀
-□ getMemberGrowth(circleId, userId)  → GET /api/v1/content/user/growth/info?circleId=&userId=
-□ getParticipationDays(circleId, userId) → GET /api/v1/content/user/growth/participation?circleId=&userId= (可选)
+□ getMemberGrowth(circleId, userId)  → GET /api/v1/content/circle/member_growth/info?circleId=&userId=
+□ getParticipationDays(circleId, userId) → GET /api/v1/content/circle/member_growth/participation?circleId=&userId= (可选)
 □ getCircleBadges(circleId, userId)  → GET /api/v1/content/circle/growth/achievement/list?circleId=&userId=
 □ getLeaderboard(params)             → GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=EXP|CONTRIBUTION|POST&period=WEEK|MONTH|ALL&currentUserId=
 ```

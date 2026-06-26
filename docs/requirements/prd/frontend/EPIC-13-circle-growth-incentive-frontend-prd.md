@@ -67,15 +67,15 @@
 
 本 Epic 涉及三个易混淆的成长体系，前端在页面设计、API 调用和数据模型中需严格区分：
 
-| 体系 | 数据库表 | API 前缀 | 前端展示场景 |
-|------|---------|---------|-------------|
-| **全局内容社区用户成长** | `content_user_*` 系列表 | `/api/v1/content/user/growth/` | 用户个人主页的全局积分/等级/勋章（跨圈子通用），有衰减降级机制 |
+| 体系 | 数据库表 | API 前缀                          | 前端展示场景 |
+|------|---------|---------------------------------|-------------|
+| **全局内容社区用户成长** | `content_user_*` 系列表 | `/api/v1/content/user/growth/`  | 用户个人主页的全局积分/等级/勋章（跨圈子通用），有衰减降级机制 |
 | **圈子等级** | `circle_level` | `/api/v1/content/circle/growth/level/` | 圈子详情页的等级标识、成长进度、权益展示（L1-L5） |
-| **圈子内成员成长** | `circle_member_growth` 等 5 张表 | `/api/v1/content/user/growth/` | 个人成长信息页的经验值、贡献值、徽章、排行榜（单圈子维度） |
+| **圈子内成员成长** | `circle_member_growth` 等 5 张表 | `/api/v1/content/circle/member_growth/`             | 个人成长信息页的经验值、贡献值、徽章、排行榜（单圈子维度） |
 
 **前端区分要点**：
 
-1. **API 路径区分**：全局用户成长与圈子内成员成长共享 `/api/v1/content/user/growth/` 前缀，通过请求参数区分：
+1. **API 路径区分**：全局用户成长与圈子内成员成长 分别为`/user/growth/`  `/circle/member_growth/`前缀不同，通过请求参数和路径区分：
    - 无 `circleId` 参数 → 全局体系（EPIC-03，不在本 PRD 范围）
    - 有 `circleId` 参数 → 圈子内成员成长体系（本 PRD 范围）
 
@@ -390,8 +390,8 @@
 | 获取圈子等级信息 | GET | `/api/v1/content/circle/growth/level/info?circleId={circleId}` | 等级、成长分、下一等级条件、权益 | 圈子详情页加载 |
 | 获取圈子等级配置列表 | GET | `/api/v1/content/circle/growth/level/config` | 所有等级配置（门槛、权益） | 等级说明页/首次加载 |
 | 获取等级权益摘要 | GET | `/api/v1/content/circle/growth/level/benefit?userId={userId}` | 用户当前等级权益摘要 | 个人成长页加载 |
-| 获取成员成长信息 | GET | `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` | 经验值、贡献值、等级、排名、今日经验、徽章摘要 | 个人成长页加载 |
-| 获取连续参与天数 | GET | `/api/v1/content/user/growth/participation?circleId={circleId}&userId={userId}` | 连续参与天数 | 个人成长页加载 |
+| 获取成员成长信息 | GET | `/api/v1/content/circle/member_growth/info?circleId={circleId}&userId={userId}` | 经验值、贡献值、等级、排名、今日经验、徽章摘要 | 个人成长页加载 |
+| 获取连续参与天数 | GET | `/api/v1/content/circle/member_growth/participation?circleId={circleId}&userId={userId}` | 连续参与天数 | 个人成长页加载 |
 | 获取成员徽章列表 | GET | `/api/v1/content/circle/growth/achievement/list?circleId={circleId}&userId={userId}` | 已获得徽章、未获得徽章、进度 | 徽章墙页加载 |
 | 获取排行榜 | GET | `/api/v1/content/circle/growth/leaderboard?circleId={circleId}&dimension={dimension}&period={period}&currentUserId={userId}` | Top 50 列表、当前用户排名 | 排行榜页加载 / 维度或周期切换 |
 
@@ -428,7 +428,7 @@ interface LevelConditionVO {
 }
 ```
 
-#### GET `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}`
+#### GET `/api/v1/content/circle/member_growth/info?circleId={circleId}&userId={userId}`
 
 **响应字段**:
 ```typescript
@@ -511,8 +511,8 @@ enum Api {
   CircleLevelConfig = '/api/v1/content/circle/growth/level/config',
   CircleLevelBenefit = '/api/v1/content/circle/growth/level/benefit',
   // 用户成长 — 成员经验值、徽章、排行榜
-  MemberGrowth = '/api/v1/content/user/growth/info',
-  Participation = '/api/v1/content/user/growth/participation',
+  MemberGrowth = '/api/v1/content/circle/member_growth/info',
+  Participation = '/api/v1/content/circle/member_growth/participation',
   Achievements = '/api/v1/content/circle/growth/achievement/list',
   Leaderboard = '/api/v1/content/circle/growth/leaderboard',
 }

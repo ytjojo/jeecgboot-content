@@ -48,7 +48,7 @@
 | # | 前端文档当前引用路径 | 后端实际路径（2026-06-24） | 状态 |
 |---|-------------------|------------------------|------|
 | 1 | `GET /api/v1/content/user/growth/level/info?circleId=` | `GET /api/v1/content/circle/growth/level/info?circleId=` | ⚠️ 需修正为 `/circle/growth/` |
-| 2 | `GET /api/v1/content/user/growth/info?circleId=&userId=` | `GET /api/v1/content/user/growth/info?circleId=&userId=` | ✅ 一致 |
+| 2 | `GET /api/v1/content/circle/member_growth/info?circleId=&userId=` | `GET /api/v1/content/circle/member_growth/info?circleId=&userId=` | ✅ 一致 |
 | 3 | `GET /api/v1/content/circle/growth/achievement/list?circleId=&userId=` | `GET /api/v1/content/circle/growth/achievement/list?circleId=&userId=` | ✅ 一致 |
 | 4 | `GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | `GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ✅ 一致 |
 
@@ -73,7 +73,7 @@
 
 | 接口 | 路径 | 归属 Controller | 说明 |
 |------|------|----------------|------|
-| 连续参与天数 | `GET /api/v1/content/user/growth/participation?circleId=&userId=` | MemberGrowthController | 返回 `Result<Integer>`，圈子成长相关 |
+| 连续参与天数 | `GET /api/v1/content/circle/member_growth/participation?circleId=&userId=` | MemberGrowthController | 返回 `Result<Integer>`，圈子成长相关 |
 | 等级权益摘要 | `GET /api/v1/content/circle/growth/level/benefit?userId=` | CircleLevelController | 返回 `Result<ContentUserLevelBenefitSummaryVO>`，注意路径为 `/circle/growth/` 前缀 |
 | 等级配置列表 | `GET /api/v1/content/circle/growth/level/config` | CircleLevelController | 返回 `Result<List<ContentUserLevelConfigVO>>`，注意路径为 `/circle/growth/` 前缀 |
 | 成长汇总 | `GET /api/v1/content/user/growth/summary?userId=` | ContentUserGrowthController | 用户全局成长，非圈子 |

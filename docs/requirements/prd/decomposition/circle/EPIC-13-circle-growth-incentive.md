@@ -46,7 +46,7 @@ editHistory:
 |------|---------|----------------|---------|
 | **全局内容社区用户成长** | `content_user_*` 系列表 | `/api/v1/content/user/growth/` | **无 circleId**，整个内容社区通用的积分/等级/勋章/兑换体系，有衰减降级机制 |
 | **圈子等级** | `circle_level` | `/api/v1/content/circle/growth/level/` | **只有 circleId**，圈子本身的等级（L1 新芽圈 → L5 标杆圈），衡量圈子整体发展阶段 |
-| **圈子内成员成长** | `circle_member_growth` 等 5 张表 | `/api/v1/content/user/growth/` | **有 circleId + userId**，用户在某个圈子内的经验/贡献/徽章/排名 |
+| **圈子内成员成长** | `circle_member_growth` 等 5 张表 | `/api/v1/content/circle/circle_growth/` | **有 circleId + userId**，用户在某个圈子内的经验/贡献/徽章/排名 |
 
 **关键区分点**：
 - **全局用户成长**（EPIC-03）是跨圈子的平台级体系，用户积分、等级、勋章在整个内容社区通用，有积分衰减和等级降级机制，与圈子无关。
@@ -55,12 +55,12 @@ editHistory:
 
 **API 路径区分规则**：
 
-全局用户成长与圈子内成员成长共享 `/api/v1/content/user/growth/` 前缀，通过请求参数和子路径区分：
+全局用户成长与圈子内成员成长 分别为`/user/growth/`  `/circle/member_growth/`前缀不同，通过请求参数和路径区分：
 
-| 场景 | 路径模式 | 区分方式 |
-|------|---------|---------|
-| 全局用户成长（跨圈子） | `/api/v1/content/user/growth/{action}` | 无 circleId 参数，操作对象是用户在全局的积分/等级/勋章 |
-| 圈子内成员成长（单圈子） | `/api/v1/content/user/growth/{action}?circleId={id}` 或 `/api/v1/content/user/growth/circle/{circleId}/{action}` | 必须携带 circleId，操作对象是用户在特定圈子内的经验/贡献/徽章/排名 |
+| 场景 | 路径模式                                                                                                   | 区分方式 |
+|------|--------------------------------------------------------------------------------------------------------|---------|
+| 全局用户成长（跨圈子） | `/api/v1/content/user/growth/{action}`                                                                 | 无 circleId 参数，操作对象是用户在全局的积分/等级/勋章 |
+| 圈子内成员成长（单圈子） | `/api/v1/content/circle/member_growth/{action}?circleId={id}` 或 `/api/v1/content/circle/member_growth/{circleId}/{action}` | 必须携带 circleId，操作对象是用户在特定圈子内的经验/贡献/徽章/排名 |
 
 **判断标准**：请求中是否包含 circleId。无 circleId 则走全局体系（EPIC-03），有 circleId 则走圈子内成员成长体系（本 Epic）。
 

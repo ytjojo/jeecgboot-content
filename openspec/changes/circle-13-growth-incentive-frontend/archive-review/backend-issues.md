@@ -125,8 +125,8 @@ public class CircleBenefitVO {
 | 圈子等级信息 | `/api/v1/content/user/growth/level/info?circleId=` | `/api/v1/content/circle/growth/level/info?circleId=` | ⚠️ 已变更 |
 | 等级权益摘要 | — | `/api/v1/content/circle/growth/level/benefit?userId=` | 🆕 新增接口 |
 | 等级配置列表 | — | `/api/v1/content/circle/growth/level/config` | 🆕 新增接口 |
-| 成员成长 | `/api/v1/content/user/growth/info?circleId=&userId=` | `/api/v1/content/user/growth/info?circleId=&userId=` | ✅ 未变 |
-| 连续参与 | `/api/v1/content/user/growth/participation?circleId=&userId=` | `/api/v1/content/user/growth/participation?circleId=&userId=` | ✅ 未变 |
+| 成员成长 | `/api/v1/content/circle/member_growth/info?circleId=&userId=` | `/api/v1/content/circle/member_growth/info?circleId=&userId=` | ✅ 未变 |
+| 连续参与 | `/api/v1/content/circle/member_growth/participation?circleId=&userId=` | `/api/v1/content/circle/member_growth/participation?circleId=&userId=` | ✅ 未变 |
 | 成就徽章 | `/api/v1/content/circle/growth/achievement/list?circleId=&userId=` | `/api/v1/content/circle/growth/achievement/list?circleId=&userId=` | ✅ 未变 |
 | 排行榜 | `/api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | `/api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | ✅ 未变 |
 

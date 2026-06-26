@@ -20,7 +20,7 @@
 | **圈子等级** | `circle_level` | `/api/v1/content/circle/growth/level/` | ✅ 有 | ❌ 无 | `circle-13-growth-incentive` (EPIC-13) |
 | **圈子内成员成长** | `circle_member_growth`、`circle_growth_log`、`circle_achievement`、`circle_member_achievement`、`circle_leaderboard_snapshot` | `/api/v1/content/user/growth/` | ✅ 有 | ✅ 有 | `circle-13-growth-incentive` (EPIC-13) |
 
-> **关键区分**：「圈子内成员成长」和「全局内容社区用户成长」共享 `/api/v1/content/user/growth/` 前缀，但前者必须带 `circleId`，后者不带 `circleId`。两者是完全独立的数据库表和业务逻辑。
+> **关键区分**：「圈子内成员成长」和「全局内容社区用户成长」，前者必须带 `circleId`，后者不带 `circleId`。两者是完全独立的数据库表和业务逻辑。
 
 ---
 

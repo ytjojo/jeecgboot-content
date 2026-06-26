@@ -27,11 +27,11 @@
 |------|---------|---------|------|
 | **全局内容社区用户成长** | `content_user_*` 系列表 | `/api/v1/content/user/growth/` | **无 circleId**，跨圈子通用的积分/等级/勋章/兑换体系，有衰减降级机制（属于 EPIC-03，不在本 change 范围） |
 | **圈子等级** | `circle_level` | `/api/v1/content/circle/growth/level/` | **只有 circleId**，圈子本身的等级（L1 新芽圈 → L5 标杆圈） |
-| **圈子内成员成长** | `circle_member_growth` 等 5 张表 | `/api/v1/content/user/growth/` | **有 circleId + userId**，用户在某个圈子内的经验/贡献/徽章/排名 |
+| **圈子内成员成长** | `circle_member_growth` 等 5 张表 | `/api/v1/content/circle/member_growth/` | **有 circleId + userId**，用户在某个圈子内的经验/贡献/徽章/排名 |
 
 **本 change 范围**：仅覆盖后两个体系（圈子等级 + 圈子内成员成长）。全局用户成长体系属于 EPIC-03。
 
-**API 路径区分**：全局用户成长与圈子内成员成长共享 `/api/v1/content/user/growth/` 前缀，通过 `circleId` 参数区分——无 circleId 走全局体系，有 circleId 走圈子内成员成长体系。
+**API 路径区分**：全局用户成长与圈子内成员成长，通过 `circleId` 参数区分——无 circleId 走全局体系，有 circleId 走圈子内成员成长体系。
 
 ## Success Criteria
 

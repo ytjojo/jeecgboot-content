@@ -74,11 +74,11 @@
 - **描述**: proposal.md 第 11 行列出的 4 个核心接口中，有 3 个路径使用了错误前缀：
   - 成就徽章列表: proposal 写 `GET /api/v1/content/circle/growth/achievement/list`，design/specs 正确为 `GET /api/v1/content/circle/growth/achievement/list`
   - 排行榜: proposal 写 `GET /api/v1/content/circle/growth/leaderboard`，design/specs 正确为 `GET /api/v1/content/circle/growth/leaderboard`
-  - 成员成长: proposal 写 `GET /api/v1/content/circle/growth/info`，design/specs 正确为 `GET /api/v1/content/user/growth/info`
+  - 成员成长: proposal 写 `GET /api/v1/content/circle/growth/info`，design/specs 正确为 `GET /api/v1/content/circle/member_growth/info`
   - 仅圈子等级接口路径正确（`/api/v1/content/circle/growth/level/info`）
 - **影响**: 若开发者以 proposal.md 为依据实现，将调用错误的 API 前缀，导致 3 个核心功能（成员成长、徽章、排行榜）接口 404。
 - **建议修复**: 修正 proposal.md 第 11 行的 API 路径：
-  - `GET /api/v1/content/circle/growth/info` → `GET /api/v1/content/user/growth/info`
+  - `GET /api/v1/content/circle/growth/info` → `GET /api/v1/content/circle/member_growth/info`
   - `GET /api/v1/content/circle/growth/achievement/list` → `GET /api/v1/content/circle/growth/achievement/list`
   - `GET /api/v1/content/circle/growth/leaderboard` → `GET /api/v1/content/circle/growth/leaderboard`
 
@@ -140,7 +140,7 @@
 - **位置**: `proposal.md` 第 11 行
 - **描述**: proposal.md 写 `GET /api/v1/content/circle/growth/info`，即使在错误的 `/circle/growth/` 前缀下，也缺少 `/level/` 段（圈子等级接口是 `/circle/growth/level/info`，成员成长接口应是 `/user/growth/info`）。
 - **影响**: 路径完全错误，无法定位到任何 Controller。
-- **建议修复**: 修正为 `GET /api/v1/content/user/growth/info?circleId=&userId=`。
+- **建议修复**: 修正为 `GET /api/v1/content/circle/member_growth/info?circleId=&userId=`。
 
 ---
 
@@ -227,10 +227,10 @@
 | # | 前端 proposal 引用 | 前端 design/specs 引用 | 后端实际 | 状态 | 问题类型 |
 |---|-------------------|----------------------|---------|------|---------|
 | 1 | GET /api/v1/content/circle/growth/level/info | GET /api/v1/content/circle/growth/level/info?circleId= | GET /api/v1/content/circle/growth/level/info?circleId= (CircleLevelController) | ✅ OK | 匹配 |
-| 2 | GET /api/v1/content/circle/growth/info ❌ | GET /api/v1/content/user/growth/info?circleId=&userId= | GET /api/v1/content/user/growth/info?circleId=&userId= (MemberGrowthController) | **BLOCK** | proposal 路径前缀错误（应为 /user/ 非 /circle/）|
+| 2 | GET /api/v1/content/circle/growth/info ❌ | GET /api/v1/content/circle/member_growth/info?circleId=&userId= | GET /api/v1/content/circle/member_growth/info?circleId=&userId= (MemberGrowthController) | **BLOCK** | proposal 路径前缀错误（应为 /user/ 非 /circle/）|
 | 3 | GET /api/v1/content/circle/growth/achievement/list ❌ | GET /api/v1/content/circle/growth/achievement/list?circleId=&userId= | GET /api/v1/content/circle/growth/achievement/list?circleId=&userId= (AchievementController) | **BLOCK** | proposal 路径前缀错误（应为 /user/ 非 /circle/）|
 | 4 | GET /api/v1/content/circle/growth/leaderboard ❌ | GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId= | GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId= (LeaderboardController) | **BLOCK** | proposal 路径前缀错误（应为 /user/ 非 /circle/）|
-| 5 | GET /api/v1/content/user/growth/participation（可选接口） | GET /api/v1/content/user/growth/participation?circleId=&userId= | GET /api/v1/content/user/growth/participation?circleId=&userId= (MemberGrowthController) | ✅ OK | 匹配（design/specs 正确）|
+| 5 | GET /api/v1/content/circle/member_growth/participation（可选接口） | GET /api/v1/content/circle/member_growth/participation?circleId=&userId= | GET /api/v1/content/circle/member_growth/participation?circleId=&userId= (MemberGrowthController) | ✅ OK | 匹配（design/specs 正确）|
 | 6 | 7 个可选接口（summary/badge/catalog/badge/detail/badge/wear/level/benefit/level/config） | 未在 specs 中对接 | 后端已提供 | ⚠️ FLAG | proposal 列出但未纳入本期实现 |
 | 7 | POST 徽章佩戴（badge/wear） | 未引用 | 后端已提供 | ⚠️ FLAG | proposal 列出但本期 Non-Goals 未包含佩戴功能，前后端范围一致但 proposal 列在可选接口易误解 |
 | 8 | 查询参数 circleId/userId | specs 中各接口均包含 circleId，member-growth 等包含 userId | 后端接口均需要 circleId（/user/growth/ 还需要 userId） | ✅ OK | 匹配 |
@@ -411,10 +411,10 @@
 | # | 后端 API | 后端 Controller | 前端 spec 是否引用 | 路径是否匹配 | 状态 |
 |---|---------|----------------|-------------------|-------------|------|
 | 1 | GET /api/v1/content/circle/growth/level/info?circleId= | CircleLevelController | ✅ circle-level spec | ✅ 匹配 | OK |
-| 2 | GET /api/v1/content/user/growth/info?circleId=&userId= | MemberGrowthController | ✅ member-growth spec | ✅ design/specs 匹配，proposal 不匹配 | **BLOCK (proposal)** |
+| 2 | GET /api/v1/content/circle/member_growth/info?circleId=&userId= | MemberGrowthController | ✅ member-growth spec | ✅ design/specs 匹配，proposal 不匹配 | **BLOCK (proposal)** |
 | 3 | GET /api/v1/content/circle/growth/achievement/list?circleId=&userId= | AchievementController | ✅ badge-system spec | ✅ design/specs 匹配，proposal 不匹配 | **BLOCK (proposal)** |
 | 4 | GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId= | LeaderboardController | ✅ leaderboard spec | ✅ design/specs 匹配，proposal 不匹配 | **BLOCK (proposal)** |
-| 5 | GET /api/v1/content/user/growth/participation?circleId=&userId= | MemberGrowthController | ✅ member-growth spec + design.md Context | ✅ 匹配 | OK |
+| 5 | GET /api/v1/content/circle/member_growth/participation?circleId=&userId= | MemberGrowthController | ✅ member-growth spec + design.md Context | ✅ 匹配 | OK |
 | 6 | GET /api/v1/content/user/growth/summary | - | ❌ 未引用 | N/A | 可选，未纳入本期 |
 | 7 | GET /api/v1/content/user/growth/badge/catalog | - | ❌ 未引用 | N/A | 可选，未纳入本期 |
 | 8 | GET /api/v1/content/user/growth/badge/detail | - | ❌ 未引用 | N/A | 可选，未纳入本期 |
@@ -589,9 +589,9 @@
 |------|---------|---------|-------------|
 | **全局内容社区用户成长** | `content_user_*` 系列表 | `/api/v1/content/user/growth/`（跨圈子通用，不在本 change） | 用户个人主页的全局积分/等级/勋章（跨圈子通用），有衰减降级机制（属于 EPIC-03，不在本 change 范围） |
 | **圈子等级** | `circle_level` | `/api/v1/content/circle/growth/level/` | 圈子详情页的等级标识、成长进度、权益展示（L1-L5） |
-| **圈子内成员成长** | `circle_member_growth` 等 5 张表 | `/api/v1/content/user/growth/`（通过 `circleId` 参数限定单圈子维度） | 个人成长信息页的经验值、贡献值、徽章、排行榜（单圈子维度） |
+| **圈子内成员成长** | `circle_member_growth` 等 5 张表 | `/api/v1/content/circle/member_growth/`（通过 `circleId` 参数限定单圈子维度） | 个人成长信息页的经验值、贡献值、徽章、排行榜（单圈子维度） |
 
-**澄清结论**: 后端 design.md D7 决策的路径划分正确，`/user/growth/` 前缀通过 `circleId` 查询参数限定为"用户在某圈子内的成长数据"，不存在语义冲突。proposal.md 将圈子内成员成长接口错误放在 `/circle/growth/` 前缀下确实是错误。
+**澄清结论**: 后端 design.md D7 决策的路径划分正确，`/circle/member_growth/` 前缀通过 `circleId` 查询参数限定为"用户在某圈子内的成长数据"，不存在语义冲突。
 
 ### 13.2 BLOCK-001/003/004/C002 API 路径修改方案验证
 
@@ -599,13 +599,13 @@
 
 | 接口 | 产品提议修改后路径 | 与 design.md 核对 | 状态 |
 |------|------------------|-----------------|------|
-| 成员成长 | `GET /api/v1/content/user/growth/info?circleId=&userId=` | 前端 design.md 第7行一致 | ✅ 正确 |
+| 成员成长 | `GET /api/v1/content/circle/member_growth/info?circleId=&userId=` | 前端 design.md 第7行一致 | ✅ 正确 |
 | 成就徽章 | `GET /api/v1/content/circle/growth/achievement/list?circleId=&userId=` | 前端 design.md 第8行一致 | ✅ 正确 |
 | 排行榜 | `GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId=` | 前端 design.md 第9行一致 | ✅ 正确 |
 
 **补充发现**: proposal.md 第11行还遗漏了一个核心接口：
 ```
-GET /api/v1/content/user/growth/participation?circleId=&userId=  (MemberGrowthController，连续参与接口)
+GET /api/v1/content/circle/member_growth/participation?circleId=&userId=  (MemberGrowthController，连续参与接口)
 ```
 该接口在前端 design.md 第10行已列出，用于支撑连续参与 Scenario，修正 proposal.md 时必须补上。
 
@@ -691,10 +691,10 @@ Step 2 依赖检查: P0 依赖阻塞=2（等级规则矛盾必须与后端对齐
 
 **优先级 P0（BLOCK，2 项）**:
 - [BLOCK] 修正 `proposal.md` 第 11 行的核心接口清单：
-  - `GET /api/v1/content/circle/growth/info` → `GET /api/v1/content/user/growth/info?circleId=&userId=`
+  - `GET /api/v1/content/circle/growth/info` → `GET /api/v1/content/circle/member_growth/info?circleId=&userId=`
   - `GET /api/v1/content/circle/growth/achievement/list` → `GET /api/v1/content/circle/growth/achievement/list?circleId=&userId=`
   - `GET /api/v1/content/circle/growth/leaderboard` → `GET /api/v1/content/circle/growth/leaderboard?circleId=&dimension=&period=&currentUserId=`
-  - **补充遗漏**：新增 `GET /api/v1/content/user/growth/participation?circleId=&userId=`（MemberGrowthController，连续参与接口）
+  - **补充遗漏**：新增 `GET /api/v1/content/circle/member_growth/participation?circleId=&userId=`（MemberGrowthController，连续参与接口）
 - [BLOCK] 修正 `specs/member-growth/spec.md` 中的等级降级规则：删除"等级下降展示" Scenario，替换为"经验值扣减但等级不下降" Scenario，与后端 member-experience spec 和 design.md 关键区别表对齐。（待产品最终确认后执行）
 
 **优先级 P1（FLAG，13 项）**:
@@ -713,7 +713,7 @@ Step 2 依赖检查: P0 依赖阻塞=2（等级规则矛盾必须与后端对齐
 
 #### 需要与后端协调的依赖项（共 2 项）
 
-- [P1] 确认后端 `/api/v1/content/user/growth/participation` 接口是否计划在本期补充 `streakDetail: boolean[]` 字段，若否则前端降级实现
+- [P1] 确认后端 `/api/v1/content/circle/member_growth/participation` 接口是否计划在本期补充 `streakDetail: boolean[]` 字段，若否则前端降级实现
 - [P1] 确认后端 MemberGrowthVO 是否计划补充 `totalBadges`/`totalBadgeCount` 字段，若否则前端通过徽章列表长度计算
 
 所有 BLOCK 问题修复后，请重新执行审核以确认"可开发"状态。FLAG 问题可在开发过程中同步修复，但建议在 apply 前全部处理完毕以避免实现偏差。
