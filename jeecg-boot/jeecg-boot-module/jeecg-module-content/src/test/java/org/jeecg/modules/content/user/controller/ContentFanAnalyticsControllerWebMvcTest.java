@@ -51,7 +51,7 @@ class ContentFanAnalyticsControllerWebMvcTest {
         when(fanAnalyticsService.listFans(eq("u1"), eq("test"), eq(1L), eq(10L)))
             .thenReturn(page);
 
-        mockMvc.perform(get("/content/user/fan/list")
+        mockMvc.perform(get("/api/v1/content/user/fan/list")
                 .param("userId", "u1")
                 .param("keyword", "test")
                 .param("pageNo", "1")
@@ -68,7 +68,7 @@ class ContentFanAnalyticsControllerWebMvcTest {
         when(fanAnalyticsService.listFans(eq("u1"), eq(null), eq(1L), eq(10L)))
             .thenReturn(page);
 
-        mockMvc.perform(get("/content/user/fan/list")
+        mockMvc.perform(get("/api/v1/content/user/fan/list")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
@@ -82,7 +82,7 @@ class ContentFanAnalyticsControllerWebMvcTest {
         when(fanAnalyticsService.getFanTrend(eq("u1"), eq("day"), any(), any()))
             .thenReturn(List.of(trend));
 
-        mockMvc.perform(get("/content/user/fan/trend")
+        mockMvc.perform(get("/api/v1/content/user/fan/trend")
                 .param("userId", "u1")
                 .param("period", "day")
                 .param("startDate", "2024-01-01")
@@ -97,7 +97,7 @@ class ContentFanAnalyticsControllerWebMvcTest {
         ContentFanProfileVO profile = new ContentFanProfileVO();
         when(fanAnalyticsService.getFanProfile("u1")).thenReturn(profile);
 
-        mockMvc.perform(get("/content/user/fan/profile")
+        mockMvc.perform(get("/api/v1/content/user/fan/profile")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
@@ -107,7 +107,7 @@ class ContentFanAnalyticsControllerWebMvcTest {
 
     @Test
     void shouldExportFans() throws Exception {
-        mockMvc.perform(get("/content/user/fan/export")
+        mockMvc.perform(get("/api/v1/content/user/fan/export")
                 .param("userId", "u1"))
             .andExpect(status().isOk());
 

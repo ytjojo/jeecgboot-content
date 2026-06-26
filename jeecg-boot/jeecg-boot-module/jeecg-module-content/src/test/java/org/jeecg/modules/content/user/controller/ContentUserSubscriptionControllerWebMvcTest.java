@@ -74,7 +74,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
                 .setSourceName("Java")
                 .setPaused(false));
 
-        mockMvc.perform(post("/content/user/subscription/subscribe?userId=u1")
+        mockMvc.perform(post("/api/v1/content/user/subscription/subscribe?userId=u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"sourceType\":\"TOPIC\",\"sourceId\":\"t1\",\"sourceName\":\"Java\"}"))
             .andExpect(status().isOk())
@@ -86,7 +86,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
 
     @Test
     void shouldRejectSubscribeWithMissingFields() throws Exception {
-        mockMvc.perform(post("/content/user/subscription/subscribe?userId=u1")
+        mockMvc.perform(post("/api/v1/content/user/subscription/subscribe?userId=u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"sourceType\":\"\",\"sourceId\":\"\",\"sourceName\":\"\"}"))
             .andExpect(status().isBadRequest());
@@ -98,7 +98,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
             .thenReturn(new ContentUserSubscriptionVO()
                 .setSubscriptionId("sub1").setPaused(true));
 
-        mockMvc.perform(post("/content/user/subscription/pause")
+        mockMvc.perform(post("/api/v1/content/user/subscription/pause")
                 .param("userId", "u1")
                 .param("subscriptionId", "sub1"))
             .andExpect(status().isOk())
@@ -112,7 +112,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
             .thenReturn(new ContentUserSubscriptionVO()
                 .setSubscriptionId("sub1").setPaused(false));
 
-        mockMvc.perform(post("/content/user/subscription/resume")
+        mockMvc.perform(post("/api/v1/content/user/subscription/resume")
                 .param("userId", "u1")
                 .param("subscriptionId", "sub1"))
             .andExpect(status().isOk())
@@ -126,7 +126,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
             .thenReturn(new ContentUserSubscriptionVO()
                 .setSubscriptionId("sub1").setSubscriptionStatus("CANCELLED"));
 
-        mockMvc.perform(post("/content/user/subscription/cancel")
+        mockMvc.perform(post("/api/v1/content/user/subscription/cancel")
                 .param("userId", "u1")
                 .param("subscriptionId", "sub1"))
             .andExpect(status().isOk())
@@ -146,7 +146,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
                     new ContentUserSubscriptionVO().setSubscriptionId("sub2").setSourceType("TOPIC")
                 )));
 
-        mockMvc.perform(get("/content/user/subscription/list")
+        mockMvc.perform(get("/api/v1/content/user/subscription/list")
                 .param("userId", "u1")
                 .param("sourceType", "TOPIC")
                 .param("pageNo", "1")
@@ -167,7 +167,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
                 .setHasMore(false)
                 .setRecords(List.of()));
 
-        mockMvc.perform(get("/content/user/subscription/feed")
+        mockMvc.perform(get("/api/v1/content/user/subscription/feed")
                 .param("userId", "u1")
                 .param("pageNo", "1")
                 .param("pageSize", "10"))
@@ -185,7 +185,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
                 .setSourceName("Java")
                 .setSubscriberCount(0));
 
-        mockMvc.perform(post("/content/user/subscription/source/save")
+        mockMvc.perform(post("/api/v1/content/user/subscription/source/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"sourceType\":\"TOPIC\",\"sourceId\":\"t1\",\"sourceName\":\"Java\"}"))
             .andExpect(status().isOk())
@@ -204,7 +204,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
                     new ContentSubscriptionSourceVO().setSourceType("TOPIC").setSourceId("t1").setSourceName("Java")
                 )));
 
-        mockMvc.perform(get("/content/user/subscription/plaza")
+        mockMvc.perform(get("/api/v1/content/user/subscription/plaza")
                 .param("userId", "u1")
                 .param("category", "DEV")
                 .param("keyword", "java")
@@ -227,7 +227,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
         detail.setPaused(false);
         when(sourceService.getSourceDetail("u1", "TOPIC", "t1")).thenReturn(detail);
 
-        mockMvc.perform(get("/content/user/subscription/source/detail")
+        mockMvc.perform(get("/api/v1/content/user/subscription/source/detail")
                 .param("userId", "u1")
                 .param("sourceType", "TOPIC")
                 .param("sourceId", "t1"))
@@ -244,7 +244,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
                 .setSourceType("TOPIC")
                 .setSourceId("t1"));
 
-        mockMvc.perform(post("/content/user/subscription/source/subscribe")
+        mockMvc.perform(post("/api/v1/content/user/subscription/source/subscribe")
                 .param("userId", "u1")
                 .param("sourceType", "TOPIC")
                 .param("sourceId", "t1"))
@@ -258,7 +258,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
         when(subscriptionService.batchPause(eq("u1"), any()))
             .thenReturn(batchResult(2, 0));
 
-        mockMvc.perform(post("/content/user/subscription/batch/pause?userId=u1")
+        mockMvc.perform(post("/api/v1/content/user/subscription/batch/pause?userId=u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"subscriptionIds\":[\"s1\",\"s2\"]}"))
             .andExpect(status().isOk())
@@ -272,7 +272,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
         when(subscriptionService.batchResume(eq("u1"), any()))
             .thenReturn(batchResult(1, 1));
 
-        mockMvc.perform(post("/content/user/subscription/batch/resume?userId=u1")
+        mockMvc.perform(post("/api/v1/content/user/subscription/batch/resume?userId=u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"subscriptionIds\":[\"s1\",\"s2\"]}"))
             .andExpect(status().isOk())
@@ -286,7 +286,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
         when(subscriptionService.batchCancel(eq("u1"), any()))
             .thenReturn(batchResult(3, 0));
 
-        mockMvc.perform(post("/content/user/subscription/batch/cancel?userId=u1")
+        mockMvc.perform(post("/api/v1/content/user/subscription/batch/cancel?userId=u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"subscriptionIds\":[\"s1\",\"s2\",\"s3\"]}"))
             .andExpect(status().isOk())
@@ -302,7 +302,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
                 .setUserId("u1")
                 .setNotificationFrequency("DAILY"));
 
-        mockMvc.perform(post("/content/user/subscription/notification/preference?userId=u1")
+        mockMvc.perform(post("/api/v1/content/user/subscription/notification/preference?userId=u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"subscriptionId\":\"sub1\",\"notificationChannels\":[\"IN_APP\"],\"notificationFrequency\":\"DAILY\"}"))
             .andExpect(status().isOk())
@@ -319,7 +319,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
                 .setNotificationFrequency("REALTIME")
                 .setInherited(false));
 
-        mockMvc.perform(get("/content/user/subscription/notification/preference")
+        mockMvc.perform(get("/api/v1/content/user/subscription/notification/preference")
                 .param("userId", "u1")
                 .param("subscriptionId", "sub1"))
             .andExpect(status().isOk())
@@ -338,7 +338,7 @@ class ContentUserSubscriptionControllerWebMvcTest {
                 .setChannels(List.of("IN_APP"))
                 .setUpdateBizId("biz1"));
 
-        mockMvc.perform(get("/content/user/subscription/notification/decision")
+        mockMvc.perform(get("/api/v1/content/user/subscription/notification/decision")
                 .param("userId", "u1")
                 .param("subscriptionId", "sub1")
                 .param("updateBizId", "biz1"))

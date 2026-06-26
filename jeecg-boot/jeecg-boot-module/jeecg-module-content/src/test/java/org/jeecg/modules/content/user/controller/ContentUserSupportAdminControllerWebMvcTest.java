@@ -58,7 +58,7 @@ class ContentUserSupportAdminControllerWebMvcTest {
             .setResultNote("申诉通过")
             .setProgressNote("已处理");
 
-        mockMvc.perform(post("/content/user/support/admin/appeal/handle")
+        mockMvc.perform(post("/api/v1/content/user/support/admin/appeal/handle")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isOk())
@@ -71,7 +71,7 @@ class ContentUserSupportAdminControllerWebMvcTest {
     void shouldRejectAppealWithBlankFields() throws Exception {
         ContentAppealHandleReq req = new ContentAppealHandleReq();
 
-        mockMvc.perform(post("/content/user/support/admin/appeal/handle")
+        mockMvc.perform(post("/api/v1/content/user/support/admin/appeal/handle")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isBadRequest());
@@ -87,7 +87,7 @@ class ContentUserSupportAdminControllerWebMvcTest {
             .setResultNote("举报属实")
             .setProgressNote("已处理");
 
-        mockMvc.perform(post("/content/user/support/admin/report/handle")
+        mockMvc.perform(post("/api/v1/content/user/support/admin/report/handle")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isOk())
@@ -100,7 +100,7 @@ class ContentUserSupportAdminControllerWebMvcTest {
     void shouldRejectReportWithBlankFields() throws Exception {
         ContentReportHandleReq req = new ContentReportHandleReq();
 
-        mockMvc.perform(post("/content/user/support/admin/report/handle")
+        mockMvc.perform(post("/api/v1/content/user/support/admin/report/handle")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isBadRequest());
@@ -111,7 +111,7 @@ class ContentUserSupportAdminControllerWebMvcTest {
         ContentUserReportAdminPageVO page = new ContentUserReportAdminPageVO();
         when(supportService.listReportsForAdmin(any(ContentUserReportAdminQueryReq.class))).thenReturn(page);
 
-        mockMvc.perform(get("/content/user/support/admin/report/list"))
+        mockMvc.perform(get("/api/v1/content/user/support/admin/report/list"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
 
@@ -123,7 +123,7 @@ class ContentUserSupportAdminControllerWebMvcTest {
         ContentUserReportAdminDetailVO detail = new ContentUserReportAdminDetailVO();
         when(supportService.getReportDetailForAdmin("r1")).thenReturn(detail);
 
-        mockMvc.perform(get("/content/user/support/admin/report/detail")
+        mockMvc.perform(get("/api/v1/content/user/support/admin/report/detail")
                 .param("reportId", "r1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));

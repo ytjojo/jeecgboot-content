@@ -74,7 +74,7 @@ class ContentUserSupportControllerWebMvcTest {
     void shouldCreateAppeal() throws Exception {
         when(supportService.createAppeal(any(ContentAppealCreateReq.class))).thenReturn("appeal-1");
 
-        mockMvc.perform(post("/content/user/support/appeal/create")
+        mockMvc.perform(post("/api/v1/content/user/support/appeal/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"u1\",\"appealType\":\"BAN\",\"targetId\":\"rec1\",\"targetType\":\"STATUS_RECORD\",\"reason\":\"误判申诉\"}"))
             .andExpect(status().isOk())
@@ -86,7 +86,7 @@ class ContentUserSupportControllerWebMvcTest {
     void shouldCreateReport() throws Exception {
         when(supportService.createReport(any(ContentReportCreateReq.class))).thenReturn("report-1");
 
-        mockMvc.perform(post("/content/user/support/report/create")
+        mockMvc.perform(post("/api/v1/content/user/support/report/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"u1\",\"targetType\":\"CONTENT\",\"targetId\":\"c1\",\"reportType\":\"SPAM\",\"reason\":\"垃圾内容\"}"))
             .andExpect(status().isOk())
@@ -104,7 +104,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setResultStatus(null)
                 .setResultNote(null));
 
-        mockMvc.perform(get("/content/user/support/appeal/progress")
+        mockMvc.perform(get("/api/v1/content/user/support/appeal/progress")
                 .param("userId", "u1")
                 .param("appealId", "appeal-1"))
             .andExpect(status().isOk())
@@ -123,7 +123,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setPageSize(10L)
                 .setRecords(List.of()));
 
-        mockMvc.perform(get("/content/user/support/appeal/list")
+        mockMvc.perform(get("/api/v1/content/user/support/appeal/list")
                 .param("userId", "u1")
                 .param("pageNo", "1")
                 .param("pageSize", "10"))
@@ -142,7 +142,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setStatus("REVIEWING")
                 .setProgressNote("审核中"));
 
-        mockMvc.perform(get("/content/user/support/report/progress")
+        mockMvc.perform(get("/api/v1/content/user/support/report/progress")
                 .param("userId", "u1")
                 .param("reportId", "report-1"))
             .andExpect(status().isOk())
@@ -161,7 +161,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setGuideEntries(List.of())
                 .setReleaseNotes(List.of()));
 
-        mockMvc.perform(get("/content/user/support/help-center")
+        mockMvc.perform(get("/api/v1/content/user/support/help-center")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -178,7 +178,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setDescription("工作时间9-18")
                 .setManualSupported(true));
 
-        mockMvc.perform(get("/content/user/support/customer-service")
+        mockMvc.perform(get("/api/v1/content/user/support/customer-service")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -188,7 +188,7 @@ class ContentUserSupportControllerWebMvcTest {
 
     @Test
     void shouldRejectInvalidAppealCreate() throws Exception {
-        mockMvc.perform(post("/content/user/support/appeal/create")
+        mockMvc.perform(post("/api/v1/content/user/support/appeal/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"\",\"appealType\":\"\",\"targetId\":\"\",\"targetType\":\"\",\"reason\":\"\"}"))
             .andExpect(status().isBadRequest());
@@ -196,7 +196,7 @@ class ContentUserSupportControllerWebMvcTest {
 
     @Test
     void shouldRejectInvalidReportCreate() throws Exception {
-        mockMvc.perform(post("/content/user/support/report/create")
+        mockMvc.perform(post("/api/v1/content/user/support/report/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"\",\"targetType\":\"\",\"targetId\":\"\",\"reportType\":\"\",\"reason\":\"\"}"))
             .andExpect(status().isBadRequest());
@@ -206,7 +206,7 @@ class ContentUserSupportControllerWebMvcTest {
     void shouldHandleAppealThroughAdmin() throws Exception {
         when(supportService.handleAppeal(any(ContentAppealHandleReq.class))).thenReturn("处理成功");
 
-        adminMockMvc.perform(post("/content/user/support/admin/appeal/handle")
+        adminMockMvc.perform(post("/api/v1/content/user/support/admin/appeal/handle")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"appealId\":\"a1\",\"operatorUserId\":\"admin1\",\"status\":\"RESOLVED\",\"resultStatus\":\"APPROVED\",\"resultNote\":\"证据有效\",\"progressNote\":\"已确认\"}"))
             .andExpect(status().isOk())
@@ -218,7 +218,7 @@ class ContentUserSupportControllerWebMvcTest {
     void shouldHandleReportThroughAdmin() throws Exception {
         when(supportService.handleReport(any(ContentReportHandleReq.class))).thenReturn("处理成功");
 
-        adminMockMvc.perform(post("/content/user/support/admin/report/handle")
+        adminMockMvc.perform(post("/api/v1/content/user/support/admin/report/handle")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"reportId\":\"r1\",\"operatorUserId\":\"admin1\",\"status\":\"RESOLVED\",\"resultStatus\":\"REMOVED\",\"resultNote\":\"违规\",\"progressNote\":\"已处理\"}"))
             .andExpect(status().isOk())
@@ -235,7 +235,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setPageSize(10L)
                 .setRecords(List.of()));
 
-        adminMockMvc.perform(get("/content/user/support/admin/report/list")
+        adminMockMvc.perform(get("/api/v1/content/user/support/admin/report/list")
                 .param("pageNo", "1")
                 .param("pageSize", "10")
                 .param("status", "PENDING"))
@@ -252,7 +252,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setStatus("PENDING")
                 .setResultNote("违规举报"));
 
-        adminMockMvc.perform(get("/content/user/support/admin/report/detail")
+        adminMockMvc.perform(get("/api/v1/content/user/support/admin/report/detail")
                 .param("reportId", "r1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -278,7 +278,7 @@ class ContentUserSupportControllerWebMvcTest {
                         .setCreateTime(new Date())
                 )));
 
-        mockMvc.perform(get("/content/user/support/report/list")
+        mockMvc.perform(get("/api/v1/content/user/support/report/list")
                 .param("userId", "u1")
                 .param("pageNo", "1")
                 .param("pageSize", "10"))
@@ -304,7 +304,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setStatusLabel("待处理")
                 .setCreateTime(new Date()));
 
-        mockMvc.perform(get("/content/user/support/report/r1")
+        mockMvc.perform(get("/api/v1/content/user/support/report/r1")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -325,7 +325,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setStatus("PENDING")
                 .setCreateTime(new Date()));
 
-        mockMvc.perform(get("/content/user/support/appeal/a1")
+        mockMvc.perform(get("/api/v1/content/user/support/appeal/a1")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -337,7 +337,7 @@ class ContentUserSupportControllerWebMvcTest {
     void shouldCreateServiceSession() throws Exception {
         when(supportService.createServiceSession("u1", "ONLINE")).thenReturn("session-1");
 
-        mockMvc.perform(post("/content/user/support/customer-service/session")
+        mockMvc.perform(post("/api/v1/content/user/support/customer-service/session")
                 .param("userId", "u1")
                 .param("sessionType", "ONLINE"))
             .andExpect(status().isOk())
@@ -354,7 +354,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setPageSize(10L)
                 .setRecords(List.of()));
 
-        mockMvc.perform(get("/content/user/support/customer-service/sessions")
+        mockMvc.perform(get("/api/v1/content/user/support/customer-service/sessions")
                 .param("userId", "u1")
                 .param("pageNo", "1")
                 .param("pageSize", "10"))
@@ -374,7 +374,7 @@ class ContentUserSupportControllerWebMvcTest {
                     .setSnippet("在登录页面点击忘记密码...")
             ));
 
-        mockMvc.perform(get("/content/user/support/help/search")
+        mockMvc.perform(get("/api/v1/content/user/support/help/search")
                 .param("userId", "u1")
                 .param("keyword", "密码"))
             .andExpect(status().isOk())
@@ -387,7 +387,7 @@ class ContentUserSupportControllerWebMvcTest {
     void shouldRateService() throws Exception {
         when(supportService.rateService("u1", "session-1", 5, "很好")).thenReturn("评分成功");
 
-        mockMvc.perform(post("/content/user/support/customer-service/session/session-1/rating")
+        mockMvc.perform(post("/api/v1/content/user/support/customer-service/session/session-1/rating")
                 .param("userId", "u1")
                 .param("rating", "5")
                 .param("comment", "很好"))
@@ -408,7 +408,7 @@ class ContentUserSupportControllerWebMvcTest {
                     .setFixes(List.of("修复登录问题"))
             ));
 
-        mockMvc.perform(get("/content/user/support/changelog/list")
+        mockMvc.perform(get("/api/v1/content/user/support/changelog/list")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -419,7 +419,7 @@ class ContentUserSupportControllerWebMvcTest {
     void shouldWithdrawReport() throws Exception {
         when(supportService.withdrawReport("u1", "r1")).thenReturn("r1");
 
-        mockMvc.perform(post("/content/user/support/report/r1/withdraw")
+        mockMvc.perform(post("/api/v1/content/user/support/report/r1/withdraw")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -430,7 +430,7 @@ class ContentUserSupportControllerWebMvcTest {
     void shouldWithdrawAppeal() throws Exception {
         when(supportService.withdrawAppeal("u1", "a1")).thenReturn("a1");
 
-        mockMvc.perform(post("/content/user/support/appeal/a1/withdraw")
+        mockMvc.perform(post("/api/v1/content/user/support/appeal/a1/withdraw")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -444,7 +444,7 @@ class ContentUserSupportControllerWebMvcTest {
                 new ContentHelpCenterEntryVO().setCode("ACCOUNT_SECURITY").setTitle("账号安全").setDescription("账号登录")
             ));
 
-        mockMvc.perform(get("/content/user/support/help/categories")
+        mockMvc.perform(get("/api/v1/content/user/support/help/categories")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -461,7 +461,7 @@ class ContentUserSupportControllerWebMvcTest {
                 .setDescription("账号登录、密码与设备安全相关问题")
                 .setSnippet("账号登录、密码与设备安全相关问题"));
 
-        mockMvc.perform(get("/content/user/support/help/article/ACCOUNT_SECURITY")
+        mockMvc.perform(get("/api/v1/content/user/support/help/article/ACCOUNT_SECURITY")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -473,7 +473,7 @@ class ContentUserSupportControllerWebMvcTest {
     void shouldSubmitArticleFeedback() throws Exception {
         when(supportService.submitArticleFeedback("u1", "ACCOUNT_SECURITY", true)).thenReturn("反馈已提交");
 
-        mockMvc.perform(post("/content/user/support/help/article/ACCOUNT_SECURITY/feedback")
+        mockMvc.perform(post("/api/v1/content/user/support/help/article/ACCOUNT_SECURITY/feedback")
                 .param("userId", "u1")
                 .param("helpful", "true"))
             .andExpect(status().isOk())

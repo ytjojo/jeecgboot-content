@@ -45,7 +45,7 @@ class ContentUserRelationControllerWebMvcTest {
             .setBlockVsMuteComparison("拉黑是双向切断，屏蔽是单向降噪");
         when(relationService.getBlockMuteHelp()).thenReturn(help);
 
-        mockMvc.perform(get("/content/user/relation/block-mute/help"))
+        mockMvc.perform(get("/api/v1/content/user/relation/block-mute/help"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.blockConfirmation").value("拉黑确认文案"))
             .andExpect(jsonPath("$.result.muteConfirmation").value("屏蔽确认文案"))
@@ -60,7 +60,7 @@ class ContentUserRelationControllerWebMvcTest {
                 .setRecords(java.util.Collections.emptyList())
                 .setTotal(0L).setPageNo(1L).setPageSize(10L));
 
-        mockMvc.perform(get("/content/user/relation/blacklist")
+        mockMvc.perform(get("/api/v1/content/user/relation/blacklist")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result").exists());
@@ -68,7 +68,7 @@ class ContentUserRelationControllerWebMvcTest {
 
     @Test
     void shouldBlacklistUser() throws Exception {
-        mockMvc.perform(post("/content/user/relation/block")
+        mockMvc.perform(post("/api/v1/content/user/relation/block")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())
@@ -77,7 +77,7 @@ class ContentUserRelationControllerWebMvcTest {
 
     @Test
     void shouldUnblacklistUser() throws Exception {
-        mockMvc.perform(post("/content/user/relation/unblock")
+        mockMvc.perform(post("/api/v1/content/user/relation/unblock")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())
@@ -86,7 +86,7 @@ class ContentUserRelationControllerWebMvcTest {
 
     @Test
     void shouldMuteUser() throws Exception {
-        mockMvc.perform(post("/content/user/relation/mute")
+        mockMvc.perform(post("/api/v1/content/user/relation/mute")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())
@@ -95,7 +95,7 @@ class ContentUserRelationControllerWebMvcTest {
 
     @Test
     void shouldUnmuteUser() throws Exception {
-        mockMvc.perform(post("/content/user/relation/mute/cancel")
+        mockMvc.perform(post("/api/v1/content/user/relation/mute/cancel")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())

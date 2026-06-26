@@ -47,7 +47,7 @@ class ContentInviteControllerWebMvcTest {
         ContentInviteCodeVO vo = new ContentInviteCodeVO();
         when(inviteService.generateOrGetInviteCode("u1")).thenReturn(vo);
 
-        mockMvc.perform(post("/content/user/invite/generate")
+        mockMvc.perform(post("/api/v1/content/user/invite/generate")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
@@ -57,7 +57,7 @@ class ContentInviteControllerWebMvcTest {
 
     @Test
     void shouldBindInviteRelation() throws Exception {
-        mockMvc.perform(post("/content/user/invite/bind")
+        mockMvc.perform(post("/api/v1/content/user/invite/bind")
                 .param("inviteCode", "ABC123")
                 .param("inviteeUserId", "u2"))
             .andExpect(status().isOk())
@@ -72,7 +72,7 @@ class ContentInviteControllerWebMvcTest {
         ContentInviteRecordPageVO page = new ContentInviteRecordPageVO();
         when(inviteService.listInviteRecords(eq("u1"), eq(1L), eq(10L))).thenReturn(page);
 
-        mockMvc.perform(get("/content/user/invite/records")
+        mockMvc.perform(get("/api/v1/content/user/invite/records")
                 .param("userId", "u1")
                 .param("pageNo", "1")
                 .param("pageSize", "10"))
@@ -87,7 +87,7 @@ class ContentInviteControllerWebMvcTest {
         ContentInviteRecordPageVO page = new ContentInviteRecordPageVO();
         when(inviteService.listInviteRecords(eq("u1"), eq(1L), eq(10L))).thenReturn(page);
 
-        mockMvc.perform(get("/content/user/invite/records")
+        mockMvc.perform(get("/api/v1/content/user/invite/records")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
@@ -98,7 +98,7 @@ class ContentInviteControllerWebMvcTest {
         ContentInviteStatsVO stats = new ContentInviteStatsVO();
         when(inviteService.getInviteStats("u1")).thenReturn(stats);
 
-        mockMvc.perform(get("/content/user/invite/stats")
+        mockMvc.perform(get("/api/v1/content/user/invite/stats")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));

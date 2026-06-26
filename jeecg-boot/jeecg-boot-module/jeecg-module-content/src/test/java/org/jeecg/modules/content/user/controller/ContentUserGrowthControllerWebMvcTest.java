@@ -83,7 +83,7 @@ class ContentUserGrowthControllerWebMvcTest {
 
     @Test
     void shouldRecordBehavior() throws Exception {
-        mockMvc.perform(post("/content/user/growth/record")
+        mockMvc.perform(post("/api/v1/content/user/growth/record")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"u1\",\"sourceType\":\"PUBLISH\",\"pointDelta\":10,\"growthDelta\":5}"))
             .andExpect(status().isOk())
@@ -95,7 +95,7 @@ class ContentUserGrowthControllerWebMvcTest {
 
     @Test
     void shouldRejectRecordWithBlankUserId() throws Exception {
-        mockMvc.perform(post("/content/user/growth/record")
+        mockMvc.perform(post("/api/v1/content/user/growth/record")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"\",\"sourceType\":\"PUBLISH\"}"))
             .andExpect(status().isBadRequest());
@@ -111,7 +111,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 .setLevel(3)
                 .setLevelBenefitSummary(new ContentUserLevelBenefitSummaryVO().setTopicQuota(5)));
 
-        mockMvc.perform(get("/content/user/growth/summary").param("userId", "u1"))
+        mockMvc.perform(get("/api/v1/content/user/growth/summary").param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.userId").value("u1"))
@@ -127,7 +127,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 new ContentUserBadgeVO().setBadgeCode("B1").setBadgeName("社交达人").setGranted(true)
             )));
 
-        mockMvc.perform(get("/content/user/growth/badge/catalog").param("userId", "u1"))
+        mockMvc.perform(get("/api/v1/content/user/growth/badge/catalog").param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.SOCIAL[0].badgeCode").value("B1"))
@@ -139,7 +139,7 @@ class ContentUserGrowthControllerWebMvcTest {
         when(badgeService.getBadgeDetail("u1", "B1"))
             .thenReturn(new ContentUserBadgeVO().setBadgeCode("B1").setBadgeName("测试勋章").setGranted(false));
 
-        mockMvc.perform(get("/content/user/growth/badge/detail")
+        mockMvc.perform(get("/api/v1/content/user/growth/badge/detail")
                 .param("userId", "u1")
                 .param("badgeCode", "B1"))
             .andExpect(status().isOk())
@@ -153,7 +153,7 @@ class ContentUserGrowthControllerWebMvcTest {
         when(badgeService.saveWornBadges(eq("u1"), any()))
             .thenReturn(List.of(new ContentUserBadgeVO().setBadgeCode("B1").setDisplaying(true)));
 
-        mockMvc.perform(post("/content/user/growth/badge/wear")
+        mockMvc.perform(post("/api/v1/content/user/growth/badge/wear")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"grantIds\":[\"g1\",\"g2\"]}"))
@@ -164,7 +164,7 @@ class ContentUserGrowthControllerWebMvcTest {
 
     @Test
     void shouldRejectEmptyWornBadgesList() throws Exception {
-        mockMvc.perform(post("/content/user/growth/badge/wear")
+        mockMvc.perform(post("/api/v1/content/user/growth/badge/wear")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"grantIds\":[]}"))
@@ -176,7 +176,7 @@ class ContentUserGrowthControllerWebMvcTest {
         when(badgeService.listWornBadges("u1"))
             .thenReturn(List.of(new ContentUserBadgeVO().setBadgeCode("B1").setDisplaying(true)));
 
-        mockMvc.perform(get("/content/user/growth/badge/worn").param("userId", "u1"))
+        mockMvc.perform(get("/api/v1/content/user/growth/badge/worn").param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result[0].displaying").value(true));
@@ -184,7 +184,7 @@ class ContentUserGrowthControllerWebMvcTest {
 
     @Test
     void shouldRecycleBadge() throws Exception {
-        mockMvc.perform(post("/content/user/growth/badge/recycle")
+        mockMvc.perform(post("/api/v1/content/user/growth/badge/recycle")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"grantId\":\"g1\",\"operatorUserId\":\"admin1\",\"reason\":\"违规撤销\"}"))
             .andExpect(status().isOk())
@@ -196,7 +196,7 @@ class ContentUserGrowthControllerWebMvcTest {
 
     @Test
     void shouldRejectRecycleWithMissingFields() throws Exception {
-        mockMvc.perform(post("/content/user/growth/badge/recycle")
+        mockMvc.perform(post("/api/v1/content/user/growth/badge/recycle")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"grantId\":\"\",\"operatorUserId\":\"\",\"reason\":\"\"}"))
             .andExpect(status().isBadRequest());
@@ -207,7 +207,7 @@ class ContentUserGrowthControllerWebMvcTest {
         when(pointSpendService.listExchangeGoods("VIRTUAL"))
             .thenReturn(List.of(new ContentUserExchangeGoodsStub("g1", "虚拟商品", 100).toVO()));
 
-        mockMvc.perform(get("/content/user/growth/point/exchange/goods").param("goodsType", "VIRTUAL"))
+        mockMvc.perform(get("/api/v1/content/user/growth/point/exchange/goods").param("goodsType", "VIRTUAL"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result[0].goodsId").value("g1"))
@@ -225,7 +225,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 .setPointCost(300)
                 .setBalanceAfter(700));
 
-        mockMvc.perform(post("/content/user/growth/point/exchange")
+        mockMvc.perform(post("/api/v1/content/user/growth/point/exchange")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"u1\",\"goodsId\":\"g1\",\"quantity\":3}"))
             .andExpect(status().isOk())
@@ -236,7 +236,7 @@ class ContentUserGrowthControllerWebMvcTest {
 
     @Test
     void shouldRejectExchangeWithZeroQuantity() throws Exception {
-        mockMvc.perform(post("/content/user/growth/point/exchange")
+        mockMvc.perform(post("/api/v1/content/user/growth/point/exchange")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"u1\",\"goodsId\":\"g1\",\"quantity\":0}"))
             .andExpect(status().isBadRequest());
@@ -252,7 +252,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 .setBalanceAfter(950)
                 .setReusedUnlock(false));
 
-        mockMvc.perform(post("/content/user/growth/point/feature/unlock")
+        mockMvc.perform(post("/api/v1/content/user/growth/point/feature/unlock")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"u1\",\"goodsId\":\"g1\"}"))
             .andExpect(status().isOk())
@@ -267,7 +267,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 .setFeatureCode("FEATURE_X")
                 .setEnabled(true));
 
-        mockMvc.perform(get("/content/user/growth/point/feature/unlock")
+        mockMvc.perform(get("/api/v1/content/user/growth/point/feature/unlock")
                 .param("userId", "u1")
                 .param("featureCode", "FEATURE_X"))
             .andExpect(status().isOk())
@@ -285,7 +285,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 .setPointCost(99)
                 .setBalanceAfter(901));
 
-        mockMvc.perform(post("/content/user/growth/point/gift/send")
+        mockMvc.perform(post("/api/v1/content/user/growth/point/gift/send")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"senderUserId\":\"u1\",\"receiverUserId\":\"u2\",\"giftGoodsId\":\"gift1\",\"quantity\":1,\"message\":\"生日快乐\"}"))
             .andExpect(status().isOk())
@@ -302,7 +302,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 .setSize(10L)
                 .setRecords(List.of()));
 
-        mockMvc.perform(get("/content/user/growth/point/ledger")
+        mockMvc.perform(get("/api/v1/content/user/growth/point/ledger")
                 .param("userId", "u1")
                 .param("type", "EARN")
                 .param("current", "1")
@@ -321,7 +321,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 .setHdVideoEnabled(true)
                 .setTopicQuota(10));
 
-        mockMvc.perform(get("/content/user/growth/level/benefit").param("userId", "u1"))
+        mockMvc.perform(get("/api/v1/content/user/growth/level/benefit").param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.uploadSizeLimitMb").value(200))
@@ -339,7 +339,7 @@ class ContentUserGrowthControllerWebMvcTest {
                     .setLevel(2).setLevelName("进阶").setGrowthThreshold(500).setBadgeStyleKey("lv2")
             ));
 
-        mockMvc.perform(get("/content/user/growth/level/config"))
+        mockMvc.perform(get("/api/v1/content/user/growth/level/config"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result[0].level").value(1))
@@ -357,7 +357,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 .setDistributionWeight(new BigDecimal("1.20"))
                 .setWeighted(true));
 
-        mockMvc.perform(get("/content/user/growth/level/distribution-weight")
+        mockMvc.perform(get("/api/v1/content/user/growth/level/distribution-weight")
                 .param("userId", "u1")
                 .param("qualityScore", "85.50"))
             .andExpect(status().isOk())
@@ -376,7 +376,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 .setProtectionDays(7)
                 .setRuleDescription("30天未活跃衰减10%，7天降级保护"));
 
-        mockMvc.perform(get("/content/user/growth/decay/rule"))
+        mockMvc.perform(get("/api/v1/content/user/growth/decay/rule"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.inactiveDays").value(30))
@@ -392,7 +392,7 @@ class ContentUserGrowthControllerWebMvcTest {
                 .setCurrentLevel(3)
                 .setCurrentGrowthValue(200));
 
-        mockMvc.perform(get("/content/user/growth/decay/status").param("userId", "u1"))
+        mockMvc.perform(get("/api/v1/content/user/growth/decay/status").param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.status").value("NORMAL"))
@@ -401,7 +401,7 @@ class ContentUserGrowthControllerWebMvcTest {
 
     @Test
     void shouldUseZeroForNullPointDeltaInRecord() throws Exception {
-        mockMvc.perform(post("/content/user/growth/record")
+        mockMvc.perform(post("/api/v1/content/user/growth/record")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"u1\",\"sourceType\":\"LIKE\",\"pointDelta\":null,\"growthDelta\":null}"))
             .andExpect(status().isOk())

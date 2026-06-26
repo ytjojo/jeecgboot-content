@@ -67,7 +67,7 @@ class ContentUserSettingsControllerWebMvcTest {
     void shouldUpdatePrivacy() throws Exception {
         ContentUserPrivacyUpdateReq req = new ContentUserPrivacyUpdateReq();
 
-        mockMvc.perform(post("/content/user/settings/privacy/update")
+        mockMvc.perform(post("/api/v1/content/user/settings/privacy/update")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
@@ -83,7 +83,7 @@ class ContentUserSettingsControllerWebMvcTest {
         ContentUserNotificationSettingVO vo = new ContentUserNotificationSettingVO();
         when(notificationSettingService.getSetting("u1")).thenReturn(vo);
 
-        mockMvc.perform(get("/content/user/settings/notification")
+        mockMvc.perform(get("/api/v1/content/user/settings/notification")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
@@ -97,7 +97,7 @@ class ContentUserSettingsControllerWebMvcTest {
         ContentUserNotificationUpdateReq req = new ContentUserNotificationUpdateReq();
         when(notificationSettingService.updateSetting(eq("u1"), any())).thenReturn(vo);
 
-        mockMvc.perform(post("/content/user/settings/notification/update")
+        mockMvc.perform(post("/api/v1/content/user/settings/notification/update")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
@@ -112,7 +112,7 @@ class ContentUserSettingsControllerWebMvcTest {
         ContentUserFeedSettingVO vo = new ContentUserFeedSettingVO();
         when(feedSettingService.getSetting("u1")).thenReturn(vo);
 
-        mockMvc.perform(get("/content/user/settings/feed")
+        mockMvc.perform(get("/api/v1/content/user/settings/feed")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
@@ -126,7 +126,7 @@ class ContentUserSettingsControllerWebMvcTest {
         ContentFeedSettingUpdateReq req = new ContentFeedSettingUpdateReq();
         when(feedSettingService.updateSetting(eq("u1"), any())).thenReturn(vo);
 
-        mockMvc.perform(post("/content/user/settings/feed/update")
+        mockMvc.perform(post("/api/v1/content/user/settings/feed/update")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
@@ -140,7 +140,7 @@ class ContentUserSettingsControllerWebMvcTest {
     void shouldCheckContentVisibility() throws Exception {
         when(visibilityPolicyService.canViewContent("owner1", "viewer1")).thenReturn(true);
 
-        mockMvc.perform(get("/content/user/settings/visibility/content")
+        mockMvc.perform(get("/api/v1/content/user/settings/visibility/content")
                 .param("ownerUserId", "owner1")
                 .param("viewerUserId", "viewer1"))
             .andExpect(status().isOk())
@@ -156,7 +156,7 @@ class ContentUserSettingsControllerWebMvcTest {
         ContentNotificationDndRuleReq req = new ContentNotificationDndRuleReq();
         when(notificationSettingService.updateDndRule(eq("u1"), any())).thenReturn(vo);
 
-        mockMvc.perform(post("/content/user/settings/notification/dnd/update")
+        mockMvc.perform(post("/api/v1/content/user/settings/notification/dnd/update")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
@@ -171,7 +171,7 @@ class ContentUserSettingsControllerWebMvcTest {
         ContentUserSecuritySettingVO vo = new ContentUserSecuritySettingVO();
         when(securitySettingService.getSecuritySetting("u1")).thenReturn(vo);
 
-        mockMvc.perform(get("/content/user/settings/security")
+        mockMvc.perform(get("/api/v1/content/user/settings/security")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));

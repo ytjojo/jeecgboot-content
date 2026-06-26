@@ -47,7 +47,7 @@ class ContentUserFilterRuleControllerWebMvcTest {
 
     @Test
     void shouldAddKeywordRule() throws Exception {
-        mockMvc.perform(post("/content/user/filter-rule")
+        mockMvc.perform(post("/api/v1/content/user/filter-rule")
                 .param("userId", "u1")
                 .param("ruleType", "KEYWORD")
                 .param("value", "广告"))
@@ -59,7 +59,7 @@ class ContentUserFilterRuleControllerWebMvcTest {
 
     @Test
     void shouldAddRegexRule() throws Exception {
-        mockMvc.perform(post("/content/user/filter-rule")
+        mockMvc.perform(post("/api/v1/content/user/filter-rule")
                 .param("userId", "u1")
                 .param("ruleType", "REGEX")
                 .param("value", "\\d+"))
@@ -71,7 +71,7 @@ class ContentUserFilterRuleControllerWebMvcTest {
 
     @Test
     void shouldAddTopicRule() throws Exception {
-        mockMvc.perform(post("/content/user/filter-rule")
+        mockMvc.perform(post("/api/v1/content/user/filter-rule")
                 .param("userId", "u1")
                 .param("ruleType", "TOPIC")
                 .param("value", "科技"))
@@ -83,7 +83,7 @@ class ContentUserFilterRuleControllerWebMvcTest {
 
     @Test
     void shouldAddTopicRuleWithExpiry() throws Exception {
-        mockMvc.perform(post("/content/user/filter-rule")
+        mockMvc.perform(post("/api/v1/content/user/filter-rule")
                 .param("userId", "u1")
                 .param("ruleType", "TOPIC")
                 .param("value", "科技")
@@ -96,7 +96,7 @@ class ContentUserFilterRuleControllerWebMvcTest {
 
     @Test
     void shouldAddContentTypeRule() throws Exception {
-        mockMvc.perform(post("/content/user/filter-rule")
+        mockMvc.perform(post("/api/v1/content/user/filter-rule")
                 .param("userId", "u1")
                 .param("ruleType", "CONTENT_TYPE")
                 .param("value", "VIDEO"))
@@ -108,7 +108,7 @@ class ContentUserFilterRuleControllerWebMvcTest {
 
     @Test
     void shouldDeleteRule() throws Exception {
-        mockMvc.perform(post("/content/user/filter-rule/delete")
+        mockMvc.perform(post("/api/v1/content/user/filter-rule/delete")
                 .param("userId", "u1")
                 .param("ruleId", "r1"))
             .andExpect(status().isOk())
@@ -119,7 +119,7 @@ class ContentUserFilterRuleControllerWebMvcTest {
 
     @Test
     void shouldBatchDeleteRules() throws Exception {
-        mockMvc.perform(post("/content/user/filter-rule/batch-delete")
+        mockMvc.perform(post("/api/v1/content/user/filter-rule/batch-delete")
                 .param("userId", "u1")
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .content("[\"r1\",\"r2\",\"r3\"]"))
@@ -146,7 +146,7 @@ class ContentUserFilterRuleControllerWebMvcTest {
                 return p;
             });
 
-        mockMvc.perform(get("/content/user/filter-rule/list")
+        mockMvc.perform(get("/api/v1/content/user/filter-rule/list")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.total").value(1))
@@ -164,7 +164,7 @@ class ContentUserFilterRuleControllerWebMvcTest {
                 return p;
             });
 
-        mockMvc.perform(get("/content/user/filter-rule/list")
+        mockMvc.perform(get("/api/v1/content/user/filter-rule/list")
                 .param("userId", "u1")
                 .param("ruleType", "KEYWORD"))
             .andExpect(status().isOk())
