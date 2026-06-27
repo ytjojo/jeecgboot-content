@@ -48,11 +48,19 @@
                 <a-button @click="goEdit">编辑</a-button>
                 <a-button @click="goMembers">成员管理</a-button>
                 <a-button @click="goGovernanceLog">治理日志</a-button>
+                <a-button @click="goAnalytics">
+                  <template #icon><BarChartOutlined /></template>
+                  数据统计
+                </a-button>
               </template>
 
               <!-- 版主操作 -->
               <template v-else-if="circleStore.isModerator">
                 <a-button @click="goMembers">成员管理</a-button>
+                <a-button @click="goAnalytics">
+                  <template #icon><BarChartOutlined /></template>
+                  数据统计
+                </a-button>
                 <a-button danger @click="handleLeave">退出</a-button>
               </template>
 
@@ -83,6 +91,34 @@
             :closable="false"
             class="muted-banner"
           />
+
+          <!-- 圈子等级区块 -->
+          <div class="detail-section circle-level-section">
+            <div class="section-title">圈子等级</div>
+
+            <!-- 私有圈子未加入提示 -->
+            <div v-if="isPrivateCircle && !circle.joined" class="level-private-tip">
+              <LockOutlined class="lock-icon" />
+              <span>加入圈子后查看等级信息</span>
+            </div>
+
+            <!-- 加载态 -->
+            <a-skeleton v-else-if="levelLoading" active :paragraph="{ rows: 3 }" />
+
+            <!-- 失败态 -->
+            <div v-else-if="levelError" class="level-error">
+              <a-typography-text type="danger">{{ levelError }}</a-typography-text>
+              <a-button size="small" type="primary" @click="retryFetchLevel">重试</a-button>
+            </div>
+
+            <!-- 成功态 -->
+            <template v-else-if="circleLevelInfo">
+              <div class="level-header">
+                <CircleLevelBadge :level="circleLevelInfo.level" :level-name="circleLevelInfo.levelName" />
+              </div>
+              <CircleLevelProgress :level-info="circleLevelInfo" />
+            </template>
+          </div>
 
           <!-- 圈子简介 -->
           <div class="detail-section">
@@ -175,11 +211,14 @@
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { LockOutlined, BarChartOutlined } from '@ant-design/icons-vue';
 import { getCircleDetail, joinCircle, leaveCircle } from '/@/api/content/circle';
 import { getMemberList } from '/@/api/content/circle';
 import { useMessage } from '/@/hooks/web/useMessage';
 import type { CircleVO, CircleMemberVO } from '/@/api/content/model/circleModel';
+import type { CircleLevelVO } from '/@/api/content/circle/growth';
 import { useCircleStoreWithOut } from '/@/store/modules/circle';
+import { useCircleGrowthStoreWithOut } from '/@/store/modules/circleGrowth';
 import PrivacyBadge from './components/PrivacyBadge.vue';
 import JoinStatusButton from './components/JoinStatusButton.vue';
 import MemberAvatar from './components/MemberAvatar.vue';
@@ -189,17 +228,26 @@ import CircleContentCard from './components/CircleContentCard.vue';
 import type { CircleContentItem } from './components/CircleContentCard.vue';
 import CircleAnnouncementBar from './components/CircleAnnouncementBar.vue';
 import CircleAnnouncementManage from './components/CircleAnnouncementManage.vue';
+import { CircleLevelBadge, CircleLevelProgress } from './components/growth';
+import { useGrowthNotification } from './components/growth/useGrowthNotification';
 import { togglePin, toggleFeatured } from '/@/api/content/circle/content';
 
 const route = useRoute();
 const router = useRouter();
 const { createMessage } = useMessage();
 const circleStore = useCircleStoreWithOut();
+const circleGrowthStore = useCircleGrowthStoreWithOut();
 
 const circle = ref<CircleVO | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const previewMembers = ref<CircleMemberVO[]>([]);
+
+// 圈子等级相关状态
+const levelLoading = ref(false);
+const levelError = ref<string | null>(null);
+const circleLevelInfo = ref<CircleLevelVO | null>(null);
+const isPrivateCircle = computed(() => circle.value?.privacyType === 'PRIVATE' || circle.value?.privacyType === 'PASSWORD');
 
 // 弹出层状态
 const showApplyModal = ref(false);
@@ -246,8 +294,9 @@ async function handleContentAction(action: string, contentId: string) {
     }
     // 刷新内容列表
     await fetchFeedItems();
-  } catch (e: any) {
-    createMessage.error(e?.message || '操作失败，请重试');
+  } catch (e) {
+    const err = e as Error;
+    createMessage.error(err?.message || '操作失败，请重试');
   } finally {
     delete actionLoading.value[loadingKey];
   }
@@ -300,6 +349,8 @@ async function fetchDetail() {
       circleStore.setCurrentCircle(detail);
       // 加载预览成员
       fetchPreviewMembers(id);
+      // 加载圈子等级信息
+      fetchCircleLevelInfo(id);
     }
   } catch {
     error.value = 'not-found';
@@ -314,6 +365,29 @@ async function fetchPreviewMembers(circleId: string) {
     previewMembers.value = result?.records || [];
   } catch {
     previewMembers.value = [];
+  }
+}
+
+async function fetchCircleLevelInfo(circleId: string) {
+  if (!circleId) return;
+
+  levelLoading.value = true;
+  levelError.value = null;
+  try {
+    const data = await circleGrowthStore.fetchCircleLevel(circleId);
+    circleLevelInfo.value = data;
+  } catch (e) {
+    const err = e as Error;
+    levelError.value = err?.message || '获取等级信息失败';
+    circleLevelInfo.value = null;
+  } finally {
+    levelLoading.value = false;
+  }
+}
+
+function retryFetchLevel() {
+  if (circle.value) {
+    fetchCircleLevelInfo(circle.value.id);
   }
 }
 
@@ -385,9 +459,28 @@ function goMembers() {
 function goGovernanceLog() {
   router.push(`/circle/${circle.value!.id}/governance-log`);
 }
+function goAnalytics() {
+  router.push(`/circle/${circle.value!.id}/analytics`);
+}
 function goList() {
   router.push('/circle/list');
 }
+
+// 获取当前圈子ID
+function getCurrentCircleId(): string | undefined {
+  return circle.value?.id || (route.params.id as string);
+}
+
+// 刷新圈子等级信息
+function refreshCircleData() {
+  const id = getCurrentCircleId();
+  if (id) {
+    fetchCircleLevelInfo(id);
+  }
+}
+
+// 注册成长通知监听
+useGrowthNotification(getCurrentCircleId, refreshCircleData);
 
 // 监听路由参数变化
 watch(() => route.params.id, () => {
@@ -498,6 +591,37 @@ onMounted(() => fetchDetail());
 
 .muted-banner {
   margin-bottom: 16px;
+}
+
+.circle-level-section {
+  .level-header {
+    margin-bottom: 16px;
+  }
+
+  .level-private-tip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 32px 16px;
+    color: var(--text-color-secondary, #999);
+    font-size: 14px;
+    background: var(--background-color-base, #f5f5f5);
+    border-radius: 8px;
+
+    .lock-icon {
+      font-size: 18px;
+      color: var(--text-color-tertiary, #ccc);
+    }
+  }
+
+  .level-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+  }
 }
 
 .detail-section {

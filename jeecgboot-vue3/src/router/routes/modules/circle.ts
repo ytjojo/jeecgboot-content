@@ -69,6 +69,30 @@ const circle: AppRouteModule = {
         title: '治理日志',
       },
     },
+    {
+      path: ':id/growth',
+      name: 'CircleGrowth',
+      component: () => import('/@/views/circle/growth/index.vue'),
+      meta: {
+        title: '成长中心',
+      },
+    },
+    {
+      path: ':id/badges',
+      name: 'CircleBadges',
+      component: () => import('/@/views/circle/badges/index.vue'),
+      meta: {
+        title: '徽章墙',
+      },
+    },
+    {
+      path: ':id/leaderboard',
+      name: 'CircleLeaderboard',
+      component: () => import('/@/views/circle/leaderboard/index.vue'),
+      meta: {
+        title: '排行榜',
+      },
+    },
   ],
 };
 
