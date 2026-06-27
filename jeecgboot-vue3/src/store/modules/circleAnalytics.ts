@@ -50,6 +50,13 @@ export const useCircleAnalyticsStore = defineStore('circle-analytics', () => {
     error.value = null;
   }
 
+  function isNoDataError(e: any): boolean {
+    const code = e?.code ?? e?.response?.data?.code;
+    if (code === 404002) return true;
+    const msg = (e?.message ?? e?.response?.data?.message ?? '') as string;
+    return msg.includes('暂无数据') || msg.includes('没有数据');
+  }
+
   async function fetchAnalytics(circleId: string, params: DateRange) {
     loading.value = true;
     error.value = null;
@@ -59,7 +66,7 @@ export const useCircleAnalyticsStore = defineStore('circle-analytics', () => {
       analyticsData.value = data;
     } catch (e: any) {
       analyticsData.value = null;
-      if (e?.code === 404002) {
+      if (isNoDataError(e)) {
         error.value = null;
       } else {
         error.value = e?.message || '加载失败';

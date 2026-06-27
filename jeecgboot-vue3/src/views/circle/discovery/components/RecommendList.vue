@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, nextTick, watch } from 'vue';
+import { ref, onMounted, nextTick, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCircleRecommendStore } from '/@/store/modules/circleRecommend';
 import { useExposureTracker } from '/@/hooks/web/useExposureTracker';
@@ -52,12 +52,14 @@ const store = useCircleRecommendStore();
 const containerRef = ref<HTMLElement | null>(null);
 const listRef = ref<HTMLElement | null>(null);
 
+const listVersion = computed(() => store.recommendList.length);
+
 function getCardItems(): HTMLElement[] {
   if (!listRef.value) return [];
   return Array.from(listRef.value.querySelectorAll('.recommend-card')) as HTMLElement[];
 }
 
-useExposureTracker({
+const { update: updateExposure } = useExposureTracker({
   containerRef,
   getItems: getCardItems,
   onExposure(items) {
@@ -67,22 +69,17 @@ useExposureTracker({
     }
   },
   thresholdTime: 500,
+  trigger: listVersion,
 });
 
 onMounted(async () => {
   await store.fetchRecommendList();
   await nextTick();
+  updateExposure();
 });
 
-watch(
-  () => store.recommendList.length,
-  async () => {
-    await nextTick();
-  },
-);
-
-async function handleClick(item: CircleRecommendItem) {
-  await store.reportClick(item.sourceId);
+function handleClick(item: CircleRecommendItem) {
+  store.reportClick(item.sourceId);
   router.push(`/circle/${item.circleId}`);
 }
 </script>

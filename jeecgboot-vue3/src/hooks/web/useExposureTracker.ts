@@ -13,16 +13,19 @@ interface ExposureTrackerOptions<T = HTMLElement> {
   onExposure: (items: ExposureItem[]) => void;
   thresholdTime?: number;
   rootMargin?: string;
+  trigger?: Ref<unknown>;
 }
 
 export function useExposureTracker<T extends HTMLElement = HTMLElement>(options: ExposureTrackerOptions<T>) {
-  const { containerRef, getItems, onExposure, thresholdTime = 500, rootMargin = '0px' } = options;
+  const { containerRef, getItems, onExposure, thresholdTime = 500, rootMargin = '0px', trigger } = options;
 
   const exposedSet = new Set<string>();
   const pendingTimers = new Map<Element, ReturnType<typeof setTimeout>>();
   const pendingItems: ExposureItem[] = [];
   let flushTimer: ReturnType<typeof setTimeout> | null = null;
   let observer: IntersectionObserver | null = null;
+  let mutationObserver: MutationObserver | null = null;
+  let mounted = false;
 
   function getItemKey(el: Element): string | null {
     const id = el.getAttribute('data-expose-id');
@@ -103,7 +106,7 @@ export function useExposureTracker<T extends HTMLElement = HTMLElement>(options:
     flush();
   }
 
-  function observeItems() {
+  function observeNewItems() {
     if (!observer) return;
     const items = getItems();
     for (const el of items) {
@@ -145,9 +148,7 @@ export function useExposureTracker<T extends HTMLElement = HTMLElement>(options:
     }
   }
 
-  function init() {
-    if (typeof window === 'undefined') return;
-
+  function createObserver() {
     if (typeof IntersectionObserver === 'undefined') {
       fallbackExposeAll();
       return;
@@ -159,15 +160,25 @@ export function useExposureTracker<T extends HTMLElement = HTMLElement>(options:
       threshold: [0, 0.1, 0.5, 1],
     });
 
-    observeItems();
+    observeNewItems();
+  }
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+  function setupMutationObserver() {
+    if (typeof MutationObserver === 'undefined' || !containerRef.value) return;
+    mutationObserver = new MutationObserver(() => {
+      nextTick(() => observeNewItems());
+    });
+    mutationObserver.observe(containerRef.value, { childList: true, subtree: true });
   }
 
   function cleanup() {
     if (observer) {
       observer.disconnect();
       observer = null;
+    }
+    if (mutationObserver) {
+      mutationObserver.disconnect();
+      mutationObserver = null;
     }
     for (const timer of pendingTimers.values()) {
       clearTimeout(timer);
@@ -183,26 +194,31 @@ export function useExposureTracker<T extends HTMLElement = HTMLElement>(options:
     flushPending();
   }
 
-  init();
+  function update() {
+    if (!mounted) return;
+    nextTick(() => observeNewItems());
+  }
 
   tryOnMounted(() => {
-    nextTick(() => {
-      observeItems();
-    });
+    mounted = true;
+    createObserver();
+    setupMutationObserver();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    }
   });
 
   tryOnUnmounted(() => {
+    mounted = false;
     cleanup();
   });
 
-  watch(
-    () => getItems(),
-    () => {
-      observeItems();
-    },
-  );
+  if (trigger) {
+    watch(trigger, () => update(), { flush: 'post' });
+  }
 
   return {
     flushPending,
+    update,
   };
 }
