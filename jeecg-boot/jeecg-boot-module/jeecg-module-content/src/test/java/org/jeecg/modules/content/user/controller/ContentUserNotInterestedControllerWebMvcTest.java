@@ -31,7 +31,7 @@ class ContentUserNotInterestedControllerWebMvcTest {
 
     @Test
     void shouldRecordNotInterestedFeedback() throws Exception {
-        mockMvc.perform(post("/content/user/not-interested")
+        mockMvc.perform(post("/api/v1/content/user/not-interested")
                 .param("userId", "u1")
                 .param("contentId", "c1")
                 .param("contentType", "article"))

@@ -56,7 +56,7 @@ class ContentAccountControllerWebMvcTest {
 
     @Test
     void applyCancel_validRequest_returnsSuccess() throws Exception {
-        mockMvc.perform(post("/content/user/account/cancel/apply")
+        mockMvc.perform(post("/api/v1/content/user/account/cancel/apply")
                 .param("userId", "u1")
                 .param("operatorUserId", "operator1")
                 .param("reason", "user requested"))
@@ -69,7 +69,7 @@ class ContentAccountControllerWebMvcTest {
 
     @Test
     void completeCancel_validRequest_returnsSuccess() throws Exception {
-        mockMvc.perform(post("/content/user/account/cancel/complete")
+        mockMvc.perform(post("/api/v1/content/user/account/cancel/complete")
                 .param("userId", "u1")
                 .param("operatorUserId", "system"))
             .andExpect(status().isOk())
@@ -81,7 +81,7 @@ class ContentAccountControllerWebMvcTest {
 
     @Test
     void revokeCancel_validRequest_returnsSuccess() throws Exception {
-        mockMvc.perform(post("/content/user/account/cancel/revoke")
+        mockMvc.perform(post("/api/v1/content/user/account/cancel/revoke")
                 .param("userId", "u1")
                 .param("operatorUserId", "u1")
                 .param("reason", "keep account"))
@@ -98,7 +98,7 @@ class ContentAccountControllerWebMvcTest {
             .when(contentAccountService)
             .completeCancel("u1", "system");
 
-        mockMvc.perform(post("/content/user/account/cancel/complete")
+        mockMvc.perform(post("/api/v1/content/user/account/cancel/complete")
                 .param("userId", "u1")
                 .param("operatorUserId", "system"))
             .andExpect(status().isOk())
@@ -110,7 +110,7 @@ class ContentAccountControllerWebMvcTest {
     void registerByEmail_validRequest_returnsSuccess() throws Exception {
         when(contentAccountService.registerByEmail(any())).thenReturn("u_mail_1001");
 
-        mockMvc.perform(post("/content/user/account/register/email")
+        mockMvc.perform(post("/api/v1/content/user/account/register/email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -130,7 +130,7 @@ class ContentAccountControllerWebMvcTest {
             .when(contentAccountService)
             .bindMobile(any());
 
-        mockMvc.perform(post("/content/user/account/bind/mobile")
+        mockMvc.perform(post("/api/v1/content/user/account/bind/mobile")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -146,7 +146,7 @@ class ContentAccountControllerWebMvcTest {
 
     @Test
     void bindEmail_validRequest_returnsSuccess() throws Exception {
-        mockMvc.perform(post("/content/user/account/bind/email")
+        mockMvc.perform(post("/api/v1/content/user/account/bind/email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -165,7 +165,7 @@ class ContentAccountControllerWebMvcTest {
 
     @Test
     void unbindMobile_validRequest_returnsSuccess() throws Exception {
-        mockMvc.perform(post("/content/user/account/unbind/mobile")
+        mockMvc.perform(post("/api/v1/content/user/account/unbind/mobile")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -183,7 +183,7 @@ class ContentAccountControllerWebMvcTest {
 
     @Test
     void unbindEmail_validRequest_returnsSuccess() throws Exception {
-        mockMvc.perform(post("/content/user/account/unbind/email")
+        mockMvc.perform(post("/api/v1/content/user/account/unbind/email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {

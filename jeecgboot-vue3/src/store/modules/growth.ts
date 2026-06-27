@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { store } from '/@/store';
 import mitt from '/@/utils/mitt';
+import { useUserStore } from '/@/store/modules/user';
 import type {
   GrowthSummaryVO,
   LevelConfigVO,
@@ -92,9 +93,14 @@ export const useGrowthStore = defineStore({
     },
   },
   actions: {
+    /** 获取当前登录用户 ID */
+    getCurrentUserId(): string {
+      const userId = useUserStore().getUserInfo?.userId;
+      return String(userId ?? '');
+    },
     /** 加载成长汇总（每次进入页面刷新） */
     async loadSummary(): Promise<GrowthSummaryVO> {
-      const data = await getGrowthSummary();
+      const data = await getGrowthSummary(this.getCurrentUserId());
       const oldLevel = this.summary?.level ?? 0;
       this.summary = data;
       // 检测升级事件并广播
@@ -119,7 +125,7 @@ export const useGrowthStore = defineStore({
     },
     /** 加载当前等级权益 */
     async loadLevelBenefit(): Promise<LevelBenefitVO> {
-      const data = await getLevelBenefit();
+      const data = await getLevelBenefit(this.getCurrentUserId());
       this.levelBenefit = data;
       return data;
     },
@@ -131,7 +137,7 @@ export const useGrowthStore = defineStore({
     },
     /** 加载用户衰减状态 */
     async loadDecayStatus(): Promise<DecayStatusVO> {
-      const data = await getDecayStatus();
+      const data = await getDecayStatus(this.getCurrentUserId());
       this.decayStatus = data;
       return data;
     },

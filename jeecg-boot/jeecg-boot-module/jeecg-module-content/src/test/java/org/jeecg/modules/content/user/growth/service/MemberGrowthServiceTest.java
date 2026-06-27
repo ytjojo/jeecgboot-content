@@ -3,14 +3,12 @@ package org.jeecg.modules.content.user.growth.service;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
-import org.jeecg.modules.content.user.growth.entity.CircleGrowthLog;
-import org.jeecg.modules.content.user.growth.entity.CircleMemberGrowth;
-import org.jeecg.modules.content.user.growth.enums.GrowthActionEnum;
-import org.jeecg.modules.content.user.growth.mapper.CircleAchievementMapper;
-import org.jeecg.modules.content.user.growth.mapper.CircleGrowthLogMapper;
-import org.jeecg.modules.content.user.growth.mapper.CircleMemberAchievementMapper;
-import org.jeecg.modules.content.user.growth.mapper.CircleMemberGrowthMapper;
-import org.jeecg.modules.content.user.growth.service.impl.MemberGrowthServiceImpl;
+import org.jeecg.modules.content.circle.growth.entity.CircleGrowthLog;
+import org.jeecg.modules.content.circle.growth.entity.CircleMemberGrowth;
+import org.jeecg.modules.content.circle.growth.enums.GrowthActionEnum;
+import org.jeecg.modules.content.circle.growth.mapper.CircleGrowthLogMapper;
+import org.jeecg.modules.content.circle.growth.mapper.CircleMemberGrowthMapper;
+import org.jeecg.modules.content.circle.growth.service.impl.MemberGrowthServiceImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -164,7 +162,7 @@ class MemberGrowthServiceTest {
         assertThat(vo.getLevel()).isEqualTo(2);
         assertThat(vo.getPostCount()).isEqualTo(5);
         assertThat(vo.getRank()).isEqualTo(1);
-        // L2: threshold = LEVEL_THRESHOLDS[2] = 300, current threshold = 100
+        // L2: threshold = MEMBER_LEVEL_THRESHOLDS[2] = 300, current threshold = 100
         // progress% = (150 - 100) * 100 / (300 - 100) = 25
         assertThat(vo.getNextLevelThreshold()).isEqualTo(300);
         assertThat(vo.getProgressPercent()).isEqualTo(25);

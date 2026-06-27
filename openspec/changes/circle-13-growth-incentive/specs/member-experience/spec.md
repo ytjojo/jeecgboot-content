@@ -1,5 +1,34 @@
 ## ADDED Requirements
 
+### Requirement: Member Level System
+
+成员在圈子内的等级 SHALL 基于累计经验值计算，分为 L1-L5 五级。
+
+成员等级门槛：
+- L1 初来乍到：0 经验值
+- L2 小有所成：100 经验值
+- L3 圈内达人：300 经验值
+- L4 资深成员：600 经验值
+- L5 圈中领袖：1000 经验值
+
+#### Scenario: Member level calculated from experience points
+- **WHEN** 成员的经验值达到某等级门槛
+- **THEN** 成员等级 SHALL 自动提升至对应等级
+
+#### Scenario: Member level display in growth profile
+- **WHEN** 成员查看个人成长信息
+- **THEN** 系统 SHALL 展示当前等级标识（level）、等级名称（levelName，如 L3 圈内达人）、下一等级门槛（nextLevelThreshold）和升级进度百分比
+
+#### Scenario: Max level reached
+- **WHEN** 成员达到 L5 圈中领袖
+- **THEN** 进度条满格，文案变为「已达最高等级」
+
+#### Scenario: Level does not downgrade
+- **WHEN** 经验值因内容删除/违规被扣减至低于当前等级门槛
+- **THEN** 成员等级 SHALL NOT 降级，仅经验值数值减少
+
+---
+
 ### Requirement: Experience Points from Content Creation
 
 成员在圈子内发布内容成功后 SHALL 获得 10 点经验值和 10 点贡献值。
@@ -64,11 +93,11 @@
 
 ### Requirement: Member Growth Profile Display
 
-成员查看个人资料时 SHALL 展示其在各圈子的经验值、贡献值、当前等级、下一等级进度和圈内排名。
+成员查看个人资料时 SHALL 展示其在各圈子的经验值、贡献值、当前等级（level + levelName）、下一等级所需经验值（nextLevelThreshold）、升级进度百分比和圈内排名（rank）。
 
 #### Scenario: View growth info on profile
 - **WHEN** 成员查看个人资料
-- **THEN** 系统 SHALL 展示该成员在各圈子的经验值、贡献值、当前等级、下一等级进度和圈内排名
+- **THEN** 系统 SHALL 展示该成员在各圈子的经验值、贡献值、当前等级（level + levelName）、下一等级所需经验值（nextLevelThreshold）、升级进度百分比和圈内排名（rank）
 
 #### Scenario: Growth info respects circle visibility
 - **WHEN** 私有圈子的成员查看成长信息

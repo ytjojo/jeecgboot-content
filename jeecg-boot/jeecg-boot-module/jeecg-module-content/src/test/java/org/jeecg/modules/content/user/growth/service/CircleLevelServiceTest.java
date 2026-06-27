@@ -3,12 +3,14 @@ package org.jeecg.modules.content.user.growth.service;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
-import org.jeecg.modules.content.user.growth.entity.CircleLevel;
-import org.jeecg.modules.content.user.growth.entity.CircleMemberGrowth;
-import org.jeecg.modules.content.user.growth.mapper.CircleLevelMapper;
-import org.jeecg.modules.content.user.growth.mapper.CircleMemberGrowthMapper;
-import org.jeecg.modules.content.user.growth.service.impl.CircleLevelServiceImpl;
-import org.jeecg.modules.content.user.growth.vo.CircleLevelVO;
+import org.jeecg.modules.content.circle.growth.entity.CircleLevel;
+import org.jeecg.modules.content.circle.growth.entity.CircleMemberGrowth;
+import org.jeecg.modules.content.circle.growth.mapper.CircleLevelMapper;
+import org.jeecg.modules.content.circle.growth.mapper.CircleMemberGrowthMapper;
+import org.jeecg.modules.content.circle.growth.service.impl.CircleLevelServiceImpl;
+import org.jeecg.modules.content.circle.growth.vo.CircleBenefitVO;
+import org.jeecg.modules.content.circle.growth.vo.CircleLevelVO;
+import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.modules.content.user.service.IContentNotificationService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +38,8 @@ class CircleLevelServiceTest {
     private CircleMemberGrowthMapper growthMapper;
     @Mock
     private IContentNotificationService notificationService;
+    @Mock
+    private ISysBaseAPI sysBaseAPI;
     @InjectMocks
     private CircleLevelServiceImpl service;
 
@@ -48,6 +52,7 @@ class CircleLevelServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(service, "baseMapper", levelMapper);
+        ReflectionTestUtils.setField(service, "sysBaseAPI", sysBaseAPI);
     }
 
     @Test
@@ -107,5 +112,44 @@ class CircleLevelServiceTest {
         assertThat(vo.getGrowthScore()).isEqualTo(200);
         assertThat(vo.getNextLevelThreshold()).isEqualTo(300);
         assertThat(vo.getProgressPercent()).isBetween(0, 100);
+    }
+
+    @Test
+    @DisplayName("L3等级返回全量5个权益，前3个已解锁后2个未解锁")
+    void getLevelInfo_l3_returnsAllBenefitsWithUnlockStatus() {
+        CircleLevel level = new CircleLevel()
+                .setCircleId("c1").setLevel(3).setGrowthScore(450)
+                .setMemberScore(150).setContentScore(180).setActivityScore(120);
+        doReturn(level).when(levelMapper).selectOne(any(), anyBoolean());
+
+        CircleLevelVO vo = service.getLevelInfo("c1");
+
+        assertThat(vo.getBenefits()).hasSize(5);
+        assertThat(vo.getBenefits().get(0).getName()).isEqualTo("基础展示");
+        assertThat(vo.getBenefits().get(0).getUnlocked()).isTrue();
+        assertThat(vo.getBenefits().get(1).getName()).isEqualTo("排行榜入口");
+        assertThat(vo.getBenefits().get(1).getUnlocked()).isTrue();
+        assertThat(vo.getBenefits().get(2).getName()).isEqualTo("徽章墙");
+        assertThat(vo.getBenefits().get(2).getUnlocked()).isTrue();
+        assertThat(vo.getBenefits().get(3).getName()).isEqualTo("推荐权重提升");
+        assertThat(vo.getBenefits().get(3).getUnlocked()).isFalse();
+        assertThat(vo.getBenefits().get(4).getName()).isEqualTo("全部权益");
+        assertThat(vo.getBenefits().get(4).getUnlocked()).isFalse();
+    }
+
+    @Test
+    @DisplayName("L5最高等级所有5个权益都已解锁")
+    void getLevelInfo_l5_allBenefitsUnlocked() {
+        CircleLevel level = new CircleLevel()
+                .setCircleId("c1").setLevel(5).setGrowthScore(1000)
+                .setMemberScore(400).setContentScore(300).setActivityScore(300);
+        doReturn(level).when(levelMapper).selectOne(any(), anyBoolean());
+
+        CircleLevelVO vo = service.getLevelInfo("c1");
+
+        assertThat(vo.getBenefits()).hasSize(5);
+        for (CircleBenefitVO benefit : vo.getBenefits()) {
+            assertThat(benefit.getUnlocked()).isTrue();
+        }
     }
 }

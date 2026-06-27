@@ -26,7 +26,7 @@
 
 ### Requirement: 连续参与进度展示
 
-系统 SHALL 在个人成长信息页展示近 7 天连续参与进度，已完成天数用实心圆标记（主题色），当日未完成用空心圆，非统计日用横线。后端 MemberGrowthVO 提供 `participationDays` 字段（连续参与天数），也可通过 `GET /api/v1/content/user/growth/participation?circleId=&userId=` 接口单独查询。
+系统 SHALL 在个人成长信息页展示近 7 天连续参与进度，已完成天数用实心圆标记（主题色），当日未完成用空心圆，非统计日用横线。后端 MemberGrowthVO 提供 `participationDays` 字段（连续参与天数），也可通过 `GET /api/v1/content/circle/member_growth/participation?circleId=&userId=` 接口单独查询。
 
 #### Scenario: 展示连续参与进度
 - **WHEN** 用户进入个人成长信息页
@@ -46,23 +46,23 @@
 
 ### Requirement: 每日经验上限展示
 
-系统 SHALL 在个人成长信息页展示今日已获经验值和每日上限。后端 MemberGrowthVO 未提供 `todayExp` 和 `dailyExpLimit` 字段，每日上限 100 点为前端硬编码（PRD 定义），今日经验值暂不展示（后续后端补充 `todayExp` 字段后启用）。
+系统 SHALL 在个人成长信息页展示今日已获经验值和每日上限。后端 MemberGrowthVO 提供 `todayExp`（今日已获经验值）和 `dailyExpLimit`（每日经验上限）字段，直接使用无需前端硬编码。
 
 #### Scenario: 展示今日经验进度
 - **WHEN** 用户进入个人成长信息页
-- **THEN** 展示每日经验上限提示「每日上限 100 点」（注：后端未提供 `todayExp` 字段，今日已获经验值暂不展示，待后端补充后启用进度条）
+- **THEN** 展示今日经验进度条，显示「今日经验 `todayExp` / `dailyExpLimit`」
 
 #### Scenario: 达到每日上限
 - **WHEN** 今日经验值达到 100 点上限
-- **THEN** 进度条变为满格，显示「已达今日上限」（注：后端未提供 `todayExp` 字段，此场景待后端补充后启用）
+- **THEN** 进度条变为满格，显示「已达今日上限」（`todayExp >= dailyExpLimit`）
 
 ### Requirement: 徽章摘要展示
 
-系统 SHALL 在个人成长信息页展示最近获得的徽章摘要，并提供「查看全部徽章」入口。后端 MemberGrowthVO 未提供 `recentBadges` 字段，需单独调用 `GET /api/v1/content/user/growth/achievement/list` 接口获取徽章列表并筛选已获得的徽章。
+系统 SHALL 在个人成长信息页展示最近获得的徽章摘要，并提供「查看全部徽章」入口。后端 MemberGrowthVO 提供 `recentBadges` 字段（`List<AchievementVO>`，最多 3 枚），直接使用无需单独调接口。
 
 #### Scenario: 展示徽章摘要
 - **WHEN** 用户进入个人成长信息页
-- **THEN** 调用成就徽章列表接口获取已获得徽章，展示最近获得的 3 枚徽章卡片，点击「查看全部徽章」跳转徽章墙页
+- **THEN** 展示 `recentBadges` 中的最近 3 枚徽章卡片（`AchievementVO` 类型，含 `achievementType`、`name`、`iconUrl`、`earnedDate`），点击「查看全部徽章」跳转徽章墙页
 
 #### Scenario: 无已获得徽章
 - **WHEN** 用户未获得任何徽章
@@ -70,7 +70,7 @@
 
 ### Requirement: 成员成长信息 API 对接
 
-系统 SHALL 通过 GET `/api/v1/content/user/growth/info?circleId={circleId}&userId={userId}` 接口获取成员成长信息。
+系统 SHALL 通过 GET `/api/v1/content/circle/member_growth/info?circleId={circleId}&userId={userId}` 接口获取成员成长信息。
 
 #### Scenario: 接口请求成功
 - **WHEN** 个人成长信息页加载
@@ -84,14 +84,15 @@
 - **WHEN** 成员成长接口请求中
 - **THEN** 展示骨架屏占位
 
-### Requirement: 经验值扣除与等级回退展示
+### Requirement: 经验值扣减展示（等级不降级）
 
-系统 SHALL 正确展示经验值扣除后的数据变化，包括等级下降情况。
+系统 SHALL 正确展示经验值扣除后的数据变化。根据后端设计，成员等级不降级（经验值可扣减，等级保持不变），避免因少量经验值回退导致等级频繁波动。
 
 #### Scenario: 经验值扣减后数据更新
 - **WHEN** 内容删除/撤回/违规导致经验值扣减
-- **THEN** 个人成长页数据实时更新，排行榜排名相应调整
+- **THEN** 个人成长页数据实时更新，经验值数值和进度条相应调整，排行榜排名相应调整
 
-#### Scenario: 等级下降展示
-- **WHEN** 经验值扣减导致低于当前等级门槛
-- **THEN** 等级下降一级，页面展示更新后的等级标识
+#### Scenario: 经验值扣减但等级不下降
+- **WHEN** 经验值因内容删除/撤回/违规被扣减至低于当前等级门槛
+- **THEN** 成员等级保持不变，仅经验值数值和进度条更新
+- **AND** 页面提示「经验值已调整」

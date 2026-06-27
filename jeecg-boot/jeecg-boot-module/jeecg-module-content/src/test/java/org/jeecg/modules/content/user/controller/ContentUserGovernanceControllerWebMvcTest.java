@@ -71,7 +71,7 @@ class ContentUserGovernanceControllerWebMvcTest {
             .setOperatorUserId("admin1")
             .setReason("违规发言");
 
-        mockMvc.perform(post("/content/user/governance/status/change")
+        mockMvc.perform(post("/api/v1/content/user/governance/status/change")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isOk())
@@ -92,7 +92,7 @@ class ContentUserGovernanceControllerWebMvcTest {
             .setTargetStatus("MUTED")
             .setOperatorUserId("admin1");
 
-        mockMvc.perform(post("/content/user/governance/status/change")
+        mockMvc.perform(post("/api/v1/content/user/governance/status/change")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isBadRequest());
@@ -106,7 +106,7 @@ class ContentUserGovernanceControllerWebMvcTest {
             .setTargetStatus("MUTED")
             .setOperatorUserId("admin1");
 
-        mockMvc.perform(post("/content/user/governance/status/change")
+        mockMvc.perform(post("/api/v1/content/user/governance/status/change")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isBadRequest());
@@ -116,7 +116,7 @@ class ContentUserGovernanceControllerWebMvcTest {
     void shouldCheckPermission() throws Exception {
         when(governanceService.canExecuteAction("u1", "POST_COMMENT")).thenReturn(true);
 
-        mockMvc.perform(get("/content/user/governance/permission/check")
+        mockMvc.perform(get("/api/v1/content/user/governance/permission/check")
                 .param("userId", "u1")
                 .param("actionType", "POST_COMMENT"))
             .andExpect(status().isOk())
@@ -128,7 +128,7 @@ class ContentUserGovernanceControllerWebMvcTest {
     void shouldCheckPermissionDenied() throws Exception {
         when(governanceService.canExecuteAction("u1", "POST_COMMENT")).thenReturn(false);
 
-        mockMvc.perform(get("/content/user/governance/permission/check")
+        mockMvc.perform(get("/api/v1/content/user/governance/permission/check")
                 .param("userId", "u1")
                 .param("actionType", "POST_COMMENT"))
             .andExpect(status().isOk())
@@ -144,7 +144,7 @@ class ContentUserGovernanceControllerWebMvcTest {
             .setReason("违规");
         when(governanceService.getCurrentStatus("u1")).thenReturn(vo);
 
-        mockMvc.perform(get("/content/user/governance/status/current")
+        mockMvc.perform(get("/api/v1/content/user/governance/status/current")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -166,7 +166,7 @@ class ContentUserGovernanceControllerWebMvcTest {
             .setPageSize(10L);
         when(governanceService.listStatusHistory(eq("u1"), anyLong(), anyLong())).thenReturn(page);
 
-        mockMvc.perform(get("/content/user/governance/status/history")
+        mockMvc.perform(get("/api/v1/content/user/governance/status/history")
                 .param("userId", "u1")
                 .param("pageNo", "1")
                 .param("pageSize", "10"))
@@ -185,7 +185,7 @@ class ContentUserGovernanceControllerWebMvcTest {
             .setPageSize(10L);
         when(governanceService.listStatusHistory(eq("u1"), eq(1L), eq(10L))).thenReturn(page);
 
-        mockMvc.perform(get("/content/user/governance/status/history")
+        mockMvc.perform(get("/api/v1/content/user/governance/status/history")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.pageNo").value(1))
@@ -200,7 +200,7 @@ class ContentUserGovernanceControllerWebMvcTest {
             .setDeviceId("dev-1");
         when(governanceService.listDeviceSessions("u1")).thenReturn(List.of(session));
 
-        mockMvc.perform(get("/content/user/governance/device/sessions")
+        mockMvc.perform(get("/api/v1/content/user/governance/device/sessions")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -209,7 +209,7 @@ class ContentUserGovernanceControllerWebMvcTest {
 
     @Test
     void shouldOfflineDeviceSession() throws Exception {
-        mockMvc.perform(post("/content/user/governance/device/offline")
+        mockMvc.perform(post("/api/v1/content/user/governance/device/offline")
                 .param("userId", "u1")
                 .param("sessionId", "s1"))
             .andExpect(status().isOk())
@@ -221,7 +221,7 @@ class ContentUserGovernanceControllerWebMvcTest {
 
     @Test
     void shouldDeleteComment() throws Exception {
-        mockMvc.perform(post("/content/user/governance/moderator/comment/delete")
+        mockMvc.perform(post("/api/v1/content/user/governance/moderator/comment/delete")
                 .param("commentId", "c1")
                 .param("reason", "违规"))
             .andExpect(status().isOk())
@@ -233,7 +233,7 @@ class ContentUserGovernanceControllerWebMvcTest {
 
     @Test
     void shouldWarnUser() throws Exception {
-        mockMvc.perform(post("/content/user/governance/moderator/user/warn")
+        mockMvc.perform(post("/api/v1/content/user/governance/moderator/user/warn")
                 .param("targetUserId", "u2")
                 .param("reason", "首次警告"))
             .andExpect(status().isOk())
@@ -259,7 +259,7 @@ class ContentUserGovernanceControllerWebMvcTest {
             .setPageSize(10L);
         when(governanceService.listAuditLog(any(), any(), any(), any(), any(), any())).thenReturn(page);
 
-        mockMvc.perform(get("/content/user/governance/audit-log")
+        mockMvc.perform(get("/api/v1/content/user/governance/audit-log")
                 .param("pageNo", "1")
                 .param("pageSize", "10"))
             .andExpect(status().isOk())
@@ -278,7 +278,7 @@ class ContentUserGovernanceControllerWebMvcTest {
             .setPageSize(10L);
         when(governanceService.listAuditLog(any(), any(), any(), any(), any(), any())).thenReturn(page);
 
-        mockMvc.perform(get("/content/user/governance/audit-log"))
+        mockMvc.perform(get("/api/v1/content/user/governance/audit-log"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.pageNo").value(1))

@@ -1,7 +1,8 @@
 package org.jeecg.modules.content.user.growth.controller;
 
-import org.jeecg.modules.content.user.growth.service.ILeaderboardService;
-import org.jeecg.modules.content.user.growth.vo.LeaderboardEntryVO;
+import org.jeecg.modules.content.circle.growth.controller.LeaderboardController;
+import org.jeecg.modules.content.circle.growth.service.ILeaderboardService;
+import org.jeecg.modules.content.circle.growth.vo.LeaderboardEntryVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

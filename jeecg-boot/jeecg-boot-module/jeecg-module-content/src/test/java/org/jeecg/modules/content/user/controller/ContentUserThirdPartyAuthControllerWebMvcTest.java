@@ -64,7 +64,7 @@ class ContentUserThirdPartyAuthControllerWebMvcTest {
             .setStatus("ACTIVE");
         when(thirdPartyAuthService.listActiveAuths("u1")).thenReturn(List.of(vo));
 
-        mockMvc.perform(get("/content/user/auth/third-party/")
+        mockMvc.perform(get("/api/v1/content/user/auth/third-party/")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -76,7 +76,7 @@ class ContentUserThirdPartyAuthControllerWebMvcTest {
     void revokeAuth_validAuthId_returns200() throws Exception {
         when(thirdPartyAuthService.revokeAuth("u1", "a1")).thenReturn(true);
 
-        mockMvc.perform(delete("/content/user/auth/third-party/a1")
+        mockMvc.perform(delete("/api/v1/content/user/auth/third-party/a1")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -90,7 +90,7 @@ class ContentUserThirdPartyAuthControllerWebMvcTest {
         when(thirdPartyAuthService.revokeAuth("u1", "nonexistent"))
             .thenThrow(new JeecgBootException("授权记录不存在"));
 
-        mockMvc.perform(delete("/content/user/auth/third-party/nonexistent")
+        mockMvc.perform(delete("/api/v1/content/user/auth/third-party/nonexistent")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(false))

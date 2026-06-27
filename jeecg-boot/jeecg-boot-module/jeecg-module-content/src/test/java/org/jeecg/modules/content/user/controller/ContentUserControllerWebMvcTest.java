@@ -127,7 +127,7 @@ class ContentUserControllerWebMvcTest {
     void shouldRejectMutedUserCommentPermission() throws Exception {
         when(governanceService.canExecuteAction("u1", "COMMENT")).thenReturn(false);
 
-        mockMvc.perform(get("/content/user/governance/permission/check")
+        mockMvc.perform(get("/api/v1/content/user/governance/permission/check")
                 .param("userId", "u1")
                 .param("actionType", "COMMENT"))
             .andExpect(status().isOk())
@@ -152,7 +152,7 @@ class ContentUserControllerWebMvcTest {
                     .setReason("违规处理")
                     .setCreateTime(createTime))));
 
-        mockMvc.perform(get("/content/user/governance/status/history")
+        mockMvc.perform(get("/api/v1/content/user/governance/status/history")
                 .param("userId", "u1")
                 .param("pageNo", "2")
                 .param("pageSize", "1"))
@@ -167,7 +167,7 @@ class ContentUserControllerWebMvcTest {
 
     @Test
     void shouldRejectInvalidFollowRequest() throws Exception {
-        mockMvc.perform(post("/content/user/relation/follow")
+        mockMvc.perform(post("/api/v1/content/user/relation/follow")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"targetUserId\":\"\"}"))
@@ -183,7 +183,7 @@ class ContentUserControllerWebMvcTest {
             .setProtectionDays(7)
             .setRuleDescription("连续 30 天未登录后衰减，7 天保护"));
 
-        mockMvc.perform(get("/content/user/growth/decay/rule"))
+        mockMvc.perform(get("/api/v1/content/user/growth/decay/rule"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.enabled").value(true))
@@ -208,13 +208,13 @@ class ContentUserControllerWebMvcTest {
         when(badgeService.listBadgeCatalog("u1")).thenReturn(Map.of("ACHIEVEMENT", List.of(badge)));
         when(badgeService.getBadgeDetail("u1", "PUBLISHER")).thenReturn(badge);
 
-        mockMvc.perform(get("/content/user/growth/badge/catalog").param("userId", "u1"))
+        mockMvc.perform(get("/api/v1/content/user/growth/badge/catalog").param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result.ACHIEVEMENT[0].badgeCode").value("PUBLISHER"))
             .andExpect(jsonPath("$.result.ACHIEVEMENT[0].progress.remainingRequirement").value(7));
 
-        mockMvc.perform(get("/content/user/growth/badge/detail")
+        mockMvc.perform(get("/api/v1/content/user/growth/badge/detail")
                 .param("userId", "u1")
                 .param("badgeCode", "PUBLISHER"))
             .andExpect(status().isOk())
@@ -230,7 +230,7 @@ class ContentUserControllerWebMvcTest {
             .setDisplaying(Boolean.TRUE);
         when(badgeService.saveWornBadges("u1", List.of("grant-1"))).thenReturn(List.of(worn));
 
-        mockMvc.perform(post("/content/user/growth/badge/wear")
+        mockMvc.perform(post("/api/v1/content/user/growth/badge/wear")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"grantIds\":[\"grant-1\"]}"))
@@ -239,7 +239,7 @@ class ContentUserControllerWebMvcTest {
             .andExpect(jsonPath("$.result[0].badgeGrantId").value("grant-1"))
             .andExpect(jsonPath("$.result[0].displaying").value(true));
 
-        mockMvc.perform(post("/content/user/growth/badge/recycle")
+        mockMvc.perform(post("/api/v1/content/user/growth/badge/recycle")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"grantId\":\"grant-1\",\"operatorUserId\":\"admin-1\",\"reason\":\"违规获取\"}"))
             .andExpect(status().isOk())
@@ -249,7 +249,7 @@ class ContentUserControllerWebMvcTest {
 
     @Test
     void shouldRejectTooManyWornBadgesAtControllerBoundary() throws Exception {
-        mockMvc.perform(post("/content/user/growth/badge/wear")
+        mockMvc.perform(post("/api/v1/content/user/growth/badge/wear")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"grantIds\":[\"g1\",\"g2\",\"g3\",\"g4\",\"g5\",\"g6\"]}"))
@@ -290,25 +290,25 @@ class ContentUserControllerWebMvcTest {
                     .setSourceType("POINT_EXCHANGE")
                     .setSourceDescription("会员标识"))));
 
-        mockMvc.perform(get("/content/user/growth/point/exchange/goods").param("goodsType", "BENEFIT"))
+        mockMvc.perform(get("/api/v1/content/user/growth/point/exchange/goods").param("goodsType", "BENEFIT"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result[0].goodsCode").value("VIP_BADGE"));
 
-        mockMvc.perform(post("/content/user/growth/point/exchange")
+        mockMvc.perform(post("/api/v1/content/user/growth/point/exchange")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"u1\",\"goodsId\":\"goods-1\",\"quantity\":2}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.orderId").value("order-1"))
             .andExpect(jsonPath("$.result.balanceAfter").value(800));
 
-        mockMvc.perform(post("/content/user/growth/point/gift/send")
+        mockMvc.perform(post("/api/v1/content/user/growth/point/gift/send")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"senderUserId\":\"u1\",\"receiverUserId\":\"u2\",\"giftGoodsId\":\"gift-1\",\"quantity\":1,\"message\":\"加油\"}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.orderId").value("gift-order-1"))
             .andExpect(jsonPath("$.result.benefitStatus").value("GRANTED"));
 
-        mockMvc.perform(get("/content/user/growth/point/ledger")
+        mockMvc.perform(get("/api/v1/content/user/growth/point/ledger")
                 .param("userId", "u1")
                 .param("type", "SPEND")
                 .param("current", "1")
@@ -320,7 +320,7 @@ class ContentUserControllerWebMvcTest {
 
     @Test
     void shouldRejectInvalidPointExchangeAtControllerBoundary() throws Exception {
-        mockMvc.perform(post("/content/user/growth/point/exchange")
+        mockMvc.perform(post("/api/v1/content/user/growth/point/exchange")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"u1\",\"goodsId\":\"goods-1\",\"quantity\":0}"))
             .andExpect(status().isBadRequest());
@@ -359,31 +359,31 @@ class ContentUserControllerWebMvcTest {
                 .setQualityScoreRequired(Boolean.TRUE)
                 .setWeighted(Boolean.TRUE));
 
-        mockMvc.perform(post("/content/user/growth/point/feature/unlock")
+        mockMvc.perform(post("/api/v1/content/user/growth/point/feature/unlock")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"userId\":\"u1\",\"goodsId\":\"feature-goods-1\"}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.goodsId").value("feature-goods-1"))
             .andExpect(jsonPath("$.result.reusedUnlock").value(false));
 
-        mockMvc.perform(get("/content/user/growth/point/feature/unlock")
+        mockMvc.perform(get("/api/v1/content/user/growth/point/feature/unlock")
                 .param("userId", "u1")
                 .param("featureCode", "PIN_TOP"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.featureCode").value("PIN_TOP"))
             .andExpect(jsonPath("$.result.enabled").value(true));
 
-        mockMvc.perform(get("/content/user/growth/level/benefit").param("userId", "u1"))
+        mockMvc.perform(get("/api/v1/content/user/growth/level/benefit").param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.uploadSizeLimitMb").value(500))
             .andExpect(jsonPath("$.result.enabledBenefitCodes[0]").value("HD_VIDEO"));
 
-        mockMvc.perform(get("/content/user/growth/level/config"))
+        mockMvc.perform(get("/api/v1/content/user/growth/level/config"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result[0].level").value(2))
             .andExpect(jsonPath("$.result[0].growthThreshold").value(100));
 
-        mockMvc.perform(get("/content/user/growth/level/distribution-weight")
+        mockMvc.perform(get("/api/v1/content/user/growth/level/distribution-weight")
                 .param("userId", "u1")
                 .param("qualityScore", "0.80"))
             .andExpect(status().isOk())
@@ -407,7 +407,7 @@ class ContentUserControllerWebMvcTest {
 
     @Test
     void shouldCancelBlacklistSuccessfully() throws Exception {
-        mockMvc.perform(post("/content/user/relation/unblock")
+        mockMvc.perform(post("/api/v1/content/user/relation/unblock")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())
@@ -417,7 +417,7 @@ class ContentUserControllerWebMvcTest {
 
     @Test
     void shouldEnableSpecialFollowSuccessfully() throws Exception {
-        mockMvc.perform(post("/content/user/relation/special-follow")
+        mockMvc.perform(post("/api/v1/content/user/relation/special-follow")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"targetUserId\":\"u2\",\"relationGroupId\":\"g1\"}"))
@@ -441,7 +441,7 @@ class ContentUserControllerWebMvcTest {
                 .setFollowedAt(new Date(1735689600000L))
                 .setSpecialFollowAt(new Date(1735776000000L)));
 
-        mockMvc.perform(get("/content/user/relation/detail")
+        mockMvc.perform(get("/api/v1/content/user/relation/detail")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())
@@ -461,7 +461,7 @@ class ContentUserControllerWebMvcTest {
 
     @Test
     void shouldKeepLegacyRelationEndpointsCompatible() throws Exception {
-        mockMvc.perform(post("/content/user/relation/follow")
+        mockMvc.perform(post("/api/v1/content/user/relation/follow")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"targetUserId\":\"u2\",\"relationGroupId\":\"g1\"}"))
@@ -469,14 +469,14 @@ class ContentUserControllerWebMvcTest {
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result").value("关注成功"));
 
-        mockMvc.perform(post("/content/user/relation/unfollow")
+        mockMvc.perform(post("/api/v1/content/user/relation/unfollow")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.result").value("取消关注成功"));
 
-        mockMvc.perform(post("/content/user/relation/special-follow/cancel")
+        mockMvc.perform(post("/api/v1/content/user/relation/special-follow/cancel")
                 .param("userId", "u1")
                 .param("targetUserId", "u2"))
             .andExpect(status().isOk())
@@ -486,13 +486,13 @@ class ContentUserControllerWebMvcTest {
 
     @Test
     void shouldRejectInvalidRelationGroupRequestsAtControllerBoundary() throws Exception {
-        mockMvc.perform(post("/content/user/relation/group/create")
+        mockMvc.perform(post("/api/v1/content/user/relation/group/create")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"groupName\":\"\",\"sortOrder\":1}"))
             .andExpect(status().isBadRequest());
 
-        mockMvc.perform(post("/content/user/relation/group/move")
+        mockMvc.perform(post("/api/v1/content/user/relation/group/move")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"targetUserIds\":[],\"relationGroupId\":\"g1\"}"))
@@ -504,7 +504,7 @@ class ContentUserControllerWebMvcTest {
         when(relationService.moveTargetsToGroup("u1", List.of("u2"), "g1"))
             .thenReturn(new ContentRelationBatchResultVO().setSuccessCount(1).setFailureCount(0));
 
-        mockMvc.perform(post("/content/user/relation/group/move")
+        mockMvc.perform(post("/api/v1/content/user/relation/group/move")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"targetUserIds\":[\"u2\"],\"relationGroupId\":\"g1\"}"))
@@ -527,7 +527,7 @@ class ContentUserControllerWebMvcTest {
                     .setRelationGroupId("g1")
                     .setFollowed(Boolean.TRUE))));
 
-        mockMvc.perform(get("/content/user/relation/follow-list")
+        mockMvc.perform(get("/api/v1/content/user/relation/follow-list")
                 .param("userId", "u1")
                 .param("relationGroupId", "g1")
                 .param("keyword", "小")
@@ -549,7 +549,7 @@ class ContentUserControllerWebMvcTest {
                 .setPageSize(10L)
                 .setEmptyStateCode("NO_SPECIAL_FOLLOW"));
 
-        mockMvc.perform(get("/content/user/relation/special-follow-list")
+        mockMvc.perform(get("/api/v1/content/user/relation/special-follow-list")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -567,7 +567,7 @@ class ContentUserControllerWebMvcTest {
                     .setTargetUserId("missing")
                     .setReason("关注关系不存在"))));
 
-        mockMvc.perform(post("/content/user/relation/batch/unfollow")
+        mockMvc.perform(post("/api/v1/content/user/relation/batch/unfollow")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"targetUserIds\":[\"u2\",\"missing\"]}"))
@@ -580,7 +580,7 @@ class ContentUserControllerWebMvcTest {
 
     @Test
     void shouldRejectEmptyBatchRelationRequestAtControllerBoundary() throws Exception {
-        mockMvc.perform(post("/content/user/relation/batch/special-follow/cancel")
+        mockMvc.perform(post("/api/v1/content/user/relation/batch/special-follow/cancel")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"targetUserIds\":[]}"))
@@ -601,7 +601,7 @@ class ContentUserControllerWebMvcTest {
                     .setStartTime("22:00")
                     .setEndTime("08:00")));
 
-        mockMvc.perform(get("/content/user/settings/notification")
+        mockMvc.perform(get("/api/v1/content/user/settings/notification")
                 .param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true))
@@ -613,7 +613,7 @@ class ContentUserControllerWebMvcTest {
 
     @Test
     void shouldRejectInvalidNotificationChannel() throws Exception {
-        mockMvc.perform(post("/content/user/settings/notification/update")
+        mockMvc.perform(post("/api/v1/content/user/settings/notification/update")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"channelConfig\":{\"likeChannels\":[\"BAD\"]}}"))

@@ -48,11 +48,19 @@
                 <a-button @click="goEdit">编辑</a-button>
                 <a-button @click="goMembers">成员管理</a-button>
                 <a-button @click="goGovernanceLog">治理日志</a-button>
+                <a-button @click="goAnalytics">
+                  <template #icon><BarChartOutlined /></template>
+                  数据统计
+                </a-button>
               </template>
 
               <!-- 版主操作 -->
               <template v-else-if="circleStore.isModerator">
                 <a-button @click="goMembers">成员管理</a-button>
+                <a-button @click="goAnalytics">
+                  <template #icon><BarChartOutlined /></template>
+                  数据统计
+                </a-button>
                 <a-button danger @click="handleLeave">退出</a-button>
               </template>
 
@@ -203,7 +211,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { LockOutlined } from '@ant-design/icons-vue';
+import { LockOutlined, BarChartOutlined } from '@ant-design/icons-vue';
 import { getCircleDetail, joinCircle, leaveCircle } from '/@/api/content/circle';
 import { getMemberList } from '/@/api/content/circle';
 import { useMessage } from '/@/hooks/web/useMessage';
@@ -450,6 +458,9 @@ function goMembers() {
 }
 function goGovernanceLog() {
   router.push(`/circle/${circle.value!.id}/governance-log`);
+}
+function goAnalytics() {
+  router.push(`/circle/${circle.value!.id}/analytics`);
 }
 function goList() {
   router.push('/circle/list');

@@ -2,7 +2,7 @@
 
 圈子基础功能（EPIC-10）和内容互动能力（EPIC-11）为设计前置依赖。当前代码库中尚无圈子相关 Java 代码，圈子功能以 spec 和 PRD 形式存在。模块代码将放在 `jeecg-module-content` 的 `content/user/` 包下，遵循已有分层架构：entity → mapper → service/impl → controller，辅以 dto/req/vo。
 
-数据库迁移使用 Flyway，最新版本号 V3.9.1_62，新表使用 V3.9.1_63+。通知系统已有完整基础设施（`IContentNotificationService`、`ContentUserNotificationSetting`），等级提升和徽章发放直接复用。
+数据库迁移使用 Flyway，最新版本号 V3.9.1_66，新表使用 V3.9.1_67+。通知系统已有完整基础设施（`IContentNotificationService`、`ContentUserNotificationSetting`），等级提升和徽章发放直接复用。
 
 ## Goals / Non-Goals
 
@@ -18,6 +18,42 @@
 - 跨圈子积分兑换或成长数据合并
 - 自定义徽章
 - 实物奖励
+
+## 概念区分：圈子等级 vs 成员等级
+
+本 change 包含两套独立的成长等级体系，分别面向不同的主体和计算逻辑：
+
+### 圈子等级（Circle Level）
+- **主体**: 圈子（Circle）
+- **定位**: 反映社区整体发展状态和运营成熟度
+- **计算依据**: 成员规模、内容贡献、活跃互动 3 类聚合指标
+- **计算方式**: 定时任务（30 分钟）批量聚合计算
+- **等级体系**: L1 新芽圈 → L2 活跃圈 → L3 优质圈 → L4 热门圈 → L5 标杆圈（成长分 0-1000）
+- **展示位置**: 圈子详情页、圈子列表卡片
+- **核心字段**: `CircleLevelVO` — level, levelName, growthScore, nextLevelThreshold, progressPercent, memberScore, contentScore, activityScore, benefits (List\<CircleBenefitVO\>), nextLevelConditions (List\<LevelConditionVO\>)
+- **Controller**: `CircleLevelController`
+- **API 前缀**: `/api/v1/content/circle/growth/`
+
+### 成员等级（Member Level）
+- **主体**: 成员（Member/CircleMember）
+- **定位**: 反映个人在圈子内的参与深度和活跃程度
+- **计算依据**: 单个成员累计经验值
+- **计算方式**: 行为触发实时计算（发帖+10、评论+3、加精+30/50），每日上限 100 点
+- **等级体系**: L1 初来乍到 → L2 小有所成 → L3 圈内达人 → L4 资深成员 → L5 圈中领袖（经验值 0-1000）
+- **展示位置**: 个人成长信息页
+- **核心字段**: `MemberGrowthVO` — circleId, expPoints, contributionPoints, level, levelName, postCount, participationDays, rank, nextLevelThreshold, progressPercent, todayExp, dailyExpLimit, recentBadges (List\<AchievementVO\>)
+- **Controller**: `MemberGrowthController`
+- **API 前缀**: `/api/v1/content/user/growth/`
+
+### 关键区别
+| 维度 | 圈子等级 | 成员等级 |
+|------|---------|---------|
+| 谁在成长 | 圈子（社区） | 成员（个人） |
+| 衡量什么 | 社区发展成熟度 | 个人参与深度 |
+| 数据来源 | 圈子聚合指标 | 个人行为累计 |
+| 是否降级 | 不降级（仅升级） | 不降级（经验值可扣减，等级不变） |
+| 升级频率 | 30 分钟批量 | 行为后实时 |
+| 查询参数 | circleId | circleId + userId |
 
 ## Decisions
 
@@ -57,11 +93,41 @@
 
 **理由**: 徽章检查涉及聚合查询（如累计发帖数），同步执行会拖慢主流程。异步方式解耦，主流程不受徽章逻辑影响。
 
+### D5.5: 成员等级计算 — 基于经验值 vs 贡献值
+
+**选择**: 成员等级基于累计经验值计算，分 L1-L5 五级
+
+**门槛**:
+| 等级 | 名称 | 经验值门槛 |
+|------|------|-----------|
+| L1 | 初来乍到 | 0 |
+| L2 | 小有所成 | 100 |
+| L3 | 圈内达人 | 300 |
+| L4 | 资深成员 | 600 |
+| L5 | 圈中领袖 | 1000 |
+
+**理由**: 经验值反映成员在圈子内的综合参与深度，比贡献值更能代表成长轨迹。等级不降级，避免因少量经验值回退导致等级频繁波动。
+
+**替代方案**: 基于贡献值计算 — 贡献值受加精等低频行为影响大，波动不明显，不利于激励持续参与。
+
 ### D6: 包结构 — 新建 growth 子包
 
 **选择**: 在 `content/user/` 下新建 `growth/` 子包，包含 entity/mapper/service/controller/vo
 
 **理由**: 已有 `content/user/req/growth/` 子包存在，说明项目已预留成长相关扩展位。新增 `growth/` 包与现有架构一致，避免污染其他子域。
+
+### D7: API 路径命名约定 — 圈子成长 vs 用户成长
+
+**选择**: 圈子等级相关 API 使用 `/api/v1/content/circle/growth/` 前缀，用户成长相关 API 使用 `/api/v1/content/user/growth/` 前缀
+
+**路径划分**:
+
+| 前缀 | 归属 | Controller | 说明 |
+|------|------|-----------|------|
+| `/circle/growth/` | 圈子成长 | CircleLevelController | 圈子等级计算与展示，基于圈子聚合指标 |
+| `/user/growth/` | 用户成长 | MemberGrowthController, AchievementController, LeaderboardController | 成员经验值、贡献值、徽章、排行榜 |
+
+**理由**: 圈子等级（反映社区整体发展状态）和用户成长（反映个人参与深度）是两套独立体系，API 路径前缀应体现这一区别。混用 `user/growth` 前缀会导致「调用用户成长 API 却返回圈子等级信息」的语义混乱。
 
 ## Risks / Trade-offs
 
@@ -81,7 +147,7 @@ jeecg-boot-module/jeecg-module-content/src/main/
 │   │   └── GrowthConstant.java              # 经验值规则、等级门槛等常量
 │   ├── entity/
 │   │   ├── CircleLevel.java                 # 圈子等级配置表实体
-│   │   ├── CircleMemberGrowth.java          # 成员成长记录实体
+│   │   ├── CircleMemberGrowth.java          # 成员成长记录实体（含 level/levelName/nextLevelExp 字段）
 │   │   ├── CircleGrowthLog.java             # 成长行为流水实体
 │   │   ├── CircleAchievement.java           # 成就徽章配置实体
 │   │   ├── CircleMemberAchievement.java     # 成员已获得徽章实体
@@ -114,13 +180,13 @@ jeecg-boot-module/jeecg-module-content/src/main/
 │   │   ├── AchievementVO.java
 │   │   └── LeaderboardEntryVO.java
 │   └── controller/
-│       ├── CircleLevelController.java
+│       ├── CircleLevelController.java         # API 前缀: /api/v1/content/circle/growth/
 │       ├── MemberGrowthController.java
 │       ├── AchievementController.java
 │       └── LeaderboardController.java
 ├── resources/flyway/sql/mysql/
-│   ├── V3.9.1_63__circle_growth_system.sql
-│   └── R3.9.1_63__circle_growth_system_rollback.sql
+│   ├── V3.9.1_67__circle_growth_system.sql
+│   └── R3.9.1_67__circle_growth_system_rollback.sql
 
 jeecg-boot-module/jeecg-module-content/src/test/
 ├── java/org/jeecg/modules/content/user/growth/
@@ -133,6 +199,28 @@ jeecg-boot-module/jeecg-module-content/src/test/
 │       ├── MemberGrowthControllerTest.java
 │       └── LeaderboardControllerTest.java
 ```
+
+### MemberGrowthVO 字段（补充后）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `circleId` | String | 圈子ID |
+| `expPoints` | Integer | 经验值 |
+| `contributionPoints` | Integer | 贡献值 |
+| `level` | Integer | 当前等级(L1-L5) |
+| `levelName` | String | 等级名称（"初来乍到"/"小有所成"/"圈内达人"/"资深成员"/"圈中领袖"） |
+| `expPoints` | Integer | 经验值 |
+| `contributionPoints` | Integer | 贡献值 |
+| `level` | Integer | 当前等级(L1-L5) |
+| `levelName` | String | 等级名称 |
+| `nextLevelThreshold` | Integer | 下一等级所需经验值（L5时为null） |
+| `postCount` | Integer | 发帖数 |
+| `participationDays` | Integer | 连续参与天数 |
+| `rank` | Integer | 圈内排名 |
+| `todayExp` | Integer | 今日已获经验值 |
+| `dailyExpLimit` | Integer | 每日经验值上限 |
+| `recentBadges` | List\<AchievementVO\> | 最近获得的徽章（最多3枚） |
+| `progressPercent` | Integer | 等级进度百分比 |
 
 ## Test Strategy
 
@@ -147,7 +235,7 @@ jeecg-boot-module/jeecg-module-content/src/test/
 
 ## Migration Plan
 
-1. 执行 Flyway 迁移 `V3.9.1_63__circle_growth_system.sql` 创建 6 张表
+1. 执行 Flyway 迁移 `V3.9.1_67__circle_growth_system.sql` 创建 6 张表
 2. 部署后端服务，验证等级计算和经验值服务可用
 3. 运行一次性历史数据初始化脚本（如有已有圈子和成员数据）
 4. 启用定时任务（等级 30 分钟、排行榜 1 小时）

@@ -1,8 +1,10 @@
 package org.jeecg.modules.content.user.growth.controller;
 
-import org.jeecg.modules.content.user.growth.service.ICircleLevelService;
-import org.jeecg.modules.content.user.growth.vo.CircleLevelVO;
-import org.jeecg.modules.content.user.growth.vo.LevelConditionVO;
+import org.jeecg.modules.content.circle.growth.controller.CircleLevelController;
+import org.jeecg.modules.content.circle.growth.service.ICircleLevelService;
+import org.jeecg.modules.content.circle.growth.vo.CircleBenefitVO;
+import org.jeecg.modules.content.circle.growth.vo.CircleLevelVO;
+import org.jeecg.modules.content.circle.growth.vo.LevelConditionVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +36,13 @@ class CircleLevelControllerTest {
         vo.setGrowthScore(450);
         vo.setNextLevelThreshold(600);
         vo.setProgressPercent(50);
-        vo.setBenefits(List.of("基础展示", "排行榜入口", "徽章墙"));
+        vo.setBenefits(List.of(
+                new CircleBenefitVO().setName("基础展示").setUnlocked(true),
+                new CircleBenefitVO().setName("排行榜入口").setUnlocked(true),
+                new CircleBenefitVO().setName("徽章墙").setUnlocked(true),
+                new CircleBenefitVO().setName("推荐权重提升").setUnlocked(false),
+                new CircleBenefitVO().setName("全部权益").setUnlocked(false)
+        ));
         vo.setMemberScore(150);
         vo.setContentScore(180);
         vo.setActivityScore(120);
@@ -56,7 +64,13 @@ class CircleLevelControllerTest {
         assertThat(res.getGrowthScore()).isEqualTo(450);
         assertThat(res.getNextLevelThreshold()).isEqualTo(600);
         assertThat(res.getProgressPercent()).isEqualTo(50);
-        assertThat(res.getBenefits()).containsExactly("基础展示", "排行榜入口", "徽章墙");
+        assertThat(res.getBenefits()).hasSize(5);
+        assertThat(res.getBenefits().get(0).getName()).isEqualTo("基础展示");
+        assertThat(res.getBenefits().get(0).getUnlocked()).isTrue();
+        assertThat(res.getBenefits().get(2).getName()).isEqualTo("徽章墙");
+        assertThat(res.getBenefits().get(2).getUnlocked()).isTrue();
+        assertThat(res.getBenefits().get(3).getName()).isEqualTo("推荐权重提升");
+        assertThat(res.getBenefits().get(3).getUnlocked()).isFalse();
         assertThat(res.getMemberScore()).isEqualTo(150);
         assertThat(res.getContentScore()).isEqualTo(180);
         assertThat(res.getActivityScore()).isEqualTo(120);

@@ -1,13 +1,17 @@
 package org.jeecg.modules.content.user.growth.controller;
 
-import org.jeecg.modules.content.user.growth.service.IMemberGrowthService;
-import org.jeecg.modules.content.user.growth.vo.MemberGrowthVO;
+import org.jeecg.modules.content.circle.growth.controller.MemberGrowthController;
+import org.jeecg.modules.content.circle.growth.service.IMemberGrowthService;
+import org.jeecg.modules.content.circle.growth.vo.MemberGrowthVO;
+import org.jeecg.modules.content.circle.growth.vo.ParticipationVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -58,14 +62,24 @@ class MemberGrowthControllerTest {
     }
 
     @Test
-    @DisplayName("获取连续参与进度返回200和天数")
-    void getParticipationDays_returnsOkWithDays() {
-        when(memberGrowthService.getParticipationDays("c1", "u1")).thenReturn(5);
+    @DisplayName("获取连续参与进度返回200和完整数据")
+    void getParticipationProgress_returnsOkWithData() {
+        ParticipationVO vo = new ParticipationVO();
+        vo.setDays(5);
+        vo.setDailyStatus(Arrays.asList(
+                new ParticipationVO.DayStatus("2026-06-26", true),
+                new ParticipationVO.DayStatus("2026-06-25", true),
+                new ParticipationVO.DayStatus("2026-06-24", false)
+        ));
+        when(memberGrowthService.getParticipationProgress("c1", "u1")).thenReturn(vo);
 
-        var result = controller.getParticipationDays("c1", "u1");
+        var result = controller.getParticipationProgress("c1", "u1");
 
         assertThat(result.getCode()).isEqualTo(200);
-        assertThat(result.getResult()).isEqualTo(5);
-        verify(memberGrowthService).getParticipationDays("c1", "u1");
+        assertThat(result.getResult().getDays()).isEqualTo(5);
+        assertThat(result.getResult().getDailyStatus()).hasSize(3);
+        assertThat(result.getResult().getDailyStatus().get(0).getParticipated()).isTrue();
+        assertThat(result.getResult().getDailyStatus().get(2).getParticipated()).isFalse();
+        verify(memberGrowthService).getParticipationProgress("c1", "u1");
     }
 }

@@ -60,11 +60,11 @@ class ContentUserProfileControllerWebMvcTest {
         when(profileService.updateProfile(eq("u1"), any(ContentUserProfileUpdateReq.class)))
             .thenReturn(new ContentUserProfileVO().setUserId("u1").setNickname("作者更新"));
 
-        mockMvc.perform(get("/content/user/profile/detail").param("ownerUserId", "u1").param("viewerUserId", "viewer"))
+        mockMvc.perform(get("/api/v1/content/user/profile/detail").param("ownerUserId", "u1").param("viewerUserId", "viewer"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.userId").value("u1"));
 
-        mockMvc.perform(post("/content/user/profile/update")
+        mockMvc.perform(post("/api/v1/content/user/profile/update")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new ContentUserProfileUpdateReq()
@@ -78,7 +78,7 @@ class ContentUserProfileControllerWebMvcTest {
 
     @Test
     void shouldExposePrivacyHomepageBadgeAndHistoryEndpoints() throws Exception {
-        mockMvc.perform(post("/content/user/profile/privacy/update")
+        mockMvc.perform(post("/api/v1/content/user/profile/privacy/update")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new ContentUserPrivacyUpdateReq().setBirthdayVisibility("PRIVATE"))))
@@ -86,7 +86,7 @@ class ContentUserProfileControllerWebMvcTest {
 
         ContentUserProfileVO homepageResult = new ContentUserProfileVO().setUserId("u1").setThemeColor("#123456");
         when(homepageService.updateHomepage(eq("u1"), any(ContentUserHomepageUpdateReq.class))).thenReturn(homepageResult);
-        mockMvc.perform(post("/content/user/profile/homepage/update")
+        mockMvc.perform(post("/api/v1/content/user/profile/homepage/update")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new ContentUserHomepageUpdateReq().setThemeColor("#123456"))))
@@ -95,7 +95,7 @@ class ContentUserProfileControllerWebMvcTest {
 
         ContentUserProfileVO restoredDefault = new ContentUserProfileVO().setUserId("u1").setThemeColor("#1677ff");
         when(homepageService.restoreDefaults("u1")).thenReturn(restoredDefault);
-        mockMvc.perform(post("/content/user/profile/homepage/defaults/restore").param("userId", "u1"))
+        mockMvc.perform(post("/api/v1/content/user/profile/homepage/defaults/restore").param("userId", "u1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.themeColor").value("#1677ff"));
 
@@ -103,13 +103,13 @@ class ContentUserProfileControllerWebMvcTest {
         when(verificationBadgeService.listVisibleBadges("u1")).thenReturn(List.of());
         when(historyService.listHistory("u1", "NICKNAME")).thenReturn(List.of());
 
-        mockMvc.perform(get("/content/user/profile/homepage/modules").param("userId", "u1")).andExpect(status().isOk());
-        mockMvc.perform(get("/content/user/profile/badge/list").param("userId", "u1")).andExpect(status().isOk());
-        mockMvc.perform(get("/content/user/profile/history/list").param("userId", "u1").param("historyType", "NICKNAME")).andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/content/user/profile/homepage/modules").param("userId", "u1")).andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/content/user/profile/badge/list").param("userId", "u1")).andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/content/user/profile/history/list").param("userId", "u1").param("historyType", "NICKNAME")).andExpect(status().isOk());
 
         ContentUserProfileVO historyRestoreResult = new ContentUserProfileVO().setUserId("u1").setNickname("旧昵称");
         when(historyService.restoreHistory("u1", "h1")).thenReturn(historyRestoreResult);
-        mockMvc.perform(post("/content/user/profile/history/restore").param("userId", "u1").param("historyId", "h1"))
+        mockMvc.perform(post("/api/v1/content/user/profile/history/restore").param("userId", "u1").param("historyId", "h1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.result.nickname").value("旧昵称"));
         verify(profileService).updatePrivacy(eq("u1"), any(ContentUserPrivacyUpdateReq.class));
@@ -118,7 +118,7 @@ class ContentUserProfileControllerWebMvcTest {
 
     @Test
     void shouldRejectInvalidProfileRequestAtControllerBoundary() throws Exception {
-        mockMvc.perform(post("/content/user/profile/update")
+        mockMvc.perform(post("/api/v1/content/user/profile/update")
                 .param("userId", "u1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new ContentUserProfileUpdateReq().setNickname("").setAvatar(""))))

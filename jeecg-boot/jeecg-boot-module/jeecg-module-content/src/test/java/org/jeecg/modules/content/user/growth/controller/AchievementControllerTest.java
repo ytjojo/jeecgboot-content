@@ -1,7 +1,8 @@
 package org.jeecg.modules.content.user.growth.controller;
 
-import org.jeecg.modules.content.user.growth.service.IAchievementService;
-import org.jeecg.modules.content.user.growth.vo.AchievementVO;
+import org.jeecg.modules.content.circle.growth.controller.AchievementController;
+import org.jeecg.modules.content.circle.growth.service.IAchievementService;
+import org.jeecg.modules.content.circle.growth.vo.AchievementVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
