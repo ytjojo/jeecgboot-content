@@ -223,9 +223,8 @@ function handleTabChange(key: string) {
 }
 
 // 发现子 Tab 切换
-function handleDiscoverSubTabChange(key: string) {
-  const subTab = key as 'recommend' | 'hot' | 'new' | 'all';
-  if (subTab === 'all') {
+function handleDiscoverSubTabChange() {
+  if (discoverSubTab.value === 'all') {
     const now = Date.now();
     const cached = cacheTimestamps['all'];
     if (!cached || (now - cached) > CACHE_TTL) {
