@@ -124,7 +124,6 @@ None detected.
 - [x] Worktree 內無未 staged 的實作檔案（graphify-out 為自動產生）
 - [ ] 所有相關 commit 已推送（本地分支，尚未推送）
 
-**Commit range**: `springboot3_content..feat/circle-content-interaction` (12 commits)
 
 ---
 

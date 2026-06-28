@@ -127,4 +127,3 @@ plan.md 中无 `[~]` 标记的 deferred 任务。本节不适用。
   - 已完成部分编译通过、5 个单元测试全部通过
 - [ ] ❌ FAIL — 返回失敗的 artifact 修正後重跑 verify
 
-**下一步**：执行 `/code-review`，然后合并回 `springboot3_content` 分支。
