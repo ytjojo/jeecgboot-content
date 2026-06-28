@@ -140,3 +140,137 @@
 7. **保证编译通过**（新增到 7.2 节和 9.2 节）
 
 **无冲突**：所有补充项都是需求文档中缺失的内容，与现有需求不冲突。
+
+---
+
+## 2026-06-28 设计讨论（grilling）
+
+### 决策 12：Issue 到 FixItem 的映射规则
+
+**背景**：一个 Issue 可能需要多步修复，多个 Issue 有时可以合并修复。
+
+**决定**：
+- 1:N 始终支持（一个 Issue 拆为多个 FixItem）
+- N:1 按实际情况判断（多个 Issue 合并为一个 FixItem）
+
+**合并标准**：
+| 条件 | 策略 |
+|------|------|
+| 多个 Issue 指向同一文件同一行/同一逻辑块 | 合并 |
+| 多个 Issue 指向同一文件不同位置 | 保持独立 |
+| 多个 Issue 有依赖关系 | 保持独立，按依赖排序 |
+| 多个 Issue 是同类问题模式（如相同命名错误在不同文件中） | 合并 |
+| 多个 Issue 来自不同 change | 保持独立（在各自 change 下） |
+
+---
+
+### 决策 13：跨 change 依赖识别策略
+
+**背景**：需求要求"自动识别跨 change 的依赖关系"。
+
+**决定**：
+- **主策略（方案 B）**：基于 `{文件路径, 实体名}` 元组匹配。两个 Issue 来自不同 change 但引用同一实体时，标记为跨 change 依赖
+- **兜底策略（方案 A）**：关键词匹配作为补充
+- **不用方案 C**：代码引用图解析成本太高，plan 阶段不需要
+
+**人工确认**：plan 标记出「疑似跨 change 依赖」后，交由用户确认。
+
+---
+
+### 决策 14：审核文档解析策略
+
+**背景**：6 类审核文档格式各异（有的结构化编号，有的按维度松散评估）。
+
+**决定**：所有审核文档交给大模型解析，不需要为不同格式编写不同的解析逻辑。回退策略：无法识别的归为「未分类问题」，标记需人工确认。
+
+---
+
+### 决策 15：plan 阶段上下文读取——前后端成对读取
+
+**背景**：后端 change 单独读取容易漏掉前端需要的 API 和字段。
+
+**决定**：
+- 前后端 change 成对（ChangePair）读取，提供完整视角
+- 配对依据 `docs/requirements/prd/decomposition/change-prd-mapping.yaml`
+- 多个 ChangePair 分配 subagent 并行处理，每个 subagent 负责一对
+- 无配对 change（如 `frontend_change: null`）单独处理
+- 单 change 模式下自动查找配对（scan proposal/design 确定大概配对关系）
+
+**理由**：后端缺乏前端视角容易漏 API 和字段，成对读取可提供充足上下文。
+
+---
+
+### 决策 16：跨 pair 冲突检测由主 agent 汇总
+
+**背景**：每个 subagent 只看自己的一对 change，无法发现跨 pair 的依赖。
+
+**决定**：
+- 每个 subagent 在自己的 pair 内做完整分析
+- 主 agent 汇总所有 subagent 产出的 fix-plan
+- 主 agent 做跨 pair 冲突检测（同名文件、同名实体交叉对比）
+- 生成全局 fix-plan.md，标记跨 pair 依赖关系
+
+---
+
+### 决策 17：fix 阶段——并行 subagent + 共享 worktree
+
+**背景**：fix 阶段需要平衡速度和冲突风险。
+
+**决定**：
+- 采用**文件级分区 + 并行 subagent + 共享 worktree** 模式
+- plan 产出的 FixItem 按文件路径分组，同文件的所有 FixItem 分配给同一个 subagent
+- 不同文件的 FixItem 可并行到不同 subagent
+- 当大部分 FixItem 集中在同一批文件时，退化为串行
+
+**注意**：按文件路径分组是纯确定性逻辑（字符串匹配），不交给模型判断。
+
+---
+
+### 决策 18：plan 阶段执行流程
+
+**决定**：四步流程
+
+1. **解析输入**：确定 change 列表 → 配对 → 形成 ChangePair 列表
+2. **并行 dispatch subagent**：每对 1 个 subagent，输入包含前后端 change 目录、审核文档列表、对应 PRD 文档
+3. **主 agent 汇总**：收集元数据摘要 → 跨 pair 冲突检测 → 生成全局 fix-plan.md
+4. **输出 fix-plan**，等待用户确认
+
+---
+
+### 决策 19：fix 阶段执行流程
+
+**决定**：五步流程
+
+1. **读取 fix-plan**：按文件路径分组 FixItem，按依赖排序
+2. **创建共享 worktree**
+3. **并行 dispatch fix subagent**：文档修复直接改、代码修复走 TDD、自动验证（测试 + lint + 编译）
+4. **独立 Code Review**：fix 全部完成后主 agent 派独立 reviewer，不由 subagent 自我 review
+5. **主 agent 汇总**：检查状态 → commit → 生成复盘报告 → 清理 worktree
+
+---
+
+### 决策 20：失败处理与自动提交策略
+
+**背景**：并行 subagent 模型下，部分失败时如何处理已完成的改动。
+
+**决定**：三级自动策略
+| 情况 | 行为 |
+|------|------|
+| 全部 done | 自动 commit，无需用户介入 |
+| 有 failed 但不阻塞其他项 | 自动跳过 failed，commit 成功的，复盘报告中列出 failed 清单 |
+| 关键依赖项 failed | 暂停，展示阻塞原因，等待用户决策 |
+
+**理由**：用户只在真正卡住时才介入，其他全自动流转。
+
+---
+
+### 决策 21：文件的领域术语表
+
+**决定**：创建 `workspace/CONTEXT.md` 作为领域术语精确定义，包含：
+- 核心实体（Change、ChangePair、AuditReport、Issue、FixItem、FixPlan）
+- 审核报告类型
+- 同步策略
+- 过滤规则
+- 子命令定义
+
+所有设计文档和代码必须一致使用这些术语。
