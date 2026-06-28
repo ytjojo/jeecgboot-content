@@ -9,7 +9,7 @@
 **选项**：
 - A：只覆盖 review-report（文档审核）
 - B：覆盖 review-report + drift-report（文档 + 漂移）
-- C：覆盖全部 6 类（review/drift/verify/verify.md/verification-review/backend-issues）
+- C：覆盖全部 6 类（review/drift/verify/verification-review/backend-issues）
 
 **决定**：选 C，全覆盖。
 
@@ -122,3 +122,21 @@
 **决定**：不需要。
 
 **理由**：修复步骤已经足够详细，对比示例增加文档体积但不增加信息量。
+
+---
+
+### 决策 11：吸收原始需求文档中的补充项
+
+**背景**：原始需求文档（raw/技能需求.md）中有部分要求在 requirements-v1.md 中未体现。
+
+**决定**：吸收以下 6 项补充要求到 requirements-v1.md：
+
+1. **过滤已归档的 change**（新增到 2.3 节）
+2. **过滤全部标记完成的审核文档**（新增到 2.3 节）
+3. **读取对应的规范/需求文档作为上下文**（新增到 4.1 节 plan 处理逻辑）
+4. **忽略非代码实现问题**（新增到 4.1 节 plan 处理逻辑）
+5. **精准识别同步策略**（新增到 5.3 节）
+6. **修复后进行 code review**（新增到 4.2 节 fix 处理逻辑）
+7. **保证编译通过**（新增到 7.2 节和 9.2 节）
+
+**无冲突**：所有补充项都是需求文档中缺失的内容，与现有需求不冲突。
