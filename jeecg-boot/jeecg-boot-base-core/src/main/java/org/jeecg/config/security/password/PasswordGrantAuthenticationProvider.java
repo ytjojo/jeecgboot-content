@@ -289,8 +289,8 @@ public class PasswordGrantAuthenticationProvider implements AuthenticationProvid
         if(failTime!=null){
             val = Integer.parseInt(failTime.toString());
         }
-        // 10分钟
-        redisUtil.set(key, ++val, 10);
+        // 10分钟，一分钟为60s
+        redisUtil.set(key, ++val, 600);
     }
 
     /**

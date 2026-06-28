@@ -7,6 +7,7 @@
         <result column="user_id" property="userId"/>
         <result column="source_type" property="sourceType"/>
         <result column="source_id" property="sourceId"/>
+        <result column="exposure_time" property="exposureTime"/>
         <result column="click_time" property="clickTime"/>
         <result column="join_time" property="joinTime"/>
         <result column="create_time" property="createTime"/>

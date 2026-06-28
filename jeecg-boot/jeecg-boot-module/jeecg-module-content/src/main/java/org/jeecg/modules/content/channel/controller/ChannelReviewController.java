@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.biz.ChannelMergeBiz;
 import org.jeecg.modules.content.channel.entity.ChannelReview;
 import org.jeecg.modules.content.channel.req.ChannelReviewActionReq;
@@ -126,7 +127,6 @@ public class ChannelReviewController {
     }
 
     private String getCurrentUserId() {
-        // TODO: 从安全上下文获取当前用户ID
-        return "current-user-id";
+        return SecureUtil.currentUser().getId();
     }
 }

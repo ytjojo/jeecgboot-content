@@ -116,4 +116,6 @@ INSERT IGNORE INTO `circle_achievement` (`id`, `achievement_type`, `name`, `desc
 ('ach_001', 'CONTINUOUS_CREATOR', '持续创作者', '累计发布10篇可见内容', '累计发布10篇可见内容'),
 ('ach_002', 'QUALITY_CONTRIBUTOR', '优质贡献者', '累计获得5篇精华内容', '累计获得5篇精华内容'),
 ('ach_003', 'ACTIVE_PARTICIPANT', '活跃参与者', '近7天至少3天完成有效参与行为', '近7天至少3天完成有效参与行为'),
-('ach_004', 'RISING_STAR', '圈内新星', '近7天经验值增长排名前10', '近7天经验值增长排名前10');
+('ach_004', 'RISING_STAR', '圈内新星', '近7天经验值增长排名前10', '近7天经验值增长排名前10'),
+('ach_005', 'CONTENT_MILESTONE', '内容里程碑', '累计发布50篇可见内容', '累计发布50篇可见内容'),
+('ach_006', 'SOCIAL_BUTTERFLY', '社交达人', '累计获得100个点赞/评论互动', '累计获得100个点赞/评论互动');
