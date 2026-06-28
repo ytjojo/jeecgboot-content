@@ -89,7 +89,7 @@ ownership=shared 的 subagent 完成后：
 ```bash
 cat <worktree-path>/.worktree-owner                     # 1. 确认 session= 匹配当前会话
 git worktree list | grep <path>                         # 2. 确认未被 locked
-git branch --merged springboot3_content | grep <branch> # 3. 确认已合并回来源分支
+git branch --merged $source_branch | grep <branch> # 3. 确认已合并回来源分支
 git -C <worktree-path> status --short                   # 4. 确认无未提交改动
 # shared worktree 额外执行：
 # 5. 确认引用计数 IN_USE == 0

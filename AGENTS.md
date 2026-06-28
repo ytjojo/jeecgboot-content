@@ -330,7 +330,7 @@ docs/requirements/prd/decomposition/change-prd-mapping.yaml
 2. worktree 必须合并回**来源分支**，禁止跨分支合并
 3. **禁止**从 worktree 复制文件到主 worktree 后重新 commit（丢失元数据，绕过 git）
 4. 执行 `superpowers:finishing-a-development-branch` 时，**严禁**选择 Option 1（Merge locally）合并到 `master` or `main`
-5. 对于 `springboot3_content` 分支上的 worktree，合并目标**始终**为 `springboot3_content`
+5. 对于 `BRANCH_A` 分支上的 worktree，合并目标**始终**为 `BRANCH_A`
 6. EnterWorktree 后，文件路径**必须**用 worktree 的相对路径写入，**严禁**用绝对路径写回主仓库
 
 ### 标准流程（创建 → 开发 → 合并 → 清理）
