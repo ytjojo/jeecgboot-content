@@ -1,4 +1,4 @@
-package org.jeecg.modules.content.user.growth;
+package org.jeecg.modules.content.circle.growth;
 
 import org.jeecg.modules.content.circle.growth.entity.CircleLevel;
 import org.jeecg.modules.content.circle.growth.mapper.CircleLevelMapper;

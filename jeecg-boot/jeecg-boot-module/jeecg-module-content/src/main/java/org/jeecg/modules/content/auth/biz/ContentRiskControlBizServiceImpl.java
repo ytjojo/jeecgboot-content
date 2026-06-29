@@ -106,7 +106,7 @@ public class ContentRiskControlBizServiceImpl implements IContentRiskControlBizS
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void recordRiskEvent(String userId, String eventType, String riskLevel,
+    public void recordRiskEvent(String userId, String eventType, Integer riskLevel,
                                 String reason, String ipAddress, String deviceFingerprint, String userAgent) {
         ContentRiskEvent event = new ContentRiskEvent()
                 .setUserId(userId)

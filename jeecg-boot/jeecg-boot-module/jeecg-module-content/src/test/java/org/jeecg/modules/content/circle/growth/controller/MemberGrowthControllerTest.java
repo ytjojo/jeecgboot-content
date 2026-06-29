@@ -1,7 +1,6 @@
-package org.jeecg.modules.content.user.growth.controller;
+package org.jeecg.modules.content.circle.growth.controller;
 
-import org.jeecg.modules.content.circle.growth.controller.MemberGrowthController;
-import org.jeecg.modules.content.circle.growth.service.IMemberGrowthService;
+import org.jeecg.modules.content.circle.growth.biz.ICircleGrowthBiz;
 import org.jeecg.modules.content.circle.growth.vo.MemberGrowthVO;
 import org.jeecg.modules.content.circle.growth.vo.ParticipationVO;
 import org.junit.jupiter.api.DisplayName;
@@ -21,14 +20,14 @@ import static org.mockito.Mockito.when;
 class MemberGrowthControllerTest {
 
     @Mock
-    private IMemberGrowthService memberGrowthService;
+    private ICircleGrowthBiz circleGrowthBiz;
 
     @InjectMocks
     private MemberGrowthController controller;
 
     @Test
     @DisplayName("获取成长信息返回200和完整字段数据")
-    void getGrowthInfo_returnsOkWithData() {
+    void getMyGrowthInfo_returnsOkWithData() {
         MemberGrowthVO vo = new MemberGrowthVO();
         vo.setCircleId("c1");
         vo.setExpPoints(50);
@@ -41,9 +40,9 @@ class MemberGrowthControllerTest {
         vo.setProgressPercent(25);
         vo.setTodayExp(15);
         vo.setDailyExpLimit(100);
-        when(memberGrowthService.getGrowthInfo("c1", "u1")).thenReturn(vo);
+        when(circleGrowthBiz.getMyGrowthInfo("c1", "u1")).thenReturn(vo);
 
-        var result = controller.getGrowthInfo("c1", "u1");
+        var result = controller.getMyGrowthInfo("c1");
 
         assertThat(result.getCode()).isEqualTo(200);
         var res = result.getResult();
@@ -58,12 +57,12 @@ class MemberGrowthControllerTest {
         assertThat(res.getProgressPercent()).isEqualTo(25);
         assertThat(res.getTodayExp()).isEqualTo(15);
         assertThat(res.getDailyExpLimit()).isEqualTo(100);
-        verify(memberGrowthService).getGrowthInfo("c1", "u1");
+        verify(circleGrowthBiz).getMyGrowthInfo("c1", null);
     }
 
     @Test
     @DisplayName("获取连续参与进度返回200和完整数据")
-    void getParticipationProgress_returnsOkWithData() {
+    void getMyParticipationProgress_returnsOkWithData() {
         ParticipationVO vo = new ParticipationVO();
         vo.setDays(5);
         vo.setDailyStatus(Arrays.asList(
@@ -71,15 +70,15 @@ class MemberGrowthControllerTest {
                 new ParticipationVO.DayStatus("2026-06-25", true),
                 new ParticipationVO.DayStatus("2026-06-24", false)
         ));
-        when(memberGrowthService.getParticipationProgress("c1", "u1")).thenReturn(vo);
+        when(circleGrowthBiz.getMyParticipationProgress("c1", "u1")).thenReturn(vo);
 
-        var result = controller.getParticipationProgress("c1", "u1");
+        var result = controller.getMyParticipationProgress("c1");
 
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.getResult().getDays()).isEqualTo(5);
         assertThat(result.getResult().getDailyStatus()).hasSize(3);
         assertThat(result.getResult().getDailyStatus().get(0).getParticipated()).isTrue();
         assertThat(result.getResult().getDailyStatus().get(2).getParticipated()).isFalse();
-        verify(memberGrowthService).getParticipationProgress("c1", "u1");
+        verify(circleGrowthBiz).getMyParticipationProgress("c1", null);
     }
 }

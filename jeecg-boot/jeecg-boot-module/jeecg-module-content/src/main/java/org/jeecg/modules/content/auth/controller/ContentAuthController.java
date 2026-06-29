@@ -24,7 +24,7 @@ import java.util.Map;
 @Tag(name = "内容社区认证", description = "用户注册、登录、设备管理、账号绑定等认证相关接口")
 @Validated
 @RestController
-@RequestMapping("/api/v1/content/auth")
+@RequestMapping("/api/v1/auth")
 public class ContentAuthController {
 
     @Resource
@@ -35,7 +35,7 @@ public class ContentAuthController {
 
     @Operation(summary = "手机号验证码注册")
     @PostMapping("/register/mobile")
-    public Result<String> registerByMobile(@Valid @RequestBody ContentAuthMobileRegisterReq req) {
+    public Result<AuthLoginResult> registerByMobile(@Valid @RequestBody ContentAuthMobileRegisterReq req) {
         return Result.OK(contentAuthBizService.registerByMobile(req));
     }
 
@@ -87,7 +87,7 @@ public class ContentAuthController {
 
     @Operation(summary = "邮箱密码注册", description = "使用邮箱和密码注册，注册后发送确认邮件")
     @PostMapping("/register/email")
-    public Result<String> registerByEmail(@Valid @RequestBody ContentAuthEmailRegisterReq req) {
+    public Result<AuthLoginResult> registerByEmail(@Valid @RequestBody ContentAuthEmailRegisterReq req) {
         return Result.OK(contentAuthBizService.registerByEmail(req));
     }
 
@@ -100,14 +100,10 @@ public class ContentAuthController {
 
     @Operation(summary = "第三方登录", description = "使用第三方平台(微信等)登录或自动注册")
     @PostMapping("/login/third-party")
-    public Result<?> loginByThirdParty(
-            @NotBlank(message = "平台不能为空") @Parameter(description = "第三方平台代码") @RequestParam("provider") String provider,
-            @NotBlank(message = "开放ID不能为空") @Parameter(description = "第三方开放ID") @RequestParam("openId") String openId,
-            @Parameter(description = "第三方联合ID") @RequestParam(value = "unionId", required = false) String unionId,
-            @Parameter(description = "第三方昵称") @RequestParam(value = "nickname", required = false) String nickname,
-            @Parameter(description = "第三方头像") @RequestParam(value = "avatar", required = false) String avatar,
-            @Parameter(description = "原始授权JSON") @RequestParam(value = "rawJson", required = false) String rawJson) {
-        return Result.OK(contentAuthBizService.loginByThirdParty(provider, openId, unionId, nickname, avatar, rawJson));
+    public Result<?> loginByThirdParty(@Valid @RequestBody ContentAuthThirdPartyLoginReq req) {
+        return Result.OK(contentAuthBizService.loginByThirdParty(
+                req.getProvider(), req.getOpenId(), req.getUnionId(),
+                req.getNickname(), req.getAvatar(), req.getRawJson()));
     }
 
     @Operation(summary = "换绑手机号", description = "验证旧手机和新手机验证码后，将凭证迁移到新手机号")

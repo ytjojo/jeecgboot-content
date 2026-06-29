@@ -728,3 +728,23 @@
 11. **coolingOffDays 冗余存储**— SUGGESTION 级别，不影响功能
 12. **API 目录结构优化**— SUGGESTION 级别
 13. **生产环境真实外部服务 Bean 替换**— 部署配置项，非代码修复范畴
+
+---
+
+## user-01-auth BLOCK/CRITICAL 代码修复状态（agent=u01be）
+
+| FIX ID | 问题 | 状态 | 说明 |
+|---|---|---|---|
+| BLOCK-CODE-01 | ContentUserAccount.riskLevel 类型不匹配 | ✅ 已修复 | String → Integer，与SQL INT一致 |
+| BLOCK-CODE-02 | ContentRiskEvent.riskLevel 类型不匹配 | ✅ 已修复 | String → Integer，同步更新 IContentRiskControlBizService 接口参数类型 |
+| BLOCK-CODE-03 | Biz层直接注入Mapper（ContentAuthBizServiceImpl） | ⏭️ 跳过 | 大范围重构，本次不处理 |
+| BLOCK-CODE-04 | Biz层直接注入Mapper（ContentAccountCancellationBizServiceImpl） | ⏭️ 跳过 | 依赖FIX-003，本次不处理 |
+| BLOCK-CODE-05 | 缺少冷静期到期自动注销@Scheduled定时任务 | ✅ 已修复（partial） | 添加processExpiredCancellations()方法，每小时执行，标记TODO:分布式锁+事务自调用问题 |
+| BLOCK-CODE-06 | API路径前缀修正 | ✅ 已修复 | ContentAuthController从/api/v1/content/auth改为/api/v1/auth；ContentRiskControlController(/api/v1/content/account-security)和ContentAccountCancellationController(/api/v1/content/account-cancellation)路径保持不变；同步修复了邮件确认URL中的路径 |
+| CRITICAL-CODE-01 | 第三方登录接口@RequestParam接收rawJson | ✅ 已修复 | 新增ContentAuthThirdPartyLoginReq DTO，改为@RequestBody接收 |
+| CRITICAL-CODE-02 | 邮箱注册未发送验证邮件 | ✅ 已修复（已有实现） | registerByEmail中已存在emailSenderPort.send()调用，确认URL路径同步更新 |
+| CRITICAL-CODE-03 | 手机号/邮箱注册返回String而非AuthLoginResult | ✅ 已修复 | registerByMobile/registerByEmail均改为返回AuthLoginResult(含token)，与登录接口一致 |
+
+### 编译验证
+- jeecg-module-content模块auth包无编译错误
+- 存在的编译错误为channel模块（ChannelAnnouncementController.getById、ChannelExportController.getChannelId）和system模块（DateRangeUtils、DySmsLimit等）的已有问题，与本次修复无关

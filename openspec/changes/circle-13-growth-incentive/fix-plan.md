@@ -23,6 +23,7 @@
 **优先级**: BLOCK
 **依赖**: 无
 **类型**: 代码修复-后端
+**状态**: done
 **修复步骤**:
 1. 对于查询自己成长数据的接口（getGrowthInfo、getParticipationProgress、getAchievements），从`SecureUtil.currentUser()`获取当前登录用户ID，移除@RequestParam中的userId参数
 2. 对于查询圈子公共信息的接口（getLevelInfo、getLeaderboard），circleId参数保留，但需校验当前用户是否有权限访问该圈子（是否为成员）
@@ -41,6 +42,8 @@
 **优先级**: BLOCK
 **依赖**: BE-003（Biz层抽取后集成更清晰）
 **类型**: 代码修复-后端
+**状态**: skipped
+**跳过原因**: 当前代码库无ApplicationEventPublisher事件机制，集成需要修改circle-11等其他模块的发帖/评论/加精/删帖核心业务逻辑，属于跨change大范围改动，不适合在本次audit-fix中完成。建议后续独立change实现，通过事件机制解耦。
 **修复步骤**:
 1. 在发帖成功后调用`memberGrowthService.addExperience(circleId, userId, GrowthActionEnum.POST, postId)`
 2. 在评论成功后调用`memberGrowthService.addExperience(circleId, userId, GrowthActionEnum.COMMENT, commentId)`
@@ -62,6 +65,7 @@
 **优先级**: BLOCK
 **依赖**: 无
 **类型**: 代码修复-后端
+**状态**: done
 **修复步骤**:
 1. 在`circle/growth/`下创建`biz/`子包
 2. 创建`CircleGrowthBizService`类，编排以下业务逻辑：
@@ -83,6 +87,7 @@
 **优先级**: CRITICAL
 **依赖**: 无
 **类型**: 代码修复-后端
+**状态**: done
 **修复步骤**:
 1. 新增Flyway迁移脚本（如V3.9.1_XX__add_missing_achievements.sql）
 2. 插入CONTENT_MILESTONE（内容里程碑，50篇内容）和SOCIAL_BUTTERFLY（社交达人，邀请5人加入圈子）的初始数据
@@ -101,6 +106,7 @@
 **优先级**: CRITICAL
 **依赖**: 无
 **类型**: 代码修复-后端
+**状态**: done
 **修复步骤**:
 1. 将测试文件从`src/test/java/.../user/growth/`移动到`src/test/java/.../circle/growth/`
 2. 更新测试类中的package声明
@@ -156,6 +162,7 @@
 **优先级**: P1
 **依赖**: BE-001（认证修复后参数可能变化）
 **类型**: 代码修复-后端
+**状态**: done
 **修复步骤**:
 1. 在Controller类上添加@Validated注解
 2. 对必填参数添加@NotBlank/@NotNull注解

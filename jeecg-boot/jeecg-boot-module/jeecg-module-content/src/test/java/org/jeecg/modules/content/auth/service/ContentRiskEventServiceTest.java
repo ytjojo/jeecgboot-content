@@ -35,7 +35,7 @@ class ContentRiskEventServiceTest {
         ContentRiskEvent entity = new ContentRiskEvent()
             .setUserId("u_3001")
             .setEventType("ABNORMAL_LOGIN")
-            .setRiskLevel("HIGH")
+            .setRiskLevel(3)
             .setRiskScore(85)
             .setRiskReason("异地IP登录")
             .setDecision("CHALLENGE")
@@ -54,7 +54,7 @@ class ContentRiskEventServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getUserId()).isEqualTo("u_3001");
         assertThat(result.getEventType()).isEqualTo("ABNORMAL_LOGIN");
-        assertThat(result.getRiskLevel()).isEqualTo("HIGH");
+        assertThat(result.getRiskLevel()).isEqualTo(3);
         assertThat(result.getRiskScore()).isEqualTo(85);
         assertThat(result.getRiskReason()).isEqualTo("异地IP登录");
         assertThat(result.getDecision()).isEqualTo("CHALLENGE");

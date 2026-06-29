@@ -24,8 +24,8 @@ public class ContentRiskEvent extends JeecgEntity {
     @Schema(description = "事件类型")
     private String eventType;
 
-    @Schema(description = "风险等级")
-    private String riskLevel;
+    @Schema(description = "风险等级 0-100")
+    private Integer riskLevel;
 
     @Schema(description = "风险评分")
     private Integer riskScore;

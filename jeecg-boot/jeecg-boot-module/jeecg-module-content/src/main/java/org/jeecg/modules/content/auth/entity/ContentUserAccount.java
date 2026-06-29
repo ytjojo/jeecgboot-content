@@ -54,6 +54,6 @@ public class ContentUserAccount extends JeecgEntity {
     @Schema(description = "锁定截止时间")
     private Date lockedUntil;
 
-    @Schema(description = "风险等级")
-    private String riskLevel;
+    @Schema(description = "风险等级 0-100")
+    private Integer riskLevel;
 }

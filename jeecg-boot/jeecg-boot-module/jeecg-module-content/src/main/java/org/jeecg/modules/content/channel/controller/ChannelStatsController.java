@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.channel.biz.ChannelStatsBiz;
 import org.jeecg.modules.content.channel.constant.ChannelStatsConstant;
+import org.jeecg.modules.content.channel.service.ChannelMemberService;
+import org.jeecg.modules.content.channel.util.ChannelSecurityUtil;
 import org.jeecg.modules.content.channel.vo.ChannelHotContentVO;
 import org.jeecg.modules.content.channel.vo.ChannelInteractionStatsVO;
 import org.jeecg.modules.content.channel.vo.ChannelStatsVO;
@@ -35,11 +37,16 @@ public class ChannelStatsController {
     @Resource
     private ChannelStatsBiz channelStatsBiz;
 
+    @Resource
+    private ChannelMemberService memberService;
+
     @GetMapping("/core")
     @Operation(summary = "获取核心指标")
     public Result<ChannelStatsVO> getCoreStats(
             @Parameter(description = "频道ID", required = true)
             @RequestParam String channelId) {
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, userId);
         return Result.OK(channelStatsBiz.getCoreStats(channelId));
     }
 
@@ -54,6 +61,8 @@ public class ChannelStatsController {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
             @Parameter(description = "统计类型：daily/weekly/monthly")
             @RequestParam(defaultValue = ChannelStatsConstant.STAT_TYPE_DAILY) String statType) {
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, userId);
         if (!VALID_STAT_TYPES.contains(statType)) {
             return Result.error("无效的统计类型: " + statType);
         }
@@ -69,6 +78,8 @@ public class ChannelStatsController {
             @RequestParam(required = false) Integer limit,
             @Parameter(description = "统计天数")
             @RequestParam(required = false) Integer days) {
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, userId);
         return Result.OK(channelStatsBiz.getHotContent(channelId, limit, days));
     }
 
@@ -77,6 +88,8 @@ public class ChannelStatsController {
     public Result<ChannelInteractionStatsVO> getInteractionStats(
             @Parameter(description = "频道ID", required = true)
             @RequestParam String channelId) {
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, userId);
         return Result.OK(channelStatsBiz.getInteractionStats(channelId));
     }
 
@@ -89,6 +102,8 @@ public class ChannelStatsController {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @Parameter(description = "结束日期")
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, userId);
         return Result.OK(channelStatsBiz.getUserAnalysis(channelId, startDate, endDate));
     }
 }

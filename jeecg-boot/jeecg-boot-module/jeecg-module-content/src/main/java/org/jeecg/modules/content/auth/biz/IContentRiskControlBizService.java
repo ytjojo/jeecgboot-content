@@ -53,7 +53,7 @@ public interface IContentRiskControlBizService {
      * @param deviceFingerprint 设备指纹
      * @param userAgent        User-Agent
      */
-    void recordRiskEvent(String userId, String eventType, String riskLevel,
+    void recordRiskEvent(String userId, String eventType, Integer riskLevel,
                          String reason, String ipAddress, String deviceFingerprint, String userAgent);
 
     /**

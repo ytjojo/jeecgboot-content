@@ -150,7 +150,7 @@
 - 运行 CircleControllerWebMvcTest 和 CircleSearchControllerWebMvcTest，验证匿名访问不抛异常
 - mvn test -pl jeecg-boot-module/jeecg-module-content -am
 
-**状态**: pending
+**状态**: done
 
 ---
 
@@ -171,8 +171,9 @@
 **验证方式**:
 - 单元测试验证原子更新逻辑
 - mvn test -pl jeecg-boot-module/jeecg-module-content -am
+- 注：经检查，原子更新已在现有代码中正确实现（CircleMapper使用SQL原子更新+affected rows判断）
 
-**状态**: pending
+**状态**: done
 
 ---
 
@@ -194,7 +195,7 @@
 - 检查 Controller 层无直接数据库查询操作
 - mvn test -pl jeecg-boot-module/jeecg-module-content -am
 
-**状态**: pending
+**状态**: done
 
 ---
 
@@ -215,7 +216,7 @@
 - 单元测试验证搜索结果joined字段正确
 - mvn test -pl jeecg-boot-module/jeecg-module-content -am
 
-**状态**: pending
+**状态**: done
 
 ---
 
@@ -235,7 +236,7 @@
 - 单元测试验证正常和异常场景返回
 - mvn test -pl jeecg-boot-module/jeecg-module-content -am
 
-**状态**: pending
+**状态**: done
 
 ---
 

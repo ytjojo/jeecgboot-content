@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
-import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.biz.ChannelMergeBiz;
 import org.jeecg.modules.content.channel.entity.ChannelReview;
 import org.jeecg.modules.content.channel.req.ChannelReviewActionReq;
 import org.jeecg.modules.content.channel.service.IChannelReviewService;
+import org.jeecg.modules.content.channel.util.ChannelSecurityUtil;
 import org.jeecg.modules.content.channel.vo.ChannelReviewVO;
 import org.jeecg.modules.content.user.service.IContentNotificationService;
 import org.springframework.web.bind.annotation.*;
@@ -74,22 +74,22 @@ public class ChannelReviewController {
             return Result.error("无效的审核操作: " + req.getAction());
         }
 
+        String reviewerId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         ChannelReview review = reviewService.getById(req.getReviewId());
         if (review == null) {
             return Result.error("审核记录不存在");
         }
 
         review.setStatus(req.getAction());
-        review.setReviewerId(getCurrentUserId());
+        review.setReviewerId(reviewerId);
         review.setReviewReason(req.getReason());
         review.setReviewTime(LocalDateTime.now());
         reviewService.updateById(review);
 
-        // 合并审核通过后执行合并
         if ("approved".equals(req.getAction()) && "merge".equals(review.getReviewType())
                 && review.getTargetChannelId() != null) {
             try {
-                mergeBiz.executeMerge(review.getChannelId(), review.getTargetChannelId(), getCurrentUserId());
+                mergeBiz.executeMerge(review.getChannelId(), review.getTargetChannelId(), reviewerId);
                 log.info("合并审核通过，已执行合并: {} -> {}", review.getChannelId(), review.getTargetChannelId());
             } catch (Exception e) {
                 log.error("合并执行失败: {}", e.getMessage(), e);
@@ -97,7 +97,6 @@ public class ChannelReviewController {
             }
         }
 
-        // 审核结果通知申请人
         if (review.getApplicantId() != null) {
             String actionLabel = switch (req.getAction()) {
                 case "approved" -> "通过";
@@ -124,9 +123,5 @@ public class ChannelReviewController {
                 .submitTime(review.getSubmitTime())
                 .timeoutFlag(review.getTimeoutFlag())
                 .build();
-    }
-
-    private String getCurrentUserId() {
-        return SecureUtil.currentUser().getId();
     }
 }

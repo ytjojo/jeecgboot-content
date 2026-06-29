@@ -1,5 +1,6 @@
 package org.jeecg.modules.content.circle.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.content.circle.biz.ICircleBiz;
@@ -29,6 +30,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -43,6 +45,11 @@ class CircleControllerWebMvcTest {
         @ExceptionHandler(JeecgBootException.class)
         Result<?> handleJeecgBootException(JeecgBootException e) {
             return Result.error(e.getErrCode(), e.getMessage());
+        }
+
+        @ExceptionHandler(IllegalStateException.class)
+        Result<?> handleIllegalStateException(IllegalStateException e) {
+            return Result.error(510, e.getMessage());
         }
     }
 
@@ -66,7 +73,6 @@ class CircleControllerWebMvcTest {
                 .setControllerAdvice(new TestExceptionHandler())
                 .build();
 
-        // SecureUtil.currentUser() reads JSON from SecurityContextHolder
         Authentication auth = mock(Authentication.class);
         lenient().when(auth.getName()).thenReturn("{\"id\":\"u_001\"}");
         SecurityContext context = SecurityContextHolder.createEmptyContext();
@@ -144,6 +150,64 @@ class CircleControllerWebMvcTest {
                                     """))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
+        }
+    }
+
+    @Nested
+    @DisplayName("publicList")
+    class PublicList {
+
+        @Test
+        @DisplayName("anonymous access - returns list without NPE")
+        void anonymousAccess_returnsListWithoutNpe() throws Exception {
+            SecurityContextHolder.clearContext();
+
+            Page<CircleVO> page = new Page<>(1, 20, 0);
+            when(circleBiz.publicList(eq(1), eq(20), eq(null))).thenReturn(page);
+
+            mockMvc.perform(get("/api/v1/content/circle/public-list"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
+    }
+
+    @Nested
+    @DisplayName("checkName")
+    class CheckName {
+
+        @Test
+        @DisplayName("name available - returns true")
+        void nameAvailable_returnsTrue() throws Exception {
+            when(circleBiz.checkNameAvailable("新圈子")).thenReturn(true);
+
+            mockMvc.perform(get("/api/v1/content/circle/check-name")
+                            .param("name", "新圈子"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.result").value(true));
+        }
+
+        @Test
+        @DisplayName("name exists - returns false")
+        void nameExists_returnsFalse() throws Exception {
+            when(circleBiz.checkNameAvailable("已存在")).thenReturn(false);
+
+            mockMvc.perform(get("/api/v1/content/circle/check-name")
+                            .param("name", "已存在"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.result").value(false));
+        }
+
+        @Test
+        @DisplayName("system error - returns error")
+        void systemError_returnsError() throws Exception {
+            when(circleBiz.checkNameAvailable("错误")).thenThrow(new JeecgBootException("数据库连接失败"));
+
+            mockMvc.perform(get("/api/v1/content/circle/check-name")
+                            .param("name", "错误"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(false));
         }
     }
 }

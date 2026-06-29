@@ -95,22 +95,23 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns userId")
         void validRequest_returnsUserId() throws Exception {
-            when(contentAuthBizService.registerByMobile(any())).thenReturn("u_001");
+            when(contentAuthBizService.registerByMobile(any())).thenReturn(new AuthLoginResult().setUserId("u_001").setAccessToken("token_abc"));
 
-            mockMvc.perform(post("/api/v1/content/auth/register/mobile")
+            mockMvc.perform(post("/api/v1/auth/register/mobile")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"mobile":"13800138000","code":"123456","nickname":"test"}
                                     """))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.result").value("u_001"));
+                    .andExpect(jsonPath("$.result.userId").value("u_001"))
+                    .andExpect(jsonPath("$.result.accessToken").value("token_abc"));
         }
 
         @Test
         @DisplayName("blank mobile - returns validation error")
         void blankMobile_returns400() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/register/mobile")
+            mockMvc.perform(post("/api/v1/auth/register/mobile")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"mobile":"","code":"123456","nickname":"test"}
@@ -121,7 +122,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("invalid mobile format - returns validation error")
         void invalidMobile_returns400() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/register/mobile")
+            mockMvc.perform(post("/api/v1/auth/register/mobile")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"mobile":"abc","code":"123456","nickname":"test"}
@@ -132,7 +133,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("blank code - returns validation error")
         void blankCode_returns400() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/register/mobile")
+            mockMvc.perform(post("/api/v1/auth/register/mobile")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"mobile":"13800138000","code":"","nickname":"test"}
@@ -146,7 +147,7 @@ class ContentAuthControllerWebMvcTest {
             when(contentAuthBizService.registerByMobile(any()))
                     .thenThrow(new JeecgBootException("该手机号已被注册"));
 
-            mockMvc.perform(post("/api/v1/content/auth/register/mobile")
+            mockMvc.perform(post("/api/v1/auth/register/mobile")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"mobile":"13800138000","code":"123456","nickname":"test"}
@@ -170,7 +171,7 @@ class ContentAuthControllerWebMvcTest {
                     .setUserId("u_001").setAccessToken("token_abc").setJti("jti_123");
             when(contentAuthBizService.loginByPassword(any())).thenReturn(result);
 
-            mockMvc.perform(post("/api/v1/content/auth/login/password")
+            mockMvc.perform(post("/api/v1/auth/login/password")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"identifier":"13800138000","password":"Pass@123"}
@@ -184,7 +185,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("blank identifier - returns 400")
         void blankIdentifier_returns400() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/login/password")
+            mockMvc.perform(post("/api/v1/auth/login/password")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"identifier":"","password":"Pass@123"}
@@ -198,7 +199,7 @@ class ContentAuthControllerWebMvcTest {
             when(contentAuthBizService.loginByPassword(any()))
                     .thenThrow(new JeecgBootException("账号或密码错误"));
 
-            mockMvc.perform(post("/api/v1/content/auth/login/password")
+            mockMvc.perform(post("/api/v1/auth/login/password")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"identifier":"13800138000","password":"wrong"}
@@ -220,7 +221,7 @@ class ContentAuthControllerWebMvcTest {
                     .setUserId("u_001").setAccessToken("token_xyz").setJti("jti_456");
             when(contentAuthBizService.loginBySms(any())).thenReturn(result);
 
-            mockMvc.perform(post("/api/v1/content/auth/login/sms")
+            mockMvc.perform(post("/api/v1/auth/login/sms")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"mobile":"13800138000","code":"123456"}
@@ -233,7 +234,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("invalid mobile format - returns 400")
         void invalidMobile_returns400() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/login/sms")
+            mockMvc.perform(post("/api/v1/auth/login/sms")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"mobile":"not-a-phone","code":"123456"}
@@ -251,7 +252,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("valid request - returns success")
         void validRequest_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/bind/phone")
+            mockMvc.perform(post("/api/v1/auth/bind/phone")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"userId":"u_001","mobile":"13800138001","code":"123456"}
@@ -266,7 +267,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("blank mobile - returns 400")
         void blankMobile_returns400() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/bind/phone")
+            mockMvc.perform(post("/api/v1/auth/bind/phone")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"mobile":"","code":"123456"}
@@ -287,7 +288,7 @@ class ContentAuthControllerWebMvcTest {
             when(contentDeviceSessionService.listDevices("testUser", "jti_123"))
                     .thenReturn(List.of());
 
-            mockMvc.perform(get("/api/v1/content/auth/devices")
+            mockMvc.perform(get("/api/v1/auth/devices")
                             .param("currentTokenJti", "jti_123"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
@@ -296,7 +297,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("missing currentTokenJti - returns 400")
         void missingJti_returns400() throws Exception {
-            mockMvc.perform(get("/api/v1/content/auth/devices")
+            mockMvc.perform(get("/api/v1/auth/devices")
                             .param("userId", "u_001"))
                     .andExpect(status().isBadRequest());
         }
@@ -311,7 +312,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("rebindMobile valid - returns success")
         void rebindMobile_valid_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/rebind/phone")
+            mockMvc.perform(post("/api/v1/auth/rebind/phone")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"userId":"u_001","oldCode":"111111","newMobile":"13800138002","newCode":"222222"}
@@ -324,7 +325,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("unbindEmail valid - returns success")
         void unbindEmail_valid_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/unbind/email")
+            mockMvc.perform(post("/api/v1/auth/unbind/email")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"userId":"u_001","code":"123456"}
@@ -337,7 +338,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("unbind third-party valid - returns success")
         void unbindThirdParty_valid_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/unbind/third-party")
+            mockMvc.perform(post("/api/v1/auth/unbind/third-party")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"userId":"u_001","provider":"WECHAT"}
@@ -357,7 +358,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("resetPasswordByMobile valid - returns success")
         void resetByMobile_valid_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/reset-password/mobile")
+            mockMvc.perform(post("/api/v1/auth/reset-password/mobile")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"mobile":"13800138000","code":"123456","newPassword":"NewPass@1"}
@@ -370,7 +371,7 @@ class ContentAuthControllerWebMvcTest {
         @Test
         @DisplayName("resetPasswordByEmail valid - returns success")
         void resetByEmail_valid_returnsSuccess() throws Exception {
-            mockMvc.perform(post("/api/v1/content/auth/reset-password/email")
+            mockMvc.perform(post("/api/v1/auth/reset-password/email")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"token":"reset_token_abc","newPassword":"NewPass@1"}
@@ -386,7 +387,7 @@ class ContentAuthControllerWebMvcTest {
             org.mockito.Mockito.doThrow(new JeecgBootException("密码不能与最近3次使用的密码相同"))
                     .when(contentAuthBizService).resetPasswordByMobile(any());
 
-            mockMvc.perform(post("/api/v1/content/auth/reset-password/mobile")
+            mockMvc.perform(post("/api/v1/auth/reset-password/mobile")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"mobile":"13800138000","code":"123456","newPassword":"NewPass@1"}

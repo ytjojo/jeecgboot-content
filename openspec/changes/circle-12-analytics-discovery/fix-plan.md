@@ -29,6 +29,8 @@
 - 使用创建者/版主账号访问应正常返回数据
 - 运行现有CircleDataControllerTest，补充权限校验测试用例
 
+**状态**: done
+
 ---
 
 ### B-BLOCK-002 - circle_recommend_source表缺少exposure_time字段
@@ -49,6 +51,8 @@
 - 执行Flyway迁移，确认字段添加成功
 - 调用recordExposure接口不报错
 - 检查数据库中exposure_time字段被正确更新
+
+**状态**: done
 
 ---
 
@@ -71,6 +75,8 @@
 - 手动触发定时任务，检查circle_data_statistics表中post_count/new_post_count/active_count不再为0
 - 运行CircleDataAggregationSchedulerTest
 
+**状态**: done
+
 ---
 
 ### B-P1-001 - 定时任务catch块rethrow导致调度终止
@@ -88,6 +94,8 @@
 
 **验证方式**:
 - 模拟定时任务执行异常，确认后续调度仍正常执行
+
+**状态**: done
 
 ---
 
@@ -108,6 +116,8 @@
 **验证方式**:
 - 使用包含公式注入字符的测试数据导出CSV，在Excel中打开不应执行公式
 - 运行现有测试确认CSV格式正确
+
+**状态**: done
 
 ---
 
@@ -168,6 +178,8 @@
 - 传入超过90天的范围应返回错误
 - 正常参数应正常返回数据
 
+**状态**: done
+
 ---
 
 ### B-P2-001 - CircleRankingController limit参数缺少校验注解
@@ -203,6 +215,8 @@
 
 **验证方式**:
 - 下载CSV文件，中文文件名在浏览器中正常显示不乱码
+
+**状态**: done
 
 ---
 

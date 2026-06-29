@@ -8,6 +8,7 @@ import org.jeecg.modules.content.auth.entity.ContentUserAccount;
 import org.jeecg.modules.content.auth.mapper.ContentCancellationRequestMapper;
 import org.jeecg.modules.content.auth.mapper.ContentUserAccountMapper;
 import org.jeecg.modules.content.auth.req.ContentCancelApplyReq;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -225,5 +226,30 @@ public class ContentAccountCancellationBizServiceImpl implements IContentAccount
         result.put("eligible", eligible);
         result.put("checks", checks);
         return result;
+    }
+
+    @Scheduled(cron = "0 0 * * * ?")
+    public void processExpiredCancellations() {
+        log.info("开始处理冷静期到期的注销申请");
+        Date now = new Date();
+        List<ContentCancellationRequest> expiredRequests = cancellationRequestMapper.selectList(
+                new LambdaQueryWrapper<ContentCancellationRequest>()
+                        .eq(ContentCancellationRequest::getStatus, REQUEST_STATUS_PENDING)
+                        .le(ContentCancellationRequest::getCooldownDeadline, now)
+        );
+        int successCount = 0;
+        int failCount = 0;
+        for (ContentCancellationRequest request : expiredRequests) {
+            try {
+                // TODO: 多实例部署时需添加分布式锁防止重复执行；自调用事务需通过AopContext或注入self代理解决
+                completeCancellation(request.getUserId());
+                successCount++;
+            } catch (Exception e) {
+                failCount++;
+                log.error("自动注销失败, userId={}, error={}", request.getUserId(), e.getMessage(), e);
+            }
+        }
+        log.info("处理冷静期到期注销申请完成, 到期数={}, 成功={}, 失败={}",
+                expiredRequests.size(), successCount, failCount);
     }
 }

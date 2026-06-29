@@ -12,7 +12,7 @@ import org.jeecg.modules.content.channel.service.ChannelJoinApplicationService;
 import org.jeecg.modules.content.channel.service.ChannelMemberListService;
 import org.jeecg.modules.content.channel.service.ChannelMuteService;
 import org.jeecg.modules.content.channel.service.ChannelSubscriptionService;
-import org.jeecg.config.security.utils.SecureUtil;
+import org.jeecg.modules.content.channel.util.ChannelSecurityUtil;
 import org.jeecg.modules.content.channel.service.ChannelMemberService;
 import org.jeecg.modules.content.channel.vo.UserChannelRelationVO;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +41,7 @@ public class ChannelMemberController {
     @Operation(summary = "自由加入频道")
     @PostMapping("/join/free")
     public Result<String> joinFree(@RequestParam String channelId) {
-        String userId = SecureUtil.currentUser().getId();
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         memberBizService.joinByFree(channelId, userId);
         return Result.OK("加入成功");
     }
@@ -50,7 +50,7 @@ public class ChannelMemberController {
     @PostMapping("/join/apply")
     public Result<String> joinApply(@RequestParam String channelId,
                                     @RequestParam(required = false) String reason) {
-        String userId = SecureUtil.currentUser().getId();
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         memberBizService.joinByReview(channelId, userId, reason);
         return Result.OK("申请已提交");
     }
@@ -58,7 +58,7 @@ public class ChannelMemberController {
     @Operation(summary = "退出频道")
     @PostMapping("/leave")
     public Result<String> leave(@RequestParam String channelId) {
-        String userId = SecureUtil.currentUser().getId();
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         ChannelMember member = memberService.getByChannelAndUser(channelId, userId);
         if (member == null) {
             return Result.error("您不是该频道成员");
@@ -73,7 +73,15 @@ public class ChannelMemberController {
     @Operation(summary = "分配角色")
     @PostMapping("/assign-role")
     public Result<String> assignRole(@RequestParam String memberId, @RequestParam MemberRole role) {
-        String operatorId = SecureUtil.currentUser().getId();
+        String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelMember targetMember = memberService.getById(memberId);
+        if (targetMember == null) {
+            return Result.error("成员不存在");
+        }
+        if (role == MemberRole.OWNER) {
+            return Result.error("不能直接分配频道主角色");
+        }
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, targetMember.getChannelId(), operatorId);
         memberService.assignRole(memberId, role, operatorId);
         return Result.OK("角色已更新");
     }
@@ -99,6 +107,8 @@ public class ChannelMemberController {
     @Operation(summary = "待审核列表")
     @GetMapping("/applications/pending")
     public Result<List<ChannelJoinApplication>> listPendingApplications(@RequestParam String channelId) {
+        String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, operatorId);
         return Result.OK(applicationService.listPending(channelId));
     }
 
@@ -106,7 +116,12 @@ public class ChannelMemberController {
     @PostMapping("/applications/approve")
     public Result<String> approveApplication(@RequestParam String applicationId,
                                               @RequestParam(required = false) String reason) {
-        String reviewerId = SecureUtil.currentUser().getId();
+        String reviewerId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelJoinApplication app = applicationService.getById(applicationId);
+        if (app == null) {
+            return Result.error("申请不存在");
+        }
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, app.getChannelId(), reviewerId);
         memberBizService.approveAndAddMember(applicationId, reviewerId, reason);
         return Result.OK("已批准");
     }
@@ -115,7 +130,12 @@ public class ChannelMemberController {
     @PostMapping("/applications/reject")
     public Result<String> rejectApplication(@RequestParam String applicationId,
                                              @RequestParam(required = false) String reason) {
-        String reviewerId = SecureUtil.currentUser().getId();
+        String reviewerId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelJoinApplication app = applicationService.getById(applicationId);
+        if (app == null) {
+            return Result.error("申请不存在");
+        }
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, app.getChannelId(), reviewerId);
         applicationService.reject(applicationId, reviewerId, reason);
         return Result.OK("已拒绝");
     }
@@ -123,7 +143,7 @@ public class ChannelMemberController {
     @Operation(summary = "用户频道关系查询")
     @GetMapping("/relation")
     public Result<UserChannelRelationVO> getUserChannelRelation(@RequestParam String channelId) {
-        String userId = SecureUtil.currentUser().getId();
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         UserChannelRelationVO vo = new UserChannelRelationVO();
         vo.setChannelId(channelId);
         vo.setUserId(userId);

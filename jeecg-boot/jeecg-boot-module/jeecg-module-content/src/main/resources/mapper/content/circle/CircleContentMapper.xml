@@ -27,4 +27,21 @@
         LIMIT 500
     </select>
 
+    <select id="selectPostStatsGroupByCircle" resultType="java.util.Map">
+        SELECT circle_id,
+               SUM(CASE WHEN content_type = 'POST' AND deleted = 0 THEN 1 ELSE 0 END) AS post_count,
+               SUM(CASE WHEN create_time >= #{todayStart} AND content_type = 'POST' AND deleted = 0 THEN 1 ELSE 0 END) AS new_post_count
+        FROM circle_content
+        WHERE deleted = 0
+        GROUP BY circle_id
+    </select>
+
+    <select id="selectActiveUserStatsGroupByCircle" resultType="java.util.Map">
+        SELECT circle_id,
+               COUNT(DISTINCT user_id) AS active_count
+        FROM circle_content
+        WHERE deleted = 0 AND create_time >= #{thirtyDaysAgo}
+        GROUP BY circle_id
+    </select>
+
 </mapper>

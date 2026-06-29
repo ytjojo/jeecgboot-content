@@ -5,12 +5,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import org.jeecg.common.api.vo.Result;
-import org.jeecg.config.security.utils.SecureUtil;
 import org.jeecg.modules.content.channel.biz.ChannelGovernanceBizService;
 import org.jeecg.modules.content.channel.entity.ChannelBlacklist;
 import org.jeecg.modules.content.channel.entity.ChannelGovernanceLog;
+import org.jeecg.modules.content.channel.entity.ChannelMember;
 import org.jeecg.modules.content.channel.service.ChannelBlacklistService;
 import org.jeecg.modules.content.channel.service.ChannelGovernanceLogService;
+import org.jeecg.modules.content.channel.service.ChannelMemberService;
+import org.jeecg.modules.content.channel.util.ChannelSecurityUtil;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
@@ -27,12 +29,19 @@ public class ChannelGovernanceController {
     private ChannelBlacklistService blacklistService;
     @Resource
     private ChannelGovernanceLogService governanceLogService;
+    @Resource
+    private ChannelMemberService memberService;
 
     @Operation(summary = "移除成员")
     @PostMapping("/remove")
     public Result<String> removeMember(@RequestParam String memberId,
                                        @RequestParam(required = false) String reason) {
-        String operatorId = SecureUtil.currentUser().getId();
+        String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelMember targetMember = memberService.getById(memberId);
+        if (targetMember == null) {
+            return Result.error("成员不存在");
+        }
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, targetMember.getChannelId(), operatorId);
         governanceBizService.removeMember(memberId, operatorId, reason);
         return Result.OK("已移除");
     }
@@ -43,7 +52,8 @@ public class ChannelGovernanceController {
                                      @RequestParam String userId,
                                      @RequestParam int days,
                                      @RequestParam(required = false) String reason) {
-        String operatorId = SecureUtil.currentUser().getId();
+        String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, operatorId);
         governanceBizService.muteMember(channelId, userId, operatorId, reason, days);
         return Result.OK("已禁言");
     }
@@ -52,7 +62,8 @@ public class ChannelGovernanceController {
     @PostMapping("/unmute")
     public Result<String> unmuteMember(@RequestParam String channelId,
                                        @RequestParam String userId) {
-        String operatorId = SecureUtil.currentUser().getId();
+        String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, operatorId);
         governanceBizService.unmuteMember(channelId, userId, operatorId);
         return Result.OK("已解除禁言");
     }
@@ -62,7 +73,8 @@ public class ChannelGovernanceController {
     public Result<String> addToBlacklist(@RequestParam String channelId,
                                          @RequestParam String userId,
                                          @RequestParam(required = false) String reason) {
-        String operatorId = SecureUtil.currentUser().getId();
+        String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, operatorId);
         governanceBizService.addToBlacklist(channelId, userId, operatorId, reason);
         return Result.OK("已加入黑名单");
     }
@@ -71,7 +83,8 @@ public class ChannelGovernanceController {
     @PostMapping("/blacklist/remove")
     public Result<String> removeFromBlacklist(@RequestParam String channelId,
                                                @RequestParam String userId) {
-        String operatorId = SecureUtil.currentUser().getId();
+        String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, operatorId);
         governanceBizService.removeFromBlacklist(channelId, userId, operatorId);
         return Result.OK("已移出黑名单");
     }
@@ -79,6 +92,8 @@ public class ChannelGovernanceController {
     @Operation(summary = "黑名单列表")
     @GetMapping("/blacklist/list")
     public Result<List<ChannelBlacklist>> listBlacklist(@RequestParam String channelId) {
+        String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, operatorId);
         return Result.OK(blacklistService.listByChannel(channelId));
     }
 
@@ -89,6 +104,8 @@ public class ChannelGovernanceController {
             @RequestParam(required = false) Integer action,
             @RequestParam(defaultValue = "1") int pageNum,
             @Max(100) @RequestParam(defaultValue = "20") int pageSize) {
+        String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, operatorId);
         return Result.OK(governanceLogService.listByChannel(channelId, action, pageNum, pageSize));
     }
 }

@@ -228,7 +228,7 @@ class ContentRiskControlBizServiceTest {
         @Test
         @DisplayName("记录风险事件成功")
         void record_success() {
-            riskControlService.recordRiskEvent(TEST_USER_ID, "LOGIN_FAIL", "HIGH",
+            riskControlService.recordRiskEvent(TEST_USER_ID, "LOGIN_FAIL", 3,
                     "多次登录失败", TEST_IP, TEST_DEVICE_FP, "Mozilla/5.0");
 
             ArgumentCaptor<ContentRiskEvent> eventCaptor = ArgumentCaptor.forClass(ContentRiskEvent.class);
@@ -236,7 +236,7 @@ class ContentRiskControlBizServiceTest {
             ContentRiskEvent capturedEvent = eventCaptor.getValue();
             assertThat(capturedEvent.getUserId()).isEqualTo(TEST_USER_ID);
             assertThat(capturedEvent.getEventType()).isEqualTo("LOGIN_FAIL");
-            assertThat(capturedEvent.getRiskLevel()).isEqualTo("HIGH");
+            assertThat(capturedEvent.getRiskLevel()).isEqualTo(3);
             assertThat(capturedEvent.getResolved()).isFalse();
         }
     }

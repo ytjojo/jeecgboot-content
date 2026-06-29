@@ -10,7 +10,9 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.modules.content.channel.biz.ChannelExportBiz;
 import org.jeecg.modules.content.channel.entity.ChannelExportTask;
 import org.jeecg.modules.content.channel.req.ChannelExportReq;
+import org.jeecg.modules.content.channel.service.ChannelMemberService;
 import org.jeecg.modules.content.channel.service.IChannelExportTaskService;
+import org.jeecg.modules.content.channel.util.ChannelSecurityUtil;
 import org.jeecg.modules.content.channel.vo.ChannelExportTaskVO;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,20 +35,29 @@ public class ChannelExportController {
     @Resource
     private IChannelExportTaskService exportTaskService;
 
+    @Resource
+    private ChannelMemberService memberService;
+
     @PostMapping("/create")
     @Operation(summary = "创建导出任务")
     public Result<ChannelExportTaskVO> createExport(@Valid @RequestBody ChannelExportReq req) {
-        return Result.OK(exportBiz.createExport(req, getCurrentUserId()));
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, req.getChannelId(), userId);
+        return Result.OK(exportBiz.createExport(req, userId));
     }
 
     @GetMapping("/status")
     @Operation(summary = "查询导出状态")
     public Result<ChannelExportTaskVO> getExportStatus(@RequestParam String taskId) {
-        ChannelExportTaskVO vo = exportBiz.getExportStatus(taskId);
-        if (vo == null) {
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        ChannelExportTask task = exportTaskService.lambdaQuery()
+                .eq(ChannelExportTask::getTaskId, taskId)
+                .one();
+        if (task == null) {
             return Result.error("导出任务不存在");
         }
-        return Result.OK(vo);
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, task.getChannelId(), userId);
+        return Result.OK(exportBiz.getExportStatus(taskId));
     }
 
     @GetMapping("/history")
@@ -55,8 +66,12 @@ public class ChannelExportController {
             @Parameter(description = "频道ID") @RequestParam(required = false) String channelId,
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size) {
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
+        if (channelId != null) {
+            ChannelSecurityUtil.checkChannelAdminPermission(memberService, channelId, userId);
+        }
         LambdaQueryWrapper<ChannelExportTask> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ChannelExportTask::getUserId, getCurrentUserId());
+        wrapper.eq(ChannelExportTask::getUserId, userId);
         if (channelId != null) {
             wrapper.eq(ChannelExportTask::getChannelId, channelId);
         }
@@ -69,6 +84,7 @@ public class ChannelExportController {
     public void downloadExport(
             @Parameter(description = "任务ID", required = true) @RequestParam String taskId,
             HttpServletResponse response) throws IOException {
+        String userId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         ChannelExportTask task = exportTaskService.lambdaQuery()
                 .eq(ChannelExportTask::getTaskId, taskId)
                 .one();
@@ -77,6 +93,7 @@ public class ChannelExportController {
             response.getWriter().write("{\"success\":false,\"message\":\"导出文件不存在或未完成\"}");
             return;
         }
+        ChannelSecurityUtil.checkChannelAdminPermission(memberService, task.getChannelId(), userId);
 
         File file = new File(task.getFilePath());
         if (!file.exists()) {
@@ -98,10 +115,5 @@ public class ChannelExportController {
                 os.write(buffer, 0, len);
             }
         }
-    }
-
-    private String getCurrentUserId() {
-        // TODO: 从安全上下文获取当前用户ID
-        return "current-user-id";
     }
 }

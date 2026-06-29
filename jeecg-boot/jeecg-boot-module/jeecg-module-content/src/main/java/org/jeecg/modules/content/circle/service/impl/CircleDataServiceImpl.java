@@ -33,17 +33,14 @@ public class CircleDataServiceImpl implements ICircleDataService {
             return vo;
         }
 
-        // 取最新一天的数据作为总数
         CircleDataStatistics latest = stats.get(stats.size() - 1);
         vo.setMemberCount(latest.getMemberCount());
         vo.setPostCount(latest.getPostCount());
         vo.setActiveCount(latest.getActiveCount());
 
-        // 汇总新增数据
         vo.setNewMemberCount(stats.stream().mapToInt(CircleDataStatistics::getNewMemberCount).sum());
         vo.setNewPostCount(stats.stream().mapToInt(CircleDataStatistics::getNewPostCount).sum());
 
-        // 构建每日趋势
         List<CircleDataStatisticsVO.DailyTrend> trends = stats.stream()
                 .map(s -> {
                     CircleDataStatisticsVO.DailyTrend trend = new CircleDataStatisticsVO.DailyTrend();
@@ -68,7 +65,7 @@ public class CircleDataServiceImpl implements ICircleDataService {
 
         for (CircleDataStatistics s : stats) {
             csv.append(String.format("%s,%d,%d,%d,%d,%d\n",
-                    s.getStatDate(),
+                    escapeCsvField(String.valueOf(s.getStatDate())),
                     s.getMemberCount(),
                     s.getNewMemberCount(),
                     s.getPostCount(),
@@ -77,5 +74,19 @@ public class CircleDataServiceImpl implements ICircleDataService {
         }
 
         return csv.toString();
+    }
+
+    private String escapeCsvField(String value) {
+        if (value == null) {
+            return "";
+        }
+        if (value.startsWith("=") || value.startsWith("+") || value.startsWith("-") || value.startsWith("@")
+                || value.startsWith("\t") || value.startsWith("\r")) {
+            value = "'" + value;
+        }
+        if (value.contains(",") || value.contains("\"") || value.contains("\n") || value.contains("\r")) {
+            value = "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
     }
 }

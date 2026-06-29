@@ -5,6 +5,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.modules.content.auth.dto.AuthLoginResult;
 import org.jeecg.modules.content.auth.entity.ContentUserAccount;
 import org.jeecg.modules.content.auth.entity.ContentUserCredential;
 import org.jeecg.modules.content.auth.enums.CredentialTypeEnum;
@@ -13,8 +14,11 @@ import org.jeecg.modules.content.auth.mapper.ContentUserAccountMapper;
 import org.jeecg.modules.content.auth.mapper.ContentUserCredentialMapper;
 import org.jeecg.modules.content.auth.req.ContentAuthMobileRegisterReq;
 import org.jeecg.modules.content.auth.service.IContentVerificationCodeService;
+import org.jeecg.modules.content.auth.service.LoginTokenGeneratorPort;
+import org.jeecg.modules.content.user.entity.ContentUserDeviceSession;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.gateway.SystemUserAccountGateway;
+import org.jeecg.modules.content.user.mapper.ContentUserDeviceSessionMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserNotificationSettingMapper;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,6 +55,10 @@ class ContentAuthBizServiceRegisterMobileTest {
     private ContentUserProfileMapper profileMapper;
     @Mock
     private ContentUserNotificationSettingMapper notificationMapper;
+    @Mock
+    private LoginTokenGeneratorPort loginTokenGeneratorPort;
+    @Mock
+    private ContentUserDeviceSessionMapper deviceSessionMapper;
 
     @InjectMocks
     private ContentAuthBizServiceImpl bizService;
@@ -73,12 +81,15 @@ class ContentAuthBizServiceRegisterMobileTest {
         when(codeService.verifyCode(VerificationCodeSceneEnum.REGISTER, "13800138000", "123456")).thenReturn(true);
         when(credentialMapper.selectCount(any())).thenReturn(0L);
         when(gateway.createUser(any())).thenReturn("u_generated_001");
+        when(loginTokenGeneratorPort.generateToken("u_generated_001", "PC")).thenReturn("access-token-xyz");
+        when(deviceSessionMapper.insert(any(ContentUserDeviceSession.class))).thenReturn(1);
 
         // when
-        String userId = bizService.registerByMobile(req);
+        AuthLoginResult result = bizService.registerByMobile(req);
 
         // then
-        assertThat(userId).isEqualTo("u_generated_001");
+        assertThat(result.getUserId()).isEqualTo("u_generated_001");
+        assertThat(result.getAccessToken()).isEqualTo("access-token-xyz");
 
         // 验证凭证记录被创建
         ArgumentCaptor<ContentUserCredential> credentialCaptor = ArgumentCaptor.forClass(ContentUserCredential.class);

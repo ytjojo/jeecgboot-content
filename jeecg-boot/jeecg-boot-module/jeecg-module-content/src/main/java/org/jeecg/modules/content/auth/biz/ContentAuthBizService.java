@@ -15,17 +15,17 @@ public interface ContentAuthBizService {
      * 手机号验证码注册。
      *
      * @param req 注册请求
-     * @return 用户ID
+     * @return 登录结果（含token）
      */
-    String registerByMobile(ContentAuthMobileRegisterReq req);
+    AuthLoginResult registerByMobile(ContentAuthMobileRegisterReq req);
 
     /**
      * 邮箱密码注册，注册后发送确认邮件。
      *
      * @param req 注册请求
-     * @return 用户ID
+     * @return 登录结果（含token）
      */
-    String registerByEmail(ContentAuthEmailRegisterReq req);
+    AuthLoginResult registerByEmail(ContentAuthEmailRegisterReq req);
 
     /**
      * 确认邮箱验证链接。

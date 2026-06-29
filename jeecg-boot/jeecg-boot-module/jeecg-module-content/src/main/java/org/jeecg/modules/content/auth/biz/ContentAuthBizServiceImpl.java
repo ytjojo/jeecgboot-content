@@ -108,7 +108,7 @@ public class ContentAuthBizServiceImpl implements ContentAuthBizService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String registerByMobile(ContentAuthMobileRegisterReq req) {
+    public AuthLoginResult registerByMobile(ContentAuthMobileRegisterReq req) {
         // 1. 校验短信验证码
         boolean codeValid = codeService.verifyCode(
                 VerificationCodeSceneEnum.REGISTER, req.getMobile(), req.getCode());
@@ -164,12 +164,12 @@ public class ContentAuthBizServiceImpl implements ContentAuthBizService {
         notificationSettingMapper.insert(notificationSetting);
 
         log.info("用户手机号注册成功, userId={}, mobile={}", userId, req.getMobile());
-        return userId;
+        return createLoginResult(userId, "PC");
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String registerByEmail(ContentAuthEmailRegisterReq req) {
+    public AuthLoginResult registerByEmail(ContentAuthEmailRegisterReq req) {
         // 1. 检查邮箱是否已注册
         Long count = credentialMapper.selectCount(
                 new LambdaQueryWrapper<ContentUserCredential>()
@@ -213,12 +213,12 @@ public class ContentAuthBizServiceImpl implements ContentAuthBizService {
 
         // 6. 生成邮箱验证token并发送确认邮件
         String token = tokenService.generateEmailVerifyToken(userId, req.getEmail());
-        String confirmUrl = "https://example.com/auth/confirm-email?token=" + token;
+        String confirmUrl = "/api/v1/auth/confirm-email?token=" + token;
         String htmlContent = "<p>请点击以下链接确认您的邮箱：</p><a href=\"" + confirmUrl + "\">确认邮箱</a>";
         emailSenderPort.send(req.getEmail(), "请确认您的邮箱", htmlContent);
 
         log.info("用户邮箱注册成功, userId={}, email={}", userId, req.getEmail());
-        return userId;
+        return createLoginResult(userId, "PC");
     }
 
     @Override

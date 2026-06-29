@@ -9,6 +9,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.modules.content.auth.dto.AuthLoginResult;
 import org.jeecg.modules.content.auth.entity.ContentUserAccount;
 import org.jeecg.modules.content.auth.entity.ContentUserCredential;
 import org.jeecg.modules.content.auth.mapper.ContentUserAccountMapper;
@@ -16,6 +17,9 @@ import org.jeecg.modules.content.auth.mapper.ContentUserCredentialMapper;
 import org.jeecg.modules.content.auth.req.ContentAuthEmailRegisterReq;
 import org.jeecg.modules.content.auth.service.EmailSenderPort;
 import org.jeecg.modules.content.auth.service.IContentTokenService;
+import org.jeecg.modules.content.auth.service.LoginTokenGeneratorPort;
+import org.jeecg.modules.content.user.entity.ContentUserDeviceSession;
+import org.jeecg.modules.content.user.mapper.ContentUserDeviceSessionMapper;
 import org.jeecg.modules.content.user.entity.ContentUserProfile;
 import org.jeecg.modules.content.user.gateway.SystemUserAccountGateway;
 import org.jeecg.modules.content.user.mapper.ContentUserProfileMapper;
@@ -59,6 +63,12 @@ class ContentAuthBizServiceRegisterEmailTest {
     @Mock
     private EmailSenderPort emailSenderPort;
 
+    @Mock
+    private LoginTokenGeneratorPort loginTokenGeneratorPort;
+
+    @Mock
+    private ContentUserDeviceSessionMapper deviceSessionMapper;
+
     @InjectMocks
     private ContentAuthBizServiceImpl service;
 
@@ -85,14 +95,17 @@ class ContentAuthBizServiceRegisterEmailTest {
         when(profileMapper.insert(any(ContentUserProfile.class))).thenReturn(1);
         when(tokenService.generateEmailVerifyToken("user-001", "test@example.com")).thenReturn("verify-token-abc");
         when(emailSenderPort.send(eq("test@example.com"), anyString(), anyString())).thenReturn(true);
+        when(loginTokenGeneratorPort.generateToken("user-001", "PC")).thenReturn("access-token-abc");
+        when(deviceSessionMapper.insert(any(ContentUserDeviceSession.class))).thenReturn(1);
 
         ContentAuthEmailRegisterReq req = validReq();
 
         // when
-        String userId = service.registerByEmail(req);
+        AuthLoginResult result = service.registerByEmail(req);
 
         // then
-        assertThat(userId).isEqualTo("user-001");
+        assertThat(result.getUserId()).isEqualTo("user-001");
+        assertThat(result.getAccessToken()).isEqualTo("access-token-abc");
 
         // 验证调用了gateway创建用户
         ArgumentCaptor<ContentEmailRegisterReq> gatewayReqCaptor = ArgumentCaptor.forClass(ContentEmailRegisterReq.class);
