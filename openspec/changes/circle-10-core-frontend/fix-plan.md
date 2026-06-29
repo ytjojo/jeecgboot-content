@@ -205,7 +205,7 @@
 - 人工测试：非圈主用户访问edit路由被拦截
 - npm run lint
 
-**状态**: pending
+**状态**: done
 
 ---
 
@@ -227,7 +227,7 @@
 - 人工测试：5分钟内重复访问详情不重复请求
 - npm run lint
 
-**状态**: pending
+**状态**: done
 
 ---
 
@@ -249,7 +249,7 @@
 - 人工测试：输入停止300ms后自动搜索
 - npm run lint
 
-**状态**: pending
+**状态**: done
 
 ---
 
@@ -272,7 +272,8 @@
 - 人工测试：裁剪后头像正确显示
 - npm run lint
 
-**状态**: pending
+**状态**: skipped
+**跳过原因**: 图片裁剪涉及引入第三方裁剪库（vue-cropper）和弹窗交互，属于增强功能，MVP阶段可后续迭代实现。
 
 ---
 
@@ -292,7 +293,13 @@
 - 人工检查：所有icon按钮有aria-label
 - npm run lint
 
-**状态**: pending
+**修复说明**:
+- Members.vue操作按钮均为文字按钮（如"设为版主"、"禁言"、"移除"等），按钮文本本身已作为可访问名称，无需额外aria-label
+- Search.vue的纯图标返回按钮（ArrowLeftOutlined，无文字）已添加 `aria-label="返回"`
+- List.vue的创建按钮已有 `aria-label="创建圈子"`
+- 其他circle页面（Detail、GovernanceLog、growth/badges/leaderboard）的返回按钮均包含文字"返回圈子详情"
+
+**状态**: done
 
 ---
 

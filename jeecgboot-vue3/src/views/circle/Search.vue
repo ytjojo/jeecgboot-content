@@ -3,7 +3,7 @@
     <div class="search-container">
       <!-- 搜索栏 -->
       <div class="search-bar">
-        <a-button type="link" @click="goBack">
+        <a-button type="link" @click="goBack" aria-label="返回">
           <ArrowLeftOutlined />
         </a-button>
         <a-input-search
@@ -78,7 +78,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ArrowLeftOutlined } from '@ant-design/icons-vue';
 import { searchCircle, joinCircle } from '/@/api/content/circle';
@@ -121,18 +121,25 @@ function handleSearch(val?: string) {
   if (!term.trim()) return;
   keyword.value = term;
   router.replace({ query: { q: term } });
-  // Enter 键立即触发，清除防抖计时器
-  if (debounceTimer) clearTimeout(debounceTimer);
-  doSearch(term);
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+  doSearch(term, true);
 }
 
 function doSearch(term: string, immediate = false) {
-  if (debounceTimer) clearTimeout(debounceTimer);
-  loading.value = true;
-  error.value = false;
-  searched.value = true;
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
 
   const executeSearch = () => {
+    debounceTimer = null;
+    loading.value = true;
+    error.value = false;
+    searched.value = true;
+
     searchCircle({ keyword: term, pageNum: 1, pageSize: 20 })
       .then((res) => {
         results.value = res?.records || [];
@@ -152,6 +159,13 @@ function doSearch(term: string, immediate = false) {
     debounceTimer = setTimeout(executeSearch, DEBOUNCE_MS);
   }
 }
+
+onUnmounted(() => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+});
 
 function highlight(text: string): string {
   if (!keyword.value) return text;

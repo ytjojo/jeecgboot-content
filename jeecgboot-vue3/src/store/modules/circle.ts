@@ -1,7 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { store } from '/@/store';
+import { getCircleDetail } from '/@/api/content/circle';
 import type { CircleVO, MemberRole } from '/@/api/content/model/circleModel';
+
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 /** 隐私类型选项 */
 export const privacyTypeOptions = [
@@ -22,6 +25,8 @@ export const useCircleStore = defineStore('circle', () => {
   // ===== State =====
   const currentCircle = ref<CircleVO | null>(null);
   const searchKeyword = ref<string>('');
+  const lastFetchTime = ref<number>(0);
+  const lastFetchCircleId = ref<string | null>(null);
 
   // ===== Getters =====
   /** 当前用户角色 */
@@ -62,10 +67,24 @@ export const useCircleStore = defineStore('circle', () => {
   // ===== Actions =====
   function setCurrentCircle(circle: CircleVO | null) {
     currentCircle.value = circle;
+    if (circle) {
+      lastFetchTime.value = Date.now();
+      lastFetchCircleId.value = circle.id;
+    } else {
+      lastFetchTime.value = 0;
+      lastFetchCircleId.value = null;
+    }
   }
 
   function clearCurrentCircle() {
     currentCircle.value = null;
+    lastFetchTime.value = 0;
+    lastFetchCircleId.value = null;
+  }
+
+  function clearCache() {
+    lastFetchTime.value = 0;
+    lastFetchCircleId.value = null;
   }
 
   function setSearchKeyword(keyword: string) {
@@ -77,6 +96,29 @@ export const useCircleStore = defineStore('circle', () => {
     if (currentCircle.value) {
       Object.assign(currentCircle.value, partial);
     }
+  }
+
+  /**
+   * 获取圈子详情（带5分钟缓存）
+   * - 相同circleId且5分钟内：直接返回缓存
+   * - 超过5分钟或ID不同：重新请求
+   * - force=true：强制刷新
+   */
+  async function fetchCircleDetail(circleId: string, force = false): Promise<CircleVO> {
+    const now = Date.now();
+    const isCacheValid =
+      !force &&
+      currentCircle.value &&
+      lastFetchCircleId.value === circleId &&
+      now - lastFetchTime.value < CACHE_TTL_MS;
+
+    if (isCacheValid) {
+      return currentCircle.value!;
+    }
+
+    const circle = await getCircleDetail(circleId);
+    setCurrentCircle(circle);
+    return circle;
   }
 
   /**
@@ -109,6 +151,8 @@ export const useCircleStore = defineStore('circle', () => {
     // State
     currentCircle,
     searchKeyword,
+    lastFetchTime,
+    lastFetchCircleId,
     // Getters
     currentRole,
     isCreator,
@@ -120,8 +164,10 @@ export const useCircleStore = defineStore('circle', () => {
     // Actions
     setCurrentCircle,
     clearCurrentCircle,
+    clearCache,
     setSearchKeyword,
     updateCurrentCircle,
+    fetchCircleDetail,
     canMute,
     canRemove,
   };

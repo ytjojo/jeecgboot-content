@@ -1,5 +1,43 @@
 import type { AppRouteModule } from '/@/router/types';
+import type { RouteLocationNormalized } from 'vue-router';
 import { LAYOUT } from '/@/router/constant';
+import { getCircleDetail } from '/@/api/content/circle';
+import { useCircleStoreWithOut } from '/@/store/modules/circle';
+import { useMessage } from '/@/hooks/web/useMessage';
+
+const { createMessage } = useMessage();
+
+async function checkCirclePermission(
+  to: RouteLocationNormalized,
+  requireRole: 'admin' | 'member',
+) {
+  const circleId = to.params.id as string;
+  const circleStore = useCircleStoreWithOut();
+
+  try {
+    const circle = await getCircleDetail(circleId);
+    circleStore.setCurrentCircle(circle);
+
+    if (requireRole === 'admin') {
+      const isAdmin = circle.myRole === 'CREATOR' || circle.myRole === 'MODERATOR';
+      if (!isAdmin) {
+        createMessage.warning('您没有管理权限');
+        return { path: `/circle/${circleId}`, replace: true };
+      }
+    }
+
+    if (requireRole === 'member') {
+      if (!circle.joined) {
+        createMessage.warning('请先加入圈子');
+        return { path: `/circle/${circleId}`, replace: true };
+      }
+    }
+
+    return true;
+  } catch {
+    return { path: `/circle/${circleId}`, replace: true };
+  }
+}
 
 const circle: AppRouteModule = {
   path: '/circle',
@@ -44,6 +82,7 @@ const circle: AppRouteModule = {
       meta: {
         title: '编辑圈子',
       },
+      beforeEnter: (to) => checkCirclePermission(to, 'admin'),
     },
     {
       path: ':id/members',
@@ -52,6 +91,7 @@ const circle: AppRouteModule = {
       meta: {
         title: '成员管理',
       },
+      beforeEnter: (to) => checkCirclePermission(to, 'member'),
     },
     {
       path: 'search',
@@ -68,6 +108,7 @@ const circle: AppRouteModule = {
       meta: {
         title: '治理日志',
       },
+      beforeEnter: (to) => checkCirclePermission(to, 'admin'),
     },
     {
       path: ':id/growth',
