@@ -21,7 +21,7 @@
 - Impact: 新增端点，非破坏性变更
 
 **前端路径统一**
-- From: 前端使用 `/api/v1/content/auth/`、`/api/v1/account-security/`、`/api/v1/account-cancellation/`
+- From: 前端使用 `/api/v1/content/auth/`、`/api/v1/content/account-security/`、`/api/v1/content/account-security/`
 - To: 统一为 `/api/v1/content/auth/`、`/api/v1/content/account-security/`、`/api/v1/content/account-cancellation/`
 - Reason: 与后端目标路径对齐，同时与其他内容社区 API（`/api/v1/content/channel/`）风格一致
 - Impact: 修改 4 个前端 API 文件的路径字符串

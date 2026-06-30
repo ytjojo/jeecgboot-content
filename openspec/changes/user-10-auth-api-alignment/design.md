@@ -35,7 +35,7 @@
 | ContentAccountCancellationController | `/content/auth/cancellation` | `/api/v1/content/account-cancellation` |
 | ContentRiskControlController | `/content/auth/risk` | `/api/v1/content/account-security` |
 
-**说明**: RiskControlController 的风控功能（异常登录通知、确认登录）属于账户安全范畴，合并到 `/api/v1/account-security` 下合理。新增的风控相关端点（deny、appeal）也放在同一 Controller 中。
+**说明**: RiskControlController 的风控功能（异常登录通知、确认登录）属于账户安全范畴，合并到 `/api/v1/content/account-security` 下合理。新增的风控相关端点（deny、appeal）也放在同一 Controller 中。
 
 ### Decision 3: 新增端点放置策略
 
@@ -63,17 +63,17 @@
 | 4 | 密码登录 | POST | `/content/auth/login/password` | `/api/v1/content/auth/login/password` | `/api/v1/content/auth/login/password` | 后端改 |
 | 5 | 短信登录 | POST | `/content/auth/login/sms` | `/api/v1/content/auth/login/sms-code` | `/api/v1/content/auth/login/sms-code` | 后端改 |
 | 6 | 第三方登录 | POST | `/content/auth/login/third-party` | `/api/v1/content/auth/login/third-party` | `/api/v1/content/auth/login/third-party` | 后端改 |
-| 7 | 绑定手机 | POST | `/content/auth/bind/mobile` | `/api/v1/content/account-security/bind/phone` | `/api/v1/account-security/bind/phone` | 后端改 |
-| 8 | 换绑手机 | POST | `/content/auth/rebind/mobile` | `/api/v1/content/account-security/rebind/phone` | `/api/v1/account-security/rebind/phone` | 后端改 |
-| 9 | 解绑手机 | POST | `/content/auth/unbind/mobile` | `/api/v1/content/account-security/unbind/phone` | `/api/v1/account-security/unbind/phone` | 后端改 |
-| 10 | 绑定邮箱 | POST | `/content/auth/bind/email` | `/api/v1/content/account-security/bind/email` | `/api/v1/account-security/bind/email` | 后端改 |
-| 11 | 换绑邮箱 | POST | `/content/auth/rebind/email` | `/api/v1/content/account-security/rebind/email` | `/api/v1/account-security/rebind/email` | 后端改 |
-| 12 | 解绑邮箱 | POST | `/content/auth/unbind/email` | `/api/v1/content/account-security/unbind/email` | `/api/v1/account-security/unbind/email` | 后端改 |
-| 13 | 绑定第三方 | POST | `/content/auth/bind/third-party` | `/api/v1/content/account-security/bind/third-party` | `/api/v1/account-security/bind/third-party` | 后端改 |
-| 14 | 解绑第三方 | POST | `/content/auth/unbind/third-party` | `/api/v1/content/account-security/unbind/third-party` | `/api/v1/account-security/unbind/third-party` | 后端改 |
-| 15 | 设备列表 | GET | `/content/auth/devices` | `/api/v1/content/account-security/devices` | `/api/v1/account-security/devices` | 后端改 |
-| 16 | 撤销设备 | POST | `/content/auth/devices/revoke` | `/api/v1/content/account-security/devices/revoke` | `/api/v1/account-security/devices/revoke` | 后端改 |
-| 17 | 重置密码 | POST | `/content/auth/reset-password` | `/api/v1/content/account-security/password/reset` | `/api/v1/account-security/password/reset` | 后端改 |
+| 7 | 绑定手机 | POST | `/content/auth/bind/mobile` | `/api/v1/content/account-security/bind/phone` | `/api/v1/content/account-security/bind/phone` | 后端改 |
+| 8 | 换绑手机 | POST | `/content/auth/rebind/mobile` | `/api/v1/content/account-security/rebind/phone` | `/api/v1/content/account-security/rebind/phone` | 后端改 |
+| 9 | 解绑手机 | POST | `/content/auth/unbind/mobile` | `/api/v1/content/account-security/unbind/phone` | `/api/v1/content/account-security/unbind/phone` | 后端改 |
+| 10 | 绑定邮箱 | POST | `/content/auth/bind/email` | `/api/v1/content/account-security/bind/email` | `/api/v1/content/account-security/bind/email` | 后端改 |
+| 11 | 换绑邮箱 | POST | `/content/auth/rebind/email` | `/api/v1/content/account-security/rebind/email` | `/api/v1/content/account-security/rebind/email` | 后端改 |
+| 12 | 解绑邮箱 | POST | `/content/auth/unbind/email` | `/api/v1/content/account-security/unbind/email` | `/api/v1/content/account-security/unbind/email` | 后端改 |
+| 13 | 绑定第三方 | POST | `/content/auth/bind/third-party` | `/api/v1/content/account-security/bind/third-party` | `/api/v1/content/account-security/bind/third-party` | 后端改 |
+| 14 | 解绑第三方 | POST | `/content/auth/unbind/third-party` | `/api/v1/content/account-security/unbind/third-party` | `/api/v1/content/account-security/unbind/third-party` | 后端改 |
+| 15 | 设备列表 | GET | `/content/auth/devices` | `/api/v1/content/account-security/devices` | `/api/v1/content/account-security/devices` | 后端改 |
+| 16 | 撤销设备 | POST | `/content/auth/devices/revoke` | `/api/v1/content/account-security/devices/revoke` | `/api/v1/content/account-security/devices/revoke` | 后端改 |
+| 17 | 重置密码 | POST | `/content/auth/reset-password` | `/api/v1/content/account-security/password/reset` | `/api/v1/content/account-security/password/reset` | 后端改 |
 
 ### 新增认证端点 (ContentAuthController)
 
@@ -86,39 +86,39 @@
 | N5 | 获取验证码图片 | POST | `/api/v1/content/auth/captcha/image` | `/api/v1/content/auth/captcha/image` | 代理系统模块 |
 | N6 | 校验验证码 | POST | `/api/v1/content/auth/captcha/verify` | `/api/v1/content/auth/captcha/verify` | 代理系统模块 |
 | N7 | 查询锁定状态 | GET | `/api/v1/content/auth/captcha/lock-status` | `/api/v1/content/auth/captcha/lock-status` | 风控查询 |
-| N8 | 账户安全状态 | GET | `/api/v1/content/account-security/status` | `/api/v1/account-security/status` | 聚合查询 |
-| N9 | 信任设备 | POST | `/api/v1/content/account-security/devices/trust` | `/api/v1/account-security/devices/trust` | 设备管理扩展 |
-| N10 | 取消信任 | POST | `/api/v1/content/account-security/devices/untrust` | `/api/v1/account-security/devices/untrust` | 设备管理扩展 |
-| N11 | 修改密码 | POST | `/api/v1/content/account-security/password/change` | `/api/v1/account-security/password/change` | 验证旧密码 |
-| N12 | 安全操作验证码 | POST | `/api/v1/content/account-security/send-code` | `/api/v1/account-security/send-code` | 复用短信/邮件 |
+| N8 | 账户安全状态 | GET | `/api/v1/content/account-security/status` | `/api/v1/content/account-security/status` | 聚合查询 |
+| N9 | 信任设备 | POST | `/api/v1/content/account-security/devices/trust` | `/api/v1/content/account-security/devices/trust` | 设备管理扩展 |
+| N10 | 取消信任 | POST | `/api/v1/content/account-security/devices/untrust` | `/api/v1/content/account-security/devices/untrust` | 设备管理扩展 |
+| N11 | 修改密码 | POST | `/api/v1/content/account-security/password/change` | `/api/v1/content/account-security/password/change` | 验证旧密码 |
+| N12 | 安全操作验证码 | POST | `/api/v1/content/account-security/send-code` | `/api/v1/content/account-security/send-code` | 复用短信/邮件 |
 
 ### 风控模块 (ContentRiskControlController)
 
 | # | 功能 | HTTP | 后端当前路径 | 目标路径 | 前端当前路径 | 改动 |
 |---|------|------|-------------|---------|-------------|------|
-| 18 | 异常登录列表 | GET | `/content/auth/risk/notifications` | `/api/v1/content/account-security/anomaly/list` | `/api/v1/account-security/anomaly/list` | 后端改 |
-| 19 | 确认登录 | POST | `/content/auth/risk/confirm-login` | `/api/v1/content/account-security/anomaly/confirm` | `/api/v1/account-security/anomaly/confirm` | 后端改 |
+| 18 | 异常登录列表 | GET | `/content/auth/risk/notifications` | `/api/v1/content/account-security/anomaly/list` | `/api/v1/content/account-security/anomaly/list` | 后端改 |
+| 19 | 确认登录 | POST | `/content/auth/risk/confirm-login` | `/api/v1/content/account-security/anomaly/confirm` | `/api/v1/content/account-security/anomaly/confirm` | 后端改 |
 | 20 | 申诉 | POST | `/content/auth/risk/appeal` | `/api/v1/content/account-security/anomaly/appeal` | — | 后端改 + 前端新增 |
 
 ### 新增风控端点
 
 | # | 功能 | HTTP | 目标路径 | 前端当前路径 | 说明 |
 |---|------|------|---------|-------------|------|
-| N13 | 否认异常登录 | POST | `/api/v1/content/account-security/anomaly/deny` | `/api/v1/account-security/anomaly/deny` | 触发设备踢出 |
+| N13 | 否认异常登录 | POST | `/api/v1/content/account-security/anomaly/deny` | `/api/v1/content/account-security/anomaly/deny` | 触发设备踢出 |
 
 ### 注销模块 (ContentAccountCancellationController)
 
 | # | 功能 | HTTP | 后端当前路径 | 目标路径 | 前端当前路径 | 改动 |
 |---|------|------|-------------|---------|-------------|------|
-| 21 | 申请注销 | POST | `/content/auth/cancellation/apply` | `/api/v1/content/account-cancellation/apply` | `/api/v1/account-cancellation/apply` | 后端改 |
-| 22 | 查询状态 | GET | `/content/auth/cancellation/status` | `/api/v1/content/account-cancellation/status` | `/api/v1/account-cancellation/status` | 后端改 |
-| 23 | 撤销注销 | POST | `/content/auth/cancellation/revoke` | `/api/v1/content/account-cancellation/cancel` | `/api/v1/account-cancellation/cancel` | 后端改 |
+| 21 | 申请注销 | POST | `/content/auth/cancellation/apply` | `/api/v1/content/account-cancellation/apply` | `/api/v1/content/account-security/apply` | 后端改 |
+| 22 | 查询状态 | GET | `/content/auth/cancellation/status` | `/api/v1/content/account-cancellation/status` | `/api/v1/content/account-security/status` | 后端改 |
+| 23 | 撤销注销 | POST | `/content/auth/cancellation/revoke` | `/api/v1/content/account-cancellation/cancel` | `/api/v1/content/account-security/cancel` | 后端改 |
 
 ### 新增注销端点
 
 | # | 功能 | HTTP | 目标路径 | 前端当前路径 | 说明 |
 |---|------|------|---------|-------------|------|
-| N14 | 注销资格检查 | GET | `/api/v1/content/account-cancellation/eligibility` | `/api/v1/account-cancellation/eligibility` | 积分/待办检查 |
+| N14 | 注销资格检查 | GET | `/api/v1/content/account-cancellation/eligibility` | `/api/v1/content/account-security/eligibility` | 积分/待办检查 |
 
 ### 前端需修正路径
 
