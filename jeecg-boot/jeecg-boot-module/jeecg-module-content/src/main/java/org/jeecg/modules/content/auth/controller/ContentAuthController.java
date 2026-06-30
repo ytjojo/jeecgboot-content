@@ -24,7 +24,7 @@ import java.util.Map;
 @Tag(name = "内容社区认证", description = "用户注册、登录、设备管理、账号绑定等认证相关接口")
 @Validated
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/content/auth")
 public class ContentAuthController {
 
     @Resource

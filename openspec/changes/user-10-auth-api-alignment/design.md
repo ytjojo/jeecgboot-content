@@ -57,12 +57,12 @@
 
 | # | 功能 | HTTP | 后端当前路径 | 目标路径 | 前端当前路径 | 改动 |
 |---|------|------|-------------|---------|-------------|------|
-| 1 | 手机注册 | POST | `/content/auth/register/mobile` | `/api/v1/content/auth/register/mobile` | `/api/v1/auth/register/mobile` | 后端改 |
-| 2 | 邮箱注册 | POST | `/content/auth/register/email` | `/api/v1/content/auth/register/email` | `/api/v1/auth/register/email` | 后端改 |
-| 3 | 邮箱确认 | GET | `/content/auth/confirm-email` | `/api/v1/content/auth/email/confirm` | `/api/v1/auth/email/confirm` | 后端改 |
-| 4 | 密码登录 | POST | `/content/auth/login/password` | `/api/v1/content/auth/login/password` | `/api/v1/auth/login/password` | 后端改 |
-| 5 | 短信登录 | POST | `/content/auth/login/sms` | `/api/v1/content/auth/login/sms-code` | `/api/v1/auth/login/sms-code` | 后端改 |
-| 6 | 第三方登录 | POST | `/content/auth/login/third-party` | `/api/v1/content/auth/login/third-party` | `/api/v1/auth/login/third-party` | 后端改 |
+| 1 | 手机注册 | POST | `/content/auth/register/mobile` | `/api/v1/content/auth/register/mobile` | `/api/v1/content/auth/register/mobile` | 后端改 |
+| 2 | 邮箱注册 | POST | `/content/auth/register/email` | `/api/v1/content/auth/register/email` | `/api/v1/content/auth/register/email` | 后端改 |
+| 3 | 邮箱确认 | GET | `/content/auth/confirm-email` | `/api/v1/content/auth/email/confirm` | `/api/v1/content/auth/email/confirm` | 后端改 |
+| 4 | 密码登录 | POST | `/content/auth/login/password` | `/api/v1/content/auth/login/password` | `/api/v1/content/auth/login/password` | 后端改 |
+| 5 | 短信登录 | POST | `/content/auth/login/sms` | `/api/v1/content/auth/login/sms-code` | `/api/v1/content/auth/login/sms-code` | 后端改 |
+| 6 | 第三方登录 | POST | `/content/auth/login/third-party` | `/api/v1/content/auth/login/third-party` | `/api/v1/content/auth/login/third-party` | 后端改 |
 | 7 | 绑定手机 | POST | `/content/auth/bind/mobile` | `/api/v1/content/account-security/bind/phone` | `/api/v1/account-security/bind/phone` | 后端改 |
 | 8 | 换绑手机 | POST | `/content/auth/rebind/mobile` | `/api/v1/content/account-security/rebind/phone` | `/api/v1/account-security/rebind/phone` | 后端改 |
 | 9 | 解绑手机 | POST | `/content/auth/unbind/mobile` | `/api/v1/content/account-security/unbind/phone` | `/api/v1/account-security/unbind/phone` | 后端改 |
@@ -79,13 +79,13 @@
 
 | # | 功能 | HTTP | 目标路径 | 前端当前路径 | 说明 |
 |---|------|------|---------|-------------|------|
-| N1 | 发送手机验证码 | POST | `/api/v1/content/auth/sms/send` | `/api/v1/auth/sms/send` | 复用短信服务 |
-| N2 | 发送邮箱验证码 | POST | `/api/v1/content/auth/email/send` | `/api/v1/auth/email/send` | 复用邮件服务 |
-| N3 | 刷新 token | POST | `/api/v1/content/auth/token/refresh` | `/api/v1/auth/token/refresh` | JWT refresh |
-| N4 | 登出 | POST | `/api/v1/content/auth/logout` | `/api/v1/auth/logout` | 清理 token/会话 |
-| N5 | 获取验证码图片 | POST | `/api/v1/content/auth/captcha/image` | `/api/v1/auth/captcha/image` | 代理系统模块 |
-| N6 | 校验验证码 | POST | `/api/v1/content/auth/captcha/verify` | `/api/v1/auth/captcha/verify` | 代理系统模块 |
-| N7 | 查询锁定状态 | GET | `/api/v1/content/auth/captcha/lock-status` | `/api/v1/auth/captcha/lock-status` | 风控查询 |
+| N1 | 发送手机验证码 | POST | `/api/v1/content/auth/sms/send` | `/api/v1/content/auth/sms/send` | 复用短信服务 |
+| N2 | 发送邮箱验证码 | POST | `/api/v1/content/auth/email/send` | `/api/v1/content/auth/email/send` | 复用邮件服务 |
+| N3 | 刷新 token | POST | `/api/v1/content/auth/token/refresh` | `/api/v1/content/auth/token/refresh` | JWT refresh |
+| N4 | 登出 | POST | `/api/v1/content/auth/logout` | `/api/v1/content/auth/logout` | 清理 token/会话 |
+| N5 | 获取验证码图片 | POST | `/api/v1/content/auth/captcha/image` | `/api/v1/content/auth/captcha/image` | 代理系统模块 |
+| N6 | 校验验证码 | POST | `/api/v1/content/auth/captcha/verify` | `/api/v1/content/auth/captcha/verify` | 代理系统模块 |
+| N7 | 查询锁定状态 | GET | `/api/v1/content/auth/captcha/lock-status` | `/api/v1/content/auth/captcha/lock-status` | 风控查询 |
 | N8 | 账户安全状态 | GET | `/api/v1/content/account-security/status` | `/api/v1/account-security/status` | 聚合查询 |
 | N9 | 信任设备 | POST | `/api/v1/content/account-security/devices/trust` | `/api/v1/account-security/devices/trust` | 设备管理扩展 |
 | N10 | 取消信任 | POST | `/api/v1/content/account-security/devices/untrust` | `/api/v1/account-security/devices/untrust` | 设备管理扩展 |

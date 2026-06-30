@@ -23,7 +23,7 @@
 3. **[BLOCK-CODE-03]** ContentAuthBizServiceImpl 直接注入 7 个 Mapper，违反 Controller→Biz→Service→Mapper 分层架构
 4. **[BLOCK-CODE-04]** ContentAccountCancellationBizServiceImpl 直接注入 2 个 Mapper，分层违规
 5. **[BLOCK-CODE-05]** 缺少冷静期到期自动注销的 @Scheduled 定时任务，账号永远停留在 CANCELLING 状态
-6. **[BLOCK-CODE-06]** 后端认证 API 路径前缀错误：使用 `/api/v1/content/auth/` 应改为 `/api/v1/auth/`（用户明确要求，不经过 /content/ 前缀）
+6. **[BLOCK-CODE-06]** 后端认证 API 路径前缀错误：使用 `/api/v1/content/auth/` 应改为 `/api/v1/content/auth/`（用户明确要求，不经过 /content/ 前缀）
 7. **[CRITICAL-CODE-01]** 第三方登录接口 loginByThirdParty 使用 @RequestParam 接收参数而非 @RequestBody，rawJson 等长参数有 URL 长度限制风险
 8. **[CRITICAL-CODE-02]** 邮箱注册 registerByEmail 未发送验证邮件，邮箱验证流程无法走通
 9. **[BLOCK-DOC-01]** plan.md 文件完全缺失
@@ -148,23 +148,23 @@
 
 ---
 
-#### FIX-006: 后端认证 API 路径前缀统一为 /api/v1/auth/
+#### FIX-006: 后端认证 API 路径前缀统一为 /api/v1/content/auth/
 
 - **id**: BLOCK-CODE-06
-- **来源**: 用户明确指令（内容社区认证API路径统一使用 /api/v1/auth/ 前缀，不经过 /content/ 前缀）
+- **来源**: 用户明确指令（内容社区认证API路径统一使用 /api/v1/content/auth/ 前缀，不经过 /content/ 前缀）
 - **位置**: `jeecg-boot/jeecg-boot-module/jeecg-module-content/src/main/java/org/jeecg/modules/content/auth/controller/ContentAuthController.java` (第 27 行)
 - **优先级**: BLOCK
 - **依赖项**: FIX-012（前端对应路径修改）
 - **类型**: 代码修复
-- **问题描述**: 当前 @RequestMapping("/api/v1/content/auth")，用户明确要求认证 API 使用 `/api/v1/auth/` 前缀，去掉 `/content/` 段
+- **问题描述**: 当前 @RequestMapping("/api/v1/content/auth")，用户明确要求认证 API 使用 `/api/v1/content/auth/` 前缀，去掉 `/content/` 段
 - **修复步骤**:
-  1. 将 ContentAuthController 类级别 @RequestMapping 从 "/api/v1/content/auth" 改为 "/api/v1/auth"
+  1. 将 ContentAuthController 类级别 @RequestMapping 从 "/api/v1/content/auth" 改为 "/api/v1/content/auth"
   2. 确认所有子路径（/login/*, /register/*, /bind/*, /unbind/*, /rebind/*, /token/*, /captcha/*, /sms/*, /email/*, /logout, /devices/*, /confirm-email, /reset-password/*, /password/*）保持不变
   3. 检查 Spring Security 配置（SecurityConfig）中的 permitAll 路径是否需要同步更新
   4. 确认网关路由（若有）是否需要调整
 - **验证标准**:
-  - ContentAuthController @RequestMapping 为 "/api/v1/auth"
-  - 所有认证接口通过 /api/v1/auth/* 可访问
+  - ContentAuthController @RequestMapping 为 "/api/v1/content/auth"
+  - 所有认证接口通过 /api/v1/content/auth/* 可访问
   - SecurityConfig 白名单路径同步更新
   - 无静态资源或其他路径冲突
 
@@ -212,7 +212,7 @@
 - **问题描述**: registerByEmail 方法创建用户后直接返回，未调用 emailSenderPort 发送验证链接邮件，confirmEmail 接口无法被触发
 - **修复步骤**:
   1. 在 registerByEmail 事务提交后，生成邮箱验证 token（建议使用 JWT 或随机 UUID，存储到 Redis 设置 TTL，如 24 小时）
-  2. 构建验证链接：`/api/v1/auth/confirm-email?token={token}`（路径与 FIX-006 保持一致）
+  2. 构建验证链接：`/api/v1/content/auth/confirm-email?token={token}`（路径与 FIX-006 保持一致）
   3. 调用 emailSenderPort 发送验证邮件，包含验证链接
   4. 确认邮件模板内容正确（包含跳转链接、过期提示）
   5. confirmEmail 方法从 Redis 验证 token 有效性后标记邮箱为已验证
@@ -300,23 +300,23 @@
 - **依赖项**: FIX-006（后端前缀改完后同步）
 - **类型**: 前端修复
 - **问题描述**:
-  1. 所有认证 API（auth/index.ts）当前使用 `/api/v1/content/auth/`，需改为 `/api/v1/auth/`（配套 FIX-006）
+  1. 所有认证 API（auth/index.ts）当前使用 `/api/v1/content/auth/`，需改为 `/api/v1/content/auth/`（配套 FIX-006）
   2. 账号安全 API（account/security.ts）中 bindPhone/rebindPhone/unbindPhone/bindEmail/rebindEmail/unbindEmail/bindThirdParty/unbindThirdParty/devices/deviceRevoke/resetPassword 错误使用 `/api/v1/content/auth/` 前缀，应使用 `/api/v1/content/account-security/`
   3. loginSmsCode 路径 `/api/v1/content/auth/login/sms` 应与后端对齐（后端当前为 `/login/sms`，设计为 `/login/sms-code`——需确认后端最终路径后统一）
   4. confirmEmail 路径 `/api/v1/content/auth/confirm-email`，设计为 `/register/email/confirm`——后端保持 `/confirm-email`（实际代码），design 文档需同步
   5. cancelCancellation 路径 `/cancel` 应为 `/revoke`（与后端对齐）
   6. anomalyList 路径 `/anomaly/list` vs 设计 `/anomaly-notifications`——后端实际是 `/anomaly/list`，design 文档需同步
 - **修复步骤**:
-  1. 统一替换 auth/index.ts 中 API 前缀：`/api/v1/content/auth/` → `/api/v1/auth/`
+  1. 统一替换 auth/index.ts 中 API 前缀：`/api/v1/content/auth/` → `/api/v1/content/auth/`
   2. 修正 account/security.ts 中 10 个接口前缀：`/api/v1/content/auth/...` → `/api/v1/content/account-security/...`
-  3. 确认短信登录路径：后端为 `/api/v1/auth/login/sms`（配套 FIX-006 后），前端同步为 `/api/v1/auth/login/sms`；design.md 文档路径同步修正
-  4. confirmEmail 路径：后端实际为 `/api/v1/auth/confirm-email`（配套 FIX-006），前端和 design 文档同步到此路径
+  3. 确认短信登录路径：后端为 `/api/v1/content/auth/login/sms`（配套 FIX-006 后），前端同步为 `/api/v1/content/auth/login/sms`；design.md 文档路径同步修正
+  4. confirmEmail 路径：后端实际为 `/api/v1/content/auth/confirm-email`（配套 FIX-006），前端和 design 文档同步到此路径
   5. cancelCancellation 改为 `/api/v1/content/account-cancellation/revoke`（与后端 ContentAccountCancellationController 对齐，需确认后端实际路径）
   6. anomalyList 路径：后端实际为 `/anomaly/list`，前端保持此路径，更新 design.md 文档
 - **验证标准**:
   - 前端所有 API 路径与后端 @RequestMapping 完全一致
   - 无 404 错误
-  - auth 前缀为 `/api/v1/auth/`（无 /content/）
+  - auth 前缀为 `/api/v1/content/auth/`（无 /content/）
   - account-security 前缀为 `/api/v1/content/account-security/`
   - account-cancellation 前缀为 `/api/v1/content/account-cancellation/`
 
@@ -581,7 +581,7 @@
 - **类型**: 文档
 - **修复步骤**:
   1. 补充每个 API 的完整契约表格：
-     - 路径（已更新为 /api/v1/auth/ 等正确前缀）
+     - 路径（已更新为 /api/v1/content/auth/ 等正确前缀）
      - HTTP Method
      - 请求体字段（名称、类型、必填、说明）
      - 响应体字段（名称、类型、说明）
@@ -608,7 +608,7 @@
 - **类型**: 文档
 - **修复步骤**:
   1. 更新后端 design.md：
-     - 认证 API 前缀改为 `/api/v1/auth/`（去掉 /content/）
+     - 认证 API 前缀改为 `/api/v1/content/auth/`（去掉 /content/）
      - 确认短信登录路径为 `/login/sms`（实际代码路径）
      - 确认邮箱确认路径为 `/confirm-email`（实际代码路径）
      - 确认获取验证码 Method 为 GET
@@ -621,7 +621,7 @@
      - 补充 trust/untrust 设备接口
   2. 更新前端 design.md：
      - 同步所有 API 路径与后端实际代码一致
-     - 认证前缀 `/api/v1/auth/`
+     - 认证前缀 `/api/v1/content/auth/`
      - account-security 前缀保持 `/api/v1/content/account-security/`
      - account-cancellation 取消路径 `/revoke` 而非 `/cancel`
 - **验证标准**:
@@ -740,7 +740,7 @@
 | BLOCK-CODE-03 | Biz层直接注入Mapper（ContentAuthBizServiceImpl） | ⏭️ 跳过 | 大范围重构，本次不处理 |
 | BLOCK-CODE-04 | Biz层直接注入Mapper（ContentAccountCancellationBizServiceImpl） | ⏭️ 跳过 | 依赖FIX-003，本次不处理 |
 | BLOCK-CODE-05 | 缺少冷静期到期自动注销@Scheduled定时任务 | ✅ 已修复（partial） | 添加processExpiredCancellations()方法，每小时执行，标记TODO:分布式锁+事务自调用问题 |
-| BLOCK-CODE-06 | API路径前缀修正 | ✅ 已修复 | ContentAuthController从/api/v1/content/auth改为/api/v1/auth；ContentRiskControlController(/api/v1/content/account-security)和ContentAccountCancellationController(/api/v1/content/account-cancellation)路径保持不变；同步修复了邮件确认URL中的路径 |
+| BLOCK-CODE-06 | API路径前缀修正 | ✅ 已修复 | ContentAuthController从/api/v1/content/auth改为/api/v1/content/auth；ContentRiskControlController(/api/v1/content/account-security)和ContentAccountCancellationController(/api/v1/content/account-cancellation)路径保持不变；同步修复了邮件确认URL中的路径 |
 | CRITICAL-CODE-01 | 第三方登录接口@RequestParam接收rawJson | ✅ 已修复 | 新增ContentAuthThirdPartyLoginReq DTO，改为@RequestBody接收 |
 | CRITICAL-CODE-02 | 邮箱注册未发送验证邮件 | ✅ 已修复（已有实现） | registerByEmail中已存在emailSenderPort.send()调用，确认URL路径同步更新 |
 | CRITICAL-CODE-03 | 手机号/邮箱注册返回String而非AuthLoginResult | ✅ 已修复 | registerByMobile/registerByEmail均改为返回AuthLoginResult(含token)，与登录接口一致 |

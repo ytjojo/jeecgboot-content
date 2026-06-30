@@ -221,7 +221,7 @@ public class ContentAuthBizServiceImpl implements ContentAuthBizService {
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
-        String confirmUrl = baseUrl + "/api/v1/auth/confirm-email?token=" + token;
+        String confirmUrl = baseUrl + "/api/v1/content/auth/confirm-email?token=" + token;
         String htmlContent = "<p>请点击以下链接确认您的邮箱：</p><a href=\"" + confirmUrl + "\">确认邮箱</a>";
         emailSenderPort.send(req.getEmail(), "请确认您的邮箱", htmlContent);
 
