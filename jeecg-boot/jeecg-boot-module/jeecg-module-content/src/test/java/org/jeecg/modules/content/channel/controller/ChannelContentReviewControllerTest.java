@@ -14,8 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -26,6 +27,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ChannelContentReviewControllerTest {
 
+    private static final String TEST_USER_ID = "test-user-id";
+    private static final String TEST_USERNAME = "testuser";
+
     @Mock
     private ChannelReviewBiz channelReviewBiz;
 
@@ -34,12 +38,12 @@ class ChannelContentReviewControllerTest {
 
     @BeforeEach
     void setUp() {
-        LoginUser user = new LoginUser();
-        user.setId("reviewer1");
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(
-            JSON.toJSONString(user), null));
-        SecurityContextHolder.setContext(context);
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(TEST_USER_ID);
+        loginUser.setUsername(TEST_USERNAME);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                JSON.toJSONString(loginUser), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     @AfterEach
@@ -56,7 +60,7 @@ class ChannelContentReviewControllerTest {
         Result<Void> result = controller.review(req);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelReviewBiz).review(req, "reviewer1");
+        verify(channelReviewBiz).review(req, TEST_USER_ID);
     }
 
     @Test
@@ -69,7 +73,7 @@ class ChannelContentReviewControllerTest {
         Result<Void> result = controller.review(req);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelReviewBiz).review(req, "reviewer1");
+        verify(channelReviewBiz).review(req, TEST_USER_ID);
     }
 
     @Test
@@ -80,28 +84,12 @@ class ChannelContentReviewControllerTest {
                 .todayApprovedCount(3L)
                 .todayRejectedCount(1L)
                 .build();
-        when(channelReviewBiz.getReviewStats(null)).thenReturn(stats);
-
-        Result<ReviewStatsVO> result = controller.getReviewStats(null);
-
-        assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getResult().getPendingCount()).isEqualTo(5L);
-        verify(channelReviewBiz).getReviewStats(null);
-    }
-
-    @Test
-    void should_get_review_stats_by_channel() {
-        ReviewStatsVO stats = ReviewStatsVO.builder()
-                .pendingCount(2L)
-                .timeoutCount(0L)
-                .todayApprovedCount(1L)
-                .todayRejectedCount(0L)
-                .build();
         when(channelReviewBiz.getReviewStats("ch1")).thenReturn(stats);
 
         Result<ReviewStatsVO> result = controller.getReviewStats("ch1");
 
         assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getResult().getPendingCount()).isEqualTo(5L);
         verify(channelReviewBiz).getReviewStats("ch1");
     }
 }

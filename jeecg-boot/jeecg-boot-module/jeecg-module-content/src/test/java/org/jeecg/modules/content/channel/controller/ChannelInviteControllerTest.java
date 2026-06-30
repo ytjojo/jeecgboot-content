@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
@@ -29,6 +28,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ChannelInviteControllerTest {
 
+    private static final String TEST_USER_ID = "test-user-id";
+    private static final String TEST_USERNAME = "testuser";
+
     @Mock
     private ChannelInviteService inviteService;
     @Mock
@@ -41,12 +43,12 @@ class ChannelInviteControllerTest {
 
     @BeforeEach
     void setUp() {
-        LoginUser user = new LoginUser();
-        user.setId("operator1");
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(
-            JSON.toJSONString(user), null));
-        SecurityContextHolder.setContext(context);
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(TEST_USER_ID);
+        loginUser.setUsername(TEST_USERNAME);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                JSON.toJSONString(loginUser), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     @AfterEach
@@ -57,12 +59,12 @@ class ChannelInviteControllerTest {
     @Test
     void should_create_invite() {
         ChannelInvite invite = new ChannelInvite();
-        when(inviteService.createInvite("ch1", 1, 10, 7, "operator1")).thenReturn(invite);
+        when(inviteService.createInvite("ch1", 1, 10, 7, TEST_USER_ID)).thenReturn(invite);
 
         Result<?> result = controller.createInvite("ch1", 1, 10, 7);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(inviteService).createInvite("ch1", 1, 10, 7, "operator1");
+        verify(inviteService).createInvite("ch1", 1, 10, 7, TEST_USER_ID);
     }
 
     @Test
@@ -81,7 +83,7 @@ class ChannelInviteControllerTest {
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getMessage()).isEqualTo("已撤销");
-        verify(inviteService).revokeInvite("inv1", "operator1");
+        verify(inviteService).revokeInvite("inv1", TEST_USER_ID);
     }
 
     @Test
@@ -90,6 +92,6 @@ class ChannelInviteControllerTest {
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getMessage()).isEqualTo("加入成功");
-        verify(memberBizService).joinByInvite("ch1", "operator1", "ABCD");
+        verify(memberBizService).joinByInvite("ch1", TEST_USER_ID, "ABCD");
     }
 }

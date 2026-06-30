@@ -49,6 +49,7 @@ public class ChannelLifecycleController {
     @PostMapping("/freeze")
     @Operation(summary = "冻结频道（平台管理员）")
     public Result<Void> freeze(@Valid @RequestBody ChannelLifecycleActionReq req) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         lifecycleBiz.freeze(req.getChannelId(), operatorId, req.getReason());
         return Result.OK();
@@ -57,6 +58,7 @@ public class ChannelLifecycleController {
     @PostMapping("/unfreeze")
     @Operation(summary = "解冻频道（平台管理员）")
     public Result<Void> unfreeze(@Valid @RequestBody ChannelLifecycleActionReq req) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         lifecycleBiz.unfreeze(req.getChannelId(), operatorId, req.getReason());
         return Result.OK();
@@ -65,6 +67,7 @@ public class ChannelLifecycleController {
     @PostMapping("/hide")
     @Operation(summary = "强制隐藏频道（平台管理员）")
     public Result<Void> hide(@Valid @RequestBody ChannelLifecycleActionReq req) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         lifecycleBiz.hide(req.getChannelId(), operatorId, req.getReason());
         return Result.OK();
@@ -73,6 +76,7 @@ public class ChannelLifecycleController {
     @PostMapping("/close")
     @Operation(summary = "永久关闭频道（平台管理员）")
     public Result<Void> close(@Valid @RequestBody ChannelLifecycleActionReq req) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         lifecycleBiz.close(req.getChannelId(), operatorId, req.getReason());
         return Result.OK();
@@ -81,6 +85,7 @@ public class ChannelLifecycleController {
     @PostMapping("/archive")
     @Operation(summary = "归档频道（平台管理员）")
     public Result<Void> archive(@Valid @RequestBody ChannelLifecycleActionReq req) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         lifecycleBiz.archive(req.getChannelId(), operatorId, req.getReason());
         return Result.OK();
@@ -89,6 +94,7 @@ public class ChannelLifecycleController {
     @PostMapping("/restrict-recommend")
     @Operation(summary = "限制推荐（平台管理员）")
     public Result<Void> restrictRecommend(@Valid @RequestBody ChannelLifecycleActionReq req) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         lifecycleBiz.restrictRecommend(req.getChannelId(), operatorId, req.getReason());
         return Result.OK();
@@ -97,6 +103,7 @@ public class ChannelLifecycleController {
     @PostMapping("/restore-visibility")
     @Operation(summary = "恢复频道活跃状态（平台管理员）")
     public Result<Void> restoreVisibility(@Valid @RequestBody ChannelLifecycleActionReq req) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         lifecycleBiz.restoreActivity(req.getChannelId());
         return Result.OK();
@@ -105,6 +112,7 @@ public class ChannelLifecycleController {
     @GetMapping("/logs")
     @Operation(summary = "查询生命周期变更日志（平台管理员）")
     public Result<IPage<ChannelLifecycleLog>> queryLogs(ChannelLifecycleLogQueryReq req) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         LambdaQueryWrapper<ChannelLifecycleLog> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.hasText(req.getChannelId())) {
             wrapper.eq(ChannelLifecycleLog::getChannelId, req.getChannelId());
@@ -144,6 +152,7 @@ public class ChannelLifecycleController {
     @PostMapping("/appeal/handle")
     @Operation(summary = "处理申诉（平台管理员）")
     public Result<ChannelAppeal> handleAppeal(@Valid @RequestBody ChannelAppealHandleReq req) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         String operatorId = ChannelSecurityUtil.getCurrentUserIdOrThrow();
         ChannelAppeal appeal = appealService.handleAppeal(
                 req.getAppealId(), operatorId, req.getAction(), req.getHandleResult());
@@ -181,6 +190,7 @@ public class ChannelLifecycleController {
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         LambdaQueryWrapper<ChannelAppeal> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.hasText(channelId)) {
             wrapper.eq(ChannelAppeal::getChannelId, channelId);

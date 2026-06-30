@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Accessors(chain = true)
-@TableName("content_channel_review")
+@TableName("channel_review")
 @Schema(description = "频道审核记录")
 public class ChannelReview {
 

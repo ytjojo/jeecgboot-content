@@ -21,19 +21,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-/**
- * 频道后台管理控制器测试
- * 验证系统频道创建与审核操作的委托行为
- */
 @ExtendWith(MockitoExtension.class)
 class ChannelAdminControllerTest {
+
+    private static final String TEST_USER_ID = "test-user-id";
+    private static final String TEST_USERNAME = "testuser";
 
     @Mock
     private ChannelBizManageService channelBizManageService;
@@ -46,12 +46,12 @@ class ChannelAdminControllerTest {
 
     @BeforeEach
     void setUp() {
-        LoginUser user = new LoginUser();
-        user.setId("admin1");
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(
-            JSON.toJSONString(user), null));
-        SecurityContextHolder.setContext(context);
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(TEST_USER_ID);
+        loginUser.setUsername(TEST_USERNAME);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                JSON.toJSONString(loginUser), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     @AfterEach
@@ -66,15 +66,14 @@ class ChannelAdminControllerTest {
         Channel ch = new Channel();
         ch.setId("sys1");
         ch.setChannelType(ChannelType.SYSTEM);
-        when(channelBizManageService.createSystemChannel(any(CreateChannelDTO.class), eq("admin1")))
+        when(channelBizManageService.createSystemChannel(any(CreateChannelDTO.class), eq(TEST_USER_ID)))
             .thenReturn(ch);
 
         Result<?> result = controller.createSystemChannel(dto);
 
         assertThat(result.isSuccess()).isTrue();
-        // DTO 强制为 SYSTEM 类型
         assertThat(dto.getChannelType()).isEqualTo(ChannelType.SYSTEM);
-        verify(channelBizManageService).createSystemChannel(dto, "admin1");
+        verify(channelBizManageService).createSystemChannel(dto, TEST_USER_ID);
     }
 
     @Test
@@ -82,7 +81,7 @@ class ChannelAdminControllerTest {
         Result<Void> result = controller.reviewChannel("ch1", ReviewResult.PASS, "ok");
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelBizManageService).reviewChannel("ch1", "admin1", ReviewResult.PASS, "ok");
+        verify(channelBizManageService).reviewChannel("ch1", TEST_USER_ID, ReviewResult.PASS, "ok");
     }
 
     @Test

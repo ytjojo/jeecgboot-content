@@ -8,6 +8,7 @@ import org.jeecg.modules.content.auth.entity.ContentUserAccount;
 import org.jeecg.modules.content.auth.mapper.ContentCancellationRequestMapper;
 import org.jeecg.modules.content.auth.mapper.ContentUserAccountMapper;
 import org.jeecg.modules.content.auth.req.ContentCancelApplyReq;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,10 @@ public class ContentAccountCancellationBizServiceImpl implements IContentAccount
 
     @Resource
     private ContentUserAccountMapper accountMapper;
+
+    @Lazy
+    @Resource
+    private IContentAccountCancellationBizService self;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -241,8 +246,7 @@ public class ContentAccountCancellationBizServiceImpl implements IContentAccount
         int failCount = 0;
         for (ContentCancellationRequest request : expiredRequests) {
             try {
-                // TODO: 多实例部署时需添加分布式锁防止重复执行；自调用事务需通过AopContext或注入self代理解决
-                completeCancellation(request.getUserId());
+                self.completeCancellation(request.getUserId());
                 successCount++;
             } catch (Exception e) {
                 failCount++;

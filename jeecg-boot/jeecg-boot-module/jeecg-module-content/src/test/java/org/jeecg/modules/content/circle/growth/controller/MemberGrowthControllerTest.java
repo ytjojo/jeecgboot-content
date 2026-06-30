@@ -1,16 +1,23 @@
 package org.jeecg.modules.content.circle.growth.controller;
 
+import com.alibaba.fastjson2.JSON;
+import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.circle.growth.biz.ICircleGrowthBiz;
 import org.jeecg.modules.content.circle.growth.vo.MemberGrowthVO;
 import org.jeecg.modules.content.circle.growth.vo.ParticipationVO;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -19,11 +26,27 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MemberGrowthControllerTest {
 
+    private static final String TEST_USER_ID = "u1";
+
     @Mock
     private ICircleGrowthBiz circleGrowthBiz;
 
     @InjectMocks
     private MemberGrowthController controller;
+
+    @BeforeEach
+    void setUp() {
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(TEST_USER_ID);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                JSON.toJSONString(loginUser), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     @DisplayName("获取成长信息返回200和完整字段数据")
@@ -40,7 +63,7 @@ class MemberGrowthControllerTest {
         vo.setProgressPercent(25);
         vo.setTodayExp(15);
         vo.setDailyExpLimit(100);
-        when(circleGrowthBiz.getMyGrowthInfo("c1", "u1")).thenReturn(vo);
+        when(circleGrowthBiz.getMyGrowthInfo("c1", TEST_USER_ID)).thenReturn(vo);
 
         var result = controller.getMyGrowthInfo("c1");
 
@@ -57,7 +80,7 @@ class MemberGrowthControllerTest {
         assertThat(res.getProgressPercent()).isEqualTo(25);
         assertThat(res.getTodayExp()).isEqualTo(15);
         assertThat(res.getDailyExpLimit()).isEqualTo(100);
-        verify(circleGrowthBiz).getMyGrowthInfo("c1", null);
+        verify(circleGrowthBiz).getMyGrowthInfo("c1", TEST_USER_ID);
     }
 
     @Test
@@ -70,7 +93,7 @@ class MemberGrowthControllerTest {
                 new ParticipationVO.DayStatus("2026-06-25", true),
                 new ParticipationVO.DayStatus("2026-06-24", false)
         ));
-        when(circleGrowthBiz.getMyParticipationProgress("c1", "u1")).thenReturn(vo);
+        when(circleGrowthBiz.getMyParticipationProgress("c1", TEST_USER_ID)).thenReturn(vo);
 
         var result = controller.getMyParticipationProgress("c1");
 
@@ -79,6 +102,6 @@ class MemberGrowthControllerTest {
         assertThat(result.getResult().getDailyStatus()).hasSize(3);
         assertThat(result.getResult().getDailyStatus().get(0).getParticipated()).isTrue();
         assertThat(result.getResult().getDailyStatus().get(2).getParticipated()).isFalse();
-        verify(circleGrowthBiz).getMyParticipationProgress("c1", null);
+        verify(circleGrowthBiz).getMyParticipationProgress("c1", TEST_USER_ID);
     }
 }

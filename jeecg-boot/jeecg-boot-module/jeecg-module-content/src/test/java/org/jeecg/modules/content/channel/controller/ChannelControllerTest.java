@@ -29,7 +29,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
@@ -38,12 +37,11 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-/**
- * 频道主控制器测试
- * 验证用户端频道 CRUD 与转让流程的委托行为
- */
 @ExtendWith(MockitoExtension.class)
 class ChannelControllerTest {
+
+    private static final String TEST_USER_ID = "test-user-id";
+    private static final String TEST_USERNAME = "testuser";
 
     @Mock
     private ChannelBizManageService channelBizManageService;
@@ -61,12 +59,12 @@ class ChannelControllerTest {
 
     @BeforeEach
     void setUp() {
-        LoginUser user = new LoginUser();
-        user.setId("user1");
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(
-            JSON.toJSONString(user), null));
-        SecurityContextHolder.setContext(context);
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(TEST_USER_ID);
+        loginUser.setUsername(TEST_USERNAME);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                JSON.toJSONString(loginUser), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     @AfterEach
@@ -80,13 +78,13 @@ class ChannelControllerTest {
         dto.setChannelType(ChannelType.PERSONAL);
         Channel ch = new Channel();
         ch.setId("ch1");
-        when(channelBizManageService.createPersonalChannel(dto, "user1")).thenReturn(ch);
+        when(channelBizManageService.createPersonalChannel(dto, TEST_USER_ID)).thenReturn(ch);
 
         Result<?> result = controller.createChannel(dto);
 
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.isSuccess()).isTrue();
-        verify(channelBizManageService).createPersonalChannel(dto, "user1");
+        verify(channelBizManageService).createPersonalChannel(dto, TEST_USER_ID);
     }
 
     @Test
@@ -95,12 +93,12 @@ class ChannelControllerTest {
         dto.setChannelType(ChannelType.ORGANIZATION);
         Channel ch = new Channel();
         ch.setId("ch2");
-        when(channelBizManageService.createOrganizationChannel(dto, "user1", true)).thenReturn(ch);
+        when(channelBizManageService.createOrganizationChannel(dto, TEST_USER_ID, true)).thenReturn(ch);
 
         Result<?> result = controller.createChannel(dto);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelBizManageService).createOrganizationChannel(dto, "user1", true);
+        verify(channelBizManageService).createOrganizationChannel(dto, TEST_USER_ID, true);
     }
 
     @Test
@@ -145,7 +143,7 @@ class ChannelControllerTest {
         Result<Void> result = controller.updateChannel("ch1", dto);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelBizManageService).updateChannel("ch1", dto, "user1");
+        verify(channelBizManageService).updateChannel("ch1", dto, TEST_USER_ID);
     }
 
     @Test
@@ -153,7 +151,7 @@ class ChannelControllerTest {
         Result<Void> result = controller.transferChannel("ch1", "user2");
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelBizManageService).transferChannel("ch1", "user1", "user2");
+        verify(channelBizManageService).transferChannel("ch1", TEST_USER_ID, "user2");
     }
 
     @Test
@@ -161,7 +159,7 @@ class ChannelControllerTest {
         Result<Void> result = controller.confirmTransfer("tr1");
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelBizManageService).confirmTransfer("tr1", "user1");
+        verify(channelBizManageService).confirmTransfer("tr1", TEST_USER_ID);
     }
 
     @Test
@@ -169,7 +167,7 @@ class ChannelControllerTest {
         Result<Void> result = controller.rejectTransfer("tr1");
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelBizManageService).rejectTransfer("tr1", "user1");
+        verify(channelBizManageService).rejectTransfer("tr1", TEST_USER_ID);
     }
 
     @Test
@@ -177,7 +175,7 @@ class ChannelControllerTest {
         Result<Void> result = controller.deleteChannel("ch1");
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelBizManageService).deleteChannel("ch1", "user1");
+        verify(channelBizManageService).deleteChannel("ch1", TEST_USER_ID);
     }
 
     @Test
@@ -185,10 +183,8 @@ class ChannelControllerTest {
         Result<Void> result = controller.cancelDelete("ch1");
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelBizManageService).cancelDelete("ch1", "user1");
+        verify(channelBizManageService).cancelDelete("ch1", TEST_USER_ID);
     }
-
-    // ===== listMyChannels =====
 
     @Test
     void should_list_my_channels() {
@@ -197,21 +193,19 @@ class ChannelControllerTest {
             new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 10);
         page.setRecords(Collections.emptyList());
         page.setTotal(0);
-        when(channelService.listMyChannels(any(), eq("user1"), any())).thenReturn(page);
+        when(channelService.listMyChannels(any(), eq(TEST_USER_ID), any())).thenReturn(page);
 
         Result<?> result = controller.listMyChannels(1, 10, query);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelService).listMyChannels(any(), eq("user1"), any());
+        verify(channelService).listMyChannels(any(), eq(TEST_USER_ID), any());
     }
-
-    // ===== checkDeletePrecondition =====
 
     @Test
     void should_check_delete_precondition() {
         DeleteCheckResultVO vo = new DeleteCheckResultVO();
         vo.setCanDelete(true);
-        when(channelBizManageService.checkDeletePrecondition("ch1", "user1")).thenReturn(vo);
+        when(channelBizManageService.checkDeletePrecondition("ch1", TEST_USER_ID)).thenReturn(vo);
 
         Result<DeleteCheckResultVO> result = controller.checkDeletePrecondition("ch1");
 
@@ -219,13 +213,11 @@ class ChannelControllerTest {
         assertThat(result.getResult().isCanDelete()).isTrue();
     }
 
-    // ===== getTransferHistory =====
-
     @Test
     void should_get_transfer_history() {
         Channel ch = new Channel();
         ch.setId("ch1");
-        ch.setOwnerId("user1");
+        ch.setOwnerId(TEST_USER_ID);
         when(channelService.getById("ch1")).thenReturn(ch);
         ChannelTransfer transfer = new ChannelTransfer();
         transfer.setId("tr1");
@@ -242,8 +234,6 @@ class ChannelControllerTest {
         assertThat(result.getResult().get(0).getTransferId()).isEqualTo("tr1");
     }
 
-    // ===== checkNameUnique =====
-
     @Test
     void should_check_name_unique() {
         when(channelService.checkNameUnique("myname", null)).thenReturn(true);
@@ -254,13 +244,11 @@ class ChannelControllerTest {
         assertThat(result.getResult()).isTrue();
     }
 
-    // ===== getPendingTransfer =====
-
     @Test
     void should_get_pending_transfer() {
         Channel ch = new Channel();
         ch.setId("ch1");
-        ch.setOwnerId("user1");
+        ch.setOwnerId(TEST_USER_ID);
         when(channelService.getById("ch1")).thenReturn(ch);
         ChannelTransfer transfer = new ChannelTransfer();
         transfer.setId("tr1");
@@ -280,7 +268,7 @@ class ChannelControllerTest {
     void should_return_null_when_no_pending_transfer() {
         Channel ch = new Channel();
         ch.setId("ch1");
-        ch.setOwnerId("user1");
+        ch.setOwnerId(TEST_USER_ID);
         when(channelService.getById("ch1")).thenReturn(ch);
         when(channelTransferService.getPendingTransfer("ch1")).thenReturn(null);
 
@@ -289,8 +277,6 @@ class ChannelControllerTest {
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getResult()).isNull();
     }
-
-    // ===== updatePrivacy =====
 
     @Test
     void should_update_privacy() {
@@ -301,7 +287,7 @@ class ChannelControllerTest {
         Result<Void> result = controller.updatePrivacy(req);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelPrivacyService).updatePrivacy("ch1", PrivacyType.PUBLIC, "user1");
+        verify(channelPrivacyService).updatePrivacy("ch1", PrivacyType.PUBLIC, TEST_USER_ID);
     }
 
     @Test
@@ -313,7 +299,7 @@ class ChannelControllerTest {
         Result<Void> result = controller.updatePrivacy(req);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelPrivacyService).updatePrivacy("ch1", PrivacyType.PRIVATE, "user1");
+        verify(channelPrivacyService).updatePrivacy("ch1", PrivacyType.PRIVATE, TEST_USER_ID);
     }
 
     @Test
@@ -328,8 +314,6 @@ class ChannelControllerTest {
         assertThat(result.getMessage()).contains("无效的隐私设置值");
     }
 
-    // ===== updateJoinMethod =====
-
     @Test
     void should_update_join_method() {
         UpdateJoinMethodReq req = new UpdateJoinMethodReq();
@@ -339,7 +323,7 @@ class ChannelControllerTest {
         Result<Void> result = controller.updateJoinMethod(req);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelJoinMethodService).updateJoinMethod("ch1", JoinMethod.FREE, "user1");
+        verify(channelJoinMethodService).updateJoinMethod("ch1", JoinMethod.FREE, TEST_USER_ID);
     }
 
     @Test
@@ -351,7 +335,7 @@ class ChannelControllerTest {
         Result<Void> result = controller.updateJoinMethod(req);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelJoinMethodService).updateJoinMethod("ch1", JoinMethod.REVIEW, "user1");
+        verify(channelJoinMethodService).updateJoinMethod("ch1", JoinMethod.REVIEW, TEST_USER_ID);
     }
 
     @Test

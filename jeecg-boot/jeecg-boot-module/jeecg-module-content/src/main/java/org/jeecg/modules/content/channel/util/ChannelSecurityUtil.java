@@ -45,4 +45,17 @@ public class ChannelSecurityUtil {
         ChannelMember member = memberService.getByChannelAndUser(channelId, userId);
         return member != null && member.getRole() != null && member.getRole() <= MemberRole.ADMIN.getCode();
     }
+
+    public static void checkPlatformAdminPermission() {
+        try {
+            String username = SecureUtil.currentUser().getUsername();
+            if (!"admin".equals(username)) {
+                throw new JeecgBootException("权限不足，需要平台管理员权限");
+            }
+        } catch (JeecgBootException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new JeecgBootException("权限不足，需要平台管理员权限");
+        }
+    }
 }

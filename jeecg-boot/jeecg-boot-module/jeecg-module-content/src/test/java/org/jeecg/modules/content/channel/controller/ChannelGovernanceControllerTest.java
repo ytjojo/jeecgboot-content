@@ -8,8 +8,11 @@ import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.channel.biz.ChannelGovernanceBizService;
 import org.jeecg.modules.content.channel.entity.ChannelBlacklist;
 import org.jeecg.modules.content.channel.entity.ChannelGovernanceLog;
+import org.jeecg.modules.content.channel.entity.ChannelMember;
+import org.jeecg.modules.content.channel.enums.MemberRole;
 import org.jeecg.modules.content.channel.service.ChannelBlacklistService;
 import org.jeecg.modules.content.channel.service.ChannelGovernanceLogService;
+import org.jeecg.modules.content.channel.service.ChannelMemberService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,21 +20,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Collections;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/**
- * 频道治理控制器测试
- * 验证治理接口（移除/禁言/黑名单）正确委托给 bizService
- */
 @ExtendWith(MockitoExtension.class)
 class ChannelGovernanceControllerTest {
+
+    private static final String TEST_USER_ID = "test-user-id";
+    private static final String TEST_USERNAME = "testuser";
 
     @Mock
     private ChannelGovernanceBizService governanceBizService;
@@ -39,18 +43,26 @@ class ChannelGovernanceControllerTest {
     private ChannelBlacklistService blacklistService;
     @Mock
     private ChannelGovernanceLogService governanceLogService;
+    @Mock
+    private ChannelMemberService memberService;
 
     @InjectMocks
     private ChannelGovernanceController controller;
 
     @BeforeEach
     void setUp() {
-        LoginUser user = new LoginUser();
-        user.setId("admin1");
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(
-            JSON.toJSONString(user), null));
-        SecurityContextHolder.setContext(context);
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(TEST_USER_ID);
+        loginUser.setUsername(TEST_USERNAME);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                JSON.toJSONString(loginUser), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        ChannelMember adminMember = new ChannelMember();
+        adminMember.setRole(MemberRole.ADMIN.getCode());
+        adminMember.setChannelId("ch1");
+        lenient().when(memberService.getByChannelAndUser(any(), eq(TEST_USER_ID))).thenReturn(adminMember);
+        lenient().when(memberService.getById(any())).thenReturn(adminMember);
     }
 
     @AfterEach
@@ -60,52 +72,52 @@ class ChannelGovernanceControllerTest {
 
     @Test
     void should_remove_member() {
-        // 移除成员接口应调用 bizService 的 removeMember
+        ChannelMember targetMember = new ChannelMember();
+        targetMember.setId("m1");
+        targetMember.setChannelId("ch1");
+        when(memberService.getById("m1")).thenReturn(targetMember);
+
         Result<String> result = controller.removeMember("m1", "违规");
 
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.getMessage()).isEqualTo("已移除");
-        verify(governanceBizService).removeMember("m1", "admin1", "违规");
+        verify(governanceBizService).removeMember("m1", TEST_USER_ID, "违规");
     }
 
     @Test
     void should_mute_member() {
-        // 禁言接口应调用 bizService 的 muteMember
         Result<String> result = controller.muteMember("ch1", "user1", 7, "违规发言");
 
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.getMessage()).isEqualTo("已禁言");
-        verify(governanceBizService).muteMember("ch1", "user1", "admin1", "违规发言", 7);
+        verify(governanceBizService).muteMember("ch1", "user1", TEST_USER_ID, "违规发言", 7);
     }
 
     @Test
     void should_unmute_member() {
-        // 解除禁言接口应调用 bizService 的 unmuteMember
         Result<String> result = controller.unmuteMember("ch1", "user1");
 
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.getMessage()).isEqualTo("已解除禁言");
-        verify(governanceBizService).unmuteMember("ch1", "user1", "admin1");
+        verify(governanceBizService).unmuteMember("ch1", "user1", TEST_USER_ID);
     }
 
     @Test
     void should_add_to_blacklist() {
-        // 加入黑名单接口应调用 bizService 的 addToBlacklist
         Result<String> result = controller.addToBlacklist("ch1", "user1", "骚扰");
 
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.getMessage()).isEqualTo("已加入黑名单");
-        verify(governanceBizService).addToBlacklist("ch1", "user1", "admin1", "骚扰");
+        verify(governanceBizService).addToBlacklist("ch1", "user1", TEST_USER_ID, "骚扰");
     }
 
     @Test
     void should_remove_from_blacklist() {
-        // 移出黑名单接口应调用 bizService 的 removeFromBlacklist
         Result<String> result = controller.removeFromBlacklist("ch1", "user1");
 
         assertThat(result.getCode()).isEqualTo(200);
         assertThat(result.getMessage()).isEqualTo("已移出黑名单");
-        verify(governanceBizService).removeFromBlacklist("ch1", "user1", "admin1");
+        verify(governanceBizService).removeFromBlacklist("ch1", "user1", TEST_USER_ID);
     }
 
     @Test

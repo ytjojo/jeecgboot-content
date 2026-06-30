@@ -39,9 +39,10 @@ public class ChannelReviewController {
     private ChannelMergeBiz mergeBiz;
 
     @GetMapping("/detail/{id}")
-    @Operation(summary = "查询审核详情")
+    @Operation(summary = "查询审核详情（平台管理员）")
     public Result<ChannelReviewVO> getReviewDetail(
             @Parameter(description = "审核记录ID", required = true) @PathVariable String id) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
         ChannelReview review = reviewService.getById(id);
         if (review == null) {
             return Result.error("审核记录不存在");
@@ -50,12 +51,13 @@ public class ChannelReviewController {
     }
 
     @GetMapping("/list")
-    @Operation(summary = "审核队列列表")
+    @Operation(summary = "审核队列列表（平台管理员）")
     public Result<Page<ChannelReviewVO>> listReviews(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String reviewType) {
+        ChannelSecurityUtil.checkPlatformAdminPermission();
 
         LambdaQueryWrapper<ChannelReview> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(status != null, ChannelReview::getStatus, status);

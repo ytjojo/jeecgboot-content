@@ -1,33 +1,64 @@
 package org.jeecg.modules.content.channel.controller;
 
+import com.alibaba.fastjson2.JSON;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.channel.biz.ChannelStatsBiz;
 import org.jeecg.modules.content.channel.constant.ChannelStatsConstant;
+import org.jeecg.modules.content.channel.entity.ChannelMember;
+import org.jeecg.modules.content.channel.enums.MemberRole;
+import org.jeecg.modules.content.channel.service.ChannelMemberService;
 import org.jeecg.modules.content.channel.vo.ChannelStatsVO;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/**
- * 频道统计控制器测试
- * 验证 core/trend/hotContent/userAnalysis 端点的委托 + 校验逻辑
- */
 @ExtendWith(MockitoExtension.class)
 class ChannelStatsControllerTest {
 
+    private static final String TEST_USER_ID = "test-user-id";
+    private static final String TEST_USERNAME = "testuser";
+
     @Mock
     private ChannelStatsBiz channelStatsBiz;
+    @Mock
+    private ChannelMemberService memberService;
 
     @InjectMocks
     private ChannelStatsController controller;
+
+    @BeforeEach
+    void setUp() {
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(TEST_USER_ID);
+        loginUser.setUsername(TEST_USERNAME);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                JSON.toJSONString(loginUser), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        ChannelMember adminMember = new ChannelMember();
+        adminMember.setRole(MemberRole.ADMIN.getCode());
+        when(memberService.getByChannelAndUser(any(), eq(TEST_USER_ID))).thenReturn(adminMember);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void should_get_core_stats() {

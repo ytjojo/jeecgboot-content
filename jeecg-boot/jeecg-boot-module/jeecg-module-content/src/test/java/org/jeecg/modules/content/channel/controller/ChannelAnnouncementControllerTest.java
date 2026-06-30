@@ -5,7 +5,11 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.channel.biz.ChannelAnnouncementBiz;
 import org.jeecg.modules.content.channel.entity.ChannelAnnouncement;
+import org.jeecg.modules.content.channel.entity.ChannelMember;
+import org.jeecg.modules.content.channel.enums.MemberRole;
+import org.jeecg.modules.content.channel.mapper.ChannelAnnouncementMapper;
 import org.jeecg.modules.content.channel.req.announcement.ChannelAnnouncementReq;
+import org.jeecg.modules.content.channel.service.ChannelMemberService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,32 +18,43 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Collections;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/**
- * 频道公告控制器测试
- */
 @ExtendWith(MockitoExtension.class)
 class ChannelAnnouncementControllerTest {
 
+    private static final String TEST_USER_ID = "test-user-id";
+    private static final String TEST_USERNAME = "testuser";
+
     @Mock
     private ChannelAnnouncementBiz channelAnnouncementBiz;
+    @Mock
+    private ChannelMemberService memberService;
+    @Mock
+    private ChannelAnnouncementMapper announcementMapper;
 
     @InjectMocks
     private ChannelAnnouncementController controller;
 
     @BeforeEach
     void setUp() {
-        LoginUser user = new LoginUser();
-        user.setId("user1");
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(
-            JSON.toJSONString(user), null));
-        SecurityContextHolder.setContext(context);
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(TEST_USER_ID);
+        loginUser.setUsername(TEST_USERNAME);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                JSON.toJSONString(loginUser), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        ChannelMember adminMember = new ChannelMember();
+        adminMember.setRole(MemberRole.ADMIN.getCode());
+        lenient().when(memberService.getByChannelAndUser(any(), eq(TEST_USER_ID))).thenReturn(adminMember);
     }
 
     @AfterEach
@@ -50,18 +65,20 @@ class ChannelAnnouncementControllerTest {
     @Test
     void should_create_announcement() {
         ChannelAnnouncementReq req = new ChannelAnnouncementReq();
+        req.setChannelId("ch1");
         ChannelAnnouncement created = new ChannelAnnouncement();
-        when(channelAnnouncementBiz.create(req, "user1")).thenReturn(created);
+        when(channelAnnouncementBiz.create(req, TEST_USER_ID)).thenReturn(created);
 
         Result<?> result = controller.create(req);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(channelAnnouncementBiz).create(req, "user1");
+        verify(channelAnnouncementBiz).create(req, TEST_USER_ID);
     }
 
     @Test
     void should_update_announcement() {
         ChannelAnnouncementReq req = new ChannelAnnouncementReq();
+        req.setChannelId("ch1");
 
         Result<Void> result = controller.update("a1", req);
 
@@ -71,6 +88,10 @@ class ChannelAnnouncementControllerTest {
 
     @Test
     void should_delete_announcement() {
+        ChannelAnnouncement announcement = new ChannelAnnouncement();
+        announcement.setChannelId("ch1");
+        when(announcementMapper.selectById("a1")).thenReturn(announcement);
+
         Result<Void> result = controller.delete("a1");
 
         assertThat(result.isSuccess()).isTrue();

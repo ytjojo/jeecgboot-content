@@ -1,18 +1,24 @@
 package org.jeecg.modules.content.channel.controller;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.content.channel.biz.ChannelMergeBiz;
 import org.jeecg.modules.content.channel.entity.ChannelReview;
 import org.jeecg.modules.content.channel.req.ChannelReviewActionReq;
 import org.jeecg.modules.content.channel.service.IChannelReviewService;
 import org.jeecg.modules.content.channel.vo.ChannelReviewVO;
 import org.jeecg.modules.content.user.service.IContentNotificationService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
 
@@ -21,12 +27,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/**
- * 频道审核控制器测试
- * 验证审核列表 + 审核操作（含合并后置动作 + 通知）的行为
- */
 @ExtendWith(MockitoExtension.class)
 class ChannelReviewControllerTest {
+
+    private static final String TEST_USER_ID = "test-admin-user";
+    private static final String TEST_USERNAME = "admin";
 
     @Mock
     private IChannelReviewService reviewService;
@@ -38,6 +43,21 @@ class ChannelReviewControllerTest {
     @InjectMocks
     private ChannelReviewController controller;
 
+    @BeforeEach
+    void setUp() {
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(TEST_USER_ID);
+        loginUser.setUsername(TEST_USERNAME);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                JSON.toJSONString(loginUser), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     void should_list_reviews() {
         Page<ChannelReview> page = new Page<>(1, 10);
@@ -48,6 +68,18 @@ class ChannelReviewControllerTest {
 
         assertThat(result.isSuccess()).isTrue();
         verify(reviewService).page(any(Page.class), any());
+    }
+
+    @Test
+    void should_get_review_detail() {
+        ChannelReview review = new ChannelReview();
+        review.setReviewId("r1");
+        review.setChannelId("ch1");
+        when(reviewService.getById("r1")).thenReturn(review);
+
+        Result<ChannelReviewVO> result = controller.getReviewDetail("r1");
+
+        assertThat(result.isSuccess()).isTrue();
     }
 
     @Test
@@ -115,7 +147,7 @@ class ChannelReviewControllerTest {
         Result<Void> result = controller.reviewAction(req);
 
         assertThat(result.isSuccess()).isTrue();
-        verify(mergeBiz).executeMerge("src", "tgt", "current-user-id");
+        verify(mergeBiz).executeMerge("src", "tgt", TEST_USER_ID);
     }
 
     @Test
@@ -130,7 +162,7 @@ class ChannelReviewControllerTest {
         review.setTargetChannelId("tgt");
         review.setReviewType("merge");
         when(reviewService.getById("r1")).thenReturn(review);
-        doThrow(new RuntimeException("conflict")).when(mergeBiz).executeMerge("src", "tgt", "current-user-id");
+        doThrow(new RuntimeException("conflict")).when(mergeBiz).executeMerge("src", "tgt", TEST_USER_ID);
 
         Result<Void> result = controller.reviewAction(req);
 
